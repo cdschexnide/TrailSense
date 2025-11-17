@@ -1,0 +1,165 @@
+/**
+ * Mock Data Seeding Utility
+ *
+ * This utility injects mock data directly into React Query cache and Redux store
+ * to enable development and testing without a backend API.
+ */
+
+import { QueryClient } from '@tanstack/react-query';
+import { Store } from '@reduxjs/toolkit';
+import {
+  mockAdminUser,
+  mockAuthTokens,
+  mockAlerts,
+  mockDevices,
+  mockWhitelist,
+  mockAnalyticsData,
+  mockHeatmapPoints,
+  mockDeviceFingerprints,
+  mockAppSettings,
+} from '@/mocks/data';
+
+// React Query keys
+const ALERTS_QUERY_KEY = 'alerts';
+const DEVICES_QUERY_KEY = 'devices';
+const WHITELIST_QUERY_KEY = 'whitelist';
+const ANALYTICS_QUERY_KEY = 'analytics';
+const HEATMAP_QUERY_KEY = 'heatmap';
+const DEVICE_HISTORY_QUERY_KEY = 'device-history';
+
+interface SeedOptions {
+  queryClient: QueryClient;
+  store: Store;
+  user?: 'admin' | 'user';
+}
+
+/**
+ * Seeds the application with mock data
+ * @param options - Seeding configuration
+ * @returns Promise that resolves when seeding is complete
+ */
+export const seedMockData = async ({
+  queryClient,
+  store,
+  user: _user = 'admin',
+}: SeedOptions): Promise<void> => {
+  console.log('[MockData] Starting mock data seeding...');
+
+  try {
+    // 1. Seed Redux Store
+    console.log('[MockData] Seeding Redux store...');
+
+    // Auth slice
+    store.dispatch({
+      type: 'auth/setCredentials',
+      payload: {
+        user: mockAdminUser, // Default to admin user
+        tokens: mockAuthTokens,
+      },
+    });
+
+    // User slice
+    store.dispatch({
+      type: 'user/setUser',
+      payload: mockAdminUser,
+    });
+
+    // Settings slice
+    store.dispatch({
+      type: 'settings/updateSettings',
+      payload: mockAppSettings,
+    });
+
+    // 2. Seed React Query Cache
+    console.log('[MockData] Seeding React Query cache...');
+
+    // Alerts
+    queryClient.setQueryData([ALERTS_QUERY_KEY, undefined], mockAlerts);
+    queryClient.setQueryData([ALERTS_QUERY_KEY], mockAlerts);
+
+    // Individual alerts
+    mockAlerts.forEach((alert) => {
+      queryClient.setQueryData([ALERTS_QUERY_KEY, alert.id], alert);
+    });
+
+    // Devices
+    queryClient.setQueryData([DEVICES_QUERY_KEY], mockDevices);
+
+    // Individual devices
+    mockDevices.forEach((device) => {
+      queryClient.setQueryData([DEVICES_QUERY_KEY, device.id], device);
+    });
+
+    // Whitelist
+    queryClient.setQueryData([WHITELIST_QUERY_KEY], mockWhitelist);
+
+    // Individual whitelist entries
+    mockWhitelist.forEach((entry) => {
+      queryClient.setQueryData([WHITELIST_QUERY_KEY, entry.id], entry);
+    });
+
+    // Analytics - seed multiple time periods
+    const periods = ['day', 'week', 'month', 'year'] as const;
+    periods.forEach((period) => {
+      queryClient.setQueryData(
+        [ANALYTICS_QUERY_KEY, period, undefined, undefined],
+        mockAnalyticsData
+      );
+    });
+
+    // Heatmap data
+    queryClient.setQueryData(
+      [HEATMAP_QUERY_KEY, undefined, undefined],
+      mockHeatmapPoints
+    );
+
+    // Device history/fingerprints
+    mockDeviceFingerprints.forEach((fingerprint) => {
+      queryClient.setQueryData(
+        [DEVICE_HISTORY_QUERY_KEY, fingerprint.macAddress],
+        fingerprint
+      );
+    });
+
+    // User profile
+    queryClient.setQueryData(['user', 'profile'], mockAdminUser);
+
+    console.log('[MockData] ✓ Mock data seeding complete!');
+    console.log('[MockData] Seeded:');
+    console.log(`  - ${mockAlerts.length} alerts`);
+    console.log(`  - ${mockDevices.length} devices`);
+    console.log(`  - ${mockWhitelist.length} whitelist entries`);
+    console.log(`  - Analytics data`);
+    console.log(`  - Heatmap data (${mockHeatmapPoints.length} points)`);
+    console.log(`  - ${mockDeviceFingerprints.length} device fingerprints`);
+    console.log(`  - User: ${mockAdminUser.email} (${mockAdminUser.role})`);
+  } catch (error) {
+    console.error('[MockData] Error seeding mock data:', error);
+    throw error;
+  }
+};
+
+/**
+ * Clears all mock data from the application
+ * @param options - Clearing configuration
+ */
+export const clearMockData = ({ queryClient, store }: Omit<SeedOptions, 'user'>): void => {
+  console.log('[MockData] Clearing mock data...');
+
+  // Clear React Query cache
+  queryClient.clear();
+
+  // Reset Redux store (logout)
+  store.dispatch({ type: 'auth/logout' });
+
+  console.log('[MockData] ✓ Mock data cleared');
+};
+
+/**
+ * Refreshes mock data (useful for testing)
+ * @param options - Refresh configuration
+ */
+export const refreshMockData = async (options: SeedOptions): Promise<void> => {
+  clearMockData(options);
+  await seedMockData(options);
+};

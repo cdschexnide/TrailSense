@@ -1,30 +1,76 @@
 {
   "expo": {
     "name": "TrailSense",
-    "slug": "TrailSense",
+    "slug": "trailsense",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.trailsense.app",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "TrailSense needs your location to enable geofencing and device location tracking.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "TrailSense needs background location access to monitor your property even when the app is closed.",
+        "NSCameraUsageDescription": "TrailSense needs camera access to scan device QR codes.",
+        "UIBackgroundModes": ["location", "remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.trailsense.app",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      "expo-location",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/sounds/alert-critical.mp3"]
+        }
+      ],
+      [
+        "@react-native-firebase/app",
+        {
+          "ios": {
+            "googleServicesFile": "./GoogleService-Info.plist"
+          },
+          "android": {
+            "googleServicesFile": "./google-services.json"
+          }
+        }
+      ],
+      "@react-native-firebase/messaging"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_PROJECT_ID"
+      }
     }
   }
 }

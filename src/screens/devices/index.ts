@@ -1,0 +1,1 @@
+export { DeviceHistoryScreen } from './DeviceHistoryScreen';
