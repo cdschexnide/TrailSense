@@ -49,8 +49,8 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         styles.content,
         {
           backgroundColor: colors.background,
-          paddingHorizontal: theme.spacing.base,
         },
+        !scrollable && { paddingHorizontal: 0 },
         contentStyle,
       ]}
     >

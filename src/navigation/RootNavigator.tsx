@@ -18,6 +18,9 @@ export const RootNavigator = () => {
     (state: RootState) => state.auth.isAuthenticated
   );
 
+  // TEMPORARY: Skip auth for testing - set to true to bypass login
+  const SKIP_AUTH_FOR_TESTING = true;
+
   const [isReady, setIsReady] = useState(false);
   const [initialState, setInitialState] = useState<NavigationState | undefined>(
     undefined
@@ -62,7 +65,7 @@ export const RootNavigator = () => {
       onStateChange={onStateChange}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!isAuthenticated ? (
+        {!isAuthenticated && !SKIP_AUTH_FOR_TESTING ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : (
           <Stack.Screen name="Main" component={MainNavigator} />

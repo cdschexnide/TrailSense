@@ -3,3 +3,5 @@ export * from './Text';
 export * from './Icon';
 export * from './Badge';
 export * from './Input';
+// Re-export Card from molecules for convenience
+export { Card } from '../molecules/Card/Card';

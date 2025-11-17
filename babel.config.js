@@ -25,10 +25,11 @@ module.exports = function (api) {
     ],
   ];
 
+  // Temporarily disable reanimated plugin for Expo Go compatibility
   // Only add reanimated plugin when not in test environment
-  if (process.env.NODE_ENV !== 'test') {
-    plugins.push('react-native-reanimated/plugin');
-  }
+  // if (process.env.NODE_ENV !== 'test') {
+  //   plugins.push('react-native-reanimated/plugin');
+  // }
 
   return {
     presets: ['babel-preset-expo'],

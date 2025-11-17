@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Alert } from '@types';
 import { Card, Badge, Button } from '@components/atoms';
-import { useTheme } from '@hooks/useTheme';
 import { formatTimestamp } from '@utils/dateUtils';
 
 interface AlertCardProps {
@@ -11,22 +10,41 @@ interface AlertCardProps {
 }
 
 export const AlertCard: React.FC<AlertCardProps> = ({ alert, onPress }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const getThreatVariant = (): any => {
+    switch (alert.threatLevel) {
+      case 'low':
+        return 'threat-low';
+      case 'medium':
+        return 'threat-medium';
+      case 'high':
+        return 'threat-high';
+      case 'critical':
+        return 'threat-critical';
+      default:
+        return 'neutral';
+    }
+  };
 
-  const getThreatColor = () => {
-    return colors.threat[alert.threatLevel];
+  const getDetectionVariant = (): any => {
+    switch (alert.detectionType) {
+      case 'cellular':
+        return 'detection-cellular';
+      case 'wifi':
+        return 'detection-wifi';
+      case 'bluetooth':
+        return 'detection-bluetooth';
+      default:
+        return 'info';
+    }
   };
 
   const handleDismiss = async (e: any) => {
-    e.stopPropagation();
-    // TODO: Implement dismiss logic via API
+    e?.stopPropagation?.();
     console.log('Dismissing alert:', alert.id);
   };
 
   const handleWhitelist = async (e: any) => {
-    e.stopPropagation();
-    // TODO: Implement whitelist logic via API
+    e?.stopPropagation?.();
     console.log('Whitelisting alert:', alert.id);
   };
 
@@ -35,7 +53,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({ alert, onPress }) => {
       <View style={styles.header}>
         <Badge
           label={alert.threatLevel.toUpperCase()}
-          color={getThreatColor()}
+          variant={getThreatVariant()}
         />
         <Text style={styles.timestamp}>
           {formatTimestamp(alert.timestamp)}
@@ -43,9 +61,16 @@ export const AlertCard: React.FC<AlertCardProps> = ({ alert, onPress }) => {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>
-          {alert.detectionType} Detection
-        </Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>
+            {alert.detectionType.charAt(0).toUpperCase() + alert.detectionType.slice(1)} Detection
+          </Text>
+          <Badge
+            label={alert.detectionType.toUpperCase()}
+            variant={getDetectionVariant()}
+            size="sm"
+          />
+        </View>
         <Text style={styles.details}>
           Device: {alert.deviceId}
         </Text>
@@ -94,30 +119,38 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 12,
-    opacity: 0.7,
+    color: '#999',
   },
   content: {
+    marginBottom: 16,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 8,
+    color: '#FFFFFF',
+    flex: 1,
   },
   details: {
     fontSize: 14,
-    opacity: 0.8,
-    marginBottom: 4,
+    color: '#CCCCCC',
+    marginBottom: 6,
   },
   mac: {
     fontSize: 12,
     fontFamily: 'monospace',
-    opacity: 0.6,
-    marginTop: 4,
+    color: '#888',
+    marginTop: 8,
   },
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 8,
+    marginTop: 8,
   },
 });

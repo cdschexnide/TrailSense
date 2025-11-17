@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { useDeviceHistory } from '@hooks/useAnalytics';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { VictoryChart, VictoryLine, VictoryTheme } from 'victory-native';
+// TODO: Replace victory-native with a lighter charting library compatible with Expo Go
+// import { VictoryChart, VictoryLine, VictoryTheme } from 'victory-native';
 
 type RouteParams = {
   DeviceHistory: {
@@ -125,17 +126,12 @@ export const DeviceHistoryScreen = () => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Signal Strength Over Time</Text>
-        <VictoryChart theme={VictoryTheme.material} height={200}>
-          <VictoryLine
-            data={fingerprint.detections.map((d, index) => ({
-              x: index,
-              y: d.rssi,
-            }))}
-            style={{
-              data: { stroke: '#4CAF50', strokeWidth: 2 },
-            }}
-          />
-        </VictoryChart>
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.placeholderText}>Chart temporarily disabled</Text>
+          <Text style={styles.placeholderSubtext}>
+            {fingerprint.detections.length} signal readings available
+          </Text>
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -313,5 +309,25 @@ const styles = StyleSheet.create({
   detectionLabel: {
     fontSize: 12,
     color: '#999999',
+  },
+  chartPlaceholder: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
+    borderRadius: 8,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#333333',
+  },
+  placeholderText: {
+    color: '#999999',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  placeholderSubtext: {
+    color: '#666666',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });

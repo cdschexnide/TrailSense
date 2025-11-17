@@ -8,7 +8,8 @@
 const USE_MOCK_API = process.env.USE_MOCK_API === 'true';
 
 // Mock mode can also be forced for development
-const FORCE_MOCK_MODE = __DEV__ && false; // Set to true to always use mock data in dev
+// TEMPORARY: Force mock mode enabled for testing
+const FORCE_MOCK_MODE = __DEV__ && true; // Set to true to always use mock data in dev
 
 export const isMockMode = USE_MOCK_API || FORCE_MOCK_MODE;
 

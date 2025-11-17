@@ -5,7 +5,7 @@ import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { useTheme } from '@hooks/useTheme';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { DevicesStackParamList } from '@navigation/types';
-import { useDevice } from '@hooks/useDevice';
+import { useDevice } from '@hooks/api/useDevices';
 
 type DeviceDetailRouteProp = RouteProp<DevicesStackParamList, 'DeviceDetail'>;
 

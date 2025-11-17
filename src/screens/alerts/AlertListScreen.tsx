@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { FlatList, View, StyleSheet, ActivityIndicator } from 'react-native';
-import { useAlerts } from '@hooks/useAlerts';
+import { FlatList, View, StyleSheet } from 'react-native';
+import { useAlerts } from '@hooks/api/useAlerts';
 import { AlertCard } from '@components/organisms';
-import { ScreenLayout, EmptyState, LoadingState, ErrorState, SearchBar } from '@components/templates';
+import { ScreenLayout, EmptyState, LoadingState, ErrorState } from '@components/templates';
+import { SearchBar } from '@components/molecules/SearchBar';
 import { Alert } from '@types';
 
 export const AlertListScreen = ({ navigation }: any) => {
@@ -10,39 +11,21 @@ export const AlertListScreen = ({ navigation }: any) => {
     data: alerts,
     isLoading,
     error,
-    refetch,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage
+    refetch
   } = useAlerts();
   const [search, setSearch] = useState('');
 
-  if (isLoading && !alerts) return <LoadingState />;
-  if (error) return <ErrorState error={error} />;
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState message="Failed to load alerts" />;
 
   const filteredAlerts = alerts?.filter((alert: Alert) =>
     alert.detectionType.toLowerCase().includes(search.toLowerCase()) ||
     alert.deviceId.toLowerCase().includes(search.toLowerCase()) ||
     (alert.macAddress && alert.macAddress.toLowerCase().includes(search.toLowerCase()))
-  );
-
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  };
-
-  const renderFooter = () => {
-    if (!isFetchingNextPage) return null;
-    return (
-      <View style={styles.footer}>
-        <ActivityIndicator size="small" />
-      </View>
-    );
-  };
+  ) || [];
 
   return (
-    <ScreenLayout title="Alerts">
+    <ScreenLayout title="Alerts" scrollable={false}>
       <View style={styles.container}>
         <SearchBar
           value={search}
@@ -58,12 +41,9 @@ export const AlertListScreen = ({ navigation }: any) => {
             />
           )}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={<EmptyState message="No alerts yet" />}
-          ListFooterComponent={renderFooter}
+          ListEmptyComponent={<EmptyState title="No Alerts" message="No alerts yet" />}
           refreshing={isLoading}
           onRefresh={refetch}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
         />
       </View>
     </ScreenLayout>
@@ -73,9 +53,5 @@ export const AlertListScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  footer: {
-    padding: 16,
-    alignItems: 'center',
   },
 });

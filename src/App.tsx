@@ -12,6 +12,7 @@ import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import RootNavigator from '@navigation/RootNavigator';
 import { isMockMode, logMockStatus } from '@/config/mockConfig';
 import { seedMockData } from '@/utils/seedMockData';
+import { websocketService } from '@api/websocket';
 
 export default function App() {
   const [isMockDataReady, setIsMockDataReady] = useState(!isMockMode);
@@ -25,12 +26,24 @@ export default function App() {
       seedMockData({ queryClient, store })
         .then(() => {
           setIsMockDataReady(true);
+
+          // Initialize WebSocket after mock data is ready
+          // Use a mock token for testing
+          console.log('[App] Initializing WebSocket...');
+          websocketService.connect('mock-token-for-testing');
         })
         .catch((error) => {
           console.error('[App] Failed to seed mock data:', error);
           setIsMockDataReady(true); // Continue anyway
         });
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (isMockMode) {
+        websocketService.disconnect();
+      }
+    };
   }, []);
 
   // Show loading screen while mock data is being seeded

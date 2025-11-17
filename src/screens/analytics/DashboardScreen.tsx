@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { VictoryChart, VictoryLine, VictoryBar, VictoryPie, VictoryTheme } from 'victory-native';
+// TODO: Replace victory-native with a lighter charting library compatible with Expo Go
+// import { VictoryChart, VictoryLine, VictoryBar, VictoryPie, VictoryTheme } from 'victory-native';
 import { useAnalytics } from '@hooks/useAnalytics';
 import { StatCard, ChartCard } from '@components/molecules';
 
@@ -59,60 +60,40 @@ export const DashboardScreen = () => {
       </View>
 
       <ChartCard title="Detections Over Time">
-        <VictoryChart theme={VictoryTheme.material} height={250}>
-          <VictoryLine
-            data={analytics.dailyDetections}
-            x="date"
-            y="count"
-            style={{
-              data: { stroke: '#4CAF50', strokeWidth: 2 },
-            }}
-          />
-        </VictoryChart>
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.placeholderText}>Chart temporarily disabled</Text>
+          <Text style={styles.placeholderSubtext}>
+            {analytics.dailyDetections.length} data points available
+          </Text>
+        </View>
       </ChartCard>
 
       <ChartCard title="Detection Types">
-        <VictoryPie
-          data={[
-            { x: 'Cellular', y: analytics.cellularCount },
-            { x: 'WiFi', y: analytics.wifiCount },
-            { x: 'Bluetooth', y: analytics.bluetoothCount },
-          ]}
-          colorScale={['#9C27B0', '#2196F3', '#00BCD4']}
-          height={250}
-          style={{
-            labels: { fill: '#FFFFFF', fontSize: 12 },
-          }}
-        />
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.placeholderText}>Chart temporarily disabled</Text>
+          <Text style={styles.placeholderSubtext}>
+            Cellular: {analytics.cellularCount} | WiFi: {analytics.wifiCount} | BT: {analytics.bluetoothCount}
+          </Text>
+        </View>
       </ChartCard>
 
       <ChartCard title="Peak Hours">
-        <VictoryChart theme={VictoryTheme.material} height={250}>
-          <VictoryBar
-            data={analytics.hourlyDistribution}
-            x="hour"
-            y="count"
-            style={{
-              data: { fill: '#FF9800' },
-            }}
-          />
-        </VictoryChart>
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.placeholderText}>Chart temporarily disabled</Text>
+          <Text style={styles.placeholderSubtext}>
+            {analytics.hourlyDistribution.length} hours tracked
+          </Text>
+        </View>
       </ChartCard>
 
       <ChartCard title="Threat Level Distribution">
-        <VictoryPie
-          data={[
-            { x: 'Critical', y: analytics.criticalCount || 0 },
-            { x: 'High', y: analytics.highCount || 0 },
-            { x: 'Medium', y: analytics.mediumCount || 0 },
-            { x: 'Low', y: analytics.lowCount || 0 },
-          ]}
-          colorScale={['#FF0000', '#FF6B00', '#FFB800', '#00C853']}
-          height={250}
-          style={{
-            labels: { fill: '#FFFFFF', fontSize: 12 },
-          }}
-        />
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.placeholderText}>Chart temporarily disabled</Text>
+          <Text style={styles.placeholderSubtext}>
+            Critical: {analytics.criticalCount || 0} | High: {analytics.highCount || 0} |
+            Medium: {analytics.mediumCount || 0} | Low: {analytics.lowCount || 0}
+          </Text>
+        </View>
       </ChartCard>
     </ScrollView>
   );
@@ -172,5 +153,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
     gap: 16,
+  },
+  chartPlaceholder: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E1E',
+    borderRadius: 8,
+    padding: 20,
+  },
+  placeholderText: {
+    color: '#999999',
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  placeholderSubtext: {
+    color: '#666666',
+    fontSize: 12,
+    textAlign: 'center',
   },
 });

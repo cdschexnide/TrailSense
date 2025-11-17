@@ -5,7 +5,7 @@ import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { useTheme } from '@hooks/useTheme';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { AlertsStackParamList } from '@navigation/types';
-import { useAlert } from '@hooks/useAlert';
+import { useAlert } from '@hooks/api/useAlerts';
 import { formatTimestamp } from '@utils/dateUtils';
 
 type AlertDetailRouteProp = RouteProp<AlertsStackParamList, 'AlertDetail'>;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
-import { useDevices } from '@hooks/useDevices';
+import { useDevices } from '@hooks/api/useDevices';
 import { DeviceCard } from '@components/organisms';
-import { ScreenLayout, FAB, LoadingState, ErrorState, EmptyState } from '@components/atoms';
+import { ScreenLayout, LoadingState, ErrorState, EmptyState } from '@components/templates';
 
 export const DeviceListScreen = ({ navigation }: any) => {
   const { data: devices, isLoading, error } = useDevices();
@@ -11,7 +11,7 @@ export const DeviceListScreen = ({ navigation }: any) => {
   if (error) return <ErrorState error={error} />;
 
   return (
-    <ScreenLayout title="Devices">
+    <ScreenLayout title="Devices" scrollable={false}>
       <FlatList
         data={devices}
         renderItem={({ item }) => (
@@ -25,10 +25,7 @@ export const DeviceListScreen = ({ navigation }: any) => {
         keyExtractor={(item) => item.id}
         ListEmptyComponent={<EmptyState message="No devices yet" />}
       />
-      <FAB
-        icon="plus"
-        onPress={() => navigation.navigate('AddDevice')}
-      />
+      {/* TODO: Add FAB component for adding devices */}
     </ScreenLayout>
   );
 };

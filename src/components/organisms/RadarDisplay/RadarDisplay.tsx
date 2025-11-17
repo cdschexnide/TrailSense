@@ -1,12 +1,6 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Svg, { Circle, Line, G, Text as SvgText } from 'react-native-svg';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
+import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 import { Detection, ThreatLevel } from '@types';
 
 interface RadarDisplayProps {
@@ -36,17 +30,22 @@ export const RadarDisplay: React.FC<RadarDisplayProps> = ({
   const size = 350;
   const center = size / 2;
 
-  // Radar sweep animation
-  const rotation = useSharedValue(0);
+  // Radar sweep animation using React Native's built-in Animated API
+  const rotationAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    rotation.value = withRepeat(withTiming(360, { duration: 4000 }), -1, false);
+    Animated.loop(
+      Animated.timing(rotationAnim, {
+        toValue: 1,
+        duration: 4000,
+        useNativeDriver: true,
+      })
+    ).start();
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ rotate: `${rotation.value}deg` }],
-    };
+  const spin = rotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
   });
 
   return (
@@ -130,7 +129,7 @@ export const RadarDisplay: React.FC<RadarDisplayProps> = ({
       </Svg>
 
       {/* Sweeping radar line (animated) */}
-      <Animated.View style={[styles.sweep, animatedStyle]} />
+      <Animated.View style={[styles.sweep, { transform: [{ rotate: spin }] }]} />
     </View>
   );
 };
