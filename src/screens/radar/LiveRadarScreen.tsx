@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
 import { websocketService } from '@api/websocket';
 import { RadarDisplay } from '@components/organisms';
+import { Text } from '@components/atoms/Text';
+import { Card } from '@components/atoms';
+import { Button } from '@components/atoms/Button';
+import { Icon } from '@components/atoms/Icon';
+import { ScreenLayout } from '@components/templates';
 import { estimateDistance, calculateAngleFromMAC } from '@utils/rssiUtils';
 import { Alert, Detection } from '@types';
 
-export const LiveRadarScreen = () => {
+export const LiveRadarScreen = ({ navigation }: any) => {
   const [detections, setDetections] = useState<Detection[]>([]);
-  const [range, setRange] = useState(800); // feet
+  const [maxRange] = useState(800); // feet
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     const handleAlert = (alert: Alert) => {
@@ -26,6 +32,8 @@ export const LiveRadarScreen = () => {
         return updated.slice(-50);
       });
 
+      setLastUpdate(new Date());
+
       // Auto-remove detection after 30 seconds
       setTimeout(() => {
         setDetections((prev) => prev.filter((d) => d.id !== alert.id));
@@ -36,86 +44,63 @@ export const LiveRadarScreen = () => {
     return () => websocketService.off('alert', handleAlert);
   }, []);
 
+  const formatRelativeTime = (date: Date) => {
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 10) return 'just now';
+    if (seconds < 60) return `${seconds} seconds ago`;
+    return `${Math.floor(seconds / 60)} minutes ago`;
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Live Radar</Text>
-        <Text style={styles.subtitle}>
-          {detections.length} active detection{detections.length !== 1 ? 's' : ''}
-        </Text>
-      </View>
+    <ScreenLayout
+      header={{
+        title: 'Live Radar',
+        largeTitle: true,
+        rightActions: (
+          <Button
+            buttonStyle="plain"
+            onPress={() => navigation.navigate('RadarSettings')}
+            leftIcon={<Icon name="settings-outline" size={22} color="systemBlue" />}
+          >
+            Settings
+          </Button>
+        ),
+      }}
+      scrollable={false}
+    >
+      <ScrollView>
+        {/* Summary Card */}
+        <Card variant="grouped" style={styles.summaryCard}>
+          <View style={styles.summaryContent}>
+            <Text variant="title2" color="label">
+              {detections.length} Active Detection{detections.length !== 1 ? 's' : ''}
+            </Text>
+            <Text variant="footnote" color="secondaryLabel">
+              Last updated: {formatRelativeTime(lastUpdate)}
+            </Text>
+          </View>
+        </Card>
 
-      <View style={styles.radarContainer}>
-        <RadarDisplay detections={detections} range={range} />
-      </View>
-
-      <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#FF0000' }]} />
-          <Text style={styles.legendText}>Critical</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#FF6B00' }]} />
-          <Text style={styles.legendText}>High</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#FFB800' }]} />
-          <Text style={styles.legendText}>Medium</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.dot, { backgroundColor: '#00C853' }]} />
-          <Text style={styles.legendText}>Low</Text>
-        </View>
-      </View>
-    </View>
+        {/* Radar */}
+        <RadarDisplay
+          detections={detections}
+          maxRange={maxRange}
+          showSweep={true}
+          style={styles.radar}
+        />
+      </ScrollView>
+    </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
+  summaryCard: {
+    margin: 20,
+  },
+  summaryContent: {
     padding: 16,
   },
-  header: {
-    marginBottom: 24,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#999999',
-  },
-  radarContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  legend: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 24,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#333333',
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  legendText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+  radar: {
+    margin: 20,
   },
 });
