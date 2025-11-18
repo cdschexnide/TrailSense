@@ -82,93 +82,88 @@ export const AlertCard: React.FC<AlertCardProps> = ({
 
   return (
     <Card onPress={() => onPress?.(alert.id)} variant="grouped" style={StyleSheet.flatten([styles.card, style])}>
-      <View style={styles.container}>
-        {/* Action buttons column on the left */}
-        <View style={styles.actionsColumn}>
-          <Pressable
-            onPress={handleDelete}
-            style={({ pressed }) => [
-              styles.actionButton,
-              {
-                backgroundColor: 'rgba(255, 59, 48, 0.15)',
-                borderColor: theme.colors.systemRed,
-              },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Icon name="trash-outline" size={20} color={theme.colors.systemRed} />
-            <Text variant="caption2" style={{ color: theme.colors.systemRed, fontWeight: '600' }}>
-              Delete
-            </Text>
-          </Pressable>
+      {/* Header row: Badge and Timestamp */}
+      <View style={styles.header}>
+        <Badge variant={getThreatVariant() as any} size="sm">
+          {alert.threatLevel.toUpperCase()}
+        </Badge>
+        <Text variant="caption1" color="secondaryLabel">
+          {formatTimestamp(alert.timestamp)}
+        </Text>
+      </View>
 
-          <Pressable
-            onPress={handleWhitelist}
-            style={({ pressed }) => [
-              styles.actionButton,
-              {
-                backgroundColor: 'rgba(255, 149, 0, 0.15)',
-                borderColor: theme.colors.systemOrange,
-              },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />
-            <Text variant="caption2" style={{ color: theme.colors.systemOrange, fontWeight: '600' }}>
-              Whitelist
-            </Text>
-          </Pressable>
-        </View>
+      {/* Detection type with icon */}
+      <View style={styles.detectionRow}>
+        <Icon
+          name={getDetectionIcon()}
+          size={24}
+          color={getDetectionIconColor()}
+        />
+        <View style={styles.detectionContent}>
+          <Text variant="headline" color="label">
+            {getDetectionLabel()}
+          </Text>
 
-        {/* Main content */}
-        <View style={styles.contentColumn}>
-          {/* Header row: Badge and Timestamp */}
-          <View style={styles.header}>
-            <Badge variant={getThreatVariant() as any} size="sm">
-              {alert.threatLevel.toUpperCase()}
-            </Badge>
-            <Text variant="caption1" color="secondaryLabel">
-              {formatTimestamp(alert.timestamp)}
+          {/* Metadata rows */}
+          <View style={styles.metadata}>
+            <Text variant="subheadline" color="secondaryLabel">
+              Device: {alert.deviceId}
             </Text>
-          </View>
-
-          {/* Detection type with icon */}
-          <View style={styles.detectionRow}>
-            <Icon
-              name={getDetectionIcon()}
-              size={24}
-              color={getDetectionIconColor()}
-            />
-            <View style={styles.detectionContent}>
-              <Text variant="headline" color="label">
-                {getDetectionLabel()}
+            <Text variant="subheadline" color="secondaryLabel" style={styles.metadataRow}>
+              Signal: {alert.rssi} dBm
+            </Text>
+            {alert.macAddress && (
+              <Text variant="subheadline" color="secondaryLabel" style={StyleSheet.flatten([styles.metadataRow, styles.mac])}>
+                {alert.macAddress}
               </Text>
-
-              {/* Metadata rows */}
-              <View style={styles.metadata}>
-                <Text variant="subheadline" color="secondaryLabel">
-                  Device: {alert.deviceId}
-                </Text>
-                <Text variant="subheadline" color="secondaryLabel" style={styles.metadataRow}>
-                  Signal: {alert.rssi} dBm
-                </Text>
-                {alert.macAddress && (
-                  <Text variant="subheadline" color="secondaryLabel" style={StyleSheet.flatten([styles.metadataRow, styles.mac])}>
-                    {alert.macAddress}
-                  </Text>
-                )}
-              </View>
-            </View>
-
-            {/* Chevron indicator */}
-            <Icon
-              name="chevron-forward"
-              size={20}
-              color={theme.colors.tertiaryLabel}
-              style={styles.chevron}
-            />
+            )}
           </View>
         </View>
+
+        {/* Chevron indicator */}
+        <Icon
+          name="chevron-forward"
+          size={20}
+          color={theme.colors.tertiaryLabel}
+          style={styles.chevron}
+        />
+      </View>
+
+      {/* Action buttons row at bottom */}
+      <View style={styles.actionsRow}>
+        <Pressable
+          onPress={handleWhitelist}
+          style={({ pressed }) => [
+            styles.actionButton,
+            {
+              backgroundColor: 'rgba(255, 149, 0, 0.15)',
+              borderColor: theme.colors.systemOrange,
+            },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />
+          <Text variant="caption2" style={{ color: theme.colors.systemOrange, fontWeight: '600' }}>
+            Whitelist
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={handleDelete}
+          style={({ pressed }) => [
+            styles.actionButton,
+            {
+              backgroundColor: 'rgba(255, 59, 48, 0.15)',
+              borderColor: theme.colors.systemRed,
+            },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Icon name="trash-outline" size={20} color={theme.colors.systemRed} />
+          <Text variant="caption2" style={{ color: theme.colors.systemRed, fontWeight: '600' }}>
+            Delete
+          </Text>
+        </Pressable>
       </View>
     </Card>
   );
@@ -180,26 +175,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     padding: 16,
   },
-  container: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  actionsColumn: {
-    gap: 8,
-    justifyContent: 'center',
-  },
-  actionButton: {
-    width: 90,
-    height: 70,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 4,
-  },
-  contentColumn: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -210,6 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
+    marginBottom: 12,
   },
   detectionContent: {
     flex: 1,
@@ -225,5 +201,19 @@ const styles = StyleSheet.create({
   },
   chevron: {
     marginTop: 4,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
+  actionButton: {
+    width: 90,
+    height: 60,
+    borderRadius: 12,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
   },
 });
