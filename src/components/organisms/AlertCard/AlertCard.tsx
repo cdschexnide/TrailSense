@@ -75,9 +75,10 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         swipeActions.delete(() => onDismiss?.(alert.id)),
         {
           label: 'Whitelist',
-          backgroundColor: theme.colors.systemOrange,
+          backgroundColor: `${theme.colors.systemOrange}20`,
+          borderColor: theme.colors.systemOrange,
           onPress: () => onWhitelist?.(alert.macAddress),
-          icon: <Icon name="shield-checkmark" size={20} color="white" />,
+          icon: <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />,
         },
       ]}
     >

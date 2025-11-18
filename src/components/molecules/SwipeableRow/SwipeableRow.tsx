@@ -7,6 +7,7 @@ import { Icon } from '@components/atoms/Icon/Icon';
 export interface SwipeAction {
   label: string;
   backgroundColor: string;
+  borderColor?: string;
   onPress: () => void;
   icon?: React.ReactNode;
 }
@@ -45,11 +46,20 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
             onPress={() => handleActionPress(action)}
             style={[
               styles.actionButton,
-              { backgroundColor: action.backgroundColor },
+              {
+                backgroundColor: action.backgroundColor,
+                borderColor: action.borderColor || action.backgroundColor,
+              },
             ]}
           >
             {action.icon && <View style={styles.iconContainer}>{action.icon}</View>}
-            <Text variant="footnote" style={styles.actionLabel}>
+            <Text
+              variant="footnote"
+              style={[
+                styles.actionLabel,
+                { color: action.borderColor || action.backgroundColor },
+              ]}
+            >
               {action.label}
             </Text>
           </Pressable>
@@ -74,30 +84,34 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
 export const createSwipeActions = (colors: any) => ({
   delete: (onPress: () => void): SwipeAction => ({
     label: 'Delete',
-    backgroundColor: colors.systemRed,
+    backgroundColor: `${colors.systemRed}20`, // 20 = ~12% opacity
+    borderColor: colors.systemRed,
     onPress,
-    icon: <Icon name="trash-outline" size={20} color="white" />,
+    icon: <Icon name="trash-outline" size={20} color={colors.systemRed} />,
   }),
 
   archive: (onPress: () => void): SwipeAction => ({
     label: 'Archive',
-    backgroundColor: colors.systemOrange,
+    backgroundColor: `${colors.systemOrange}20`, // 20 = ~12% opacity
+    borderColor: colors.systemOrange,
     onPress,
-    icon: <Icon name="archive-outline" size={20} color="white" />,
+    icon: <Icon name="archive-outline" size={20} color={colors.systemOrange} />,
   }),
 
   edit: (onPress: () => void): SwipeAction => ({
     label: 'Edit',
-    backgroundColor: colors.systemBlue,
+    backgroundColor: `${colors.systemBlue}20`, // 20 = ~12% opacity
+    borderColor: colors.systemBlue,
     onPress,
-    icon: <Icon name="create-outline" size={20} color="white" />,
+    icon: <Icon name="create-outline" size={20} color={colors.systemBlue} />,
   }),
 
   share: (onPress: () => void): SwipeAction => ({
     label: 'Share',
-    backgroundColor: colors.systemPurple,
+    backgroundColor: `${colors.systemPurple}20`, // 20 = ~12% opacity
+    borderColor: colors.systemPurple,
     onPress,
-    icon: <Icon name="share-outline" size={20} color="white" />,
+    icon: <Icon name="share-outline" size={20} color={colors.systemPurple} />,
   }),
 });
 
@@ -121,14 +135,16 @@ const styles = StyleSheet.create({
   actionButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    minWidth: 80,
+    width: 90,
+    height: '100%',
+    borderWidth: 2,
+    borderRadius: 12,
+    marginHorizontal: 4,
   },
   iconContainer: {
     marginBottom: 4,
   },
   actionLabel: {
-    color: 'white',
     fontWeight: '600',
   },
 });
