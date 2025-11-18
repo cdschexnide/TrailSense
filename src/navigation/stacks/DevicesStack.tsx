@@ -11,7 +11,11 @@ const Stack = createNativeStackNavigator<DevicesStackParamList>();
 
 export const DevicesStack = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen
         name="DeviceList"
         component={DeviceListScreen}

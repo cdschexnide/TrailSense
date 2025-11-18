@@ -6,6 +6,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '@hooks/useTheme';
 
 interface CardProps {
@@ -38,6 +39,12 @@ export const Card: React.FC<CardProps> = ({
     ...(variant === 'default' ? shadows.sm : {}),
   };
 
+  const handlePress = async () => {
+    if (!onPress) return;
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
+  };
+
   if (loading) {
     return (
       <View style={[cardStyle, styles.loadingContainer, style]} testID={testID}>
@@ -49,8 +56,12 @@ export const Card: React.FC<CardProps> = ({
   if (onPress) {
     return (
       <Pressable
-        onPress={onPress}
-        style={[cardStyle, style]}
+        onPress={handlePress}
+        style={({ pressed }) => [
+          cardStyle,
+          pressed && { opacity: 0.7 },
+          style,
+        ]}
         testID={testID}
         accessibilityRole="button"
       >
