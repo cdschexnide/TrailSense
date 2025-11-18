@@ -150,9 +150,12 @@ class MockWebSocketService {
     // Determine if multiband detection
     const isMultiband = Math.random() < 0.3; // 30% chance
 
+    // Generate unique ID using timestamp + counter + random component
+    const uniqueId = `live-alert-${Date.now()}-${this.eventCounter}-${Math.random().toString(36).substr(2, 9)}`;
+
     // Generate mock alert
     const alert: Alert = {
-      id: `live-alert-${this.eventCounter}`,
+      id: uniqueId,
       deviceId: device.id,
       timestamp: new Date().toISOString(),
       threatLevel,
