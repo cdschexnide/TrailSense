@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { Text, Button, Badge, Card } from '@components/atoms';
+import { View, StyleSheet } from 'react-native';
+import { Button } from '@components/atoms/Button';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
-import { useTheme } from '@hooks/useTheme';
+import { ListSection } from '@components/molecules/ListSection';
+import { ListRow } from '@components/molecules/ListRow';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
@@ -11,154 +12,119 @@ import { formatTimestamp } from '@utils/dateUtils';
 type AlertDetailRouteProp = RouteProp<AlertsStackParamList, 'AlertDetail'>;
 
 export const AlertDetailScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
   const route = useRoute<AlertDetailRouteProp>();
   const { alertId } = route.params;
   const { data: alert, isLoading, error } = useAlert(alertId);
 
   if (isLoading) return <LoadingState />;
-  if (error) return <ErrorState error={error} />;
-  if (!alert) return <ErrorState error="Alert not found" />;
+  if (error) return <ErrorState message="Failed to load alert" />;
+  if (!alert) return <ErrorState message="Alert not found" />;
 
-  const getThreatColor = () => {
-    return theme.colors.threat[alert.threatLevel];
+  const handleMarkReviewed = async () => {
+    // Implement mark reviewed logic
+    console.log('Marking alert as reviewed:', alertId);
   };
 
-  const handleDismiss = async () => {
-    // Implement dismiss logic
+  const handleDelete = async () => {
+    // Implement delete logic
+    console.log('Deleting alert:', alertId);
     navigation.goBack();
   };
 
-  const handleWhitelist = async () => {
-    // Navigate to whitelist addition
-    navigation.navigate('AddWhitelist', {
-      macAddress: alert.macAddress,
-      deviceId: alert.deviceId
-    });
-  };
-
   return (
-    <ScreenLayout title="Alert Details">
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <View style={styles.header}>
-            <Badge
-              label={alert.threatLevel.toUpperCase()}
-              color={getThreatColor()}
-            />
-            <Text variant="caption" style={styles.timestamp}>
-              {formatTimestamp(alert.timestamp)}
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text variant="h2" style={styles.sectionTitle}>
-              Detection Information
-            </Text>
-            <InfoRow label="Type" value={alert.detectionType} />
-            <InfoRow label="Device ID" value={alert.deviceId} />
-            <InfoRow label="Signal Strength" value={`${alert.rssi} dBm`} />
-            {alert.macAddress && (
-              <InfoRow label="MAC Address" value={alert.macAddress} />
-            )}
-          </View>
-
-          {alert.location && (
-            <View style={styles.section}>
-              <Text variant="h2" style={styles.sectionTitle}>
-                Location
-              </Text>
-              <InfoRow
-                label="Coordinates"
-                value={`${alert.location.latitude}, ${alert.location.longitude}`}
-              />
-            </View>
-          )}
-
-          {alert.metadata && (
-            <View style={styles.section}>
-              <Text variant="h2" style={styles.sectionTitle}>
-                Additional Details
-              </Text>
-              {Object.entries(alert.metadata).map(([key, value]) => (
-                <InfoRow key={key} label={key} value={String(value)} />
-              ))}
-            </View>
-          )}
-        </Card>
-
-        <View style={styles.actions}>
-          <Button
-            title="Dismiss Alert"
-            variant="ghost"
-            onPress={handleDismiss}
-            style={styles.button}
+    <ScreenLayout
+      header={{
+        title: 'Alert Details',
+        showBack: true,
+      }}
+      scrollable
+    >
+      <ListSection header="DETECTION INFORMATION" style={styles.section}>
+        <ListRow
+          title="Type"
+          rightText={alert.detectionType}
+          accessoryType="none"
+        />
+        <ListRow
+          title="Threat Level"
+          rightText={alert.threatLevel.toUpperCase()}
+          accessoryType="none"
+        />
+        <ListRow
+          title="Signal Strength"
+          rightText={`${alert.rssi} dBm`}
+          accessoryType="none"
+        />
+        {alert.macAddress && (
+          <ListRow
+            title="MAC Address"
+            rightText={alert.macAddress}
+            accessoryType="none"
           />
-          <Button
-            title="Add to Whitelist"
-            variant="outline"
-            onPress={handleWhitelist}
-            style={styles.button}
+        )}
+        <ListRow
+          title="Detected"
+          rightText={formatTimestamp(alert.timestamp)}
+          accessoryType="none"
+        />
+      </ListSection>
+
+      <ListSection header="DEVICE INFORMATION" style={styles.section}>
+        <ListRow
+          title="Device"
+          rightText={alert.deviceId}
+          onPress={() => navigation.navigate('DeviceDetail', { id: alert.deviceId })}
+          accessoryType="disclosureIndicator"
+        />
+        {alert.location && (
+          <ListRow
+            title="Location"
+            rightText={`${alert.location.latitude}, ${alert.location.longitude}`}
+            accessoryType="none"
           />
-        </View>
-      </ScrollView>
+        )}
+      </ListSection>
+
+      <ListSection header="STATUS" style={styles.section}>
+        <ListRow
+          title="Reviewed"
+          rightText={alert.isReviewed ? 'Yes' : 'No'}
+          accessoryType="none"
+        />
+        <ListRow
+          title="False Positive"
+          rightText={alert.isFalsePositive ? 'Yes' : 'No'}
+          accessoryType="none"
+        />
+      </ListSection>
+
+      <View style={styles.actions}>
+        <Button
+          buttonStyle="filled"
+          role="default"
+          onPress={handleMarkReviewed}
+        >
+          Mark as Reviewed
+        </Button>
+        <Button
+          buttonStyle="filled"
+          role="destructive"
+          onPress={handleDelete}
+        >
+          Delete Alert
+        </Button>
+      </View>
     </ScreenLayout>
   );
 };
 
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.infoRow}>
-    <Text variant="caption" style={styles.label}>
-      {label}
-    </Text>
-    <Text variant="body" style={styles.value}>
-      {value}
-    </Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  card: {
-    margin: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  section: {
+    marginHorizontal: 20,
     marginBottom: 20,
   },
-  timestamp: {
-    opacity: 0.7,
-  },
-  section: {
-    marginTop: 16,
-  },
-  sectionTitle: {
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  label: {
-    flex: 1,
-    opacity: 0.7,
-  },
-  value: {
-    flex: 2,
-    textAlign: 'right',
-  },
   actions: {
-    padding: 16,
+    padding: 20,
     gap: 12,
-  },
-  button: {
-    marginBottom: 8,
   },
 });

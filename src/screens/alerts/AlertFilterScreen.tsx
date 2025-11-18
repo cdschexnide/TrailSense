@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { Text, Button } from '@components/atoms';
+import { View, StyleSheet } from 'react-native';
+import { Button } from '@components/atoms/Button';
 import { ScreenLayout } from '@components/templates';
-import { useTheme } from '@hooks/useTheme';
+import { ListSection } from '@components/molecules/ListSection';
+import { ListRow } from '@components/molecules/ListRow';
 
 interface FilterOptions {
   threatLevels: string[];
   detectionTypes: string[];
-  dateRange: {
-    start: Date | null;
-    end: Date | null;
-  };
 }
 
 export const AlertFilterScreen = ({ navigation, route }: any) => {
-  const { theme } = useTheme();
   const { onApplyFilters } = route.params || {};
 
   const [filters, setFilters] = useState<FilterOptions>({
     threatLevels: [],
     detectionTypes: [],
-    dateRange: {
-      start: null,
-      end: null,
-    },
   });
 
-  const threatLevels = ['low', 'medium', 'high', 'critical'];
-  const detectionTypes = ['wifi', 'bluetooth', 'cellular', 'gps'];
+  const threatLevels = [
+    { id: 'critical', label: 'Critical' },
+    { id: 'high', label: 'High' },
+    { id: 'medium', label: 'Medium' },
+    { id: 'low', label: 'Low' },
+  ];
+
+  const detectionTypes = [
+    { id: 'cellular', label: 'Cellular' },
+    { id: 'wifi', label: 'Wi-Fi' },
+    { id: 'bluetooth', label: 'Bluetooth' },
+    { id: 'gps', label: 'GPS' },
+  ];
 
   const toggleThreatLevel = (level: string) => {
     setFilters(prev => ({
@@ -58,120 +61,66 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
     setFilters({
       threatLevels: [],
       detectionTypes: [],
-      dateRange: { start: null, end: null },
     });
   };
 
   return (
-    <ScreenLayout title="Filter Alerts">
-      <ScrollView style={styles.container}>
-        <View style={styles.section}>
-          <Text variant="h2" style={styles.sectionTitle}>
-            Threat Level
-          </Text>
-          <View style={styles.optionsGrid}>
-            {threatLevels.map(level => (
-              <FilterChip
-                key={level}
-                label={level.toUpperCase()}
-                selected={filters.threatLevels.includes(level)}
-                onPress={() => toggleThreatLevel(level)}
-              />
-            ))}
-          </View>
-        </View>
+    <ScreenLayout
+      header={{
+        title: 'Filter Alerts',
+        showBack: true,
+        rightActions: (
+          <Button
+            buttonStyle="plain"
+            onPress={handleReset}
+          >
+            Reset
+          </Button>
+        ),
+      }}
+      scrollable
+    >
+      <ListSection header="THREAT LEVEL" style={styles.section}>
+        {threatLevels.map(level => (
+          <ListRow
+            key={level.id}
+            title={level.label}
+            accessoryType={filters.threatLevels.includes(level.id) ? "checkmark" : "none"}
+            onPress={() => toggleThreatLevel(level.id)}
+          />
+        ))}
+      </ListSection>
 
-        <View style={styles.section}>
-          <Text variant="h2" style={styles.sectionTitle}>
-            Detection Type
-          </Text>
-          <View style={styles.optionsGrid}>
-            {detectionTypes.map(type => (
-              <FilterChip
-                key={type}
-                label={type.toUpperCase()}
-                selected={filters.detectionTypes.includes(type)}
-                onPress={() => toggleDetectionType(type)}
-              />
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text variant="h2" style={styles.sectionTitle}>
-            Date Range
-          </Text>
-          <Text variant="caption" style={styles.comingSoon}>
-            Date range picker coming soon
-          </Text>
-        </View>
-      </ScrollView>
+      <ListSection header="DETECTION TYPE" style={styles.section}>
+        {detectionTypes.map(type => (
+          <ListRow
+            key={type.id}
+            title={type.label}
+            accessoryType={filters.detectionTypes.includes(type.id) ? "checkmark" : "none"}
+            onPress={() => toggleDetectionType(type.id)}
+          />
+        ))}
+      </ListSection>
 
       <View style={styles.actions}>
         <Button
-          title="Reset"
-          variant="ghost"
-          onPress={handleReset}
-          style={styles.button}
-        />
-        <Button
-          title="Apply Filters"
-          variant="primary"
+          buttonStyle="filled"
+          role="default"
           onPress={handleApply}
-          style={styles.button}
-        />
+        >
+          Apply Filters
+        </Button>
       </View>
     </ScreenLayout>
   );
 };
 
-const FilterChip = ({ label, selected, onPress }: any) => {
-  const { theme } = useTheme();
-
-  return (
-    <Button
-      title={label}
-      variant={selected ? 'primary' : 'outline'}
-      size="sm"
-      onPress={onPress}
-      style={styles.chip}
-    />
-  );
-};
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   section: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  sectionTitle: {
-    marginBottom: 12,
-  },
-  optionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  comingSoon: {
-    opacity: 0.6,
-    fontStyle: 'italic',
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   actions: {
-    flexDirection: 'row',
-    padding: 16,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  },
-  button: {
-    flex: 1,
+    padding: 20,
   },
 });
