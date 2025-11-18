@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Alert } from '@types';
 import { Card, Badge, Text, Icon } from '@components/atoms';
-import { SwipeableRow, createSwipeActions } from '@components/molecules';
 import { formatTimestamp } from '@utils/dateUtils';
 import { useTheme } from '@hooks/useTheme';
 
@@ -22,7 +22,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const swipeActions = createSwipeActions(theme.colors);
 
   const getThreatVariant = () => {
     switch (alert.threatLevel) {
@@ -69,68 +68,109 @@ export const AlertCard: React.FC<AlertCardProps> = ({
     return `${alert.detectionType.charAt(0).toUpperCase()}${alert.detectionType.slice(1)} Detection`;
   };
 
+  const handleDelete = async (e: any) => {
+    e?.stopPropagation?.();
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onDismiss?.(alert.id);
+  };
+
+  const handleWhitelist = async (e: any) => {
+    e?.stopPropagation?.();
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onWhitelist?.(alert.macAddress);
+  };
+
   return (
-    <SwipeableRow
-      rightActions={[
-        swipeActions.delete(() => onDismiss?.(alert.id)),
-        {
-          label: 'Whitelist',
-          backgroundColor: 'rgba(255, 149, 0, 0.15)', // Light orange tint
-          borderColor: theme.colors.systemOrange,
-          onPress: () => onWhitelist?.(alert.macAddress),
-          icon: <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />,
-        },
-      ]}
-    >
-      <Card onPress={() => onPress?.(alert.id)} variant="grouped" style={StyleSheet.flatten([styles.card, style])}>
-        {/* Header row: Badge and Timestamp */}
-        <View style={styles.header}>
-          <Badge variant={getThreatVariant() as any} size="sm">
-            {alert.threatLevel.toUpperCase()}
-          </Badge>
-          <Text variant="caption1" color="secondaryLabel">
-            {formatTimestamp(alert.timestamp)}
-          </Text>
+    <Card onPress={() => onPress?.(alert.id)} variant="grouped" style={StyleSheet.flatten([styles.card, style])}>
+      <View style={styles.container}>
+        {/* Action buttons column on the left */}
+        <View style={styles.actionsColumn}>
+          <Pressable
+            onPress={handleDelete}
+            style={({ pressed }) => [
+              styles.actionButton,
+              {
+                backgroundColor: 'rgba(255, 59, 48, 0.15)',
+                borderColor: theme.colors.systemRed,
+              },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Icon name="trash-outline" size={20} color={theme.colors.systemRed} />
+            <Text variant="caption2" style={{ color: theme.colors.systemRed, fontWeight: '600' }}>
+              Delete
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleWhitelist}
+            style={({ pressed }) => [
+              styles.actionButton,
+              {
+                backgroundColor: 'rgba(255, 149, 0, 0.15)',
+                borderColor: theme.colors.systemOrange,
+              },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />
+            <Text variant="caption2" style={{ color: theme.colors.systemOrange, fontWeight: '600' }}>
+              Whitelist
+            </Text>
+          </Pressable>
         </View>
 
-        {/* Detection type with icon */}
-        <View style={styles.detectionRow}>
-          <Icon
-            name={getDetectionIcon()}
-            size={24}
-            color={getDetectionIconColor()}
-          />
-          <View style={styles.detectionContent}>
-            <Text variant="headline" color="label">
-              {getDetectionLabel()}
+        {/* Main content */}
+        <View style={styles.contentColumn}>
+          {/* Header row: Badge and Timestamp */}
+          <View style={styles.header}>
+            <Badge variant={getThreatVariant() as any} size="sm">
+              {alert.threatLevel.toUpperCase()}
+            </Badge>
+            <Text variant="caption1" color="secondaryLabel">
+              {formatTimestamp(alert.timestamp)}
             </Text>
-
-            {/* Metadata rows */}
-            <View style={styles.metadata}>
-              <Text variant="subheadline" color="secondaryLabel">
-                Device: {alert.deviceId}
-              </Text>
-              <Text variant="subheadline" color="secondaryLabel" style={styles.metadataRow}>
-                Signal: {alert.rssi} dBm
-              </Text>
-              {alert.macAddress && (
-                <Text variant="subheadline" color="secondaryLabel" style={StyleSheet.flatten([styles.metadataRow, styles.mac])}>
-                  {alert.macAddress}
-                </Text>
-              )}
-            </View>
           </View>
 
-          {/* Chevron indicator */}
-          <Icon
-            name="chevron-forward"
-            size={20}
-            color={theme.colors.tertiaryLabel}
-            style={styles.chevron}
-          />
+          {/* Detection type with icon */}
+          <View style={styles.detectionRow}>
+            <Icon
+              name={getDetectionIcon()}
+              size={24}
+              color={getDetectionIconColor()}
+            />
+            <View style={styles.detectionContent}>
+              <Text variant="headline" color="label">
+                {getDetectionLabel()}
+              </Text>
+
+              {/* Metadata rows */}
+              <View style={styles.metadata}>
+                <Text variant="subheadline" color="secondaryLabel">
+                  Device: {alert.deviceId}
+                </Text>
+                <Text variant="subheadline" color="secondaryLabel" style={styles.metadataRow}>
+                  Signal: {alert.rssi} dBm
+                </Text>
+                {alert.macAddress && (
+                  <Text variant="subheadline" color="secondaryLabel" style={StyleSheet.flatten([styles.metadataRow, styles.mac])}>
+                    {alert.macAddress}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Chevron indicator */}
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.tertiaryLabel}
+              style={styles.chevron}
+            />
+          </View>
         </View>
-      </Card>
-    </SwipeableRow>
+      </View>
+    </Card>
   );
 };
 
@@ -139,6 +179,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 8,
     padding: 16,
+  },
+  container: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionsColumn: {
+    gap: 8,
+    justifyContent: 'center',
+  },
+  actionButton: {
+    width: 90,
+    height: 70,
+    borderRadius: 12,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+  contentColumn: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',
