@@ -5,14 +5,12 @@ import { useTheme } from '@hooks/useTheme';
 
 interface LoadingStateProps {
   message?: string;
-  size?: 'small' | 'large';
   style?: ViewStyle;
   testID?: string;
 }
 
 export const LoadingState: React.FC<LoadingStateProps> = ({
-  message = 'Loading...',
-  size = 'large',
+  message,
   style,
   testID,
 }) => {
@@ -21,12 +19,13 @@ export const LoadingState: React.FC<LoadingStateProps> = ({
 
   return (
     <View style={[styles.container, style]} testID={testID}>
-      <ActivityIndicator size={size} color={colors.primary[500]} />
+      <ActivityIndicator size="large" color={colors.systemBlue} />
       {message && (
         <Text
           variant="body"
-          color="secondary"
-          style={{ marginTop: theme.spacing.base }}
+          color="secondaryLabel"
+          align="center"
+          style={styles.message}
         >
           {message}
         </Text>
@@ -41,5 +40,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
+  },
+  message: {
+    marginTop: 16,
   },
 });

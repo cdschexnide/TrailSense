@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text, Button, Icon } from '@components/atoms';
-import { useTheme } from '@hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -25,29 +24,24 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
-
   return (
     <View style={[styles.container, style]} testID={testID}>
       {icon && (
-        <View style={{ marginBottom: theme.spacing.lg }}>
-          <Icon name={icon} size="2xl" color={colors.text.disabled} />
+        <View style={styles.iconContainer}>
+          <Icon name={icon} size={48} color="tertiaryLabel" />
         </View>
       )}
 
-      <Text variant="h3" style={styles.title}>
+      <Text variant="title2" weight="bold" align="center" style={styles.title}>
         {title}
       </Text>
 
       {message && (
         <Text
           variant="body"
-          color="secondary"
-          style={[
-            styles.message,
-            { marginTop: theme.spacing.sm, marginBottom: theme.spacing.lg },
-          ]}
+          color="secondaryLabel"
+          align="center"
+          style={styles.message}
         >
           {message}
         </Text>
@@ -55,11 +49,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
       {actionLabel && onActionPress && (
         <Button
-          title={actionLabel}
+          buttonStyle="tinted"
+          role="default"
           onPress={onActionPress}
-          variant="primary"
-          style={{ marginTop: theme.spacing.lg }}
-        />
+          style={styles.action}
+        >
+          {actionLabel}
+        </Button>
       )}
     </View>
   );
@@ -72,11 +68,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
   },
+  iconContainer: {
+    marginBottom: 16,
+  },
   title: {
-    textAlign: 'center',
+    marginBottom: 8,
   },
   message: {
-    textAlign: 'center',
     maxWidth: 300,
+    marginBottom: 24,
+  },
+  action: {
+    // No additional margin needed
   },
 });

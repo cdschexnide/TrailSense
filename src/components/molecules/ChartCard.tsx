@@ -1,15 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme } from '@hooks/useTheme';
+import { Text } from '@components/atoms/Text/Text';
 
 interface ChartCardProps {
   title: string;
+  subtitle?: string;
   children: React.ReactNode;
+  style?: ViewStyle;
 }
 
-export const ChartCard: React.FC<ChartCardProps> = ({ title, children }) => {
+export const ChartCard: React.FC<ChartCardProps> = ({ title, subtitle, children, style }) => {
+  const { theme } = useTheme();
+  const { colors, shadows } = theme;
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.secondarySystemGroupedBackground,
+          ...shadows.sm,
+        },
+        style,
+      ]}
+    >
+      <Text variant="headline" color="label" style={styles.title}>
+        {title}
+      </Text>
+      {subtitle && (
+        <Text variant="footnote" color="secondaryLabel" style={styles.subtitle}>
+          {subtitle}
+        </Text>
+      )}
       <View style={styles.chartContainer}>{children}</View>
     </View>
   );
@@ -17,19 +40,14 @@ export const ChartCard: React.FC<ChartCardProps> = ({ title, children }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1E1E1E',
     borderRadius: 12,
     padding: 16,
-    margin: 16,
-    marginTop: 0,
-    borderWidth: 1,
-    borderColor: '#333333',
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 16,
+    marginBottom: 4,
+  },
+  subtitle: {
+    marginBottom: 12,
   },
   chartContainer: {
     alignItems: 'center',

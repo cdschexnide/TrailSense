@@ -7,11 +7,13 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Input, Text, Badge } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
 import { register } from '@store/slices/authSlice';
 import { AppDispatch, RootState } from '@store/index';
+import { useTheme } from '@hooks/useTheme';
 
 interface RegisterScreenProps {
   navigation: any;
@@ -20,6 +22,9 @@ interface RegisterScreenProps {
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   navigation,
 }) => {
+  const { theme } = useTheme();
+  const colors = theme.colors;
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,13 +64,13 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   const getPasswordStrengthColor = (strength: string): string => {
     switch (strength) {
       case 'weak':
-        return '#FF6B6B';
+        return colors.systemRed;
       case 'medium':
-        return '#FFB800';
+        return colors.systemYellow;
       case 'strong':
-        return '#51CF66';
+        return colors.systemGreen;
       default:
-        return '#868E96';
+        return colors.systemGray;
     }
   };
 
@@ -141,10 +146,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
       !isPasswordValid ||
       !isConfirmPasswordValid
     ) {
+      // Trigger error haptic for validation failure
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 
     if (!acceptedTerms) {
+      // Trigger warning haptic for terms not accepted
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       Alert.alert(
         'Terms & Conditions',
         'Please accept the Terms & Conditions to continue'
@@ -161,12 +170,18 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         })
       ).unwrap();
 
+      // Trigger success haptic for successful registration
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
       Alert.alert(
         'Registration Successful',
         'Your account has been created successfully!',
         [{ text: 'OK' }]
       );
     } catch (error: any) {
+      // Trigger error haptic for registration failure
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
       Alert.alert(
         'Registration Failed',
         error.message || 'Unable to create account. Please try again.'
@@ -191,10 +206,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text variant="h1" style={styles.title}>
+            <Text variant="largeTitle" weight="bold" style={styles.title}>
               Create Account
             </Text>
-            <Text variant="body" style={styles.subtitle}>
+            <Text variant="body" color="secondaryLabel" style={styles.subtitle}>
               Sign up to get started with TrailSense
             </Text>
           </View>
@@ -209,8 +224,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               }}
               onBlur={() => validateName(name)}
               placeholder="Enter your full name"
-              autoCapitalize="words"
-              autoComplete="name"
+              textContentType="name"
+              returnKeyType="next"
               error={nameError}
               disabled={isLoading}
             />
@@ -225,8 +240,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               onBlur={() => validateEmail(email)}
               placeholder="Enter your email"
               keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
               error={emailError}
               disabled={isLoading}
             />
@@ -243,23 +258,25 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
                 onBlur={() => validatePassword(password)}
                 placeholder="Create a strong password"
                 secureTextEntry
-                autoComplete="password-new"
+                textContentType="newPassword"
+                returnKeyType="next"
                 error={passwordError}
                 disabled={isLoading}
               />
               {password.length > 0 && (
                 <View style={styles.passwordStrength}>
-                  <Text variant="caption" style={styles.strengthLabel}>
+                  <Text variant="caption1" color="secondaryLabel" style={styles.strengthLabel}>
                     Password Strength:
                   </Text>
                   <Badge
-                    label={passwordStrength.toUpperCase()}
                     variant="info"
                     style={{
                       backgroundColor:
                         getPasswordStrengthColor(passwordStrength),
                     }}
-                  />
+                  >
+                    {passwordStrength.toUpperCase()}
+                  </Badge>
                 </View>
               )}
             </View>
@@ -274,47 +291,53 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               onBlur={() => validateConfirmPassword(confirmPassword)}
               placeholder="Re-enter your password"
               secureTextEntry
-              autoComplete="password-new"
+              textContentType="newPassword"
+              returnKeyType="done"
+              onSubmitEditing={handleRegister}
               error={confirmPasswordError}
               disabled={isLoading}
             />
 
             <View style={styles.termsContainer}>
               <Button
-                title={acceptedTerms ? '☑' : '☐'}
-                variant="ghost"
+                buttonStyle="plain"
                 onPress={() => setAcceptedTerms(!acceptedTerms)}
                 style={styles.checkbox}
-              />
+              >
+                {acceptedTerms ? '☑' : '☐'}
+              </Button>
               <Text variant="body" style={styles.termsText}>
                 I accept the{' '}
-                <Text variant="body" style={styles.link}>
+                <Text variant="body" color="systemBlue" style={styles.link}>
                   Terms & Conditions
                 </Text>{' '}
                 and{' '}
-                <Text variant="body" style={styles.link}>
+                <Text variant="body" color="systemBlue" style={styles.link}>
                   Privacy Policy
                 </Text>
               </Text>
             </View>
 
             <Button
-              title="Create Account"
-              variant="primary"
+              buttonStyle="filled"
+              prominent
               onPress={handleRegister}
               loading={isLoading}
               disabled={isLoading}
               style={styles.registerButton}
-            />
+            >
+              Create Account
+            </Button>
 
             <View style={styles.loginContainer}>
               <Text variant="body">Already have an account? </Text>
               <Button
-                title="Sign In"
-                variant="ghost"
+                buttonStyle="plain"
                 onPress={handleLogin}
                 disabled={isLoading}
-              />
+              >
+                Sign In
+              </Button>
             </View>
           </View>
         </ScrollView>
@@ -340,7 +363,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    opacity: 0.7,
+    // No opacity needed - using secondaryLabel color
   },
   form: {
     width: '100%',
@@ -369,7 +392,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   link: {
-    color: '#007AFF',
     textDecorationLine: 'underline',
   },
   registerButton: {

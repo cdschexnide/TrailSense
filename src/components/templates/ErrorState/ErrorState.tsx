@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text, Button, Icon } from '@components/atoms';
-import { useTheme } from '@hooks/useTheme';
 
 interface ErrorStateProps {
   title?: string;
-  message: string;
-  actionLabel?: string;
-  onActionPress?: () => void;
+  message?: string;
+  retryLabel?: string;
+  onRetry?: () => void;
   style?: ViewStyle;
   testID?: string;
 }
@@ -15,37 +14,41 @@ interface ErrorStateProps {
 export const ErrorState: React.FC<ErrorStateProps> = ({
   title = 'Something went wrong',
   message,
-  actionLabel = 'Try Again',
-  onActionPress,
+  retryLabel = 'Try Again',
+  onRetry,
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
-
   return (
     <View style={[styles.container, style]} testID={testID}>
-      <View style={{ marginBottom: theme.spacing.lg }}>
-        <Icon name="alert-circle-outline" size="2xl" color={colors.error} />
+      <View style={styles.iconContainer}>
+        <Icon name="alert-circle-outline" size={48} color="systemRed" />
       </View>
 
-      <Text variant="h3" color="error" style={styles.title}>
+      <Text variant="title2" weight="bold" align="center" style={styles.title}>
         {title}
       </Text>
 
-      <Text
-        variant="body"
-        color="secondary"
-        style={[
-          styles.message,
-          { marginTop: theme.spacing.sm, marginBottom: theme.spacing.xl },
-        ]}
-      >
-        {message}
-      </Text>
+      {message && (
+        <Text
+          variant="body"
+          color="secondaryLabel"
+          align="center"
+          style={styles.message}
+        >
+          {message}
+        </Text>
+      )}
 
-      {onActionPress && (
-        <Button title={actionLabel} onPress={onActionPress} variant="primary" />
+      {onRetry && (
+        <Button
+          buttonStyle="filled"
+          role="default"
+          onPress={onRetry}
+          style={styles.action}
+        >
+          {retryLabel}
+        </Button>
       )}
     </View>
   );
@@ -58,11 +61,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
   },
+  iconContainer: {
+    marginBottom: 16,
+  },
   title: {
-    textAlign: 'center',
+    marginBottom: 8,
   },
   message: {
-    textAlign: 'center',
     maxWidth: 300,
+    marginBottom: 24,
+  },
+  action: {
+    // No additional margin needed
   },
 });

@@ -1,129 +1,522 @@
+/**
+ * iOS Semantic Color System
+ *
+ * This color system follows Apple's Human Interface Guidelines for iOS.
+ * All colors are semantic (named by purpose, not appearance) and support
+ * both light and dark modes automatically.
+ *
+ * @see https://developer.apple.com/design/human-interface-guidelines/color
+ */
+
 export const Colors = {
   light: {
-    // Primary Brand Colors
-    primary: {
-      50: '#E8F5E9',
-      100: '#C8E6C9',
-      200: '#A5D6A7',
-      300: '#81C784',
-      400: '#66BB6A',
-      500: '#4CAF50', // Main brand color
-      600: '#43A047',
-      700: '#388E3C',
-      800: '#2E7D32',
-      900: '#1B5E20',
-    },
+    // ======================
+    // iOS System Colors - Label
+    // ======================
 
-    // Threat Level Colors
+    /**
+     * Primary text color
+     * Use for main content text
+     */
+    label: '#000000',
+
+    /**
+     * Secondary text color
+     * Use for secondary or supplementary text
+     */
+    secondaryLabel: 'rgba(60, 60, 67, 0.6)',
+
+    /**
+     * Tertiary text color
+     * Use for tertiary or de-emphasized text
+     */
+    tertiaryLabel: 'rgba(60, 60, 67, 0.3)',
+
+    /**
+     * Quaternary text color
+     * Use for watermarks and disabled text
+     */
+    quaternaryLabel: 'rgba(60, 60, 67, 0.18)',
+
+    // ======================
+    // iOS System Colors - Backgrounds
+    // ======================
+
+    /**
+     * Primary background color
+     * Use for main screen backgrounds
+     */
+    systemBackground: '#FFFFFF',
+
+    /**
+     * Secondary background color
+     * Use for grouped content backgrounds
+     */
+    secondarySystemBackground: '#F2F2F7',
+
+    /**
+     * Tertiary background color
+     * Use for third-level grouped content
+     */
+    tertiarySystemBackground: '#FFFFFF',
+
+    /**
+     * Primary grouped background
+     * Use for grouped table view backgrounds
+     */
+    systemGroupedBackground: '#F2F2F7',
+
+    /**
+     * Secondary grouped background
+     * Use for grouped table view cells
+     */
+    secondarySystemGroupedBackground: '#FFFFFF',
+
+    /**
+     * Tertiary grouped background
+     * Use for third-level grouped content
+     */
+    tertiarySystemGroupedBackground: '#F2F2F7',
+
+    // ======================
+    // iOS System Colors - Fill
+    // ======================
+
+    /**
+     * Primary fill color
+     * Use for thin overlays over backgrounds
+     */
+    systemFill: 'rgba(120, 120, 128, 0.2)',
+
+    /**
+     * Secondary fill color
+     * Use for medium-thickness overlays
+     */
+    secondarySystemFill: 'rgba(120, 120, 128, 0.16)',
+
+    /**
+     * Tertiary fill color
+     * Use for thin overlays over fills
+     */
+    tertiarySystemFill: 'rgba(118, 118, 128, 0.12)',
+
+    /**
+     * Quaternary fill color
+     * Use for the thinnest overlays
+     */
+    quaternarySystemFill: 'rgba(116, 116, 128, 0.08)',
+
+    // ======================
+    // iOS System Colors - Semantic (Tint Colors)
+    // ======================
+
+    /**
+     * System Blue - NEW PRIMARY COLOR
+     * Use for interactive elements, links, and primary actions
+     */
+    systemBlue: '#007AFF',
+
+    /**
+     * System Green
+     * Use for success states and positive actions
+     */
+    systemGreen: '#34C759',
+
+    /**
+     * System Orange
+     * Use for warnings and medium-priority alerts
+     */
+    systemOrange: '#FF9500',
+
+    /**
+     * System Red
+     * Use for errors and destructive actions
+     */
+    systemRed: '#FF3B30',
+
+    /**
+     * System Yellow
+     * Use for caution states
+     */
+    systemYellow: '#FFCC00',
+
+    /**
+     * System Purple
+     * Use for specialized features
+     */
+    systemPurple: '#AF52DE',
+
+    /**
+     * System Pink
+     * Use for accents
+     */
+    systemPink: '#FF2D55',
+
+    /**
+     * System Teal
+     * Use for accents
+     */
+    systemTeal: '#5AC8FA',
+
+    /**
+     * System Indigo
+     * Use for accents
+     */
+    systemIndigo: '#5856D6',
+
+    // ======================
+    // iOS System Colors - Gray Scale
+    // ======================
+
+    systemGray: '#8E8E93',
+    systemGray2: '#AEAEB2',
+    systemGray3: '#C7C7CC',
+    systemGray4: '#D1D1D6',
+    systemGray5: '#E5E5EA',
+    systemGray6: '#F2F2F7',
+
+    // ======================
+    // iOS Separator Colors
+    // ======================
+
+    /**
+     * Separator color
+     * Use for thin borders and divider lines
+     */
+    separator: 'rgba(60, 60, 67, 0.29)',
+
+    /**
+     * Opaque separator
+     * Use for borders that don't need transparency
+     */
+    opaqueSeparator: '#C6C6C8',
+
+    // ======================
+    // TrailSense-Specific: Threat Levels
+    // ======================
+
     threat: {
-      low: '#4CAF50', // Green - Normal detection
-      medium: '#FF9800', // Orange - Suspicious
-      high: '#FF5722', // Red-Orange - Likely threat
-      critical: '#F44336', // Red - Confirmed threat
+      /**
+       * Critical threat level - System Red
+       */
+      critical: '#FF3B30',
+
+      /**
+       * High threat level - System Orange
+       */
+      high: '#FF9500',
+
+      /**
+       * Medium threat level - System Yellow
+       */
+      medium: '#FFCC00',
+
+      /**
+       * Low threat level - System Green
+       */
+      low: '#34C759',
     },
 
-    // Detection Type Colors
+    // ======================
+    // TrailSense-Specific: Detection Types
+    // ======================
+
     detection: {
-      cellular: '#9C27B0', // Purple - Cellular uplink
-      wifi: '#2196F3', // Blue - WiFi
-      bluetooth: '#00BCD4', // Cyan - Bluetooth
-      multi: '#673AB7', // Deep Purple - Multi-band
+      /**
+       * Cellular detection - System Purple
+       */
+      cellular: '#AF52DE',
+
+      /**
+       * WiFi detection - System Blue
+       */
+      wifi: '#007AFF',
+
+      /**
+       * Bluetooth detection - System Teal
+       */
+      bluetooth: '#5AC8FA',
+
+      /**
+       * Multi-band detection - System Indigo
+       */
+      multiband: '#5856D6',
+
+      /**
+       * @deprecated Use 'multiband' instead
+       */
+      multi: '#5856D6',
     },
 
-    // Semantic Colors
-    success: '#4CAF50',
-    warning: '#FF9800',
-    error: '#F44336',
-    info: '#2196F3',
+    // ======================
+    // Semantic Aliases
+    // ======================
 
-    // Neutral Colors
+    /**
+     * Primary color for the app - System Blue
+     */
+    primary: '#007AFF',
+
+    /**
+     * Success color - System Green
+     */
+    success: '#34C759',
+
+    /**
+     * Warning color - System Orange
+     */
+    warning: '#FF9500',
+
+    /**
+     * Error color - System Red
+     */
+    error: '#FF3B30',
+
+    /**
+     * Info color - System Blue
+     */
+    info: '#007AFF',
+
+    // ======================
+    // Additional Status Colors
+    // ======================
+
+    online: '#34C759',
+    offline: '#8E8E93',
+
+    battery: {
+      full: '#34C759',
+      medium: '#FF9500',
+      low: '#FF3B30',
+    },
+
+    // ======================
+    // Backward Compatibility Aliases
+    // ======================
+
+    /**
+     * @deprecated Use systemBackground instead
+     */
     background: '#FFFFFF',
-    surface: '#F5F5F5',
+
+    /**
+     * @deprecated Use secondarySystemBackground instead
+     */
+    surface: '#F2F2F7',
+
+    /**
+     * @deprecated Use tertiarySystemBackground instead
+     */
     surfaceVariant: '#E0E0E0',
 
-    // Text Colors
+    /**
+     * Text color aliases for backward compatibility
+     * @deprecated Use label, secondaryLabel, etc. instead
+     */
     text: {
-      primary: '#212121',
-      secondary: '#757575',
-      disabled: '#BDBDBD',
+      primary: '#000000',
+      secondary: 'rgba(60, 60, 67, 0.6)',
+      disabled: 'rgba(60, 60, 67, 0.3)',
       inverse: '#FFFFFF',
     },
 
-    // Border & Divider
-    border: '#E0E0E0',
-    divider: '#EEEEEE',
+    /**
+     * @deprecated Use separator instead
+     */
+    border: 'rgba(60, 60, 67, 0.29)',
 
-    // Status Colors
-    online: '#4CAF50',
-    offline: '#9E9E9E',
-    battery: {
-      full: '#4CAF50',
-      medium: '#FF9800',
-      low: '#F44336',
-    },
+    /**
+     * @deprecated Use separator instead
+     */
+    divider: 'rgba(60, 60, 67, 0.29)',
   },
 
   dark: {
-    // Primary Brand Colors (adjusted for dark mode)
-    primary: {
-      50: '#1B5E20',
-      100: '#2E7D32',
-      200: '#388E3C',
-      300: '#43A047',
-      400: '#4CAF50',
-      500: '#66BB6A', // Lighter for dark bg
-      600: '#81C784',
-      700: '#A5D6A7',
-      800: '#C8E6C9',
-      900: '#E8F5E9',
-    },
+    // ======================
+    // iOS System Colors - Label (Dark Mode)
+    // ======================
 
-    // Threat Level Colors (adjusted for dark mode)
+    label: '#FFFFFF',
+    secondaryLabel: 'rgba(235, 235, 245, 0.6)',
+    tertiaryLabel: 'rgba(235, 235, 245, 0.3)',
+    quaternaryLabel: 'rgba(235, 235, 245, 0.18)',
+
+    // ======================
+    // iOS System Colors - Backgrounds (Dark Mode)
+    // ======================
+
+    systemBackground: '#000000',
+    secondarySystemBackground: '#1C1C1E',
+    tertiarySystemBackground: '#2C2C2E',
+    systemGroupedBackground: '#000000',
+    secondarySystemGroupedBackground: '#1C1C1E',
+    tertiarySystemGroupedBackground: '#2C2C2E',
+
+    // ======================
+    // iOS System Colors - Fill (Dark Mode)
+    // ======================
+
+    systemFill: 'rgba(120, 120, 128, 0.36)',
+    secondarySystemFill: 'rgba(120, 120, 128, 0.32)',
+    tertiarySystemFill: 'rgba(118, 118, 128, 0.24)',
+    quaternarySystemFill: 'rgba(118, 118, 128, 0.18)',
+
+    // ======================
+    // iOS System Colors - Semantic (Dark Mode)
+    // ======================
+
+    systemBlue: '#0A84FF',
+    systemGreen: '#30D158',
+    systemOrange: '#FF9F0A',
+    systemRed: '#FF453A',
+    systemYellow: '#FFD60A',
+    systemPurple: '#BF5AF2',
+    systemPink: '#FF375F',
+    systemTeal: '#64D2FF',
+    systemIndigo: '#5E5CE6',
+
+    // ======================
+    // iOS System Colors - Gray Scale (Dark Mode)
+    // ======================
+
+    systemGray: '#8E8E93',
+    systemGray2: '#636366',
+    systemGray3: '#48484A',
+    systemGray4: '#3A3A3C',
+    systemGray5: '#2C2C2E',
+    systemGray6: '#1C1C1E',
+
+    // ======================
+    // iOS Separator Colors (Dark Mode)
+    // ======================
+
+    separator: 'rgba(84, 84, 88, 0.6)',
+    opaqueSeparator: '#38383A',
+
+    // ======================
+    // TrailSense-Specific: Threat Levels (Dark Mode)
+    // ======================
+
     threat: {
-      low: '#66BB6A',
-      medium: '#FFB74D',
-      high: '#FF7043',
-      critical: '#EF5350',
+      critical: '#FF453A',
+      high: '#FF9F0A',
+      medium: '#FFD60A',
+      low: '#30D158',
     },
 
-    // Detection Type Colors
+    // ======================
+    // TrailSense-Specific: Detection Types (Dark Mode)
+    // ======================
+
     detection: {
-      cellular: '#BA68C8',
-      wifi: '#64B5F6',
-      bluetooth: '#4DD0E1',
-      multi: '#9575CD',
+      cellular: '#BF5AF2',
+      wifi: '#0A84FF',
+      bluetooth: '#64D2FF',
+      multiband: '#5E5CE6',
+
+      /**
+       * @deprecated Use 'multiband' instead
+       */
+      multi: '#5E5CE6',
     },
 
-    // Semantic Colors
-    success: '#66BB6A',
-    warning: '#FFB74D',
-    error: '#EF5350',
-    info: '#64B5F6',
+    // ======================
+    // Semantic Aliases (Dark Mode)
+    // ======================
 
-    // Neutral Colors
-    background: '#121212',
-    surface: '#1E1E1E',
-    surfaceVariant: '#2C2C2C',
+    primary: '#0A84FF',
+    success: '#30D158',
+    warning: '#FF9F0A',
+    error: '#FF453A',
+    info: '#0A84FF',
 
-    // Text Colors
+    // ======================
+    // Additional Status Colors (Dark Mode)
+    // ======================
+
+    online: '#30D158',
+    offline: '#8E8E93',
+
+    battery: {
+      full: '#30D158',
+      medium: '#FF9F0A',
+      low: '#FF453A',
+    },
+
+    // ======================
+    // Backward Compatibility Aliases (Dark Mode)
+    // ======================
+
+    /**
+     * @deprecated Use systemBackground instead
+     */
+    background: '#000000',
+
+    /**
+     * @deprecated Use secondarySystemBackground instead
+     */
+    surface: '#1C1C1E',
+
+    /**
+     * @deprecated Use tertiarySystemBackground instead
+     */
+    surfaceVariant: '#2C2C2E',
+
+    /**
+     * Text color aliases for backward compatibility
+     * @deprecated Use label, secondaryLabel, etc. instead
+     */
     text: {
       primary: '#FFFFFF',
-      secondary: '#B0B0B0',
-      disabled: '#666666',
-      inverse: '#212121',
+      secondary: 'rgba(235, 235, 245, 0.6)',
+      disabled: 'rgba(235, 235, 245, 0.3)',
+      inverse: '#000000',
     },
 
-    // Border & Divider
-    border: '#2C2C2C',
-    divider: '#333333',
+    /**
+     * @deprecated Use separator instead
+     */
+    border: 'rgba(84, 84, 88, 0.6)',
 
-    // Status Colors
-    online: '#66BB6A',
-    offline: '#757575',
-    battery: {
-      full: '#66BB6A',
-      medium: '#FFB74D',
-      low: '#EF5350',
-    },
+    /**
+     * @deprecated Use separator instead
+     */
+    divider: 'rgba(84, 84, 88, 0.6)',
   },
+};
+
+// ======================
+// TypeScript Type Definitions
+// ======================
+
+/**
+ * Color mode type
+ */
+export type ColorMode = 'light' | 'dark';
+
+/**
+ * Color palette type for a single mode
+ */
+export type ColorPalette = typeof Colors.light;
+
+/**
+ * Threat level type
+ */
+export type ThreatLevel = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * Detection type
+ */
+export type DetectionType = 'cellular' | 'wifi' | 'bluetooth' | 'multiband';
+
+/**
+ * Battery level type
+ */
+export type BatteryLevel = 'full' | 'medium' | 'low';
+
+/**
+ * Helper function to get colors for current theme
+ */
+export const getColors = (mode: ColorMode = 'light'): ColorPalette => {
+  return Colors[mode];
 };

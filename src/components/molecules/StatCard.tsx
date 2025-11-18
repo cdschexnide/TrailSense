@@ -1,30 +1,75 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme } from '@hooks/useTheme';
+import { Text } from '@components/atoms/Text/Text';
+import { Icon } from '@components/atoms/Icon/Icon';
 
 interface StatCardProps {
   title: string;
-  value: number | string;
-  change?: string;
+  value: string | number;
+  change?: {
+    value: string;
+    trend: 'positive' | 'negative' | 'neutral';
+  };
+  style?: ViewStyle;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, change }) => {
-  const isPositive = change?.startsWith('+');
-  const isNegative = change?.startsWith('-');
+export const StatCard: React.FC<StatCardProps> = ({ title, value, change, style }) => {
+  const { theme } = useTheme();
+  const { colors } = theme;
+
+  const getTrendColor = () => {
+    if (!change) return colors.secondaryLabel;
+    switch (change.trend) {
+      case 'positive':
+        return colors.systemGreen;
+      case 'negative':
+        return colors.systemRed;
+      case 'neutral':
+      default:
+        return colors.secondaryLabel;
+    }
+  };
+
+  const getTrendIcon = () => {
+    if (!change) return null;
+    switch (change.trend) {
+      case 'positive':
+        return <Icon name="arrow-up" size={14} color={colors.systemGreen} />;
+      case 'negative':
+        return <Icon name="arrow-down" size={14} color={colors.systemRed} />;
+      case 'neutral':
+      default:
+        return <Text style={{ color: colors.secondaryLabel }}>—</Text>;
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.value}>{value}</Text>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.secondarySystemGroupedBackground,
+        },
+        style,
+      ]}
+    >
+      <Text variant="caption1" color="secondaryLabel" style={styles.title}>
+        {title.toUpperCase()}
+      </Text>
+      <Text variant="title1" color="label" style={styles.value}>
+        {value}
+      </Text>
       {change && (
-        <Text
-          style={[
-            styles.change,
-            isPositive && styles.changePositive,
-            isNegative && styles.changeNegative,
-          ]}
-        >
-          {change}
-        </Text>
+        <View style={styles.changeContainer}>
+          <Text
+            variant="footnote"
+            style={{ ...styles.changeText, color: getTrendColor() }}
+          >
+            {change.value}
+          </Text>
+          <View style={styles.trendIcon}>{getTrendIcon()}</View>
+        </View>
       )}
     </View>
   );
@@ -33,33 +78,24 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, change }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E1E',
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#333333',
   },
   title: {
-    fontSize: 12,
-    color: '#999999',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  value: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
     marginBottom: 4,
   },
-  change: {
-    fontSize: 12,
+  value: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  changeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  changeText: {
     fontWeight: '600',
   },
-  changePositive: {
-    color: '#00C853',
-  },
-  changeNegative: {
-    color: '#FF5252',
+  trendIcon: {
+    marginLeft: 4,
   },
 });

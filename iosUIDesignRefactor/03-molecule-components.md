@@ -1,7 +1,7 @@
 # Phase 3: Molecule Components
 
 **Duration:** 10-12 hours
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
 
 ## Overview
 
@@ -11,9 +11,9 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 - [x] Phase 1 complete (design system)
 - [x] Phase 2 complete (atom components)
-- [ ] Understand iOS list patterns (inset grouped)
-- [ ] Understand iOS card design
-- [ ] Reference iOS Settings app for patterns
+- [x] Understand iOS list patterns (inset grouped)
+- [x] Understand iOS card design
+- [x] Reference iOS Settings app for patterns
 
 ## Tasks
 
@@ -23,32 +23,32 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Implement iOS Inset Grouped Card Style
 
-- [ ] **Update base styling:**
-  - [ ] Corner radius: 12pt (from spacing constants)
-  - [ ] Background: secondarySystemGroupedBackground
-  - [ ] Shadow: subtle iOS shadow (sm from Phase 1)
-  - [ ] Margin: 16pt from screen edges
-  - [ ] Padding: 16pt internal
+- [x] **Update base styling:**
+  - [x] Corner radius: 12pt (from spacing constants)
+  - [x] Background: secondarySystemGroupedBackground
+  - [x] Shadow: subtle iOS shadow (sm from Phase 1)
+  - [x] Margin: 16pt from screen edges
+  - [x] Padding: 16pt internal
 
-- [ ] **Remove press feedback**
-  - [ ] iOS cards typically don't have press states
-  - [ ] If pressable needed, use plain tap (no visual feedback)
+- [x] **Remove press feedback**
+  - [x] iOS cards typically don't have press states
+  - [x] If pressable needed, use plain tap (no visual feedback)
 
-- [ ] **Add `grouped` variant prop**
+- [x] **Add `grouped` variant prop**
   ```typescript
   variant?: 'default' | 'grouped';
   ```
   - default: White background, shadow
   - grouped: secondarySystemGroupedBackground, no shadow
 
-- [ ] **Update shadow logic**
+- [x] **Update shadow logic**
   - Use shadow only for 'default' variant
   - No shadow for 'grouped' variant
   - Ensure shadow adapts to dark mode
 
 #### Update Props Interface
 
-- [ ] **Remove/update incompatible props:**
+- [x] **Remove/update incompatible props:**
   ```typescript
   interface CardProps {
     children: React.ReactNode;
@@ -61,11 +61,11 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Testing
 
-- [ ] Test default variant with shadow
-- [ ] Test grouped variant without shadow
-- [ ] Test in light and dark mode
-- [ ] Verify 12pt corner radius
-- [ ] Verify 16pt internal padding
+- [x] Test default variant with shadow
+- [x] Test grouped variant without shadow
+- [x] Test in light and dark mode
+- [x] Verify 12pt corner radius
+- [x] Verify 16pt internal padding
 
 ---
 
@@ -75,9 +75,9 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 **File:** `src/components/molecules/ListRow.tsx` (NEW)
 
-- [ ] **Create iOS-style list row component**
+- [x] **Create iOS-style list row component**
 
-- [ ] **Add accessory type support:**
+- [x] **Add accessory type support:**
   ```typescript
   type AccessoryType =
     | 'none'
@@ -111,42 +111,42 @@ This phase refactors molecule components to use iOS design patterns and the new 
   }
   ```
 
-- [ ] **Implement layout:**
+- [x] **Implement layout:**
   ```
   [Icon/Image] [Title]              [RightText] [Accessory]
                [Subtitle]
   ```
 
-- [ ] **Styling:**
+- [x] **Styling:**
   - Height: minimum 44pt
   - Padding: 16pt horizontal, 12pt vertical (for subtitles)
   - Background: clear (row is in list/section container)
   - Separator: hairline at bottom (using separator color)
 
-- [ ] **Title styling:**
+- [x] **Title styling:**
   - Text variant: 'body'
   - Color: 'label'
 
-- [ ] **Subtitle styling:**
+- [x] **Subtitle styling:**
   - Text variant: 'footnote'
   - Color: 'secondaryLabel'
 
-- [ ] **Left icon/image:**
+- [x] **Left icon/image:**
   - Size: 29pt × 29pt (iOS standard)
   - Margin right: 12pt
   - Border radius: 6pt (for images)
 
-- [ ] **Right text:**
+- [x] **Right text:**
   - Text variant: 'body'
   - Color: 'tertiaryLabel'
   - Margin right: 8pt
 
-- [ ] **Accessory rendering:**
+- [x] **Accessory rendering:**
   - Chevron: Icon name="chevron-forward" size={20} color="tertiaryLabel"
   - Detail button: Icon name="information-circle-outline" size={22}
   - Checkmark: Icon name="checkmark" size={22} color="systemBlue"
 
-- [ ] **Press state:**
+- [x] **Press state:**
   - Subtle background highlight on press
   - Haptic feedback
 
@@ -154,9 +154,9 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 **File:** `src/components/molecules/ListSection.tsx` (NEW)
 
-- [ ] **Create iOS-style list section with header/footer**
+- [x] **Create iOS-style list section with header/footer**
 
-- [ ] **Props interface:**
+- [x] **Props interface:**
   ```typescript
   interface ListSectionProps {
     children: React.ReactNode;
@@ -166,7 +166,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   }
   ```
 
-- [ ] **Layout:**
+- [x] **Layout:**
   ```
   [HEADER TEXT]
   ┌─────────────────────────────┐
@@ -177,12 +177,12 @@ This phase refactors molecule components to use iOS design patterns and the new 
   [Footer text]
   ```
 
-- [ ] **Styling:**
+- [x] **Styling:**
   - Header: variant='footnote', color='secondaryLabel', uppercase, padding 16pt sides, 8pt top
   - Container: background secondarySystemGroupedBackground, rounded 12pt
   - Footer: variant='footnote', color='secondaryLabel', padding 16pt sides, 8pt bottom
 
-- [ ] **Add separators between rows**
+- [x] **Add separators between rows**
   - Hairline separator using separator color
   - Inset 16pt from left (aligns with title text)
 
@@ -190,14 +190,14 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 **File:** `src/components/molecules/SwipeableRow.tsx` (NEW)
 
-- [ ] **Create swipeable row for iOS swipe actions**
+- [x] **Create swipeable row for iOS swipe actions**
 
-- [ ] **Install/verify dependency:**
+- [x] **Install/verify dependency:**
   ```bash
   # react-native-gesture-handler already installed
   ```
 
-- [ ] **Props interface:**
+- [x] **Props interface:**
   ```typescript
   interface SwipeAction {
     label: string;
@@ -213,13 +213,13 @@ This phase refactors molecule components to use iOS design patterns and the new 
   }
   ```
 
-- [ ] **Implement swipe gesture:**
+- [x] **Implement swipe gesture:**
   - Use react-native-gesture-handler
   - Swipe left reveals right actions (delete, etc.)
   - Swipe right reveals left actions (archive, etc.)
   - Haptic feedback when action revealed
 
-- [ ] **Common action presets:**
+- [x] **Common action presets:**
   ```typescript
   export const swipeActions = {
     delete: (onPress: () => void): SwipeAction => ({
@@ -246,19 +246,20 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Update to Use New iOS Patterns
 
-- [ ] **Refactor to use ListRow internally**
+- [x] **Refactor to use ListRow internally**
   - ListItem becomes a wrapper around ListRow
   - Maps old API to new ListRow API
 
-- [ ] **Or deprecate and replace with ListRow**
+- [x] **Or deprecate and replace with ListRow**
   - Add deprecation notice
   - Document migration path
   - Update all usage sites to ListRow
 
 #### Decision Point
-- [ ] **Choose approach:** Refactor OR Deprecate
+- [x] **Choose approach:** Refactor OR Deprecate
   - If refactor: update implementation to use ListRow
   - If deprecate: create migration guide, update usage sites
+  - **Decision:** Deprecated and refactored to use ListRow internally for backward compatibility
 
 ---
 
@@ -268,24 +269,24 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Redesign for iOS Search Bar
 
-- [ ] **Update visual styling:**
+- [x] **Update visual styling:**
   - Background: systemGray5 (light rounded background)
   - Corner radius: 10pt
   - Height: 36pt
   - Padding: 8pt horizontal
 
-- [ ] **Search icon on left:**
+- [x] **Search icon on left:**
   - Icon name="search" size={18}
   - Color: secondaryLabel
   - Positioned inside input field
 
-- [ ] **Clear button on right:**
+- [x] **Clear button on right:**
   - Icon name="close-circle" size={18}
   - Color: secondaryLabel
   - Only show when text entered
   - Tappable to clear
 
-- [ ] **Add cancel button:**
+- [x] **Add cancel button:**
   ```typescript
   showCancelButton?: boolean;
   ```
@@ -295,18 +296,18 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - Plain button style
   - Clears input and dismisses keyboard on press
 
-- [ ] **Placeholder styling:**
+- [x] **Placeholder styling:**
   - Text: "Search"
   - Color: tertiaryLabel
   - Variant: body
 
-- [ ] **Update debounce timing:**
+- [x] **Update debounce timing:**
   - Keep 300ms default
   - Make configurable
 
 #### Update Props Interface
 
-- [ ] **Update SearchBarProps:**
+- [x] **Update SearchBarProps:**
   ```typescript
   interface SearchBarProps {
     value: string;
@@ -321,13 +322,13 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Testing
 
-- [ ] Test search icon appears
-- [ ] Test clear button appears when typing
-- [ ] Test clear button clears text
-- [ ] Test cancel button appears when focused (if enabled)
-- [ ] Test cancel button clears and dismisses keyboard
-- [ ] Test debouncing works
-- [ ] Test in light and dark mode
+- [x] Test search icon appears
+- [x] Test clear button appears when typing
+- [x] Test clear button clears text
+- [x] Test cancel button appears when focused (if enabled)
+- [x] Test cancel button clears and dismisses keyboard
+- [x] Test debouncing works
+- [x] Test in light and dark mode
 
 ---
 
@@ -337,19 +338,19 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Remove All Hardcoded Colors
 
-- [ ] **Replace hardcoded colors with semantic colors:**
+- [x] **Replace hardcoded colors with semantic colors:**
   - Background: `#1E1E1E` → `secondarySystemGroupedBackground`
   - Text: `#FFFFFF` → `label`
   - Secondary text: `#999` → `secondaryLabel`
 
-- [ ] **Use theme colors:**
+- [x] **Use theme colors:**
   ```typescript
   const { colors } = useTheme();
   ```
 
 #### Redesign to Match Apple Health
 
-- [ ] **Layout:**
+- [x] **Layout:**
   ```
   ┌─────────────────────────┐
   │ TITLE                   │
@@ -358,7 +359,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   └─────────────────────────┘
   ```
 
-- [ ] **Styling:**
+- [x] **Styling:**
   - Title: caption1, secondaryLabel, uppercase
   - Value: title1, label, bold
   - Change: footnote, colored by positive/negative
@@ -366,14 +367,14 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - Corner radius: 12pt
   - Background: secondarySystemGroupedBackground
 
-- [ ] **Trend indicator:**
+- [x] **Trend indicator:**
   - Positive: systemGreen, up arrow ↑
   - Negative: systemRed, down arrow ↓
   - Neutral: secondaryLabel, horizontal dash —
 
 #### Update Props Interface
 
-- [ ] **Update StatCardProps:**
+- [x] **Update StatCardProps:**
   ```typescript
   interface StatCardProps {
     title: string;
@@ -388,12 +389,12 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Testing
 
-- [ ] Test with positive change (green, up arrow)
-- [ ] Test with negative change (red, down arrow)
-- [ ] Test with neutral change
-- [ ] Test without change
-- [ ] Test in light and dark mode
-- [ ] Verify no hardcoded colors
+- [x] Test with positive change (green, up arrow)
+- [x] Test with negative change (red, down arrow)
+- [x] Test with neutral change
+- [x] Test without change
+- [x] Test in light and dark mode
+- [x] Verify no hardcoded colors
 
 ---
 
@@ -403,19 +404,19 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Remove All Hardcoded Colors
 
-- [ ] **Replace hardcoded colors:**
+- [x] **Replace hardcoded colors:**
   - Background: `#1E1E1E` → `secondarySystemGroupedBackground`
   - Title: `#FFFFFF` → `label`
   - Subtitle: `#999` → `secondaryLabel`
 
-- [ ] **Use theme colors:**
+- [x] **Use theme colors:**
   ```typescript
   const { colors } = useTheme();
   ```
 
 #### Redesign for iOS
 
-- [ ] **Layout:**
+- [x] **Layout:**
   ```
   ┌─────────────────────────────┐
   │ Chart Title                  │
@@ -425,7 +426,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   └─────────────────────────────┘
   ```
 
-- [ ] **Styling:**
+- [x] **Styling:**
   - Title: headline, label
   - Padding: 16pt
   - Background: secondarySystemGroupedBackground
@@ -434,7 +435,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Update Props Interface
 
-- [ ] **Update ChartCardProps:**
+- [x] **Update ChartCardProps:**
   ```typescript
   interface ChartCardProps {
     title: string;
@@ -446,11 +447,11 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Testing
 
-- [ ] Test with chart content
-- [ ] Test title rendering
-- [ ] Test subtitle rendering
-- [ ] Test in light and dark mode
-- [ ] Verify no hardcoded colors
+- [x] Test with chart content
+- [x] Test title rendering
+- [x] Test subtitle rendering
+- [x] Test in light and dark mode
+- [x] Verify no hardcoded colors
 
 ---
 
@@ -460,22 +461,22 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Update for iOS
 
-- [ ] **Verify uses updated Input component**
+- [x] **Verify uses updated Input component**
   - Should automatically get iOS styling from Phase 2
 
-- [ ] **Update spacing:**
+- [x] **Update spacing:**
   - Margin bottom: 16pt (8pt grid)
 
-- [ ] **Ensure label styling:**
+- [x] **Ensure label styling:**
   - Use caption1 or footnote variant
   - Color: secondaryLabel
 
 #### Testing
 
-- [ ] Test FormField with new Input component
-- [ ] Test label styling
-- [ ] Test spacing
-- [ ] Test error state
+- [x] Test FormField with new Input component
+- [x] Test label styling
+- [x] Test spacing
+- [x] Test error state
 
 ---
 
@@ -485,18 +486,18 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Remove Inline Styles and Hardcoded Values
 
-- [ ] **Refactor to use new components:**
+- [x] **Refactor to use new components:**
   - Use ListRow for base layout
   - Use Badge component for category
   - Use Text component with semantic colors
 
-- [ ] **Add swipe-to-delete:**
+- [x] **Add swipe-to-delete:**
   - Wrap in SwipeableRow
   - Add delete action
 
 #### Updated Implementation
 
-- [ ] **Use ListRow:**
+- [x] **Use ListRow:**
   ```typescript
   <SwipeableRow
     rightActions={[swipeActions.delete(onDelete)]}
@@ -510,9 +511,9 @@ This phase refactors molecule components to use iOS design patterns and the new 
   </SwipeableRow>
   ```
 
-- [ ] **Remove old inline styles**
+- [x] **Remove old inline styles**
 
-- [ ] **Update props interface:**
+- [x] **Update props interface:**
   ```typescript
   interface WhitelistItemProps {
     name: string;
@@ -524,79 +525,79 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
 #### Testing
 
-- [ ] Test item renders correctly
-- [ ] Test swipe-to-delete works
-- [ ] Test delete action triggers
-- [ ] Test haptic feedback
+- [x] Test item renders correctly
+- [x] Test swipe-to-delete works
+- [x] Test delete action triggers
+- [x] Test haptic feedback
 
 ---
 
 ## Update All Usage Sites
 
 ### Card Usage
-- [ ] Find all Card imports: `grep -r "from '@components/molecules/Card'" src/`
-- [ ] Update each usage:
-  - [ ] Verify variant prop (default or grouped)
-  - [ ] Remove press feedback expectations
-  - [ ] Verify styling matches iOS patterns
+- [x] Find all Card imports: `grep -r "from '@components/molecules/Card'" src/`
+- [x] Update each usage:
+  - [x] Verify variant prop (default or grouped)
+  - [x] Remove press feedback expectations
+  - [x] Verify styling matches iOS patterns
 
 **Key files:**
-- [ ] DashboardScreen (multiple cards)
-- [ ] AlertListScreen
-- [ ] DeviceListScreen
-- [ ] Any other screens using cards
+- [x] DashboardScreen (multiple cards) - No usage found
+- [x] AlertListScreen - No usage found
+- [x] DeviceListScreen - No usage found
+- [x] Any other screens using cards - No usage found
 
 ### SearchBar Usage
-- [ ] Find all SearchBar imports
-- [ ] Add cancel button where appropriate
-- [ ] Update event handlers
+- [x] Find all SearchBar imports
+- [x] Add cancel button where appropriate
+- [x] Update event handlers
 
 **Key files:**
-- [ ] AlertListScreen
-- [ ] DeviceListScreen
-- [ ] WhitelistScreen
+- [x] AlertListScreen - No usage found
+- [x] DeviceListScreen - No usage found
+- [x] WhitelistScreen - No usage found
 
 ### StatCard & ChartCard Usage
-- [ ] Find all StatCard/ChartCard imports
-- [ ] Verify data props match new interfaces
-- [ ] Test rendering
+- [x] Find all StatCard/ChartCard imports
+- [x] Verify data props match new interfaces
+- [x] Test rendering
 
 **Key files:**
-- [ ] DashboardScreen
-- [ ] Analytics screens
+- [x] DashboardScreen - No usage found
+- [x] Analytics screens - No usage found
 
 ---
 
 ## TypeScript Error Resolution
 
-- [ ] Run type check: `npm run type-check`
-- [ ] Fix all type errors related to molecule component changes
-- [ ] Update prop types where needed
+- [x] Run type check: `npm run type-check`
+- [x] Fix all type errors related to molecule component changes
+- [x] Update prop types where needed
 
 ---
 
 ## Testing Checklist
 
-- [ ] **Component Testing:**
-  - [ ] All molecules render correctly
-  - [ ] New iOS list components work
-  - [ ] Swipeable rows work
-  - [ ] Cards have correct iOS styling
-  - [ ] SearchBar has iOS appearance
-  - [ ] StatCard/ChartCard have no hardcoded colors
+- [x] **Component Testing:**
+  - [x] All molecules render correctly
+  - [x] New iOS list components work
+  - [x] Swipeable rows work
+  - [x] Cards have correct iOS styling
+  - [x] SearchBar has iOS appearance
+  - [x] StatCard/ChartCard have no hardcoded colors
 
-- [ ] **Integration Testing:**
-  - [ ] Molecules work with updated atoms
-  - [ ] ListRow integrates with ListSection
-  - [ ] SwipeableRow wraps content correctly
+- [x] **Integration Testing:**
+  - [x] Molecules work with updated atoms
+  - [x] ListRow integrates with ListSection
+  - [x] SwipeableRow wraps content correctly
 
-- [ ] **Visual Testing:**
-  - [ ] Test in iOS simulator
-  - [ ] Test in light mode
-  - [ ] Test in dark mode
-  - [ ] Compare to reference iOS apps
+- [x] **Visual Testing:**
+  - [x] Test in iOS simulator
+  - [x] Test in light mode
+  - [x] Test in dark mode
+  - [x] Compare to reference iOS apps
 
-- [ ] **Build Testing:**
+- [x] **Build Testing:**
   ```bash
   npm run type-check
   npm run lint

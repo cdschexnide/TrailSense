@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useAlerts } from '@hooks/api/useAlerts';
 import { AlertCard } from '@components/organisms';
 import { ScreenLayout, EmptyState, LoadingState, ErrorState } from '@components/templates';
@@ -7,8 +8,11 @@ import { SearchBar } from '@components/molecules/SearchBar';
 import { Button } from '@components/atoms/Button';
 import { Icon } from '@components/atoms/Icon';
 import { Alert } from '@types';
+import { useTheme } from '@hooks/useTheme';
 
 export const AlertListScreen = ({ navigation }: any) => {
+  const { theme } = useTheme();
+  const colors = theme.colors;
   const {
     data: alerts,
     isLoading,
@@ -38,6 +42,9 @@ export const AlertListScreen = ({ navigation }: any) => {
   };
 
   const handleRefresh = async () => {
+    // Trigger haptic feedback when pull-to-refresh is triggered
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
@@ -80,7 +87,12 @@ export const AlertListScreen = ({ navigation }: any) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.systemGray}
+            titleColor={colors.secondaryLabel}
+          />
         }
         ListEmptyComponent={
           <EmptyState
@@ -89,6 +101,12 @@ export const AlertListScreen = ({ navigation }: any) => {
             message="You have no security alerts"
           />
         }
+        // Performance optimizations
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={10}
+        updateCellsBatchingPeriod={50}
+        initialNumToRender={10}
+        windowSize={10}
       />
     </ScreenLayout>
   );

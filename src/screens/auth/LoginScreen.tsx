@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Input, Text } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
@@ -82,11 +83,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     const isPasswordValid = validatePassword(password);
 
     if (!isEmailValid || !isPasswordValid) {
+      // Trigger error haptic for validation failure
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 
     try {
       await dispatch(login({ email, password })).unwrap();
+
+      // Trigger success haptic for successful login
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       // Check if biometric is available and prompt user to enable
       const isSupported = await AuthService.checkBiometricSupport();
@@ -110,6 +116,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         );
       }
     } catch (error: any) {
+      // Trigger error haptic for login failure
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+
       Alert.alert(
         'Login Failed',
         error.message || 'Invalid email or password. Please try again.'
@@ -136,10 +145,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text variant="h1" style={styles.title}>
+            <Text variant="largeTitle" weight="bold" style={styles.title}>
               Welcome Back
             </Text>
-            <Text variant="body" style={styles.subtitle}>
+            <Text variant="body" color="secondaryLabel" style={styles.subtitle}>
               Sign in to continue to TrailSense
             </Text>
           </View>
@@ -155,8 +164,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               onBlur={() => validateEmail(email)}
               placeholder="Enter your email"
               keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
               error={emailError}
               disabled={isLoading}
             />
@@ -171,35 +180,42 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               onBlur={() => validatePassword(password)}
               placeholder="Enter your password"
               secureTextEntry
-              autoComplete="password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={handleLogin}
               error={passwordError}
               disabled={isLoading}
             />
 
             <Button
-              title="Forgot Password?"
-              variant="ghost"
+              buttonStyle="plain"
               onPress={handleForgotPassword}
               style={styles.forgotButton}
-            />
+            >
+              Forgot Password?
+            </Button>
 
             <Button
-              title="Sign In"
-              variant="primary"
+              buttonStyle="filled"
+              role="default"
+              prominent
               onPress={handleLogin}
               loading={isLoading}
               disabled={isLoading}
               style={styles.loginButton}
-            />
+            >
+              Sign In
+            </Button>
 
             <View style={styles.registerContainer}>
               <Text variant="body">Don't have an account? </Text>
               <Button
-                title="Sign Up"
-                variant="ghost"
+                buttonStyle="plain"
                 onPress={handleRegister}
                 disabled={isLoading}
-              />
+              >
+                Sign Up
+              </Button>
             </View>
           </View>
         </ScrollView>
@@ -225,7 +241,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    opacity: 0.7,
+    // No opacity needed - using secondaryLabel color
   },
   form: {
     width: '100%',

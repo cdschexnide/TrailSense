@@ -10,6 +10,7 @@ import { useTheme } from '@hooks/useTheme';
 
 interface CardProps {
   children: React.ReactNode;
+  variant?: 'default' | 'grouped';
   onPress?: () => void;
   loading?: boolean;
   style?: ViewStyle;
@@ -18,6 +19,7 @@ interface CardProps {
 
 export const Card: React.FC<CardProps> = ({
   children,
+  variant = 'default',
   onPress,
   loading = false,
   style,
@@ -27,16 +29,19 @@ export const Card: React.FC<CardProps> = ({
   const { colors, shadows } = theme;
 
   const cardStyle: ViewStyle = {
-    backgroundColor: colors.surface,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.base,
-    ...shadows.base,
+    backgroundColor:
+      variant === 'grouped'
+        ? colors.secondarySystemGroupedBackground
+        : colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    ...(variant === 'default' ? shadows.sm : {}),
   };
 
   if (loading) {
     return (
       <View style={[cardStyle, styles.loadingContainer, style]} testID={testID}>
-        <ActivityIndicator color={colors.primary[500]} />
+        <ActivityIndicator color={colors.systemBlue} />
       </View>
     );
   }
@@ -45,7 +50,7 @@ export const Card: React.FC<CardProps> = ({
     return (
       <Pressable
         onPress={onPress}
-        style={({ pressed }) => [cardStyle, pressed && styles.pressed, style]}
+        style={[cardStyle, style]}
         testID={testID}
         accessibilityRole="button"
       >
@@ -66,8 +71,5 @@ const styles = StyleSheet.create({
     minHeight: 100,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  pressed: {
-    opacity: 0.8,
   },
 });

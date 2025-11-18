@@ -1,8 +1,11 @@
 import React from 'react';
-import { View, Pressable, StyleSheet, ViewStyle } from 'react-native';
-import { Text } from '@components/atoms';
-import { useTheme } from '@hooks/useTheme';
+import { ViewStyle } from 'react-native';
+import { ListRow } from '@components/molecules/ListRow';
 
+/**
+ * @deprecated Use ListRow component instead for better iOS design patterns
+ * This component is maintained for backward compatibility
+ */
 interface ListItemProps {
   title: string;
   subtitle?: string;
@@ -14,90 +17,27 @@ interface ListItemProps {
   testID?: string;
 }
 
+/**
+ * @deprecated Use ListRow component instead for better iOS design patterns
+ * This component now wraps ListRow internally for backward compatibility
+ */
 export const ListItem: React.FC<ListItemProps> = ({
   title,
   subtitle,
   leftAccessory,
-  rightAccessory,
   onPress,
   disabled = false,
   style,
-  testID,
 }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
-
-  const content = (
-    <View
-      style={[
-        styles.container,
-        {
-          padding: theme.spacing.base,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.divider,
-        },
-        style,
-      ]}
-    >
-      {leftAccessory && (
-        <View style={styles.leftAccessory}>{leftAccessory}</View>
-      )}
-
-      <View style={styles.content}>
-        <Text variant="body" color={disabled ? 'disabled' : 'primary'}>
-          {title}
-        </Text>
-        {subtitle && (
-          <Text
-            variant="bodySmall"
-            color={disabled ? 'disabled' : 'secondary'}
-            style={styles.subtitle}
-          >
-            {subtitle}
-          </Text>
-        )}
-      </View>
-
-      {rightAccessory && (
-        <View style={styles.rightAccessory}>{rightAccessory}</View>
-      )}
-    </View>
+  return (
+    <ListRow
+      title={title}
+      subtitle={subtitle}
+      leftIcon={leftAccessory}
+      accessoryType="none"
+      onPress={onPress}
+      disabled={disabled}
+      style={style}
+    />
   );
-
-  if (onPress && !disabled) {
-    return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [pressed && styles.pressed]}
-        testID={testID}
-        accessibilityRole="button"
-      >
-        {content}
-      </Pressable>
-    );
-  }
-
-  return <View testID={testID}>{content}</View>;
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  leftAccessory: {
-    marginRight: 12,
-  },
-  content: {
-    flex: 1,
-  },
-  subtitle: {
-    marginTop: 2,
-  },
-  rightAccessory: {
-    marginLeft: 12,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-});

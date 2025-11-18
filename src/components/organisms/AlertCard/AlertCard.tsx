@@ -1,108 +1,134 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Alert } from '@types';
-import { Card, Badge, Button } from '@components/atoms';
+import { Card, Badge, Text, Icon } from '@components/atoms';
+import { SwipeableRow, swipeActions } from '@components/molecules';
 import { formatTimestamp } from '@utils/dateUtils';
+import { useTheme } from '@hooks/useTheme';
 
 interface AlertCardProps {
   alert: Alert;
-  onPress?: () => void;
+  onPress?: (alertId: string) => void;
+  onDismiss?: (alertId: string) => void;
+  onWhitelist?: (macAddress: string) => void;
+  style?: ViewStyle;
 }
 
-export const AlertCard: React.FC<AlertCardProps> = ({ alert, onPress }) => {
-  const getThreatVariant = (): any => {
+export const AlertCard: React.FC<AlertCardProps> = ({
+  alert,
+  onPress,
+  onDismiss,
+  onWhitelist,
+  style,
+}) => {
+  const { theme } = useTheme();
+
+  const getThreatVariant = () => {
     switch (alert.threatLevel) {
       case 'low':
-        return 'threat-low';
+        return 'low';
       case 'medium':
-        return 'threat-medium';
+        return 'medium';
       case 'high':
-        return 'threat-high';
+        return 'high';
       case 'critical':
-        return 'threat-critical';
-      default:
-        return 'neutral';
-    }
-  };
-
-  const getDetectionVariant = (): any => {
-    switch (alert.detectionType) {
-      case 'cellular':
-        return 'detection-cellular';
-      case 'wifi':
-        return 'detection-wifi';
-      case 'bluetooth':
-        return 'detection-bluetooth';
+        return 'critical';
       default:
         return 'info';
     }
   };
 
-  const handleDismiss = async (e: any) => {
-    e?.stopPropagation?.();
-    console.log('Dismissing alert:', alert.id);
+  const getDetectionIcon = () => {
+    switch (alert.detectionType) {
+      case 'cellular':
+        return 'cellular';
+      case 'wifi':
+        return 'wifi';
+      case 'bluetooth':
+        return 'bluetooth';
+      default:
+        return 'radio';
+    }
   };
 
-  const handleWhitelist = async (e: any) => {
-    e?.stopPropagation?.();
-    console.log('Whitelisting alert:', alert.id);
+  const getDetectionIconColor = () => {
+    switch (alert.detectionType) {
+      case 'cellular':
+        return theme.colors.systemPurple;
+      case 'wifi':
+        return theme.colors.systemBlue;
+      case 'bluetooth':
+        return theme.colors.systemTeal;
+      default:
+        return theme.colors.systemBlue;
+    }
+  };
+
+  const getDetectionLabel = () => {
+    return `${alert.detectionType.charAt(0).toUpperCase()}${alert.detectionType.slice(1)} Detection`;
   };
 
   return (
-    <Card onPress={onPress} style={styles.card}>
-      <View style={styles.header}>
-        <Badge
-          label={alert.threatLevel.toUpperCase()}
-          variant={getThreatVariant()}
-        />
-        <Text style={styles.timestamp}>
-          {formatTimestamp(alert.timestamp)}
-        </Text>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.titleRow}>
-          <Text style={styles.title}>
-            {alert.detectionType.charAt(0).toUpperCase() + alert.detectionType.slice(1)} Detection
+    <SwipeableRow
+      rightActions={[
+        swipeActions.delete(() => onDismiss?.(alert.id)),
+        {
+          label: 'Whitelist',
+          backgroundColor: theme.colors.systemOrange,
+          onPress: () => onWhitelist?.(alert.macAddress),
+          icon: <Icon name="shield-checkmark" size={20} color="white" />,
+        },
+      ]}
+    >
+      <Card onPress={() => onPress?.(alert.id)} variant="grouped" style={StyleSheet.flatten([styles.card, style])}>
+        {/* Header row: Badge and Timestamp */}
+        <View style={styles.header}>
+          <Badge variant={getThreatVariant() as any} size="sm">
+            {alert.threatLevel.toUpperCase()}
+          </Badge>
+          <Text variant="caption1" color="secondaryLabel">
+            {formatTimestamp(alert.timestamp)}
           </Text>
-          <Badge
-            label={alert.detectionType.toUpperCase()}
-            variant={getDetectionVariant()}
-            size="sm"
+        </View>
+
+        {/* Detection type with icon */}
+        <View style={styles.detectionRow}>
+          <Icon
+            name={getDetectionIcon()}
+            size={24}
+            color={getDetectionIconColor()}
+          />
+          <View style={styles.detectionContent}>
+            <Text variant="headline" color="label">
+              {getDetectionLabel()}
+            </Text>
+
+            {/* Metadata rows */}
+            <View style={styles.metadata}>
+              <Text variant="subheadline" color="secondaryLabel">
+                Device: {alert.deviceId}
+              </Text>
+              <Text variant="subheadline" color="secondaryLabel" style={styles.metadataRow}>
+                Signal: {alert.rssi} dBm
+              </Text>
+              {alert.macAddress && (
+                <Text variant="subheadline" color="secondaryLabel" style={StyleSheet.flatten([styles.metadataRow, styles.mac])}>
+                  {alert.macAddress}
+                </Text>
+              )}
+            </View>
+          </View>
+
+          {/* Chevron indicator */}
+          <Icon
+            name="chevron-forward"
+            size={20}
+            color={theme.colors.tertiaryLabel}
+            style={styles.chevron}
           />
         </View>
-        <Text style={styles.details}>
-          Device: {alert.deviceId}
-        </Text>
-        <Text style={styles.details}>
-          Signal: {alert.rssi} dBm
-        </Text>
-        {alert.macAddress && (
-          <Text style={styles.mac}>{alert.macAddress}</Text>
-        )}
-      </View>
-
-      <View style={styles.actions}>
-        <Button
-          title="Dismiss"
-          variant="ghost"
-          size="sm"
-          onPress={handleDismiss}
-        />
-        <Button
-          title="Whitelist"
-          variant="outline"
-          size="sm"
-          onPress={handleWhitelist}
-        />
-        <Button
-          title="View"
-          variant="primary"
-          size="sm"
-          onPress={onPress}
-        />
-      </View>
-    </Card>
+      </Card>
+    </SwipeableRow>
   );
 };
 
@@ -110,47 +136,32 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginVertical: 8,
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  timestamp: {
-    fontSize: 12,
-    color: '#999',
-  },
-  content: {
-    marginBottom: 16,
-  },
-  titleRow: {
+  detectionRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    alignItems: 'flex-start',
+    gap: 12,
   },
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+  detectionContent: {
     flex: 1,
   },
-  details: {
-    fontSize: 14,
-    color: '#CCCCCC',
-    marginBottom: 6,
+  metadata: {
+    marginTop: 8,
+  },
+  metadataRow: {
+    marginTop: 4,
   },
   mac: {
-    fontSize: 12,
     fontFamily: 'monospace',
-    color: '#888',
-    marginTop: 8,
   },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginTop: 8,
+  chevron: {
+    marginTop: 4,
   },
 });

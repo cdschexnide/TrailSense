@@ -6,13 +6,24 @@ import {
   ViewStyle,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '@components/organisms';
+import { Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 
 interface ScreenLayoutProps {
   children: React.ReactNode;
+  header?: {
+    title: string;
+    subtitle?: string;
+    showBack?: boolean;
+    onBackPress?: () => void;
+    rightActions?: React.ReactNode;
+    largeTitle?: boolean;
+  };
+  // Legacy props for backward compatibility
   title?: string;
   subtitle?: string;
   showHeader?: boolean;
@@ -28,6 +39,8 @@ interface ScreenLayoutProps {
 
 export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   children,
+  header,
+  // Legacy props
   title,
   subtitle,
   showHeader = false,
@@ -42,18 +55,37 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
 }) => {
   const { theme } = useTheme();
   const { colors } = theme;
+  const scrollY = new Animated.Value(0);
+
+  // Use new header prop or fall back to legacy props
+  const headerConfig = header || (showHeader && title ? {
+    title,
+    subtitle,
+    showBack,
+    onBackPress,
+    rightActions: headerRightAction,
+  } : undefined);
+
+  const hasLargeTitle = headerConfig?.largeTitle;
 
   const content = (
     <View
       style={[
         styles.content,
         {
-          backgroundColor: colors.background,
+          backgroundColor: colors.systemBackground,
         },
         !scrollable && { paddingHorizontal: 0 },
         contentStyle,
       ]}
     >
+      {hasLargeTitle && headerConfig && (
+        <View style={styles.largeTitleContainer}>
+          <Text variant="largeTitle" weight="bold" style={styles.largeTitle}>
+            {headerConfig.title}
+          </Text>
+        </View>
+      )}
       {children}
     </View>
   );
@@ -63,6 +95,11 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       style={styles.scrollView}
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={false}
+      onScroll={hasLargeTitle ? Animated.event(
+        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        { useNativeDriver: false }
+      ) : undefined}
+      scrollEventThrottle={hasLargeTitle ? 16 : undefined}
     >
       {content}
     </ScrollView>
@@ -74,7 +111,7 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={showHeader ? 100 : 0}
+      keyboardVerticalOffset={headerConfig ? 100 : 0}
     >
       {wrappedContent}
     </KeyboardAvoidingView>
@@ -84,17 +121,17 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }, style]}
+      style={[styles.container, { backgroundColor: colors.systemBackground }, style]}
       edges={['left', 'right', 'bottom']}
       testID={testID}
     >
-      {showHeader && title && (
+      {headerConfig && (
         <Header
-          title={title}
-          subtitle={subtitle}
-          showBack={showBack}
-          onBackPress={onBackPress}
-          rightAction={headerRightAction}
+          title={hasLargeTitle ? '' : headerConfig.title}
+          subtitle={headerConfig.subtitle}
+          showBack={headerConfig.showBack}
+          onBackPress={headerConfig.onBackPress}
+          rightActions={headerConfig.rightActions}
         />
       )}
       {keyboardAvoidingContent}
@@ -117,5 +154,13 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  largeTitleContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  largeTitle: {
+    // Large title styling handled by Text component
   },
 });

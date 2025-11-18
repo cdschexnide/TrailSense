@@ -2,104 +2,203 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '../Text/Text';
 import { useTheme } from '@hooks/useTheme';
+import { BorderRadius } from '@constants/spacing';
 
-type BadgeVariant =
-  | 'threat-low'
-  | 'threat-medium'
-  | 'threat-high'
-  | 'threat-critical'
-  | 'detection-cellular'
-  | 'detection-wifi'
-  | 'detection-bluetooth'
-  | 'detection-multi'
+// ======================
+// Type Definitions
+// ======================
+
+/**
+ * Badge Variant System
+ * Organized by purpose: threat levels, detection types, semantic, and status
+ */
+export type BadgeVariant =
+  // Threat levels
+  | 'critical'
+  | 'high'
+  | 'medium'
+  | 'low'
+  // Detection types
+  | 'cellular'
+  | 'wifi'
+  | 'bluetooth'
+  | 'multiband'
+  // Semantic
+  | 'info'
   | 'success'
   | 'warning'
   | 'error'
-  | 'info'
-  | 'neutral';
+  // Status
+  | 'online'
+  | 'offline';
 
-type BadgeSize = 'sm' | 'base' | 'lg';
+export type BadgeSize = 'sm' | 'base' | 'lg';
 
-interface BadgeProps {
-  label: string;
-  variant?: BadgeVariant;
+export interface BadgeProps {
+  children: React.ReactNode;
+  variant: BadgeVariant;
   size?: BadgeSize;
   style?: ViewStyle;
   testID?: string;
 }
 
+// ======================
+// Badge Component
+// ======================
+
 export const Badge: React.FC<BadgeProps> = ({
-  label,
-  variant = 'neutral',
+  children,
+  variant,
   size = 'base',
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const { theme, colorScheme } = useTheme();
+  const colors = theme.colors;
+  const isDark = colorScheme === 'dark';
 
+  // ======================
+  // Style Functions
+  // ======================
+
+  /**
+   * Get background color with 15% opacity for subtle appearance
+   */
   const getBackgroundColor = (): string => {
+    const opacity15 = '26'; // Hex for 15% opacity
+
     switch (variant) {
-      case 'threat-low':
-        return colors.threat.low;
-      case 'threat-medium':
-        return colors.threat.medium;
-      case 'threat-high':
-        return colors.threat.high;
-      case 'threat-critical':
-        return colors.threat.critical;
-      case 'detection-cellular':
-        return colors.detection.cellular;
-      case 'detection-wifi':
-        return colors.detection.wifi;
-      case 'detection-bluetooth':
-        return colors.detection.bluetooth;
-      case 'detection-multi':
-        return colors.detection.multi;
-      case 'success':
-        return colors.success;
-      case 'warning':
-        return colors.warning;
-      case 'error':
-        return colors.error;
+      // Threat levels
+      case 'critical':
+        return `${colors.systemRed}${opacity15}`;
+      case 'high':
+        return `${colors.systemOrange}${opacity15}`;
+      case 'medium':
+        // Yellow needs 20% opacity for better visibility
+        return isDark
+          ? `${colors.systemYellow}33` // 20% opacity
+          : `${colors.systemYellow}33`;
+      case 'low':
+        return `${colors.systemGreen}${opacity15}`;
+
+      // Detection types
+      case 'cellular':
+        return `${colors.systemPurple}${opacity15}`;
+      case 'wifi':
+        return `${colors.systemBlue}${opacity15}`;
+      case 'bluetooth':
+        return `${colors.systemTeal}${opacity15}`;
+      case 'multiband':
+        return `${colors.systemIndigo}${opacity15}`;
+
+      // Semantic
       case 'info':
-        return colors.info;
-      case 'neutral':
+        return `${colors.systemBlue}${opacity15}`;
+      case 'success':
+        return `${colors.systemGreen}${opacity15}`;
+      case 'warning':
+        return `${colors.systemOrange}${opacity15}`;
+      case 'error':
+        return `${colors.systemRed}${opacity15}`;
+
+      // Status
+      case 'online':
+        return `${colors.systemGreen}${opacity15}`;
+      case 'offline':
+        return `${colors.systemGray}${opacity15}`;
+
       default:
-        return colors.surfaceVariant;
+        return `${colors.systemGray}${opacity15}`;
     }
   };
 
+  /**
+   * Get text color matching the background base color
+   */
+  const getTextColor = (): string => {
+    switch (variant) {
+      // Threat levels
+      case 'critical':
+        return colors.systemRed;
+      case 'high':
+        return colors.systemOrange;
+      case 'medium':
+        // Dark yellow for better contrast
+        return isDark ? colors.systemYellow : '#CC9900';
+      case 'low':
+        return colors.systemGreen;
+
+      // Detection types
+      case 'cellular':
+        return colors.systemPurple;
+      case 'wifi':
+        return colors.systemBlue;
+      case 'bluetooth':
+        return colors.systemTeal;
+      case 'multiband':
+        return colors.systemIndigo;
+
+      // Semantic
+      case 'info':
+        return colors.systemBlue;
+      case 'success':
+        return colors.systemGreen;
+      case 'warning':
+        return colors.systemOrange;
+      case 'error':
+        return colors.systemRed;
+
+      // Status
+      case 'online':
+        return colors.systemGreen;
+      case 'offline':
+        return colors.systemGray;
+
+      default:
+        return colors.label;
+    }
+  };
+
+  /**
+   * Get text variant based on size
+   */
+  const getTextVariant = (): 'caption2' | 'caption1' | 'footnote' => {
+    switch (size) {
+      case 'sm':
+        return 'caption2';
+      case 'base':
+        return 'caption1';
+      case 'lg':
+        return 'footnote';
+    }
+  };
+
+  /**
+   * Get padding based on size
+   */
   const getSizeStyle = (): ViewStyle => {
     switch (size) {
       case 'sm':
         return {
-          paddingHorizontal: theme.spacing.xs + 2,
-          paddingVertical: theme.spacing.xs / 2,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
         };
       case 'base':
         return {
-          paddingHorizontal: theme.spacing.sm,
-          paddingVertical: theme.spacing.xs,
+          paddingHorizontal: 10,
+          paddingVertical: 6,
         };
       case 'lg':
         return {
-          paddingHorizontal: theme.spacing.sm + 4,
-          paddingVertical: theme.spacing.xs + 2,
+          paddingHorizontal: 12,
+          paddingVertical: 8,
         };
     }
   };
 
-  const getTextVariant = (): 'caption' | 'bodySmall' | 'body' => {
-    switch (size) {
-      case 'sm':
-        return 'caption';
-      case 'base':
-        return 'bodySmall';
-      case 'lg':
-        return 'body';
-    }
-  };
+  // ======================
+  // Render
+  // ======================
 
   return (
     <View
@@ -107,24 +206,33 @@ export const Badge: React.FC<BadgeProps> = ({
         styles.container,
         {
           backgroundColor: getBackgroundColor(),
-          borderRadius: theme.borderRadius.sm,
+          borderRadius: BorderRadius.badge, // 6pt
         },
         getSizeStyle(),
         style,
       ]}
       testID={testID}
     >
-      <Text variant={getTextVariant()} color="inverse">
-        {label}
+      <Text
+        variant={getTextVariant()}
+        style={{ color: getTextColor() }}
+        numberOfLines={1}
+      >
+        {children}
       </Text>
     </View>
   );
 };
+
+// ======================
+// Styles
+// ======================
 
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'flex-start',
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
   },
 });

@@ -15,7 +15,10 @@
       "Bash(npm test:*)",
       "Bash(npm run lint:fix:*)",
       "Bash(npx expo prebuild:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: update Alert screens to iOS patterns\n\nUpdated AlertListScreen, AlertDetailScreen, and AlertFilterScreen to use:\n- New ScreenLayout header API with largeTitle and rightActions\n- ListSection and ListRow components for iOS inset grouped list style\n- Updated Button and SearchBar components with new API\n- Removed hardcoded styles in favor of theme-based styling\n- Added proper pull-to-refresh and empty states\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

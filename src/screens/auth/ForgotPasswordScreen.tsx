@@ -88,10 +88,10 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text variant="h1" style={styles.title}>
+            <Text variant="largeTitle" weight="bold" style={styles.title}>
               Forgot Password
             </Text>
-            <Text variant="body" style={styles.subtitle}>
+            <Text variant="body" color="secondaryLabel" align="center" style={styles.subtitle}>
               Enter your email address and we'll send you instructions to reset
               your password
             </Text>
@@ -109,43 +109,50 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                 onBlur={() => validateEmail(email)}
                 placeholder="Enter your email"
                 keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
+                textContentType="emailAddress"
+                returnKeyType="send"
+                onSubmitEditing={handleResetPassword}
                 error={emailError}
                 disabled={isLoading}
               />
 
               <Button
-                title="Send Reset Link"
-                variant="primary"
+                buttonStyle="filled"
+                prominent
                 onPress={handleResetPassword}
                 loading={isLoading}
                 disabled={isLoading}
                 style={styles.resetButton}
-              />
+              >
+                Send Reset Link
+              </Button>
 
               <Button
-                title="Back to Sign In"
-                variant="ghost"
+                buttonStyle="plain"
+                role="cancel"
                 onPress={handleBackToLogin}
                 disabled={isLoading}
                 style={styles.backButton}
-              />
+              >
+                Back to Sign In
+              </Button>
             </View>
           ) : (
             <View style={styles.successContainer}>
-              <Text variant="h2" style={styles.successTitle}>
+              <Text variant="title1" weight="bold" align="center" style={styles.successTitle}>
                 Check Your Email
               </Text>
-              <Text variant="body" style={styles.successText}>
+              <Text variant="body" color="secondaryLabel" align="center" style={styles.successText}>
                 We've sent password reset instructions to {email}
               </Text>
               <Button
-                title="Back to Sign In"
-                variant="primary"
+                buttonStyle="filled"
+                prominent
                 onPress={handleBackToLogin}
                 style={styles.backButton}
-              />
+              >
+                Back to Sign In
+              </Button>
             </View>
           )}
         </ScrollView>
@@ -171,8 +178,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    opacity: 0.7,
-    textAlign: 'center',
     paddingHorizontal: 16,
   },
   form: {
@@ -192,8 +197,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   successText: {
-    textAlign: 'center',
     marginBottom: 32,
-    opacity: 0.7,
   },
 });
