@@ -84,7 +84,7 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
 export const createSwipeActions = (colors: any) => ({
   delete: (onPress: () => void): SwipeAction => ({
     label: 'Delete',
-    backgroundColor: `${colors.systemRed}20`, // 20 = ~12% opacity
+    backgroundColor: 'rgba(255, 59, 48, 0.15)', // Light red tint
     borderColor: colors.systemRed,
     onPress,
     icon: <Icon name="trash-outline" size={20} color={colors.systemRed} />,
@@ -92,7 +92,7 @@ export const createSwipeActions = (colors: any) => ({
 
   archive: (onPress: () => void): SwipeAction => ({
     label: 'Archive',
-    backgroundColor: `${colors.systemOrange}20`, // 20 = ~12% opacity
+    backgroundColor: 'rgba(255, 149, 0, 0.15)', // Light orange tint
     borderColor: colors.systemOrange,
     onPress,
     icon: <Icon name="archive-outline" size={20} color={colors.systemOrange} />,
@@ -100,7 +100,7 @@ export const createSwipeActions = (colors: any) => ({
 
   edit: (onPress: () => void): SwipeAction => ({
     label: 'Edit',
-    backgroundColor: `${colors.systemBlue}20`, // 20 = ~12% opacity
+    backgroundColor: 'rgba(0, 122, 255, 0.15)', // Light blue tint
     borderColor: colors.systemBlue,
     onPress,
     icon: <Icon name="create-outline" size={20} color={colors.systemBlue} />,
@@ -108,7 +108,7 @@ export const createSwipeActions = (colors: any) => ({
 
   share: (onPress: () => void): SwipeAction => ({
     label: 'Share',
-    backgroundColor: `${colors.systemPurple}20`, // 20 = ~12% opacity
+    backgroundColor: 'rgba(175, 82, 222, 0.15)', // Light purple tint
     borderColor: colors.systemPurple,
     onPress,
     icon: <Icon name="share-outline" size={20} color={colors.systemPurple} />,
@@ -136,10 +136,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 90,
-    height: '100%',
+    alignSelf: 'center',
     borderWidth: 2,
     borderRadius: 12,
     marginHorizontal: 4,
+    paddingVertical: 12,
   },
   iconContainer: {
     marginBottom: 4,
