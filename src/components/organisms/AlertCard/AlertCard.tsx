@@ -206,6 +206,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginTop: 12,
+    justifyContent: 'flex-end',
   },
   actionButton: {
     width: 90,
