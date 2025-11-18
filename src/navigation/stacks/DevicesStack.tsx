@@ -4,6 +4,7 @@ import { DevicesStackParamList } from '@navigation/types';
 import {
   DeviceListScreen,
   DeviceDetailScreen,
+  DeviceHistoryScreen,
   AddDeviceScreen,
 } from '@screens/devices';
 
@@ -25,6 +26,11 @@ export const DevicesStack = () => {
         name="DeviceDetail"
         component={DeviceDetailScreen}
         options={{ title: 'Device Detail' }}
+      />
+      <Stack.Screen
+        name="DeviceHistory"
+        component={DeviceHistoryScreen}
+        options={{ title: 'Device History' }}
       />
       <Stack.Screen
         name="AddDevice"

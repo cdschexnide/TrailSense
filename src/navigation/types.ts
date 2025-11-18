@@ -33,6 +33,8 @@ export type RadarStackParamList = {
 export type DevicesStackParamList = {
   DeviceList: undefined;
   DeviceDetail: { deviceId: string };
+  DeviceHistory: { id: string };
+  DeviceSettings: { id: string };
   AddDevice: undefined;
 };
 
