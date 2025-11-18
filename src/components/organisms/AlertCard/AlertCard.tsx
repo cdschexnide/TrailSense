@@ -120,6 +120,43 @@ export const AlertCard: React.FC<AlertCardProps> = ({
           </View>
         </View>
 
+        {/* Action buttons column on right */}
+        <View style={styles.actionsColumn}>
+          <Pressable
+            onPress={handleWhitelist}
+            style={({ pressed }) => [
+              styles.actionButton,
+              {
+                backgroundColor: 'rgba(255, 149, 0, 0.15)',
+                borderColor: theme.colors.systemOrange,
+              },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />
+            <Text variant="caption2" style={{ color: theme.colors.systemOrange, fontWeight: '600' }}>
+              Whitelist
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleDelete}
+            style={({ pressed }) => [
+              styles.actionButton,
+              {
+                backgroundColor: 'rgba(255, 59, 48, 0.15)',
+                borderColor: theme.colors.systemRed,
+              },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Icon name="trash-outline" size={20} color={theme.colors.systemRed} />
+            <Text variant="caption2" style={{ color: theme.colors.systemRed, fontWeight: '600' }}>
+              Delete
+            </Text>
+          </Pressable>
+        </View>
+
         {/* Chevron indicator */}
         <Icon
           name="chevron-forward"
@@ -127,43 +164,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
           color={theme.colors.tertiaryLabel}
           style={styles.chevron}
         />
-      </View>
-
-      {/* Action buttons row at bottom */}
-      <View style={styles.actionsRow}>
-        <Pressable
-          onPress={handleWhitelist}
-          style={({ pressed }) => [
-            styles.actionButton,
-            {
-              backgroundColor: 'rgba(255, 149, 0, 0.15)',
-              borderColor: theme.colors.systemOrange,
-            },
-            pressed && { opacity: 0.7 },
-          ]}
-        >
-          <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />
-          <Text variant="caption2" style={{ color: theme.colors.systemOrange, fontWeight: '600' }}>
-            Whitelist
-          </Text>
-        </Pressable>
-
-        <Pressable
-          onPress={handleDelete}
-          style={({ pressed }) => [
-            styles.actionButton,
-            {
-              backgroundColor: 'rgba(255, 59, 48, 0.15)',
-              borderColor: theme.colors.systemRed,
-            },
-            pressed && { opacity: 0.7 },
-          ]}
-        >
-          <Icon name="trash-outline" size={20} color={theme.colors.systemRed} />
-          <Text variant="caption2" style={{ color: theme.colors.systemRed, fontWeight: '600' }}>
-            Delete
-          </Text>
-        </Pressable>
       </View>
     </Card>
   );
@@ -185,7 +185,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
-    marginBottom: 12,
   },
   detectionContent: {
     flex: 1,
@@ -199,22 +198,21 @@ const styles = StyleSheet.create({
   mac: {
     fontFamily: 'monospace',
   },
-  chevron: {
-    marginTop: 4,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 12,
-    justifyContent: 'flex-end',
+  actionsColumn: {
+    flexDirection: 'column',
+    gap: 6,
+    justifyContent: 'flex-start',
   },
   actionButton: {
     width: 90,
-    height: 60,
+    height: 56,
     borderRadius: 12,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 4,
+  },
+  chevron: {
+    marginTop: 4,
   },
 });
