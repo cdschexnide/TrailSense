@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert } from 'react-native';
-import { Text, Button, Badge, Card } from '@components/atoms';
+import React from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import { Text } from '@components/atoms/Text';
+import { Button } from '@components/atoms/Button';
+import { Card } from '@components/atoms';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
-import { useTheme } from '@hooks/useTheme';
+import { ListSection } from '@components/molecules/ListSection';
+import { ListRow } from '@components/molecules/ListRow';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { DevicesStackParamList } from '@navigation/types';
 import { useDevice } from '@hooks/api/useDevices';
@@ -10,14 +13,13 @@ import { useDevice } from '@hooks/api/useDevices';
 type DeviceDetailRouteProp = RouteProp<DevicesStackParamList, 'DeviceDetail'>;
 
 export const DeviceDetailScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
   const route = useRoute<DeviceDetailRouteProp>();
   const { deviceId } = route.params;
   const { data: device, isLoading, error } = useDevice(deviceId);
 
   if (isLoading) return <LoadingState />;
-  if (error) return <ErrorState error={error} />;
-  if (!device) return <ErrorState error="Device not found" />;
+  if (error) return <ErrorState message="Failed to load device" />;
+  if (!device) return <ErrorState message="Device not found" />;
 
   const handleDelete = () => {
     Alert.alert(
@@ -37,122 +39,96 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
     );
   };
 
-  const handleConfigure = () => {
-    navigation.navigate('DeviceConfig', { deviceId });
+  const formatDate = (dateString: string) => {
+    // TODO: Implement proper date formatting
+    return dateString;
   };
 
   return (
-    <ScreenLayout title={device.name}>
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <View style={styles.header}>
-            <Text variant="h2">{device.name}</Text>
-            <Badge
-              label={device.online ? 'ONLINE' : 'OFFLINE'}
-              color={device.online ? 'success' : 'error'}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>
-              Status
-            </Text>
-            <InfoRow label="Battery" value={`${device.battery}%`} />
-            <InfoRow label="Signal Strength" value={device.signalStrength} />
-            <InfoRow label="Detections Today" value={device.detectionCount.toString()} />
-            <InfoRow label="Last Seen" value={device.lastSeen} />
-          </View>
-
-          <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>
-              Location
-            </Text>
-            <InfoRow
-              label="Coordinates"
-              value={`${device.location.latitude}, ${device.location.longitude}`}
-            />
-          </View>
-
-          <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>
-              Device Information
-            </Text>
-            <InfoRow label="Device ID" value={device.id} />
-            <InfoRow label="Firmware Version" value={device.firmwareVersion || 'N/A'} />
-            <InfoRow label="Hardware Version" value={device.hardwareVersion || 'N/A'} />
-          </View>
-        </Card>
-
-        <View style={styles.actions}>
+    <ScreenLayout
+      header={{
+        title: device.name,
+        showBack: true,
+        rightActions: (
           <Button
-            title="Configure Device"
-            variant="primary"
-            onPress={handleConfigure}
-            style={styles.button}
-          />
-          <Button
-            title="Delete Device"
-            variant="ghost"
-            onPress={handleDelete}
-            style={styles.button}
-          />
+            buttonStyle="plain"
+            onPress={() => navigation.navigate('DeviceSettings', { id: deviceId })}
+          >
+            Edit
+          </Button>
+        ),
+      }}
+      scrollable
+    >
+      {/* Status Card */}
+      <Card variant="grouped" style={styles.statusCard}>
+        <View style={styles.statusContent}>
+          <Text variant="title2" color="label">
+            {device.online ? 'Online' : 'Offline'}
+          </Text>
+          <Text variant="footnote" color="secondaryLabel">
+            Battery: {device.battery}% • Signal: {device.signalStrength}
+          </Text>
         </View>
-      </ScrollView>
+      </Card>
+
+      <ListSection header="INFORMATION" style={styles.section}>
+        <ListRow title="Name" rightText={device.name} accessoryType="none" />
+        <ListRow
+          title="Firmware"
+          rightText={(device as any).firmwareVersion || (device as any).firmware || 'N/A'}
+          accessoryType="none"
+        />
+        <ListRow
+          title="Location"
+          rightText={`${device.location.latitude}, ${device.location.longitude}`}
+          accessoryType="none"
+        />
+        <ListRow
+          title="Last Seen"
+          rightText={device.lastSeen ? formatDate(device.lastSeen) : 'Unknown'}
+          accessoryType="none"
+        />
+      </ListSection>
+
+      <ListSection header="ACTIVITY" style={styles.section}>
+        <ListRow
+          title="View History"
+          onPress={() => navigation.navigate('DeviceHistory', { id: deviceId })}
+          accessoryType="disclosureIndicator"
+        />
+        <ListRow
+          title="Detection Count"
+          rightText={device.detectionCount?.toString() || '0'}
+          accessoryType="none"
+        />
+      </ListSection>
+
+      <View style={styles.actions}>
+        <Button
+          buttonStyle="filled"
+          role="destructive"
+          onPress={handleDelete}
+        >
+          Remove Device
+        </Button>
+      </View>
     </ScreenLayout>
   );
 };
 
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.infoRow}>
-    <Text variant="caption" style={styles.label}>
-      {label}
-    </Text>
-    <Text variant="body" style={styles.value}>
-      {value}
-    </Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  statusCard: {
+    margin: 20,
   },
-  card: {
-    margin: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+  statusContent: {
+    padding: 16,
   },
   section: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  },
-  sectionTitle: {
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  label: {
-    flex: 1,
-    opacity: 0.7,
-  },
-  value: {
-    flex: 2,
-    textAlign: 'right',
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   actions: {
-    padding: 16,
-    gap: 12,
-  },
-  button: {
-    marginBottom: 8,
+    padding: 20,
   },
 });
