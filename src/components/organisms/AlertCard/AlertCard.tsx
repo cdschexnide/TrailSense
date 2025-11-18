@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Alert } from '@types';
 import { Card, Badge, Text, Icon } from '@components/atoms';
-import { SwipeableRow, swipeActions } from '@components/molecules';
+import { SwipeableRow, createSwipeActions } from '@components/molecules';
 import { formatTimestamp } from '@utils/dateUtils';
 import { useTheme } from '@hooks/useTheme';
 
@@ -22,6 +22,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
+  const swipeActions = createSwipeActions(theme.colors);
 
   const getThreatVariant = () => {
     switch (alert.threatLevel) {

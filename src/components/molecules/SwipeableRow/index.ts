@@ -1,2 +1,2 @@
-export { SwipeableRow, swipeActions } from './SwipeableRow';
+export { SwipeableRow, createSwipeActions } from './SwipeableRow';
 export type { SwipeAction } from './SwipeableRow';
