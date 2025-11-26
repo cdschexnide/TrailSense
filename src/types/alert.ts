@@ -47,13 +47,23 @@ export interface Detection {
 }
 
 export interface AnalyticsData {
-  totalDetections: number;
-  unknownDevices: number;
-  dailyDetections: Array<{ date: string; count: number }>;
-  cellularCount: number;
-  wifiCount: number;
-  bluetoothCount: number;
-  hourlyDistribution: Array<{ hour: number; count: number }>;
+  period: string;
+  startDate: string;
+  endDate: string;
+  totalAlerts: number;
+  threatLevelDistribution: Array<{ level: string; count: number }>;
+  detectionTypeDistribution: Array<{ type: string; count: number }>;
+  deviceDistribution: Array<{ deviceId: string; count: number }>;
+  dailyTrend: Array<{ date: string; count: number }>;
+  topDetectedDevices: Array<{ macAddress: string; count: number }>;
+  // Legacy fields for backward compatibility
+  totalDetections?: number;
+  unknownDevices?: number;
+  dailyDetections?: Array<{ date: string; count: number }>;
+  cellularCount?: number;
+  wifiCount?: number;
+  bluetoothCount?: number;
+  hourlyDistribution?: Array<{ hour: number; count: number }>;
   criticalCount?: number;
   highCount?: number;
   mediumCount?: number;

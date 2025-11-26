@@ -64,12 +64,12 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({ device, onPress, style }
         {/* Battery */}
         <View style={styles.statColumn}>
           <Icon
-            name={getBatteryIcon(device.battery || 0) as any}
+            name={getBatteryIcon(device.batteryPercent || device.battery || 0) as any}
             size={20}
             color={theme.colors.secondaryLabel}
           />
           <Text variant="title3" color="label">
-            {device.battery || 0}%
+            {device.batteryPercent || device.battery || 0}%
           </Text>
           <Text variant="caption2" color="secondaryLabel">
             Battery
@@ -115,7 +115,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({ device, onPress, style }
           color={theme.colors.secondaryLabel}
         />
         <Text variant="caption1" color="secondaryLabel">
-          {device.location.latitude.toFixed(4)}, {device.location.longitude.toFixed(4)}
+          {device.latitude?.toFixed(4) || 'N/A'}, {device.longitude?.toFixed(4) || 'N/A'}
         </Text>
       </View>
     </Card>

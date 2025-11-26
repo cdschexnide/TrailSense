@@ -2,15 +2,15 @@ export interface Device {
   id: string;
   name: string;
   online: boolean;
-  battery?: number;
+  batteryPercent?: number;
+  battery?: number; // Legacy field
   signalStrength?: string;
   detectionCount?: number;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
+  latitude: number;
+  longitude: number;
   lastSeen?: string;
-  firmware?: string;
+  firmwareVersion?: string;
+  firmware?: string; // Legacy field
   createdAt: string;
   updatedAt: string;
 }

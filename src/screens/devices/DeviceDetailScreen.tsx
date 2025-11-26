@@ -67,7 +67,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
             {device.online ? 'Online' : 'Offline'}
           </Text>
           <Text variant="footnote" color="secondaryLabel">
-            Battery: {device.battery}% • Signal: {device.signalStrength}
+            Battery: {device.batteryPercent || device.battery || 0}% • Signal: {device.signalStrength}
           </Text>
         </View>
       </Card>
@@ -81,7 +81,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
         />
         <ListRow
           title="Location"
-          rightText={`${device.location.latitude}, ${device.location.longitude}`}
+          rightText={`${device.latitude?.toFixed(4) || 'N/A'}, ${device.longitude?.toFixed(4) || 'N/A'}`}
           accessoryType="none"
         />
         <ListRow

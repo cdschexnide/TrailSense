@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
+  TextInput,
+  TouchableOpacity,
+  Text,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Alert,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Input, Text } from '@components/atoms';
-import { ScreenLayout } from '@components/templates';
-import { login, setBiometricEnabled } from '@store/slices/authSlice';
+import { login } from '@store/slices/authSlice';
 import { AppDispatch, RootState } from '@store/index';
-import { AuthService } from '@services/authService';
 
 interface LoginScreenProps {
   navigation: any;
@@ -22,241 +20,131 @@ interface LoginScreenProps {
 export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, biometricEnabled } = useSelector(
-    (state: RootState) => state.auth
-  );
-
-  useEffect(() => {
-    checkBiometricAuth();
-  }, []);
-
-  const checkBiometricAuth = async () => {
-    const isEnabled = await AuthService.isBiometricEnabled();
-    const isSupported = await AuthService.checkBiometricSupport();
-
-    if (isEnabled && isSupported) {
-      const success = await AuthService.authenticateWithBiometric();
-      if (success) {
-        // Auto-login with stored credentials
-        const tokens = await AuthService.getTokens();
-        if (tokens) {
-          // User authenticated via biometric
-          dispatch(setBiometricEnabled(true));
-        }
-      }
-    }
-  };
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email) {
-      setEmailError('Email is required');
-      return false;
-    }
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
-      return false;
-    }
-    setEmailError('');
-    return true;
-  };
-
-  const validatePassword = (password: string): boolean => {
-    if (!password) {
-      setPasswordError('Password is required');
-      return false;
-    }
-    if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      return false;
-    }
-    setPasswordError('');
-    return true;
-  };
+  const { isLoading } = useSelector((state: RootState) => state.auth);
 
   const handleLogin = async () => {
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
-
-    if (!isEmailValid || !isPasswordValid) {
-      // Trigger error haptic for validation failure
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-
     try {
       await dispatch(login({ email, password })).unwrap();
-
-      // Trigger success haptic for successful login
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-      // Check if biometric is available and prompt user to enable
-      const isSupported = await AuthService.checkBiometricSupport();
-      if (isSupported && !biometricEnabled) {
-        Alert.alert(
-          'Enable Biometric Authentication?',
-          'Would you like to use Face ID/Touch ID for faster login?',
-          [
-            {
-              text: 'Not Now',
-              style: 'cancel',
-            },
-            {
-              text: 'Enable',
-              onPress: async () => {
-                await AuthService.enableBiometric();
-                dispatch(setBiometricEnabled(true));
-              },
-            },
-          ]
-        );
-      }
     } catch (error: any) {
-      // Trigger error haptic for login failure
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-
-      Alert.alert(
-        'Login Failed',
-        error.message || 'Invalid email or password. Please try again.'
-      );
+      Alert.alert('Login Failed', error.message || 'Invalid credentials');
     }
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword');
-  };
-
-  const handleRegister = () => {
-    navigation.navigate('Register');
   };
 
   return (
-    <ScreenLayout>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.header}>
-            <Text variant="largeTitle" weight="bold" style={styles.title}>
-              Welcome Back
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <View style={styles.content}>
+        <Text style={styles.title}>Welcome</Text>
+        <Text style={styles.subtitle}>Sign in to continue to TrailSense</Text>
+
+        <View style={styles.form}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isLoading}
+          />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            editable={!isLoading}
+            onSubmitEditing={handleLogin}
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <Text style={styles.buttonText}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </Text>
-            <Text variant="body" color="secondaryLabel" style={styles.subtitle}>
-              Sign in to continue to TrailSense
-            </Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.form}>
-            <Input
-              label="Email"
-              value={email}
-              onChangeText={text => {
-                setEmail(text);
-                if (emailError) validateEmail(text);
-              }}
-              onBlur={() => validateEmail(email)}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              returnKeyType="next"
-              error={emailError}
-              disabled={isLoading}
-            />
-
-            <Input
-              label="Password"
-              value={password}
-              onChangeText={text => {
-                setPassword(text);
-                if (passwordError) validatePassword(text);
-              }}
-              onBlur={() => validatePassword(password)}
-              placeholder="Enter your password"
-              secureTextEntry
-              textContentType="password"
-              returnKeyType="go"
-              onSubmitEditing={handleLogin}
-              error={passwordError}
-              disabled={isLoading}
-            />
-
-            <Button
-              buttonStyle="plain"
-              onPress={handleForgotPassword}
-              style={styles.forgotButton}
-            >
-              Forgot Password?
-            </Button>
-
-            <Button
-              buttonStyle="filled"
-              role="default"
-              prominent
-              onPress={handleLogin}
-              loading={isLoading}
-              disabled={isLoading}
-              style={styles.loginButton}
-            >
-              Sign In
-            </Button>
-
-            <View style={styles.registerContainer}>
-              <Text variant="body">Don't have an account? </Text>
-              <Button
-                buttonStyle="plain"
-                onPress={handleRegister}
-                disabled={isLoading}
-              >
-                Sign Up
-              </Button>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </ScreenLayout>
+          <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.link}>Don't have an account? Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
   },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
+  content: {
+    flex: 1,
     justifyContent: 'center',
-  },
-  header: {
-    marginBottom: 32,
-    alignItems: 'center',
+    padding: 24,
   },
   title: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    color: '#fff',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
-    // No opacity needed - using secondaryLabel color
+    fontSize: 17,
+    color: '#999',
+    marginBottom: 32,
+    textAlign: 'center',
   },
   form: {
     width: '100%',
   },
-  forgotButton: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
-    marginBottom: 24,
+  label: {
+    fontSize: 17,
+    color: '#fff',
+    marginBottom: 6,
+    marginTop: 16,
   },
-  loginButton: {
-    marginBottom: 16,
+  input: {
+    backgroundColor: '#1c1c1e',
+    borderWidth: 1,
+    borderColor: '#3a3a3c',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 17,
+    color: '#fff',
+    minHeight: 44,
   },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  button: {
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    padding: 14,
     alignItems: 'center',
+    marginTop: 24,
+    minHeight: 50,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '600',
+  },
+  link: {
+    color: '#007AFF',
+    fontSize: 17,
+    textAlign: 'center',
+    marginTop: 16,
   },
 });

@@ -57,8 +57,11 @@ if (__DEV__) {
     },
     error => {
       console.error(`[API Response Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+        message: error.message,
         status: error.response?.status,
         data: error.response?.data,
+        code: error.code,
+        fullURL: error.config?.baseURL + error.config?.url,
       });
       return Promise.reject(error);
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RadarStackParamList } from '@navigation/types';
-import { LiveRadarScreen, RadarSettingsScreen } from '@screens/radar';
+import { ProximityHeatmapScreen, RadarSettingsScreen } from '@screens/radar';
 
 const Stack = createNativeStackNavigator<RadarStackParamList>();
 
@@ -10,8 +10,8 @@ export const RadarStack = () => {
     <Stack.Navigator>
       <Stack.Screen
         name="LiveRadar"
-        component={LiveRadarScreen}
-        options={{ title: 'Live Radar' }}
+        component={ProximityHeatmapScreen}
+        options={{ title: 'Proximity Heatmap' }}
       />
       <Stack.Screen
         name="RadarSettings"

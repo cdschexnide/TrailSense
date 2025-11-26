@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
 import { Button } from '@components/atoms/Button';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
@@ -8,6 +8,9 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
 import { formatTimestamp } from '@utils/dateUtils';
+import { useAlertSummary } from '@/hooks/useAlertSummary';
+import { AlertSummaryCard } from '@/components/organisms/AlertSummaryCard';
+import { FEATURE_FLAGS } from '@/config/featureFlags';
 
 type AlertDetailRouteProp = RouteProp<AlertsStackParamList, 'AlertDetail'>;
 
@@ -15,6 +18,15 @@ export const AlertDetailScreen = ({ navigation }: any) => {
   const route = useRoute<AlertDetailRouteProp>();
   const { alertId } = route.params;
   const { data: alert, isLoading, error } = useAlert(alertId);
+
+  // LLM Alert Summary Hook
+  const {
+    summary,
+    isLoading: isGeneratingSummary,
+    error: summaryError,
+    generate: generateSummary,
+    regenerate: regenerateSummary,
+  } = useAlertSummary(alert);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState message="Failed to load alert" />;
@@ -29,6 +41,16 @@ export const AlertDetailScreen = ({ navigation }: any) => {
     // Implement delete logic
     console.log('Deleting alert:', alertId);
     navigation.goBack();
+  };
+
+  const handleFeedback = (positive: boolean) => {
+    // Track feedback for analytics
+    console.log('LLM feedback:', {
+      alertId: alert.id,
+      feedback: positive ? 'positive' : 'negative',
+      threatLevel: alert.threatLevel,
+    });
+    // TODO: Add analytics tracking when analytics service is available
   };
 
   return (
@@ -68,6 +90,30 @@ export const AlertDetailScreen = ({ navigation }: any) => {
           accessoryType="none"
         />
       </ListSection>
+
+      {/* AI Summary Section */}
+      {FEATURE_FLAGS.LLM_ALERT_SUMMARIES && Platform.OS === 'android' && (
+        <View style={styles.aiSummarySection}>
+          {!summary && !isGeneratingSummary && !summaryError && (
+            <TouchableOpacity
+              onPress={generateSummary}
+              style={styles.explainButton}
+              accessibilityLabel="Explain alert with AI"
+              accessibilityRole="button"
+            >
+              <Text style={styles.explainButtonText}>✨ Explain with AI</Text>
+            </TouchableOpacity>
+          )}
+
+          <AlertSummaryCard
+            summary={summary}
+            isLoading={isGeneratingSummary}
+            error={summaryError}
+            onRegenerate={regenerateSummary}
+            onFeedback={handleFeedback}
+          />
+        </View>
+      )}
 
       <ListSection header="DEVICE INFORMATION" style={styles.section}>
         <ListRow
@@ -126,5 +172,23 @@ const styles = StyleSheet.create({
   actions: {
     padding: 20,
     gap: 12,
+  },
+  aiSummarySection: {
+    marginHorizontal: 20,
+    marginVertical: 12,
+  },
+  explainButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  explainButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#007AFF',
   },
 });

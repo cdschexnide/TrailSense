@@ -127,11 +127,11 @@ export const Input: React.FC<InputProps> = ({
   // Event Handlers
   // ======================
 
-  const handleFocus = async () => {
+  const handleFocus = () => {
     if (disabled || !editable) return;
 
-    // Trigger haptic feedback
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Trigger haptic feedback (fire-and-forget, don't await)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     setIsFocused(true);
     onFocus?.();
@@ -142,16 +142,16 @@ export const Input: React.FC<InputProps> = ({
     onBlur?.();
   };
 
-  const handleClear = async () => {
-    // Trigger haptic feedback
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleClear = () => {
+    // Trigger haptic feedback (fire-and-forget, don't await)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     onChangeText('');
   };
 
-  const togglePasswordVisibility = async () => {
-    // Trigger haptic feedback
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const togglePasswordVisibility = () => {
+    // Trigger haptic feedback (fire-and-forget, don't await)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     setIsPasswordVisible(!isPasswordVisible);
   };

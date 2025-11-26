@@ -3,17 +3,17 @@ import { Device, CreateDeviceDTO } from '@types';
 
 export const devicesApi = {
   getDevices: async (): Promise<Device[]> => {
-    const { data } = await apiClient.get('/devices');
+    const { data } = await apiClient.get('/api/devices');
     return data;
   },
 
   getDeviceById: async (id: string): Promise<Device> => {
-    const { data } = await apiClient.get(`/devices/${id}`);
+    const { data } = await apiClient.get(`/api/devices/${id}`);
     return data;
   },
 
   addDevice: async (device: CreateDeviceDTO): Promise<Device> => {
-    const { data } = await apiClient.post('/devices', device);
+    const { data } = await apiClient.post('/api/devices', device);
     return data;
   },
 
@@ -21,11 +21,11 @@ export const devicesApi = {
     id: string,
     updates: Partial<Device>
   ): Promise<Device> => {
-    const { data } = await apiClient.patch(`/devices/${id}`, updates);
+    const { data } = await apiClient.patch(`/api/devices/${id}`, updates);
     return data;
   },
 
   deleteDevice: async (id: string): Promise<void> => {
-    await apiClient.delete(`/devices/${id}`);
+    await apiClient.delete(`/api/devices/${id}`);
   },
 };

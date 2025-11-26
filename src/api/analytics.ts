@@ -14,7 +14,7 @@ interface GetHeatmapDataParams {
 
 export const analyticsApi = {
   async getAnalytics(params: GetAnalyticsParams): Promise<AnalyticsData> {
-    const response = await apiClient.get('/analytics', {
+    const response = await apiClient.get('/api/analytics', {
       params: {
         period: params.period || 'week',
         startDate: params.startDate?.toISOString(),

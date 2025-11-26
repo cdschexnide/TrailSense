@@ -4,8 +4,8 @@ import axios from 'axios';
 import { API_BASE_URL } from '@constants/config';
 import type { AuthTokens, RegisterData } from '../types/auth';
 
-const TOKEN_KEY = '@trailsense:tokens';
-const BIOMETRIC_KEY = '@trailsense:biometric';
+const TOKEN_KEY = 'trailsense.tokens';
+const BIOMETRIC_KEY = 'trailsense.biometric';
 
 export class AuthService {
   static async login(email: string, password: string) {

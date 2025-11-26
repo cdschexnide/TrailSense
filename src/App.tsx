@@ -13,6 +13,9 @@ import RootNavigator from '@navigation/RootNavigator';
 import { isMockMode, logMockStatus } from '@/config/mockConfig';
 import { seedMockData } from '@/utils/seedMockData';
 import { websocketService } from '@api/websocket';
+import { featureFlagsManager } from '@/config/featureFlags';
+import { AuthService } from '@services/authService';
+import { login as loginAction } from '@store/slices/authSlice';
 
 export default function App() {
   const [isMockDataReady, setIsMockDataReady] = useState(!isMockMode);
@@ -20,6 +23,13 @@ export default function App() {
   useEffect(() => {
     // Log mock mode status
     logMockStatus();
+
+    // LLM mock mode disabled - using real Llama 3.2 1B model
+    // if (__DEV__) {
+    //   console.log('[App] Enabling LLM mock mode for development');
+    //   featureFlagsManager.enableMockMode();
+    // }
+    console.log('[App] LLM using real Llama 3.2 1B model (mock mode disabled)');
 
     // Seed mock data if enabled
     if (isMockMode) {
@@ -29,20 +39,22 @@ export default function App() {
 
           // Initialize WebSocket after mock data is ready
           // Use a mock token for testing
-          console.log('[App] Initializing WebSocket...');
+          console.log('[App] Initializing mock WebSocket...');
           websocketService.connect('mock-token-for-testing');
         })
         .catch((error) => {
           console.error('[App] Failed to seed mock data:', error);
           setIsMockDataReady(true); // Continue anyway
         });
+    } else {
+      // Real API mode - WebSocket will be initialized after user logs in
+      // The WebSocket requires a real JWT token from the backend
+      console.log('[App] Real API mode - WebSocket will connect after authentication');
     }
 
     // Cleanup on unmount
     return () => {
-      if (isMockMode) {
-        websocketService.disconnect();
-      }
+      websocketService.disconnect();
     };
   }, []);
 

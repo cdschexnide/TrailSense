@@ -19,7 +19,7 @@ export const RootNavigator = () => {
   );
 
   // TEMPORARY: Skip auth for testing - set to true to bypass login
-  const SKIP_AUTH_FOR_TESTING = true;
+  const SKIP_AUTH_FOR_TESTING = false;
 
   const [isReady, setIsReady] = useState(false);
   const [initialState, setInitialState] = useState<NavigationState | undefined>(

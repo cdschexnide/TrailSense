@@ -81,17 +81,17 @@ export const Button: React.FC<ButtonProps> = ({
   // Event Handlers
   // ======================
 
-  const handlePress = async () => {
+  const handlePress = () => {
     if (disabled || loading) return;
 
-    // Trigger haptic feedback with appropriate strength
+    // Trigger haptic feedback with appropriate strength (fire-and-forget, don't await)
     // Medium impact for prominent or destructive actions
     const hapticStyle =
       prominent || role === 'destructive'
         ? Haptics.ImpactFeedbackStyle.Medium
         : Haptics.ImpactFeedbackStyle.Light;
 
-    await Haptics.impactAsync(hapticStyle);
+    Haptics.impactAsync(hapticStyle);
 
     onPress?.();
   };

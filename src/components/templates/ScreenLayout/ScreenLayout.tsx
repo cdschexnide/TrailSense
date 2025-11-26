@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -55,7 +55,7 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
 }) => {
   const { theme } = useTheme();
   const { colors } = theme;
-  const scrollY = new Animated.Value(0);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   // Use new header prop or fall back to legacy props
   const headerConfig = header || (showHeader && title ? {
