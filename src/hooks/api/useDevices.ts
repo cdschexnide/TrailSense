@@ -40,7 +40,7 @@ export const useUpdateDevice = () => {
     onSuccess: (data, variables) => {
       // Update specific device in cache
       queryClient.setQueryData<Device>([DEVICES_QUERY_KEY, variables.id], data);
-      
+
       // Invalidate devices list
       queryClient.invalidateQueries({ queryKey: [DEVICES_QUERY_KEY] });
     },

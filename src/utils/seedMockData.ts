@@ -78,7 +78,7 @@ export const seedMockData = async ({
     queryClient.setQueryData([ALERTS_QUERY_KEY], mockAlerts);
 
     // Individual alerts
-    mockAlerts.forEach((alert) => {
+    mockAlerts.forEach(alert => {
       queryClient.setQueryData([ALERTS_QUERY_KEY, alert.id], alert);
     });
 
@@ -86,7 +86,7 @@ export const seedMockData = async ({
     queryClient.setQueryData([DEVICES_QUERY_KEY], mockDevices);
 
     // Individual devices
-    mockDevices.forEach((device) => {
+    mockDevices.forEach(device => {
       queryClient.setQueryData([DEVICES_QUERY_KEY, device.id], device);
     });
 
@@ -94,13 +94,13 @@ export const seedMockData = async ({
     queryClient.setQueryData([WHITELIST_QUERY_KEY], mockWhitelist);
 
     // Individual whitelist entries
-    mockWhitelist.forEach((entry) => {
+    mockWhitelist.forEach(entry => {
       queryClient.setQueryData([WHITELIST_QUERY_KEY, entry.id], entry);
     });
 
     // Analytics - seed multiple time periods
     const periods = ['day', 'week', 'month', 'year'] as const;
-    periods.forEach((period) => {
+    periods.forEach(period => {
       queryClient.setQueryData(
         [ANALYTICS_QUERY_KEY, period, undefined, undefined],
         mockAnalyticsData
@@ -114,7 +114,7 @@ export const seedMockData = async ({
     );
 
     // Device history/fingerprints
-    mockDeviceFingerprints.forEach((fingerprint) => {
+    mockDeviceFingerprints.forEach(fingerprint => {
       queryClient.setQueryData(
         [DEVICE_HISTORY_QUERY_KEY, fingerprint.macAddress],
         fingerprint
@@ -143,7 +143,10 @@ export const seedMockData = async ({
  * Clears all mock data from the application
  * @param options - Clearing configuration
  */
-export const clearMockData = ({ queryClient, store }: Omit<SeedOptions, 'user'>): void => {
+export const clearMockData = ({
+  queryClient,
+  store,
+}: Omit<SeedOptions, 'user'>): void => {
   console.log('[MockData] Clearing mock data...');
 
   // Clear React Query cache

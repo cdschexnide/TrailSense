@@ -265,7 +265,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
               />
               {password.length > 0 && (
                 <View style={styles.passwordStrength}>
-                  <Text variant="caption1" color="secondaryLabel" style={styles.strengthLabel}>
+                  <Text
+                    variant="caption1"
+                    color="secondaryLabel"
+                    style={styles.strengthLabel}
+                  >
                     Password Strength:
                   </Text>
                   <Badge

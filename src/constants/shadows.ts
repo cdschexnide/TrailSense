@@ -209,7 +209,7 @@ export const createShadow = (
   offset: { width: number; height: number },
   opacity: number,
   radius: number,
-  elevation: number = 0,
+  elevation: number = 0
 ): ShadowStyle => {
   return {
     shadowColor: '#000',

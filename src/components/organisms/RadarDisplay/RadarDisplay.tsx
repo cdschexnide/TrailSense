@@ -15,7 +15,10 @@ interface RadarDisplayProps {
 /**
  * Component for individual legend items
  */
-const LegendItem: React.FC<{ color: string; label: string }> = ({ color, label }) => (
+const LegendItem: React.FC<{ color: string; label: string }> = ({
+  color,
+  label,
+}) => (
   <View style={styles.legendItem}>
     <View style={[styles.legendDot, { backgroundColor: color }]} />
     <Text variant="caption1" color="secondaryLabel">
@@ -91,7 +94,9 @@ export const RadarDisplay: React.FC<RadarDisplayProps> = ({
   });
 
   // Calculate sweep color with opacity
-  const sweepColor = theme.colors.systemGreen.replace('rgb', 'rgba').replace(')', ', 0.2)');
+  const sweepColor = theme.colors.systemGreen
+    .replace('rgb', 'rgba')
+    .replace(')', ', 0.2)');
 
   return (
     <View style={[styles.wrapper, style]}>
@@ -192,7 +197,7 @@ export const RadarDisplay: React.FC<RadarDisplayProps> = ({
           </SvgText>
 
           {/* Detections */}
-          {detections.map((detection) => {
+          {detections.map(detection => {
             const distance = (detection.distance / maxRange) * 140;
             const radian = (detection.angle * Math.PI) / 180;
             const x = center + distance * Math.cos(radian);

@@ -70,10 +70,7 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
         title: 'Filter Alerts',
         showBack: true,
         rightActions: (
-          <Button
-            buttonStyle="plain"
-            onPress={handleReset}
-          >
+          <Button buttonStyle="plain" onPress={handleReset}>
             Reset
           </Button>
         ),
@@ -85,7 +82,9 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
           <ListRow
             key={level.id}
             title={level.label}
-            accessoryType={filters.threatLevels.includes(level.id) ? "checkmark" : "none"}
+            accessoryType={
+              filters.threatLevels.includes(level.id) ? 'checkmark' : 'none'
+            }
             onPress={() => toggleThreatLevel(level.id)}
           />
         ))}
@@ -96,18 +95,16 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
           <ListRow
             key={type.id}
             title={type.label}
-            accessoryType={filters.detectionTypes.includes(type.id) ? "checkmark" : "none"}
+            accessoryType={
+              filters.detectionTypes.includes(type.id) ? 'checkmark' : 'none'
+            }
             onPress={() => toggleDetectionType(type.id)}
           />
         ))}
       </ListSection>
 
       <View style={styles.actions}>
-        <Button
-          buttonStyle="filled"
-          role="default"
-          onPress={handleApply}
-        >
+        <Button buttonStyle="filled" role="default" onPress={handleApply}>
           Apply Filters
         </Button>
       </View>

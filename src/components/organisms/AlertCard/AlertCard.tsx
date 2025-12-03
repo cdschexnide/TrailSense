@@ -1,10 +1,23 @@
-import React from 'react';
-import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
+/**
+ * AlertCard Component - REDESIGNED
+ *
+ * Enhanced alert card with:
+ * - Threat-level background tinting
+ * - Pulsing animation for critical alerts
+ * - Signal strength interpretation
+ * - Enhanced visual hierarchy
+ * - Staggered entrance animations
+ * - Press scale feedback with haptics
+ */
+
+import React, { useMemo, useEffect, useRef } from 'react';
+import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Alert } from '@types';
-import { Card, Badge, Text, Icon } from '@components/atoms';
-import { formatTimestamp } from '@utils/dateUtils';
+import { Alert, ThreatLevel } from '@types';
+import { Badge, Icon, Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
+import { formatTimestamp } from '@utils/dateUtils';
+import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
 
 interface AlertCardProps {
   alert: Alert;
@@ -12,7 +25,69 @@ interface AlertCardProps {
   onDismiss?: (alertId: string) => void;
   onWhitelist?: (macAddress: string) => void;
   style?: ViewStyle;
+  /** Index for staggered entrance animation */
+  index?: number;
+  /** Enable entrance animation */
+  animateEntrance?: boolean;
 }
+
+/**
+ * Get threat background colors for dark mode
+ */
+const getThreatBackground = (threatLevel: ThreatLevel, isDark: boolean) => {
+  const backgrounds = {
+    critical: isDark ? 'rgba(255, 69, 58, 0.15)' : 'rgba(255, 59, 48, 0.12)',
+    high: isDark ? 'rgba(255, 159, 10, 0.12)' : 'rgba(255, 149, 0, 0.10)',
+    medium: isDark ? 'rgba(255, 214, 10, 0.10)' : 'rgba(255, 204, 0, 0.08)',
+    low: isDark ? 'rgba(48, 209, 88, 0.08)' : 'rgba(52, 199, 89, 0.06)',
+  };
+  return backgrounds[threatLevel] || backgrounds.low;
+};
+
+/**
+ * Get threat border colors
+ */
+const getThreatBorder = (threatLevel: ThreatLevel, isDark: boolean) => {
+  const borders = {
+    critical: isDark ? 'rgba(255, 69, 58, 0.40)' : 'rgba(255, 59, 48, 0.35)',
+    high: isDark ? 'rgba(255, 159, 10, 0.35)' : 'rgba(255, 149, 0, 0.30)',
+    medium: isDark ? 'rgba(255, 214, 10, 0.30)' : 'rgba(255, 204, 0, 0.25)',
+    low: isDark ? 'rgba(48, 209, 88, 0.25)' : 'rgba(52, 199, 89, 0.20)',
+  };
+  return borders[threatLevel] || borders.low;
+};
+
+/**
+ * Get detection icon and color
+ */
+const getDetectionConfig = (type: string, theme: any) => {
+  switch (type) {
+    case 'cellular':
+      return {
+        icon: 'cellular',
+        color: theme.colors.systemPurple,
+        label: 'Cellular Detection',
+      };
+    case 'wifi':
+      return {
+        icon: 'wifi',
+        color: theme.colors.systemBlue,
+        label: 'WiFi Detection',
+      };
+    case 'bluetooth':
+      return {
+        icon: 'bluetooth',
+        color: theme.colors.systemTeal,
+        label: 'Bluetooth Detection',
+      };
+    default:
+      return {
+        icon: 'radio',
+        color: theme.colors.systemGray,
+        label: 'Detection',
+      };
+  }
+};
 
 export const AlertCard: React.FC<AlertCardProps> = ({
   alert,
@@ -20,121 +95,297 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   onDismiss,
   onWhitelist,
   style,
+  index = 0,
+  animateEntrance = true,
 }) => {
-  const { theme } = useTheme();
+  const { theme, colorScheme } = useTheme();
+  const isDark = colorScheme === 'dark';
 
-  const getThreatVariant = () => {
-    switch (alert.threatLevel) {
-      case 'low':
-        return 'low';
-      case 'medium':
-        return 'medium';
-      case 'high':
-        return 'high';
-      case 'critical':
-        return 'critical';
-      default:
-        return 'info';
+  // Animation values using React Native's built-in Animated API
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(animateEntrance ? 0 : 1)).current;
+  const translateXAnim = useRef(new Animated.Value(animateEntrance ? 30 : 0)).current;
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnimRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  // Entrance animation
+  useEffect(() => {
+    if (animateEntrance) {
+      const delay = index * 60; // 60ms stagger for alerts
+
+      setTimeout(() => {
+        Animated.parallel([
+          Animated.timing(opacityAnim, {
+            toValue: 1,
+            duration: 300,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(translateXAnim, {
+            toValue: 0,
+            duration: 350,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, delay);
     }
-  };
+  }, [animateEntrance, index]);
 
-  const getDetectionIcon = () => {
-    switch (alert.detectionType) {
-      case 'cellular':
-        return 'cellular';
-      case 'wifi':
-        return 'wifi';
-      case 'bluetooth':
-        return 'bluetooth';
-      default:
-        return 'radio';
+  // Pulse animation for critical alerts
+  useEffect(() => {
+    if (alert.threatLevel === 'critical') {
+      pulseAnimRef.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 750,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 0,
+            duration: 750,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulseAnimRef.current.start();
+    } else {
+      pulseAnimRef.current?.stop();
+      pulseAnim.setValue(0);
     }
+
+    return () => {
+      pulseAnimRef.current?.stop();
+    };
+  }, [alert.threatLevel]);
+
+  // Press handlers
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.98,
+      friction: 8,
+      tension: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
-  const getDetectionIconColor = () => {
-    switch (alert.detectionType) {
-      case 'cellular':
-        return theme.colors.systemPurple;
-      case 'wifi':
-        return theme.colors.systemBlue;
-      case 'bluetooth':
-        return theme.colors.systemTeal;
-      default:
-        return theme.colors.systemBlue;
-    }
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 8,
+      tension: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
-  const getDetectionLabel = () => {
-    return `${alert.detectionType.charAt(0).toUpperCase()}${alert.detectionType.slice(1)} Detection`;
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.(alert.id);
   };
 
-  const handleDelete = async (e: any) => {
-    e?.stopPropagation?.();
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const handleDelete = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onDismiss?.(alert.id);
   };
 
-  const handleWhitelist = async (e: any) => {
-    e?.stopPropagation?.();
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const handleWhitelist = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onWhitelist?.(alert.macAddress);
   };
 
+  // Get detection config
+  const detectionConfig = getDetectionConfig(alert.detectionType, theme);
+
+  // Get RSSI interpretation
+  const rssiInfo = interpretRSSI(alert.rssi);
+
+  // Get background and border colors based on threat level
+  const backgroundColor = useMemo(
+    () => getThreatBackground(alert.threatLevel, isDark),
+    [alert.threatLevel, isDark]
+  );
+
+  const borderColor = useMemo(
+    () => getThreatBorder(alert.threatLevel, isDark),
+    [alert.threatLevel, isDark]
+  );
+
+  const threatColor = getThreatColor(alert.threatLevel);
+
+  // Interpolate pulse opacity
+  const pulseOpacity = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.15],
+  });
+
   return (
-    <Card onPress={() => onPress?.(alert.id)} variant="grouped" style={StyleSheet.flatten([styles.card, style])}>
-      {/* Header row: Badge and Timestamp */}
-      <View style={styles.header}>
-        <Badge variant={getThreatVariant() as any} size="sm">
-          {alert.threatLevel.toUpperCase()}
-        </Badge>
-        <Text variant="caption1" color="secondaryLabel">
-          {formatTimestamp(alert.timestamp)}
-        </Text>
-      </View>
+    <Animated.View
+      style={[
+        styles.card,
+        {
+          backgroundColor,
+          borderColor,
+          borderWidth: 1,
+          opacity: opacityAnim,
+          transform: [
+            { translateX: translateXAnim },
+            { scale: scaleAnim },
+          ],
+        },
+        style,
+      ]}
+    >
+      <Pressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityLabel={`${alert.threatLevel} ${alert.detectionType} alert`}
+      >
+        {/* Pulse overlay for critical alerts */}
+        {alert.threatLevel === 'critical' && (
+          <Animated.View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: threatColor, opacity: pulseOpacity },
+            ]}
+            pointerEvents="none"
+          />
+        )}
 
-      {/* Detection type with icon */}
-      <View style={styles.detectionRow}>
-        <Icon
-          name={getDetectionIcon()}
-          size={24}
-          color={getDetectionIconColor()}
-        />
-        <View style={styles.detectionContent}>
-          <Text variant="headline" color="label">
-            {getDetectionLabel()}
-          </Text>
-
-          {/* Metadata rows */}
-          <View style={styles.metadata}>
-            <Text variant="subheadline" color="secondaryLabel">
-              Device: {alert.deviceId}
-            </Text>
-            <Text variant="subheadline" color="secondaryLabel" style={styles.metadataRow}>
-              Signal: {alert.rssi} dBm
-            </Text>
-            {alert.macAddress && (
-              <Text variant="subheadline" color="secondaryLabel" style={StyleSheet.flatten([styles.metadataRow, styles.mac])}>
-                {alert.macAddress}
-              </Text>
-            )}
+        {/* Header: Badge + Timestamp */}
+        <View style={styles.header}>
+          <View style={styles.badgeRow}>
+            <Badge variant={alert.threatLevel as any} size="sm">
+              {alert.threatLevel.toUpperCase()}
+            </Badge>
+            {/* Threat level indicator bar */}
+            <View style={[styles.threatBar, { backgroundColor: threatColor }]} />
           </View>
+          <Text variant="caption1" color="secondaryLabel">
+            {formatTimestamp(alert.timestamp)}
+          </Text>
         </View>
 
-        {/* Action buttons column on right */}
-        <View style={styles.actionsColumn}>
+        {/* Detection info */}
+        <View style={styles.detectionRow}>
+          {/* Detection icon with colored background */}
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: `${detectionConfig.color}20` },
+            ]}
+          >
+            <Icon
+              name={detectionConfig.icon as any}
+              size={28}
+              color={detectionConfig.color}
+            />
+          </View>
+
+          <View style={styles.detectionContent}>
+            <Text variant="headline" color="label" style={styles.detectionTitle}>
+              {detectionConfig.label}
+            </Text>
+
+            {/* Metadata */}
+            <View style={styles.metadata}>
+              {/* Signal strength with interpretation */}
+              <View style={styles.metadataRow}>
+                <Icon name="cellular" size={14} color={rssiInfo.color} />
+                <Text
+                  variant="subheadline"
+                  color="secondaryLabel"
+                  style={styles.metadataText}
+                >
+                  {alert.rssi} dBm
+                </Text>
+                <View
+                  style={[
+                    styles.signalBadge,
+                    { backgroundColor: `${rssiInfo.color}20` },
+                  ]}
+                >
+                  <Text
+                    variant="caption2"
+                    style={{ color: rssiInfo.color, fontWeight: '600' }}
+                  >
+                    {rssiInfo.label}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Device */}
+              <View style={styles.metadataRow}>
+                <Icon
+                  name="hardware-chip-outline"
+                  size={14}
+                  color={theme.colors.secondaryLabel}
+                />
+                <Text
+                  variant="subheadline"
+                  color="secondaryLabel"
+                  style={styles.metadataText}
+                >
+                  {alert.deviceId}
+                </Text>
+              </View>
+
+              {/* MAC Address */}
+              {alert.macAddress && (
+                <View style={styles.metadataRow}>
+                  <Icon
+                    name="finger-print-outline"
+                    size={14}
+                    color={theme.colors.secondaryLabel}
+                  />
+                  <Text
+                    variant="caption1"
+                    color="tertiaryLabel"
+                    style={[styles.metadataText, styles.macAddress]}
+                  >
+                    {alert.macAddress}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Chevron */}
+          <Icon
+            name="chevron-forward"
+            size={20}
+            color={theme.colors.tertiaryLabel}
+          />
+        </View>
+
+        {/* Action buttons */}
+        <View style={styles.actionRow}>
           <Pressable
             onPress={handleWhitelist}
             style={({ pressed }) => [
               styles.actionButton,
               {
-                backgroundColor: 'rgba(255, 149, 0, 0.15)',
+                backgroundColor: isDark
+                  ? 'rgba(255, 159, 10, 0.15)'
+                  : 'rgba(255, 149, 0, 0.12)',
                 borderColor: theme.colors.systemOrange,
               },
               pressed && { opacity: 0.7 },
             ]}
           >
-            <Icon name="shield-checkmark" size={20} color={theme.colors.systemOrange} />
-            <Text variant="caption2" style={{ color: theme.colors.systemOrange, fontWeight: '600' }}>
+            <Icon
+              name="shield-checkmark"
+              size={18}
+              color={theme.colors.systemOrange}
+            />
+            <Text
+              variant="caption1"
+              style={{ color: theme.colors.systemOrange, fontWeight: '600' }}
+            >
               Whitelist
             </Text>
           </Pressable>
@@ -144,28 +395,25 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             style={({ pressed }) => [
               styles.actionButton,
               {
-                backgroundColor: 'rgba(255, 59, 48, 0.15)',
+                backgroundColor: isDark
+                  ? 'rgba(255, 69, 58, 0.15)'
+                  : 'rgba(255, 59, 48, 0.12)',
                 borderColor: theme.colors.systemRed,
               },
               pressed && { opacity: 0.7 },
             ]}
           >
-            <Icon name="trash-outline" size={20} color={theme.colors.systemRed} />
-            <Text variant="caption2" style={{ color: theme.colors.systemRed, fontWeight: '600' }}>
+            <Icon name="trash-outline" size={18} color={theme.colors.systemRed} />
+            <Text
+              variant="caption1"
+              style={{ color: theme.colors.systemRed, fontWeight: '600' }}
+            >
               Delete
             </Text>
           </Pressable>
         </View>
-
-        {/* Chevron indicator */}
-        <Icon
-          name="chevron-forward"
-          size={20}
-          color={theme.colors.tertiaryLabel}
-          style={styles.chevron}
-        />
-      </View>
-    </Card>
+      </Pressable>
+    </Animated.View>
   );
 };
 
@@ -174,45 +422,83 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 8,
     padding: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 14,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  threatBar: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
   },
   detectionRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 14,
+    marginBottom: 16,
+  },
+  iconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   detectionContent: {
     flex: 1,
   },
+  detectionTitle: {
+    fontWeight: '600',
+    marginBottom: 8,
+  },
   metadata: {
-    marginTop: 8,
+    gap: 6,
   },
   metadataRow: {
-    marginTop: 4,
-  },
-  mac: {
-    fontFamily: 'monospace',
-  },
-  actionsColumn: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
-    justifyContent: 'flex-start',
+  },
+  metadataText: {
+    marginLeft: 2,
+  },
+  signalBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 6,
+  },
+  macAddress: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(128, 128, 128, 0.2)',
   },
   actionButton: {
-    width: 90,
-    height: 56,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-  },
-  chevron: {
-    marginTop: 4,
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
   },
 });
+
+export default AlertCard;

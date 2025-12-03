@@ -26,7 +26,7 @@ export const mockDevices: Device[] = [
     detectionCount: 87,
     location: {
       latitude: 29.7589,
-      longitude: -95.3710,
+      longitude: -95.371,
     },
     lastSeen: '2025-11-16T09:47:00Z',
     firmware: 'v2.1.3',
@@ -73,7 +73,7 @@ export const mockDevices: Device[] = [
     signalStrength: 'offline',
     detectionCount: 156,
     location: {
-      latitude: 29.7620,
+      latitude: 29.762,
       longitude: -95.3695,
     },
     lastSeen: '2025-11-12T08:15:00Z',
@@ -83,5 +83,5 @@ export const mockDevices: Device[] = [
   },
 ];
 
-export const mockOnlineDevices = mockDevices.filter((d) => d.online);
-export const mockOfflineDevices = mockDevices.filter((d) => !d.online);
+export const mockOnlineDevices = mockDevices.filter(d => d.online);
+export const mockOfflineDevices = mockDevices.filter(d => !d.online);

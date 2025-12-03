@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  FlatList,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { useDeviceHistory } from '@hooks/useAnalytics';
 import { useRoute, RouteProp } from '@react-navigation/native';
 // TODO: Replace victory-native with a lighter charting library compatible with Expo Go
@@ -54,7 +48,12 @@ export const DeviceHistoryScreen = () => {
     <View style={styles.detectionCard}>
       <View style={styles.detectionHeader}>
         <Text style={styles.detectionDate}>{formatDate(item.timestamp)}</Text>
-        <View style={[styles.badge, styles[`badge${item.type}` as keyof typeof styles]]}>
+        <View
+          style={[
+            styles.badge,
+            styles[`badge${item.type}` as keyof typeof styles],
+          ]}
+        >
           <Text style={styles.badgeText}>{item.type}</Text>
         </View>
       </View>
@@ -106,7 +105,7 @@ export const DeviceHistoryScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Common Visit Times</Text>
           <View style={styles.hourList}>
-            {fingerprint.commonHours.map((hour) => (
+            {fingerprint.commonHours.map(hour => (
               <View key={hour} style={styles.hourBadge}>
                 <Text style={styles.hourText}>
                   {hour}:00 - {hour + 1}:00

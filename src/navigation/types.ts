@@ -14,8 +14,9 @@ export type AuthStackParamList = {
 export type MainTabParamList = {
   AlertsTab: NavigatorScreenParams<AlertsStackParamList>;
   RadarTab: NavigatorScreenParams<RadarStackParamList>;
-  DevicesTab: NavigatorScreenParams<DevicesStackParamList>;
   AnalyticsTab: NavigatorScreenParams<AnalyticsStackParamList>;
+  DevicesTab: NavigatorScreenParams<DevicesStackParamList>;
+  AITab: NavigatorScreenParams<AIStackParamList>;
   SettingsTab: NavigatorScreenParams<SettingsStackParamList>;
 };
 
@@ -49,4 +50,8 @@ export type SettingsStackParamList = {
   Profile: undefined;
   Whitelist: undefined;
   NotificationSettings: undefined;
+};
+
+export type AIStackParamList = {
+  TrailSenseAI: undefined;
 };

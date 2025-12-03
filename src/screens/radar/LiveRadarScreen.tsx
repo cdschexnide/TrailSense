@@ -26,7 +26,7 @@ export const LiveRadarScreen = ({ navigation }: any) => {
         timestamp: alert.timestamp,
       };
 
-      setDetections((prev) => {
+      setDetections(prev => {
         // Keep only last 50 detections for performance
         const updated = [...prev, newDetection];
         return updated.slice(-50);
@@ -36,7 +36,7 @@ export const LiveRadarScreen = ({ navigation }: any) => {
 
       // Auto-remove detection after 30 seconds
       setTimeout(() => {
-        setDetections((prev) => prev.filter((d) => d.id !== alert.id));
+        setDetections(prev => prev.filter(d => d.id !== alert.id));
       }, 30000);
     };
 
@@ -60,7 +60,9 @@ export const LiveRadarScreen = ({ navigation }: any) => {
           <Button
             buttonStyle="plain"
             onPress={() => navigation.navigate('RadarSettings')}
-            leftIcon={<Icon name="settings-outline" size={22} color="systemBlue" />}
+            leftIcon={
+              <Icon name="settings-outline" size={22} color="systemBlue" />
+            }
           >
             Settings
           </Button>
@@ -73,7 +75,8 @@ export const LiveRadarScreen = ({ navigation }: any) => {
         <Card variant="grouped" style={styles.summaryCard}>
           <View style={styles.summaryContent}>
             <Text variant="title2" color="label">
-              {detections.length} Active Detection{detections.length !== 1 ? 's' : ''}
+              {detections.length} Active Detection
+              {detections.length !== 1 ? 's' : ''}
             </Text>
             <Text variant="footnote" color="secondaryLabel">
               Last updated: {formatRelativeTime(lastUpdate)}

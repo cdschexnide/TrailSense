@@ -14,7 +14,12 @@ interface StatCardProps {
   style?: ViewStyle;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, change, style }) => {
+export const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  change,
+  style,
+}) => {
   const { theme } = useTheme();
   const { colors } = theme;
 

@@ -27,9 +27,9 @@ export const useMarkAlertReviewed = () => {
     onSuccess: (_, id) => {
       // Invalidate alerts list
       queryClient.invalidateQueries({ queryKey: [ALERTS_QUERY_KEY] });
-      
+
       // Update specific alert in cache
-      queryClient.setQueryData<Alert>([ALERTS_QUERY_KEY, id], (oldData) => {
+      queryClient.setQueryData<Alert>([ALERTS_QUERY_KEY, id], oldData => {
         if (oldData) {
           return { ...oldData, isReviewed: true };
         }

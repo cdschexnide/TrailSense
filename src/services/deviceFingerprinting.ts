@@ -24,7 +24,9 @@ export class DeviceFingerprintingService {
     await this.saveFingerprint(fingerprint);
   }
 
-  static async getDeviceHistory(macAddress: string): Promise<DeviceFingerprint> {
+  static async getDeviceHistory(
+    macAddress: string
+  ): Promise<DeviceFingerprint> {
     return await database.fingerprints.findOne({ macAddress });
   }
 
@@ -106,7 +108,7 @@ export class DeviceFingerprintingService {
   ): number[] {
     const hourCounts: Record<number, number> = {};
 
-    detections.forEach((detection) => {
+    detections.forEach(detection => {
       const hour = new Date(detection.timestamp).getHours();
       hourCounts[hour] = (hourCounts[hour] || 0) + 1;
     });
@@ -129,17 +131,17 @@ export class DeviceFingerprintingService {
   }> {
     const allFingerprints = await database.fingerprints.find();
 
-    const frequentVisitors = allFingerprints.filter((fp) => fp.totalVisits >= 5);
+    const frequentVisitors = allFingerprints.filter(fp => fp.totalVisits >= 5);
 
     const newDevices = allFingerprints.filter(
-      (fp) =>
+      fp =>
         new Date().getTime() - new Date(fp.firstSeen).getTime() <
         7 * 24 * 60 * 60 * 1000 // Last 7 days
     );
 
     const suspiciousDevices = allFingerprints.filter(
-      (fp) =>
-        fp.commonHours.some((hour) => hour >= 22 || hour <= 6) && // Night activity
+      fp =>
+        fp.commonHours.some(hour => hour >= 22 || hour <= 6) && // Night activity
         fp.averageDuration < 300 // Short visits
     );
 

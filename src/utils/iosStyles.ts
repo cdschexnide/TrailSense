@@ -628,7 +628,9 @@ export const iosCard = (backgroundColor: string = '#FFFFFF'): ViewStyle => ({
  * iOS List Item preset
  * Standard iOS list row styling
  */
-export const iosListItem = (backgroundColor: string = '#FFFFFF'): ViewStyle => ({
+export const iosListItem = (
+  backgroundColor: string = '#FFFFFF'
+): ViewStyle => ({
   backgroundColor,
   minHeight: 44,
   paddingHorizontal: 16,

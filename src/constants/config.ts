@@ -1,15 +1,14 @@
 // Configuration constants
 // NOTE: process.env doesn't work in React Native without react-native-dotenv
-// Using hardcoded defaults for now - these work for local development
+// Using hardcoded defaults for now
 
-// IMPORTANT: When using Expo Go on a physical device (scanning QR code),
-// you MUST use your Mac's local IP address, NOT localhost!
-//
-// For physical Android device via Expo Go: use Mac's IP (192.168.12.63)
-// For iOS simulator: use localhost
-// For Android emulator: use 10.0.2.2
-const DEFAULT_API_URL = 'http://192.168.12.63:3000';
-const DEFAULT_WS_URL = 'ws://192.168.12.63:3000';
+// PRODUCTION: Using Railway backend
+const DEFAULT_API_URL = 'https://trailsense-production.up.railway.app';
+const DEFAULT_WS_URL = 'wss://trailsense-production.up.railway.app';
+
+// LOCAL DEVELOPMENT (commented out):
+// const DEFAULT_API_URL = 'http://192.168.12.63:3000';
+// const DEFAULT_WS_URL = 'ws://192.168.12.63:3000';
 
 export const Config = {
   apiBaseUrl: DEFAULT_API_URL,

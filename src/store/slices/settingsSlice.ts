@@ -45,7 +45,8 @@ const settingsSlice = createSlice({
       state.settings.theme = action.payload;
     },
     toggleNotifications: state => {
-      state.settings.notificationsEnabled = !state.settings.notificationsEnabled;
+      state.settings.notificationsEnabled =
+        !state.settings.notificationsEnabled;
     },
     toggleSound: state => {
       state.settings.soundEnabled = !state.settings.soundEnabled;
@@ -65,10 +66,7 @@ const settingsSlice = createSlice({
     ) => {
       state.settings.mapStyle = action.payload;
     },
-    setDistanceUnit: (
-      state,
-      action: PayloadAction<'miles' | 'kilometers'>
-    ) => {
+    setDistanceUnit: (state, action: PayloadAction<'miles' | 'kilometers'>) => {
       state.settings.distanceUnit = action.payload;
     },
     setTemperatureUnit: (

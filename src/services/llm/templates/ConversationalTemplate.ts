@@ -26,21 +26,30 @@ export interface ConversationContext {
  */
 export class ConversationalTemplate extends PromptTemplate {
   constructor() {
-    const systemPrompt = `You are a helpful security assistant for the TrailSense home security system. You help homeowners understand their security data through natural conversation.
+    const systemPrompt = `You are a helpful security assistant for TrailSense, a passive RF detection system designed for rural and off-grid properties. TrailSense detects nearby wireless devices (WiFi, Bluetooth, cellular) to provide early warning of approaching people or vehicles. There are NO cameras - this is a detection-only system.
+
+Context: TrailSense is used on rural properties, ranches, farms, cabins, and remote locations where:
+- Properties are large with long driveways
+- Visitors are less frequent than urban areas
+- Early warning of approaching vehicles/people is valuable
+- There are no security cameras to check
+
+You help property owners understand their detection data through natural conversation.
 
 You have access to:
-- Recent security alerts and detections
-- Device status and history
-- Whitelist configuration
-- System settings
+- Recent detection alerts (WiFi, Bluetooth, cellular signals detected)
+- Detection device status (ESP32 sensors) and battery levels
+- Whitelist of known/trusted devices
+- Detection history and patterns
 
 Guidelines:
 - Be conversational and friendly (but professional)
 - Answer questions based ONLY on provided data (never speculate)
 - If you don't know something, say so
 - Offer to help with follow-up questions
-- Suggest actionable next steps when relevant
-- Keep responses concise (3-4 sentences max)`;
+- Suggest actionable next steps when relevant (but never mention cameras)
+- Keep responses concise (3-4 sentences max)
+- Remember this is for RURAL properties - context matters`;
 
     super(systemPrompt);
   }
@@ -48,7 +57,9 @@ Guidelines:
   /**
    * Build chat messages for conversational interaction
    */
-  buildPrompt(context: ConversationContext): Array<{role: 'system' | 'user' | 'assistant', content: string}> {
+  buildPrompt(
+    context: ConversationContext
+  ): Array<{ role: 'system' | 'user' | 'assistant'; content: string }> {
     const { messages, securityContext } = context;
 
     // Build conversation history (keep last 5 messages for context)
@@ -87,12 +98,10 @@ Respond to the user's latest message helpfully and concisely.`;
   /**
    * Format security context
    */
-  private formatSecurityContext(
-    securityContext?: {
-      recentAlerts: any[];
-      deviceStatus: any[];
-    }
-  ): string {
+  private formatSecurityContext(securityContext?: {
+    recentAlerts: any[];
+    deviceStatus: any[];
+  }): string {
     if (!securityContext) {
       return '';
     }
@@ -104,7 +113,8 @@ Respond to the user's latest message helpfully and concisely.`;
       ? deviceStatus.filter(d => d.online).length
       : 0;
     const criticalAlertsCount = recentAlerts
-      ? recentAlerts.filter(a => ['high', 'critical'].includes(a.threat_level)).length
+      ? recentAlerts.filter(a => ['high', 'critical'].includes(a.threat_level))
+          .length
       : 0;
 
     return `
@@ -133,11 +143,17 @@ Current Security Status:
     // Detect question type and customize prompt
     const questionLower = question.toLowerCase();
 
-    if (questionLower.includes('alert') || questionLower.includes('detection')) {
+    if (
+      questionLower.includes('alert') ||
+      questionLower.includes('detection')
+    ) {
       return this.buildAlertQuestionPrompt(question, context);
     }
 
-    if (questionLower.includes('device') || questionLower.includes('whitelist')) {
+    if (
+      questionLower.includes('device') ||
+      questionLower.includes('whitelist')
+    ) {
       return this.buildDeviceQuestionPrompt(question, context);
     }
 
@@ -226,7 +242,8 @@ Provide a clear summary addressing the user's question.`;
     return devices
       .slice(0, 10) // Show up to 10 devices
       .map(device => {
-        const name = device.friendly_name || device.metadata?.device_name || 'Unknown';
+        const name =
+          device.friendly_name || device.metadata?.device_name || 'Unknown';
         const status = device.online ? 'Active' : 'Inactive';
         const whitelisted = device.whitelisted ? '(Whitelisted)' : '';
         return `- ${name}: ${status} ${whitelisted}`;

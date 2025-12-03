@@ -17,8 +17,8 @@ export const analyticsApi = {
     const response = await apiClient.get('/api/analytics', {
       params: {
         period: params.period || 'week',
-        startDate: params.startDate?.toISOString(),
-        endDate: params.endDate?.toISOString(),
+        ...(params.startDate && { startDate: params.startDate.toISOString() }),
+        ...(params.endDate && { endDate: params.endDate.toISOString() }),
       },
     });
     return response.data;

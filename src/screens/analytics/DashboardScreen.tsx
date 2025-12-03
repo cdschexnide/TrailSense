@@ -58,7 +58,12 @@ const getDetectionColor = (type: string, isDark: boolean): string => {
 
 export const DashboardScreen = () => {
   const [period, setPeriod] = useState<Period>('week');
-  const { data: analytics, isLoading } = useAnalytics({ period });
+  const {
+    data: analytics,
+    isLoading,
+    isError,
+    refetch,
+  } = useAnalytics({ period });
   const { theme, colorScheme } = useTheme();
   const isDark = colorScheme === 'dark';
 
@@ -68,8 +73,12 @@ export const DashboardScreen = () => {
     backgroundGradientFrom: theme.colors.secondarySystemGroupedBackground,
     backgroundGradientTo: theme.colors.secondarySystemGroupedBackground,
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(${isDark ? '10, 132, 255' : '0, 122, 255'}, ${opacity})`,
-    labelColor: (opacity = 1) => `${theme.colors.label}${Math.round(opacity * 255).toString(16).padStart(2, '0')}`,
+    color: (opacity = 1) =>
+      `rgba(${isDark ? '10, 132, 255' : '0, 122, 255'}, ${opacity})`,
+    labelColor: (opacity = 1) =>
+      `${theme.colors.label}${Math.round(opacity * 255)
+        .toString(16)
+        .padStart(2, '0')}`,
     style: {
       borderRadius: 16,
     },
@@ -87,14 +96,18 @@ export const DashboardScreen = () => {
 
   // Transform daily trend data for line chart
   const transformDailyTrend = () => {
-    if (!analytics || !analytics.dailyTrend || analytics.dailyTrend.length === 0) {
+    if (
+      !analytics ||
+      !analytics.dailyTrend ||
+      analytics.dailyTrend.length === 0
+    ) {
       return null;
     }
 
-    const labels = analytics.dailyTrend.map((item) =>
+    const labels = analytics.dailyTrend.map(item =>
       formatChartDate(item.date, period)
     );
-    const data = analytics.dailyTrend.map((item) => item.count);
+    const data = analytics.dailyTrend.map(item => item.count);
 
     return {
       labels,
@@ -118,7 +131,7 @@ export const DashboardScreen = () => {
       return null;
     }
 
-    return analytics.detectionTypeDistribution.map((item) => ({
+    return analytics.detectionTypeDistribution.map(item => ({
       name: item.type.charAt(0).toUpperCase() + item.type.slice(1),
       population: item.count,
       color: getDetectionColor(item.type, isDark),
@@ -137,10 +150,10 @@ export const DashboardScreen = () => {
       return null;
     }
 
-    const labels = analytics.threatLevelDistribution.map((item) =>
-      item.level.charAt(0).toUpperCase() + item.level.slice(1)
+    const labels = analytics.threatLevelDistribution.map(
+      item => item.level.charAt(0).toUpperCase() + item.level.slice(1)
     );
-    const data = analytics.threatLevelDistribution.map((item) => item.count);
+    const data = analytics.threatLevelDistribution.map(item => item.count);
 
     return {
       labels,
@@ -164,12 +177,12 @@ export const DashboardScreen = () => {
 
     // Take top 5 devices
     const topDevices = analytics.deviceDistribution.slice(0, 5);
-    const labels = topDevices.map((item) => {
+    const labels = topDevices.map(item => {
       // Shorten device ID for display
       const id = item.deviceId;
       return id.length > 8 ? `${id.substring(0, 8)}...` : id;
     });
-    const data = topDevices.map((item) => item.count);
+    const data = topDevices.map(item => item.count);
 
     return {
       labels,
@@ -187,12 +200,49 @@ export const DashboardScreen = () => {
     // You can add a tooltip or alert here if needed
   };
 
-  if (isLoading || !analytics) {
+  if (isLoading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.systemBackground }]}>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.systemBackground },
+        ]}
+      >
         <Text style={[styles.loadingText, { color: theme.colors.label }]}>
           Loading analytics...
         </Text>
+      </View>
+    );
+  }
+
+  if (isError || !analytics) {
+    return (
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.systemBackground },
+        ]}
+      >
+        <Text style={[styles.errorText, { color: theme.colors.systemRed }]}>
+          Failed to load analytics
+        </Text>
+        <Text
+          style={[styles.errorSubtext, { color: theme.colors.secondaryLabel }]}
+        >
+          The server returned an error. Please try again.
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.retryButton,
+            { backgroundColor: theme.colors.systemBlue },
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            refetch();
+          }}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -203,21 +253,32 @@ export const DashboardScreen = () => {
   const deviceDistributionData = transformDeviceDistribution();
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.systemBackground }]}>
-      <View style={[styles.header, { borderBottomWidth: 1, borderBottomColor: theme.colors.separator }]}>
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.systemBackground },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          { borderBottomWidth: 1, borderBottomColor: theme.colors.separator },
+        ]}
+      >
         <Text style={[styles.title, { color: theme.colors.label }]}>
           Analytics Dashboard
         </Text>
         <View style={styles.periodSelector}>
-          {(['day', 'week', 'month', 'year'] as Period[]).map((p) => (
+          {(['day', 'week', 'month', 'year'] as Period[]).map(p => (
             <TouchableOpacity
               key={p}
               style={[
                 styles.periodButton,
                 {
-                  backgroundColor: period === p
-                    ? theme.colors.systemBlue
-                    : theme.colors.secondarySystemFill,
+                  backgroundColor:
+                    period === p
+                      ? theme.colors.systemBlue
+                      : theme.colors.secondarySystemFill,
                 },
               ]}
               onPress={() => {
@@ -229,9 +290,7 @@ export const DashboardScreen = () => {
                 style={[
                   styles.periodButtonText,
                   {
-                    color: period === p
-                      ? '#FFFFFF'
-                      : theme.colors.label,
+                    color: period === p ? '#FFFFFF' : theme.colors.label,
                   },
                 ]}
               >
@@ -281,7 +340,9 @@ export const DashboardScreen = () => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}>
+            <Text
+              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
+            >
               No data available for this period
             </Text>
           </View>
@@ -305,7 +366,9 @@ export const DashboardScreen = () => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}>
+            <Text
+              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
+            >
               No detection type data available
             </Text>
           </View>
@@ -328,7 +391,9 @@ export const DashboardScreen = () => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}>
+            <Text
+              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
+            >
               No device distribution data available
             </Text>
           </View>
@@ -354,7 +419,9 @@ export const DashboardScreen = () => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}>
+            <Text
+              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
+            >
               No threat level data available
             </Text>
           </View>
@@ -375,6 +442,27 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 32,
+  },
+  retryButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   header: {
     padding: 16,

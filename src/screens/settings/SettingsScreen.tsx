@@ -24,7 +24,9 @@ export const SettingsScreen = ({ navigation }: any) => {
     >
       <ListSection header="DETECTION" style={styles.section}>
         <ListRow
-          leftIcon={<Icon name="speedometer-outline" size={24} color="systemOrange" />}
+          leftIcon={
+            <Icon name="speedometer-outline" size={24} color="systemOrange" />
+          }
           title="Detection Sensitivity"
           rightText={settings?.sensitivity || 'Medium'}
           onPress={() => navigation.navigate('Sensitivity')}
@@ -41,14 +43,18 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <ListSection header="NOTIFICATIONS" style={styles.section}>
         <ListRow
-          leftIcon={<Icon name="notifications-outline" size={24} color="systemRed" />}
+          leftIcon={
+            <Icon name="notifications-outline" size={24} color="systemRed" />
+          }
           title="Push Notifications"
           subtitle="Receive alerts on your device"
           onPress={() => navigation.navigate('NotificationSettings')}
           accessoryType="disclosureIndicator"
         />
         <ListRow
-          leftIcon={<Icon name="volume-high-outline" size={24} color="systemBlue" />}
+          leftIcon={
+            <Icon name="volume-high-outline" size={24} color="systemBlue" />
+          }
           title="Alert Sound"
           subtitle="Play sound for new alerts"
           onPress={() => navigation.navigate('AlertSound')}
@@ -58,7 +64,9 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <ListSection header="APPEARANCE" style={styles.section}>
         <ListRow
-          leftIcon={<Icon name="color-palette-outline" size={24} color="systemPurple" />}
+          leftIcon={
+            <Icon name="color-palette-outline" size={24} color="systemPurple" />
+          }
           title="Theme"
           rightText={settings?.theme || 'System'}
           onPress={() => navigation.navigate('Theme')}
@@ -68,7 +76,9 @@ export const SettingsScreen = ({ navigation }: any) => {
 
       <ListSection header="SECURITY" style={styles.section}>
         <ListRow
-          leftIcon={<Icon name="finger-print-outline" size={24} color="systemGreen" />}
+          leftIcon={
+            <Icon name="finger-print-outline" size={24} color="systemGreen" />
+          }
           title="Biometric Authentication"
           subtitle="Use fingerprint or face ID"
           onPress={() => navigation.navigate('Biometric')}
@@ -91,17 +101,15 @@ export const SettingsScreen = ({ navigation }: any) => {
           accessoryType="disclosureIndicator"
         />
         <ListRow
-          leftIcon={<Icon name="lock-closed-outline" size={24} color="systemOrange" />}
+          leftIcon={
+            <Icon name="lock-closed-outline" size={24} color="systemOrange" />
+          }
           title="Security"
           subtitle="Password and security settings"
           onPress={() => navigation.navigate('Security')}
           accessoryType="disclosureIndicator"
         />
-        <ListRow
-          title="Logout"
-          onPress={handleLogout}
-          accessoryType="none"
-        />
+        <ListRow title="Logout" onPress={handleLogout} accessoryType="none" />
       </ListSection>
     </ScreenLayout>
   );

@@ -1,19 +1,20 @@
 import { modelManager } from './modelManager';
 import { llmLogger } from '@/utils/llmLogger';
 import { performanceTracker } from '@/utils/llmPerformance';
-import { LLMError, LLMErrorCode, GenerationOptions } from '@/types/llm';
+import {
+  LLMError,
+  LLMErrorCode,
+  GenerationOptions,
+  Message,
+} from '@/types/llm';
 import { LLM_CONFIG } from '@/config/llmConfig';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
-
-// Import Message type from react-native-executorch
-type Message = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-};
 
 /**
  * Inference Engine
  * Handles text generation using the loaded LLM model with chat message format
+ *
+ * Updated to use the new ModelManager API that properly wraps LLMModule
  */
 export class InferenceEngine {
   private inferenceInProgress: boolean = false;
@@ -47,30 +48,23 @@ export class InferenceEngine {
     }
 
     // Set defaults
-    const {
-      timeout = LLM_CONFIG.INFERENCE_TIMEOUT_MS,
-    } = options;
-
-    // Note: Temperature, maxTokens, and other parameters are configured in the LLMController
-    // They can be set via configure() method if needed in the future
+    const { timeout = LLM_CONFIG.INFERENCE_TIMEOUT_MS } = options;
 
     this.inferenceInProgress = true;
     const endTimer = performanceTracker.startTimer('Inference');
 
     try {
-      const messagePreview = messages.map(m => `${m.role}: ${m.content.substring(0, 50)}...`).join('; ');
+      const messagePreview = messages
+        .map(m => `${m.role}: ${m.content.substring(0, 50)}...`)
+        .join('; ');
       llmLogger.debug('Starting inference...', {
         messageCount: messages.length,
         messagePreview,
       });
 
-      const llmController = modelManager.getModel();
-
-      // Generate response using LLMController
-      await llmController.generate(messages);
-
-      // Get the response from the controller
-      const response = llmController.response;
+      // Use modelManager.generate() which properly uses LLMModule.generate()
+      // The response is built through streaming token callbacks
+      const response = await modelManager.generate(messages);
 
       const inferenceTime = endTimer();
       const tokenCount = this.estimateTokenCount(response);
@@ -165,23 +159,37 @@ export class InferenceEngine {
     llmLogger.info('Generating mock response (LLM_MOCK_MODE enabled)');
 
     // Simulate inference delay
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    await new Promise(resolve =>
+      setTimeout(resolve, 500 + Math.random() * 1000)
+    );
 
     // Extract the user message content
     const userMessage = messages.find(m => m.role === 'user')?.content || '';
-    const combinedContent = messages.map(m => m.content).join(' ').toLowerCase();
+    const combinedContent = messages
+      .map(m => m.content)
+      .join(' ')
+      .toLowerCase();
 
     // Generate mock responses based on message content
-    if (combinedContent.includes('alert') || combinedContent.includes('detection')) {
+    if (
+      combinedContent.includes('alert') ||
+      combinedContent.includes('detection')
+    ) {
       return 'This is a mock alert summary. A WiFi device was detected at -55 dBm, which indicates close proximity (within 10-20 feet). This signal strength suggests the device is in your immediate vicinity, possibly in your driveway or yard. Recommended action: Check your security cameras to see if anyone is nearby.';
     }
 
-    if (combinedContent.includes('pattern') || combinedContent.includes('device')) {
+    if (
+      combinedContent.includes('pattern') ||
+      combinedContent.includes('device')
+    ) {
       return 'This is a mock pattern analysis. Based on the detection history, this appears to be a routine visitor, likely a delivery driver. The device is detected on weekdays during typical delivery hours (10am-4pm) and stays in the FAR zone (street level). Confidence: High. Recommendation: Consider whitelisting this device as "Delivery Driver" to reduce false alerts.';
     }
 
-    if (combinedContent.includes('conversation') || combinedContent.includes('question')) {
-      return 'This is a mock conversational response. I can help you understand your security data. Based on your recent alerts, everything looks normal with routine detections only. Is there something specific you\'d like to know more about?';
+    if (
+      combinedContent.includes('conversation') ||
+      combinedContent.includes('question')
+    ) {
+      return "This is a mock conversational response. I can help you understand your security data. Based on your recent alerts, everything looks normal with routine detections only. Is there something specific you'd like to know more about?";
     }
 
     // Default mock response

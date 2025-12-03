@@ -52,7 +52,9 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
               },
             ]}
           >
-            {action.icon && <View style={styles.iconContainer}>{action.icon}</View>}
+            {action.icon && (
+              <View style={styles.iconContainer}>{action.icon}</View>
+            )}
             <Text
               variant="footnote"
               style={[

@@ -6,7 +6,8 @@ import { useAppSelector, useAppDispatch } from '@store';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export const QuietHoursScreen = ({ navigation }: any) => {
-  const quietHoursEnabled = useAppSelector(state => state.settings?.quietHoursEnabled) || false;
+  const quietHoursEnabled =
+    useAppSelector(state => state.settings?.quietHoursEnabled) || false;
   const dispatch = useAppDispatch();
 
   const [enabled, setEnabled] = useState(quietHoursEnabled);
@@ -108,11 +109,7 @@ export const QuietHoursScreen = ({ navigation }: any) => {
         )}
 
         <View style={styles.footer}>
-          <Button
-            title="Save Changes"
-            variant="primary"
-            onPress={handleSave}
-          />
+          <Button title="Save Changes" variant="primary" onPress={handleSave} />
         </View>
       </ScrollView>
     </ScreenLayout>

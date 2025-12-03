@@ -11,7 +11,8 @@ const CATEGORIES = [
 ];
 
 export const AddWhitelistScreen = ({ navigation, route }: any) => {
-  const { macAddress: initialMac, deviceId: initialDeviceId } = route.params || {};
+  const { macAddress: initialMac, deviceId: initialDeviceId } =
+    route.params || {};
 
   const [name, setName] = useState('');
   const [macAddress, setMacAddress] = useState(initialMac || '');
@@ -52,7 +53,9 @@ export const AddWhitelistScreen = ({ navigation, route }: any) => {
       category,
       isTemporary,
       expiresAt: isTemporary
-        ? new Date(Date.now() + parseInt(expiresInDays) * 24 * 60 * 60 * 1000).toISOString()
+        ? new Date(
+            Date.now() + parseInt(expiresInDays) * 24 * 60 * 60 * 1000
+          ).toISOString()
         : null,
     };
 
@@ -95,7 +98,7 @@ export const AddWhitelistScreen = ({ navigation, route }: any) => {
               Category
             </Text>
             <View style={styles.categoryGrid}>
-              {CATEGORIES.map((cat) => (
+              {CATEGORIES.map(cat => (
                 <Button
                   key={cat.value}
                   title={cat.label}
@@ -134,12 +137,8 @@ export const AddWhitelistScreen = ({ navigation, route }: any) => {
           <Text variant="h3" style={styles.sectionTitle}>
             MAC Address Format
           </Text>
-          <Text variant="caption">
-            - Use format: XX:XX:XX:XX:XX:XX
-          </Text>
-          <Text variant="caption">
-            - Example: A1:B2:C3:D4:E5:F6
-          </Text>
+          <Text variant="caption">- Use format: XX:XX:XX:XX:XX:XX</Text>
+          <Text variant="caption">- Example: A1:B2:C3:D4:E5:F6</Text>
           <Text variant="caption">
             - Each X represents a hexadecimal digit (0-9, A-F)
           </Text>

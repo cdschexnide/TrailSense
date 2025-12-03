@@ -1,5 +1,8 @@
 import React from 'react';
-import { SwipeableRow, createSwipeActions } from '@components/molecules/SwipeableRow';
+import {
+  SwipeableRow,
+  createSwipeActions,
+} from '@components/molecules/SwipeableRow';
 import { ListRow } from '@components/molecules/ListRow';
 import { useTheme } from '@hooks/useTheme';
 

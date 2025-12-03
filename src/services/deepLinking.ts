@@ -23,7 +23,7 @@ export class DeepLinkingService {
    * Handle notification tap when app is in background/foreground
    */
   static onNotificationOpenedApp(callback: (data: NotificationData) => void) {
-    return messaging().onNotificationOpenedApp((remoteMessage) => {
+    return messaging().onNotificationOpenedApp(remoteMessage => {
       const data = this.parseNotificationData(remoteMessage.data);
       if (data) {
         callback(data);
@@ -61,7 +61,9 @@ export class DeepLinkingService {
   /**
    * Navigate to screen based on notification data
    */
-  static getNavigationRoute(data: NotificationData): { screen: string; params?: any } | null {
+  static getNavigationRoute(
+    data: NotificationData
+  ): { screen: string; params?: any } | null {
     switch (data.type) {
       case 'alert':
         return {

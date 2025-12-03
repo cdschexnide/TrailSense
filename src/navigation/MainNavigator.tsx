@@ -6,8 +6,9 @@ import { MainTabParamList } from './types';
 import AlertsStack from './stacks/AlertsStack';
 import RadarStack from './stacks/RadarStack';
 import DevicesStack from './stacks/DevicesStack';
-import AnalyticsStack from './stacks/AnalyticsStack';
+import AIStack from './stacks/AIStack';
 import SettingsStack from './stacks/SettingsStack';
+import { AnalyticsStack } from './stacks/AnalyticsStack';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -37,16 +38,6 @@ export const MainNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="RadarTab"
-        component={RadarStack}
-        options={{
-          title: 'Radar',
-          tabBarIcon: ({ color }) => (
-            <Icon name="locate" color={color} size="base" />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="DevicesTab"
         component={DevicesStack}
         options={{
@@ -57,12 +48,32 @@ export const MainNavigator = () => {
         }}
       />
       <Tab.Screen
+        name="RadarTab"
+        component={RadarStack}
+        options={{
+          title: 'Map',
+          tabBarIcon: ({ color }) => (
+            <Icon name="map-outline" color={color} size="base" />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="AnalyticsTab"
         component={AnalyticsStack}
         options={{
           title: 'Analytics',
           tabBarIcon: ({ color }) => (
-            <Icon name="bar-chart" color={color} size="base" />
+            <Icon name="analytics" color={color} size="base" />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="AITab"
+        component={AIStack}
+        options={{
+          title: 'TrailSenseAI',
+          tabBarIcon: ({ color }) => (
+            <Icon name="sparkles-outline" color={color} size="base" />
           ),
         }}
       />

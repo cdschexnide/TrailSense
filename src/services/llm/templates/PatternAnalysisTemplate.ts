@@ -15,20 +15,34 @@ export interface DeviceContext {
  */
 export class PatternAnalysisTemplate extends PromptTemplate {
   constructor() {
-    const systemPrompt = `You are a pattern recognition expert for a security system. Analyze device detection patterns to identify routine visitors, suspicious behavior, and suggest appropriate actions.
+    const systemPrompt = `You are a pattern recognition expert for TrailSense, a passive RF detection system for rural and off-grid properties. TrailSense detects nearby wireless devices (WiFi, Bluetooth, cellular phones) to alert property owners of approaching people or vehicles. There are NO cameras - this is detection-only.
 
-Common patterns:
-- Delivery driver: Weekdays, same time, stays in FAR zone (street)
-- Mail carrier: Weekdays, morning, brief visits
-- Neighbor: Regular times, EXTREME zone (property boundary)
-- Routine visitor: Same days/times, approaches property
-- Suspicious: Irregular times, especially nighttime, stationary
+Context: TrailSense is deployed on rural properties, ranches, farms, cabins, and remote locations where:
+- Properties are often large with long driveways or access roads
+- Visitors are less frequent than urban areas
+- Delivery services may come on specific days
+- Neighbors may drive by on shared roads
+- Unknown vehicles are more notable
+
+Common patterns for rural properties:
+- Delivery driver: Weekdays, predictable times, stays in FAR/EXTREME zone (road/driveway entrance)
+- Mail/Package carrier: Weekdays, morning, brief detection near mailbox area
+- Neighbor: Regular times, passes through EXTREME zone on shared road
+- Ranch/Farm worker: Consistent schedule, approaches property
+- Routine visitor: Same days/times, familiar pattern
+- Suspicious: Irregular times, nighttime, lingers in detection zones, no pattern
+
+Detection zones:
+- IMMEDIATE (0-10 feet): Very close to sensor, on property
+- NEAR (10-50 feet): Approaching property
+- FAR (50-200 feet): Driveway or nearby road
+- EXTREME (200+ feet): Property boundary, passing traffic
 
 Your analysis should:
-- Identify the most likely pattern type
+- Identify the most likely pattern type for a rural property context
 - Explain the reasoning clearly
-- Suggest if device should be whitelisted
-- Recommend a friendly name if whitelisting`;
+- Suggest if device should be whitelisted to reduce alerts
+- Recommend a friendly name if whitelisting (e.g., "UPS Delivery", "Neighbor's Truck")`;
 
     super(systemPrompt);
   }
@@ -36,7 +50,9 @@ Your analysis should:
   /**
    * Build chat messages for pattern analysis
    */
-  buildPrompt(context: DeviceContext): Array<{role: 'system' | 'user' | 'assistant', content: string}> {
+  buildPrompt(
+    context: DeviceContext
+  ): Array<{ role: 'system' | 'user' | 'assistant'; content: string }> {
     const { device, detectionHistory, similarDevices } = context;
 
     // Extract device details
@@ -80,7 +96,12 @@ Based on this pattern:
    */
   private getDeviceName(device: any): string {
     const metadata = device.metadata || {};
-    return metadata.ssid || metadata.device_name || metadata.manufacturer || 'Unknown';
+    return (
+      metadata.ssid ||
+      metadata.device_name ||
+      metadata.manufacturer ||
+      'Unknown'
+    );
   }
 
   /**
@@ -91,7 +112,7 @@ Based on this pattern:
     const recent = detectionHistory.slice(0, 10);
 
     return recent
-      .map((alert) => {
+      .map(alert => {
         const day = this.formatDayOfWeek(alert.timestamp);
         const time = this.formatTime(alert.timestamp);
         const zone = alert.zone || 'unknown';
@@ -174,7 +195,9 @@ Based on this pattern:
       .slice(0, 3) // Show top 3 similar devices
       .map(d => {
         const name = d.friendly_name || d.metadata?.device_name || 'Unknown';
-        const similarity = d.similarity_score ? `${(d.similarity_score * 100).toFixed(0)}%` : 'N/A';
+        const similarity = d.similarity_score
+          ? `${(d.similarity_score * 100).toFixed(0)}%`
+          : 'N/A';
         return `- ${name} (${similarity} similar)`;
       })
       .join('\n');

@@ -91,7 +91,12 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
             <Text variant="largeTitle" weight="bold" style={styles.title}>
               Forgot Password
             </Text>
-            <Text variant="body" color="secondaryLabel" align="center" style={styles.subtitle}>
+            <Text
+              variant="body"
+              color="secondaryLabel"
+              align="center"
+              style={styles.subtitle}
+            >
               Enter your email address and we'll send you instructions to reset
               your password
             </Text>
@@ -139,10 +144,20 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
             </View>
           ) : (
             <View style={styles.successContainer}>
-              <Text variant="title1" weight="bold" align="center" style={styles.successTitle}>
+              <Text
+                variant="title1"
+                weight="bold"
+                align="center"
+                style={styles.successTitle}
+              >
                 Check Your Email
               </Text>
-              <Text variant="body" color="secondaryLabel" align="center" style={styles.successText}>
+              <Text
+                variant="body"
+                color="secondaryLabel"
+                align="center"
+                style={styles.successText}
+              >
                 We've sent password reset instructions to {email}
               </Text>
               <Button

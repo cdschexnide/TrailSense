@@ -4,9 +4,7 @@ import { format, parseISO } from 'date-fns';
 /**
  * Transform analytics data for line chart (detections over time)
  */
-export const prepareDetectionsOverTimeData = (
-  analytics: AnalyticsData
-) => {
+export const prepareDetectionsOverTimeData = (analytics: AnalyticsData) => {
   return {
     labels: analytics.dailyDetections.map(d =>
       format(parseISO(d.date), 'MM/dd')
@@ -48,9 +46,7 @@ export const prepareDetectionTypesData = (
 /**
  * Transform hourly distribution for bar chart
  */
-export const prepareHourlyDistributionData = (
-  analytics: AnalyticsData
-) => {
+export const prepareHourlyDistributionData = (analytics: AnalyticsData) => {
   // Show only peak hours for better readability
   const peakHours = analytics.hourlyDistribution.slice(6, 22); // 6am to 10pm
 

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Pressable, StyleSheet, ViewStyle, Animated, Keyboard } from 'react-native';
+import {
+  View,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  ViewStyle,
+  Animated,
+  Keyboard,
+} from 'react-native';
 import { Icon } from '@components/atoms';
 import { Text } from '@components/atoms/Text/Text';
 import { useTheme } from '@hooks/useTheme';

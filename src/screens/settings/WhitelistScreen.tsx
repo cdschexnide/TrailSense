@@ -2,7 +2,12 @@ import React from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { useWhitelist } from '@hooks/useWhitelist';
 import { WhitelistItem } from '@components/molecules';
-import { ScreenLayout, LoadingState, ErrorState, EmptyState } from '@components/templates';
+import {
+  ScreenLayout,
+  LoadingState,
+  ErrorState,
+  EmptyState,
+} from '@components/templates';
 import { Button } from '@components/atoms/Button';
 
 export const WhitelistScreen = ({ navigation }: any) => {
@@ -26,10 +31,7 @@ export const WhitelistScreen = ({ navigation }: any) => {
         title: 'Whitelist',
         showBack: true,
         rightActions: (
-          <Button
-            buttonStyle="plain"
-            onPress={handleAdd}
-          >
+          <Button buttonStyle="plain" onPress={handleAdd}>
             Add
           </Button>
         ),
@@ -46,7 +48,7 @@ export const WhitelistScreen = ({ navigation }: any) => {
             onDelete={() => handleDelete(item.id)}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <EmptyState

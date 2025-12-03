@@ -8,7 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from '@theme/index';
 import { store, persistor } from '@store/index';
 import { queryClient } from '@api/queryClient';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, Platform } from 'react-native';
 import RootNavigator from '@navigation/RootNavigator';
 import { isMockMode, logMockStatus } from '@/config/mockConfig';
 import { seedMockData } from '@/utils/seedMockData';
@@ -16,6 +16,17 @@ import { websocketService } from '@api/websocket';
 import { featureFlagsManager } from '@/config/featureFlags';
 import { AuthService } from '@services/authService';
 import { login as loginAction } from '@store/slices/authSlice';
+import { AIProvider } from '@/services/llm';
+
+// Initialize react-native-executorch early (Android and iOS)
+if (Platform.OS === 'android' || Platform.OS === 'ios') {
+  try {
+    require('react-native-executorch');
+    console.log('[App] react-native-executorch initialized for', Platform.OS);
+  } catch (error) {
+    console.warn('[App] Failed to initialize react-native-executorch:', error);
+  }
+}
 
 export default function App() {
   const [isMockDataReady, setIsMockDataReady] = useState(!isMockMode);
@@ -42,14 +53,16 @@ export default function App() {
           console.log('[App] Initializing mock WebSocket...');
           websocketService.connect('mock-token-for-testing');
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('[App] Failed to seed mock data:', error);
           setIsMockDataReady(true); // Continue anyway
         });
     } else {
       // Real API mode - WebSocket will be initialized after user logs in
       // The WebSocket requires a real JWT token from the backend
-      console.log('[App] Real API mode - WebSocket will connect after authentication');
+      console.log(
+        '[App] Real API mode - WebSocket will connect after authentication'
+      );
     }
 
     // Cleanup on unmount
@@ -81,8 +94,10 @@ export default function App() {
               persistor={persistor}
             >
               <QueryClientProvider client={queryClient}>
-                <StatusBar style="auto" />
-                <RootNavigator />
+                <AIProvider>
+                  <StatusBar style="auto" />
+                  <RootNavigator />
+                </AIProvider>
               </QueryClientProvider>
             </PersistGate>
           </ReduxProvider>

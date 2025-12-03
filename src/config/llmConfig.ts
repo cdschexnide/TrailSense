@@ -25,7 +25,7 @@ export const LLM_CONFIG = {
 
   // Model Size (in bytes) - Llama 3.2 1B
   MODEL_SIZE_BYTES: 1500000000, // ~1.5GB (approximate)
-  TOKENIZER_SIZE_BYTES: 524288,  // ~512KB
+  TOKENIZER_SIZE_BYTES: 524288, // ~512KB
 
   // Model Parameters
   CONTEXT_LENGTH: 2048,
@@ -35,7 +35,7 @@ export const LLM_CONFIG = {
   TOP_P_DEFAULT: 0.9,
 
   // Performance Settings
-  INFERENCE_TIMEOUT_MS: 10000,  // 10 seconds
+  INFERENCE_TIMEOUT_MS: 10000, // 10 seconds
   MODEL_LOAD_TIMEOUT_MS: 30000, // 30 seconds
   UNLOAD_MODEL_AFTER_IDLE_MS: 5 * 60 * 1000, // 5 minutes
 
@@ -65,9 +65,9 @@ export const LLM_CONFIG = {
     MAX_CONTEXT_MESSAGES: 5, // Keep last 5 messages in conversation context
   },
 
-  // Platform Support
-  SUPPORTED_PLATFORMS: ['android'] as const, // iOS support deferred
-  IS_PLATFORM_SUPPORTED: Platform.OS === 'android',
+  // Platform Support - Now supporting both Android and iOS
+  SUPPORTED_PLATFORMS: ['android', 'ios'] as const,
+  IS_PLATFORM_SUPPORTED: Platform.OS === 'android' || Platform.OS === 'ios',
 
   // Battery Optimization
   LOW_BATTERY_THRESHOLD: 20, // Disable AI when battery < 20%
@@ -130,14 +130,19 @@ export function getLLMErrorMessage(code: string): string {
   const errorMessages: Record<string, string> = {
     MODULE_NOT_AVAILABLE: 'AI features are not available on this device.',
     MODEL_NOT_LOADED: 'AI model is not loaded. Please try again.',
-    MODEL_NOT_DOWNLOADED: 'AI model needs to be downloaded. Go to Settings > AI Features to download.',
-    MODEL_LOAD_FAILED: 'Failed to load AI model. Please try restarting the app.',
-    MODEL_DOWNLOAD_FAILED: 'Failed to download AI model. Please check your internet connection.',
+    MODEL_NOT_DOWNLOADED:
+      'AI model needs to be downloaded. Go to Settings > AI Features to download.',
+    MODEL_LOAD_FAILED:
+      'Failed to load AI model. Please try restarting the app.',
+    MODEL_DOWNLOAD_FAILED:
+      'Failed to download AI model. Please check your internet connection.',
     INFERENCE_FAILED: 'Failed to generate AI response. Please try again.',
     INFERENCE_TIMEOUT: 'AI is taking too long to respond. Please try again.',
-    OUT_OF_MEMORY: 'Not enough memory available for AI features. Try closing other apps.',
+    OUT_OF_MEMORY:
+      'Not enough memory available for AI features. Try closing other apps.',
     INVALID_INPUT: 'Invalid input provided to AI.',
-    PLATFORM_NOT_SUPPORTED: 'AI features are not available on this platform yet.',
+    PLATFORM_NOT_SUPPORTED:
+      'AI features are not available on this platform yet.',
   };
 
   return errorMessages[code] || 'An unknown error occurred with AI features.';
@@ -152,7 +157,8 @@ export function getStorageRequirements(): {
   totalSize: number;
   formattedTotal: string;
 } {
-  const totalSize = LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES;
+  const totalSize =
+    LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES;
   const formattedTotal = `${(totalSize / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 
   return {
@@ -171,7 +177,9 @@ export async function hasEnoughStorage(): Promise<boolean> {
     const RNFS = require('react-native-fs');
     if (!RNFS || !RNFS.getFSInfo) {
       // Module not available (Expo managed workflow)
-      console.warn('[LLMConfig] react-native-fs not available, skipping storage check');
+      console.warn(
+        '[LLMConfig] react-native-fs not available, skipping storage check'
+      );
       return true;
     }
 
@@ -179,7 +187,7 @@ export async function hasEnoughStorage(): Promise<boolean> {
     const requiredSpace = getStorageRequirements().totalSize;
 
     // Require 2x the model size to be safe
-    return freeSpace.freeSpace > (requiredSpace * 2);
+    return freeSpace.freeSpace > requiredSpace * 2;
   } catch (error) {
     // If we can't check, assume there's enough space
     return true;

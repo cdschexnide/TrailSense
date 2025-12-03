@@ -37,7 +37,9 @@ class LLMPerformanceTracker {
       this.metrics.shift();
     }
 
-    llmLogger.info(`Inference: ${durationMs}ms, ${metric.tokensPerSecond.toFixed(1)} tokens/sec`);
+    llmLogger.info(
+      `Inference: ${durationMs}ms, ${metric.tokensPerSecond.toFixed(1)} tokens/sec`
+    );
   }
 
   recordModelLoad(durationMs: number) {
@@ -56,18 +58,28 @@ class LLMPerformanceTracker {
   }
 
   getAverageInferenceTime(): number {
-    const inferenceMetrics = this.metrics.filter(m => m.inferenceTime !== undefined);
+    const inferenceMetrics = this.metrics.filter(
+      m => m.inferenceTime !== undefined
+    );
     if (inferenceMetrics.length === 0) return 0;
 
-    const sum = inferenceMetrics.reduce((acc, m) => acc + (m.inferenceTime || 0), 0);
+    const sum = inferenceMetrics.reduce(
+      (acc, m) => acc + (m.inferenceTime || 0),
+      0
+    );
     return sum / inferenceMetrics.length;
   }
 
   getAverageTokensPerSecond(): number {
-    const inferenceMetrics = this.metrics.filter(m => m.tokensPerSecond !== undefined);
+    const inferenceMetrics = this.metrics.filter(
+      m => m.tokensPerSecond !== undefined
+    );
     if (inferenceMetrics.length === 0) return 0;
 
-    const sum = inferenceMetrics.reduce((acc, m) => acc + (m.tokensPerSecond || 0), 0);
+    const sum = inferenceMetrics.reduce(
+      (acc, m) => acc + (m.tokensPerSecond || 0),
+      0
+    );
     return sum / inferenceMetrics.length;
   }
 

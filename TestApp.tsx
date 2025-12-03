@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { mockAlerts, mockDevices } from './src/mocks/data';
 
 export default function TestApp() {
@@ -37,13 +43,16 @@ export default function TestApp() {
         <Text style={styles.sectionTitle}>🎯 Devices</Text>
         {mockDevices.map(device => (
           <Text key={device.id} style={styles.text}>
-            {device.name} - {device.online ? '🟢 Online' : '🔴 Offline'} - {device.battery}%
+            {device.name} - {device.online ? '🟢 Online' : '🔴 Offline'} -{' '}
+            {device.battery}%
           </Text>
         ))}
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📡 Recent Alerts ({mockAlerts.slice(0, 5).length})</Text>
+        <Text style={styles.sectionTitle}>
+          📡 Recent Alerts ({mockAlerts.slice(0, 5).length})
+        </Text>
         {mockAlerts.slice(0, 5).map(alert => (
           <Text key={alert.id} style={styles.text}>
             {alert.threatLevel.toUpperCase()} - {alert.detectionType}
@@ -57,7 +66,9 @@ export default function TestApp() {
           <ActivityIndicator />
         ) : (
           events.map((event, i) => (
-            <Text key={i} style={styles.text}>{event}</Text>
+            <Text key={i} style={styles.text}>
+              {event}
+            </Text>
           ))
         )}
       </View>
@@ -70,7 +81,17 @@ const styles = StyleSheet.create({
   header: { marginBottom: 30, alignItems: 'center' },
   title: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 8 },
   subtitle: { fontSize: 16, color: '#4CAF50' },
-  section: { marginBottom: 30, backgroundColor: '#1e1e1e', padding: 15, borderRadius: 8 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 10 },
+  section: {
+    marginBottom: 30,
+    backgroundColor: '#1e1e1e',
+    padding: 15,
+    borderRadius: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+  },
   text: { fontSize: 14, color: '#ccc', marginBottom: 5 },
 });

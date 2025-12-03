@@ -87,7 +87,7 @@ class MockWebSocketService {
   private emit(event: string, data: any) {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
-      callbacks.forEach((callback) => callback(data));
+      callbacks.forEach(callback => callback(data));
     }
   }
 
@@ -134,8 +134,9 @@ class MockWebSocketService {
     const detectionType = this.weightedRandom(detectionTypes, typeWeights);
 
     // Pick a random online device
-    const onlineDevices = mockDevices.filter((d) => d.online);
-    const device = onlineDevices[Math.floor(Math.random() * onlineDevices.length)];
+    const onlineDevices = mockDevices.filter(d => d.online);
+    const device =
+      onlineDevices[Math.floor(Math.random() * onlineDevices.length)];
 
     // Generate realistic RSSI based on detection type
     const rssiRanges = {

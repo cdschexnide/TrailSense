@@ -123,9 +123,10 @@ export const useAlertSummary = (alert: any): UseAlertSummaryReturn => {
     }
 
     // Check if this threat level should auto-generate
-    const shouldAutoGenerate = LLM_CONFIG.ALERT_SUMMARIES.AUTO_GENERATE_FOR_THREATS.includes(
-      alert.threat_level?.toLowerCase() || ''
-    );
+    const shouldAutoGenerate =
+      LLM_CONFIG.ALERT_SUMMARIES.AUTO_GENERATE_FOR_THREATS.includes(
+        alert.threat_level?.toLowerCase() || ''
+      );
 
     if (shouldAutoGenerate) {
       llmLogger.debug('Auto-generating summary for alert', {
@@ -168,7 +169,10 @@ export const useAlertSummaryPreload = () => {
   const [isPreloading, setIsPreloading] = useState(false);
 
   const preload = useCallback(async (alerts: any[]) => {
-    if (!FEATURE_FLAGS.LLM_ALERT_SUMMARIES || !LLM_CONFIG.ALERT_SUMMARIES.ENABLE_PRELOADING) {
+    if (
+      !FEATURE_FLAGS.LLM_ALERT_SUMMARIES ||
+      !LLM_CONFIG.ALERT_SUMMARIES.ENABLE_PRELOADING
+    ) {
       return;
     }
 

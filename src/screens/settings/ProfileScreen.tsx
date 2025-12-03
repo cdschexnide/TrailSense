@@ -104,7 +104,8 @@ export const ProfileScreen = ({ navigation }: any) => {
           </Text>
 
           <Text variant="caption" style={styles.dangerText}>
-            Once you delete your account, there is no going back. Please be certain.
+            Once you delete your account, there is no going back. Please be
+            certain.
           </Text>
 
           <Button

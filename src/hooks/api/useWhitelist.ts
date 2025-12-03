@@ -35,12 +35,20 @@ export const useUpdateWhitelist = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<WhitelistEntry> }) =>
-      whitelistApi.updateWhitelist(id, updates),
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<WhitelistEntry>;
+    }) => whitelistApi.updateWhitelist(id, updates),
     onSuccess: (data, variables) => {
       // Update specific entry in cache
-      queryClient.setQueryData<WhitelistEntry>([WHITELIST_QUERY_KEY, variables.id], data);
-      
+      queryClient.setQueryData<WhitelistEntry>(
+        [WHITELIST_QUERY_KEY, variables.id],
+        data
+      );
+
       // Invalidate whitelist
       queryClient.invalidateQueries({ queryKey: [WHITELIST_QUERY_KEY] });
     },

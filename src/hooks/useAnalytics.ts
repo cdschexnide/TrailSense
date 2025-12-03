@@ -11,7 +11,7 @@ export interface UseAnalyticsOptions {
 export const useAnalytics = (options: UseAnalyticsOptions = {}) => {
   const { period = 'week', startDate, endDate } = options;
 
-  return useQuery<AnalyticsData>({
+  const query = useQuery<AnalyticsData>({
     queryKey: ['analytics', period, startDate, endDate],
     queryFn: () =>
       analyticsApi.getAnalytics({
@@ -20,13 +20,22 @@ export const useAnalytics = (options: UseAnalyticsOptions = {}) => {
         endDate,
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
   });
+
+  return {
+    ...query,
+    isError: query.isError,
+    error: query.error,
+  };
 };
 
-export const useHeatmapData = (options: {
-  startDate?: Date;
-  endDate?: Date;
-} = {}) => {
+export const useHeatmapData = (
+  options: {
+    startDate?: Date;
+    endDate?: Date;
+  } = {}
+) => {
   return useQuery<HeatmapPoint[]>({
     queryKey: ['heatmap', options.startDate, options.endDate],
     queryFn: () =>

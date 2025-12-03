@@ -19,7 +19,7 @@ class WebSocketService {
         this.emit('alert', alert);
       });
 
-      mockWebSocketService.on('device-status', (status) => {
+      mockWebSocketService.on('device-status', status => {
         this.emit('device-status', status);
       });
 

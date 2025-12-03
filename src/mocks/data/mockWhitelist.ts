@@ -4,7 +4,7 @@ export const mockWhitelist: WhitelistEntry[] = [
   // Family members
   {
     id: 'whitelist-001',
-    name: 'John\'s iPhone',
+    name: "John's iPhone",
     macAddress: 'A8:5E:45:2B:1F:9C',
     category: 'family',
     notes: 'Primary owner phone',
@@ -13,7 +13,7 @@ export const mockWhitelist: WhitelistEntry[] = [
   },
   {
     id: 'whitelist-002',
-    name: 'Sarah\'s iPhone',
+    name: "Sarah's iPhone",
     macAddress: 'B2:7F:34:8A:6D:1E',
     category: 'family',
     notes: 'Spouse phone',
@@ -103,19 +103,27 @@ export const mockWhitelist: WhitelistEntry[] = [
 ];
 
 // Filtered collections
-export const mockFamilyWhitelist = mockWhitelist.filter((w) => w.category === 'family');
-export const mockGuestsWhitelist = mockWhitelist.filter((w) => w.category === 'guests');
-export const mockServiceWhitelist = mockWhitelist.filter((w) => w.category === 'service');
-export const mockOtherWhitelist = mockWhitelist.filter((w) => w.category === 'other');
+export const mockFamilyWhitelist = mockWhitelist.filter(
+  w => w.category === 'family'
+);
+export const mockGuestsWhitelist = mockWhitelist.filter(
+  w => w.category === 'guests'
+);
+export const mockServiceWhitelist = mockWhitelist.filter(
+  w => w.category === 'service'
+);
+export const mockOtherWhitelist = mockWhitelist.filter(
+  w => w.category === 'other'
+);
 
 // Active (non-expired) whitelist entries
-export const mockActiveWhitelist = mockWhitelist.filter((w) => {
+export const mockActiveWhitelist = mockWhitelist.filter(w => {
   if (!w.expiresAt) return true;
   return new Date(w.expiresAt) > new Date();
 });
 
 // Expired whitelist entries
-export const mockExpiredWhitelist = mockWhitelist.filter((w) => {
+export const mockExpiredWhitelist = mockWhitelist.filter(w => {
   if (!w.expiresAt) return false;
   return new Date(w.expiresAt) <= new Date();
 });

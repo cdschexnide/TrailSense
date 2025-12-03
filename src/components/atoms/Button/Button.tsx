@@ -119,14 +119,18 @@ export const Button: React.FC<ButtonProps> = ({
   /**
    * Get button padding to ensure 44pt minimum touch target
    */
-  const getButtonPadding = (): { paddingHorizontal: number; paddingVertical: number } => {
+  const getButtonPadding = (): {
+    paddingHorizontal: number;
+    paddingVertical: number;
+  } => {
     const height = getButtonHeight();
     const minHeight = Layout.minTouchTarget;
 
     // If button is smaller than minimum, add vertical padding
     const paddingVertical = height < minHeight ? (minHeight - height) / 2 : 0;
 
-    const paddingHorizontal = size === 'small' ? 12 : size === 'large' ? 20 : 16;
+    const paddingHorizontal =
+      size === 'small' ? 12 : size === 'large' ? 20 : 16;
 
     return { paddingHorizontal, paddingVertical };
   };
@@ -154,14 +158,10 @@ export const Button: React.FC<ButtonProps> = ({
               ? `${colors.systemRed}26` // 15% opacity
               : `${colors.systemRed}26`;
           case 'cancel':
-            return isDark
-              ? `${colors.systemGray}26`
-              : `${colors.systemGray}26`;
+            return isDark ? `${colors.systemGray}26` : `${colors.systemGray}26`;
           case 'default':
           default:
-            return isDark
-              ? `${colors.systemBlue}26`
-              : `${colors.systemBlue}26`;
+            return isDark ? `${colors.systemBlue}26` : `${colors.systemBlue}26`;
         }
 
       case 'gray':
@@ -242,14 +242,15 @@ export const Button: React.FC<ButtonProps> = ({
       backgroundColor: getBackgroundColor(),
       borderRadius: BorderRadius.button, // 10pt
       ...(fullWidth && { width: '100%' }),
-      ...(prominent && buttonStyle === 'filled' && {
-        // Add subtle shadow for prominent buttons
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-      }),
+      ...(prominent &&
+        buttonStyle === 'filled' && {
+          // Add subtle shadow for prominent buttons
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 2,
+        }),
     };
   };
 
@@ -278,9 +279,7 @@ export const Button: React.FC<ButtonProps> = ({
         />
       ) : (
         <>
-          {leftIcon && (
-            <View style={styles.leftIconContainer}>{leftIcon}</View>
-          )}
+          {leftIcon && <View style={styles.leftIconContainer}>{leftIcon}</View>}
           <Text style={[getTextStyle(), textStyle]}>{children}</Text>
           {rightIcon && (
             <View style={styles.rightIconContainer}>{rightIcon}</View>

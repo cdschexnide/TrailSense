@@ -92,13 +92,7 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
       </View>
 
       {/* Main Summary */}
-      <Text
-        style={[
-          styles.summary,
-          typography.body,
-          { color: colors.label },
-        ]}
-      >
+      <Text style={[styles.summary, typography.body, { color: colors.label }]}>
         {summary.summary}
       </Text>
 
@@ -166,7 +160,11 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
               accessibilityLabel="Negative feedback"
               accessibilityRole="button"
             >
-              <Icon name="thumbs-down" size={18} color={colors.secondaryLabel} />
+              <Icon
+                name="thumbs-down"
+                size={18}
+                color={colors.secondaryLabel}
+              />
             </TouchableOpacity>
           </View>
         )}

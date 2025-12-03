@@ -17,7 +17,7 @@ export const useWebSocket = (token: string | null) => {
     // Handle new alerts
     const handleAlert = (alert: Alert) => {
       // Add new alert to cache
-      queryClient.setQueryData<Alert[]>([ALERTS_QUERY_KEY], (oldData) => {
+      queryClient.setQueryData<Alert[]>([ALERTS_QUERY_KEY], oldData => {
         if (!oldData) return [alert];
         return [alert, ...oldData];
       });
@@ -29,15 +29,18 @@ export const useWebSocket = (token: string | null) => {
     // Handle device status updates
     const handleDeviceStatus = (status: Partial<Device> & { id: string }) => {
       // Update specific device in cache
-      queryClient.setQueryData<Device>([DEVICES_QUERY_KEY, status.id], (oldData) => {
-        if (!oldData) return oldData;
-        return { ...oldData, ...status };
-      });
+      queryClient.setQueryData<Device>(
+        [DEVICES_QUERY_KEY, status.id],
+        oldData => {
+          if (!oldData) return oldData;
+          return { ...oldData, ...status };
+        }
+      );
 
       // Update device in devices list
-      queryClient.setQueryData<Device[]>([DEVICES_QUERY_KEY], (oldData) => {
+      queryClient.setQueryData<Device[]>([DEVICES_QUERY_KEY], oldData => {
         if (!oldData) return oldData;
-        return oldData.map((device) =>
+        return oldData.map(device =>
           device.id === status.id ? { ...device, ...status } : device
         );
       });

@@ -291,6 +291,52 @@ export const Colors = {
     },
 
     // ======================
+    // TrailSense-Specific: Threat Backgrounds (Card Tints)
+    // ======================
+
+    /**
+     * Background tint colors for threat-level cards
+     * Use these for full-card background washes
+     */
+    threatBackground: {
+      critical: 'rgba(255, 59, 48, 0.12)',
+      criticalBorder: 'rgba(255, 59, 48, 0.35)',
+      high: 'rgba(255, 149, 0, 0.10)',
+      highBorder: 'rgba(255, 149, 0, 0.30)',
+      medium: 'rgba(255, 204, 0, 0.08)',
+      mediumBorder: 'rgba(255, 204, 0, 0.25)',
+      low: 'rgba(52, 199, 89, 0.06)',
+      lowBorder: 'rgba(52, 199, 89, 0.20)',
+    },
+
+    // ======================
+    // TrailSense-Specific: Device Status Backgrounds
+    // ======================
+
+    /**
+     * Background tint colors for device status cards
+     */
+    deviceStatusBackground: {
+      online: 'rgba(52, 199, 89, 0.06)',
+      offline: 'rgba(255, 59, 48, 0.08)',
+    },
+
+    // ======================
+    // TrailSense-Specific: Gradient Presets
+    // ======================
+
+    /**
+     * Gradient color arrays for various UI elements
+     */
+    gradients: {
+      cardHeader: ['rgba(0, 0, 0, 0.02)', 'rgba(0, 0, 0, 0)'],
+      statsBackground: ['#F2F2F7', '#E5E5EA'],
+      shimmer: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.05)', 'rgba(0, 0, 0, 0)'],
+      onlineStatus: ['rgba(52, 199, 89, 0.12)', 'rgba(52, 199, 89, 0)'],
+      offlineStatus: ['rgba(255, 59, 48, 0.12)', 'rgba(255, 59, 48, 0)'],
+    },
+
+    // ======================
     // Backward Compatibility Aliases
     // ======================
 
@@ -441,6 +487,56 @@ export const Colors = {
       full: '#30D158',
       medium: '#FF9F0A',
       low: '#FF453A',
+    },
+
+    // ======================
+    // TrailSense-Specific: Threat Backgrounds (Card Tints) - Dark Mode
+    // ======================
+
+    /**
+     * Background tint colors for threat-level cards (Dark Mode)
+     * Slightly higher opacity for visibility on dark backgrounds
+     */
+    threatBackground: {
+      critical: 'rgba(255, 69, 58, 0.15)',
+      criticalBorder: 'rgba(255, 69, 58, 0.40)',
+      high: 'rgba(255, 159, 10, 0.12)',
+      highBorder: 'rgba(255, 159, 10, 0.35)',
+      medium: 'rgba(255, 214, 10, 0.10)',
+      mediumBorder: 'rgba(255, 214, 10, 0.30)',
+      low: 'rgba(48, 209, 88, 0.08)',
+      lowBorder: 'rgba(48, 209, 88, 0.25)',
+    },
+
+    // ======================
+    // TrailSense-Specific: Device Status Backgrounds - Dark Mode
+    // ======================
+
+    /**
+     * Background tint colors for device status cards (Dark Mode)
+     */
+    deviceStatusBackground: {
+      online: 'rgba(48, 209, 88, 0.08)',
+      offline: 'rgba(255, 69, 58, 0.10)',
+    },
+
+    // ======================
+    // TrailSense-Specific: Gradient Presets - Dark Mode
+    // ======================
+
+    /**
+     * Gradient color arrays for various UI elements (Dark Mode)
+     */
+    gradients: {
+      cardHeader: ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 0)'],
+      statsBackground: ['#1C1C1E', '#2C2C2E'],
+      shimmer: [
+        'rgba(255, 255, 255, 0)',
+        'rgba(255, 255, 255, 0.08)',
+        'rgba(255, 255, 255, 0)',
+      ],
+      onlineStatus: ['rgba(48, 209, 88, 0.15)', 'rgba(48, 209, 88, 0)'],
+      offlineStatus: ['rgba(255, 69, 58, 0.15)', 'rgba(255, 69, 58, 0)'],
     },
 
     // ======================

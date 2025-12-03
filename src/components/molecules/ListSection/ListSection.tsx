@@ -26,11 +26,7 @@ export const ListSection: React.FC<ListSectionProps> = ({
     <View style={style}>
       {/* Header */}
       {header && (
-        <Text
-          variant="footnote"
-          color="secondaryLabel"
-          style={styles.header}
-        >
+        <Text variant="footnote" color="secondaryLabel" style={styles.header}>
           {header.toUpperCase()}
         </Text>
       )}
@@ -65,11 +61,7 @@ export const ListSection: React.FC<ListSectionProps> = ({
 
       {/* Footer */}
       {footer && (
-        <Text
-          variant="footnote"
-          color="secondaryLabel"
-          style={styles.footer}
-        >
+        <Text variant="footnote" color="secondaryLabel" style={styles.footer}>
           {footer}
         </Text>
       )}

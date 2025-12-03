@@ -19,7 +19,9 @@ export const VacationModeScreen = () => {
   );
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [sensitivity, setSensitivity] = useState<'low' | 'medium' | 'high'>('high');
+  const [sensitivity, setSensitivity] = useState<'low' | 'medium' | 'high'>(
+    'high'
+  );
 
   useEffect(() => {
     loadVacationModeStatus();
@@ -134,7 +136,7 @@ export const VacationModeScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Sensitivity</Text>
             <View style={styles.sensitivityContainer}>
-              {(['low', 'medium', 'high'] as const).map((level) => (
+              {(['low', 'medium', 'high'] as const).map(level => (
                 <TouchableOpacity
                   key={level}
                   style={[

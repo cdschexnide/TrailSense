@@ -58,13 +58,17 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   const scrollY = useRef(new Animated.Value(0)).current;
 
   // Use new header prop or fall back to legacy props
-  const headerConfig = header || (showHeader && title ? {
-    title,
-    subtitle,
-    showBack,
-    onBackPress,
-    rightActions: headerRightAction,
-  } : undefined);
+  const headerConfig =
+    header ||
+    (showHeader && title
+      ? {
+          title,
+          subtitle,
+          showBack,
+          onBackPress,
+          rightActions: headerRightAction,
+        }
+      : undefined);
 
   const hasLargeTitle = headerConfig?.largeTitle;
 
@@ -95,10 +99,14 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       style={styles.scrollView}
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={false}
-      onScroll={hasLargeTitle ? Animated.event(
-        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-        { useNativeDriver: false }
-      ) : undefined}
+      onScroll={
+        hasLargeTitle
+          ? Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+            )
+          : undefined
+      }
       scrollEventThrottle={hasLargeTitle ? 16 : undefined}
     >
       {content}
@@ -121,8 +129,12 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.systemBackground }, style]}
-      edges={['left', 'right', 'bottom']}
+      style={[
+        styles.container,
+        { backgroundColor: colors.systemBackground },
+        style,
+      ]}
+      edges={['top', 'left', 'right', 'bottom']}
       testID={testID}
     >
       {headerConfig && (

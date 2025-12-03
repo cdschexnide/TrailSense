@@ -1,6 +1,10 @@
 // Main LLM Service
 export { llmService } from './LLMService';
 
+// AI Provider and Hook (primary API for components)
+export { AIProvider, useAI } from './AIProvider';
+export type { AIContextType } from './AIProvider';
+
 // Core Services
 export { modelManager } from './modelManager';
 export { modelDownloader } from './modelDownloader';
@@ -33,4 +37,5 @@ export type {
   ConversationContext,
   ModelInfo,
   ModelDownloadProgress,
+  Message,
 } from '@/types/llm';

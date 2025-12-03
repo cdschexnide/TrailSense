@@ -1,6 +1,11 @@
 import { Platform } from 'react-native';
 import { llmLogger } from '@/utils/llmLogger';
-import { LLMError, LLMErrorCode, ModelInfo, ModelDownloadProgress } from '@/types/llm';
+import {
+  LLMError,
+  LLMErrorCode,
+  ModelInfo,
+  ModelDownloadProgress,
+} from '@/types/llm';
 import { LLM_CONFIG } from '@/config/llmConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,7 +14,9 @@ let RNFS: any = null;
 try {
   RNFS = require('react-native-fs');
 } catch (error) {
-  console.warn('[ModelDownloader] react-native-fs not available. LLM features disabled.');
+  console.warn(
+    '[ModelDownloader] react-native-fs not available. LLM features disabled.'
+  );
 }
 
 /**
@@ -27,23 +34,27 @@ export class ModelDownloader {
     if (!RNFS) {
       this.modelPath = '';
       this.tokenizerPath = '';
-      llmLogger.warn('ModelDownloader initialized without react-native-fs. LLM features unavailable.');
+      llmLogger.warn(
+        'ModelDownloader initialized without react-native-fs. LLM features unavailable.'
+      );
       return;
     }
 
     if (LLM_CONFIG.MODEL_STRATEGY === 'bundled') {
       // Model bundled with app - use MainBundlePath (read-only)
-      const bundlePath = Platform.OS === 'android'
-        ? RNFS.MainBundlePath + '/assets'
-        : RNFS.MainBundlePath;
+      const bundlePath =
+        Platform.OS === 'android'
+          ? RNFS.MainBundlePath + '/assets'
+          : RNFS.MainBundlePath;
 
       this.modelPath = `${bundlePath}/${LLM_CONFIG.MODEL_FILE_NAME}`;
       this.tokenizerPath = `${bundlePath}/${LLM_CONFIG.TOKENIZER_FILE_NAME}`;
     } else {
       // Model downloaded on-demand - use DocumentDirectory (writable)
-      const baseDir = Platform.OS === 'android'
-        ? RNFS.DocumentDirectoryPath
-        : RNFS.DocumentDirectoryPath;
+      const baseDir =
+        Platform.OS === 'android'
+          ? RNFS.DocumentDirectoryPath
+          : RNFS.DocumentDirectoryPath;
 
       this.modelPath = `${baseDir}/${LLM_CONFIG.MODEL_FILE_NAME}`;
       this.tokenizerPath = `${baseDir}/${LLM_CONFIG.TOKENIZER_FILE_NAME}`;
@@ -86,7 +97,7 @@ export class ModelDownloader {
         const tokenizerStat = await RNFS.stat(this.tokenizerPath);
 
         // Model should be at least 1GB (allow some variance)
-        const modelSizeOk = parseInt(modelStat.size) > (1024 * 1024 * 1024);
+        const modelSizeOk = parseInt(modelStat.size) > 1024 * 1024 * 1024;
         const tokenizerSizeOk = parseInt(tokenizerStat.size) > 1000;
 
         if (!modelSizeOk || !tokenizerSizeOk) {
@@ -120,7 +131,9 @@ export class ModelDownloader {
         modelSize = parseInt(modelStat.size);
 
         // Try to get download timestamp from storage
-        const timestamp = await AsyncStorage.getItem('@llm_model_downloaded_at');
+        const timestamp = await AsyncStorage.getItem(
+          '@llm_model_downloaded_at'
+        );
         if (timestamp) {
           downloadedAt = timestamp;
         }
@@ -173,12 +186,13 @@ export class ModelDownloader {
 
       // Check storage space
       const freeSpace = await RNFS.getFSInfo();
-      const requiredSpace = LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES;
+      const requiredSpace =
+        LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES;
 
       if (freeSpace.freeSpace < requiredSpace * 1.5) {
         throw new LLMError(
           LLMErrorCode.MODEL_DOWNLOAD_FAILED,
-          `Insufficient storage. Need ${(requiredSpace / (1024 ** 3)).toFixed(2)}GB free.`
+          `Insufficient storage. Need ${(requiredSpace / 1024 ** 3).toFixed(2)}GB free.`
         );
       }
 
@@ -188,7 +202,7 @@ export class ModelDownloader {
         LLM_CONFIG.MODEL_DOWNLOAD_URL,
         this.modelPath,
         LLM_CONFIG.MODEL_SIZE_BYTES,
-        (progress) => {
+        progress => {
           // Model is ~95% of total download
           const adjustedProgress = {
             ...progress,
@@ -206,11 +220,11 @@ export class ModelDownloader {
         LLM_CONFIG.TOKENIZER_DOWNLOAD_URL,
         this.tokenizerPath,
         LLM_CONFIG.TOKENIZER_SIZE_BYTES,
-        (progress) => {
+        progress => {
           // Tokenizer is last 5%
           const adjustedProgress = {
             ...progress,
-            percentage: 95 + (progress.percentage * 0.05),
+            percentage: 95 + progress.percentage * 0.05,
           };
           onProgress?.(adjustedProgress);
         }
@@ -229,8 +243,10 @@ export class ModelDownloader {
 
       // Report 100% completion
       onProgress?.({
-        bytesDownloaded: LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES,
-        totalBytes: LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES,
+        bytesDownloaded:
+          LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES,
+        totalBytes:
+          LLM_CONFIG.MODEL_SIZE_BYTES + LLM_CONFIG.TOKENIZER_SIZE_BYTES,
         percentage: 100,
       });
 
@@ -331,28 +347,33 @@ export class ModelDownloader {
         toFile: destination,
         progressInterval: 1000, // Update every second
         progressDivider: 1,
-        begin: (res) => {
+        begin: res => {
           llmLogger.debug('Download started', {
             statusCode: res.statusCode,
             contentLength: res.contentLength,
           });
 
           // Verify content length matches expected
-          if (res.contentLength && Math.abs(res.contentLength - expectedSize) > expectedSize * 0.1) {
+          if (
+            res.contentLength &&
+            Math.abs(res.contentLength - expectedSize) > expectedSize * 0.1
+          ) {
             llmLogger.warn('Downloaded file size differs from expected', {
               expected: expectedSize,
               actual: res.contentLength,
             });
           }
         },
-        progress: (res) => {
+        progress: res => {
           const progress: ModelDownloadProgress = {
             bytesDownloaded: res.bytesWritten,
             totalBytes: res.contentLength,
             percentage: (res.bytesWritten / res.contentLength) * 100,
           };
 
-          llmLogger.debug(`Download progress: ${progress.percentage.toFixed(1)}%`);
+          llmLogger.debug(
+            `Download progress: ${progress.percentage.toFixed(1)}%`
+          );
           onProgress?.(progress);
         },
       });
@@ -361,7 +382,7 @@ export class ModelDownloader {
       this.currentDownloadJobId = download.jobId;
 
       download.promise
-        .then((result) => {
+        .then(result => {
           if (result.statusCode === 200) {
             llmLogger.info('Download completed', {
               statusCode: result.statusCode,
@@ -369,10 +390,12 @@ export class ModelDownloader {
             });
             resolve();
           } else {
-            reject(new Error(`Download failed with status ${result.statusCode}`));
+            reject(
+              new Error(`Download failed with status ${result.statusCode}`)
+            );
           }
         })
-        .catch((error) => {
+        .catch(error => {
           reject(error);
         });
     });

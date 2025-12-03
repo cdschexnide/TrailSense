@@ -29,7 +29,8 @@ export const FontFamily = {
   /**
    * Fallback for web/cross-platform
    */
-  systemFallback: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif',
+  systemFallback:
+    '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif',
 
   /**
    * Monospace font for technical content

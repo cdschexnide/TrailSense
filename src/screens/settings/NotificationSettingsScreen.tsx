@@ -19,7 +19,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.pushEnabled || false}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Push notifications:', value);
                 }}
@@ -32,7 +32,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.soundEnabled || false}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Alert sound:', value);
                 }}
@@ -45,7 +45,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.vibrationEnabled || false}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Vibration:', value);
                 }}
@@ -61,7 +61,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.notifyCritical || true}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Notify critical:', value);
                 }}
@@ -74,7 +74,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.notifyHigh || true}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Notify high:', value);
                 }}
@@ -87,7 +87,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.notifyMedium || true}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Notify medium:', value);
                 }}
@@ -100,7 +100,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.notifyLow || false}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Notify low:', value);
                 }}
@@ -116,7 +116,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.notifyDeviceOffline || true}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Notify device offline:', value);
                 }}
@@ -129,7 +129,7 @@ export const NotificationSettingsScreen = () => {
             right={
               <Switch
                 value={settings?.notifyLowBattery || true}
-                onValueChange={(value) => {
+                onValueChange={value => {
                   // TODO: Dispatch action to update settings
                   console.log('Notify low battery:', value);
                 }}
@@ -142,7 +142,13 @@ export const NotificationSettingsScreen = () => {
   );
 };
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
   <View style={styles.section}>
     <Text variant="caption" style={styles.sectionTitle}>
       {title.toUpperCase()}

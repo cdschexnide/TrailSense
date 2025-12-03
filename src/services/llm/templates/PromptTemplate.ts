@@ -88,9 +88,11 @@ export abstract class PromptTemplate {
    */
   protected formatDate(dateOrTimestamp: Date | string | number): string {
     try {
-      const date = typeof dateOrTimestamp === 'string' || typeof dateOrTimestamp === 'number'
-        ? new Date(dateOrTimestamp)
-        : dateOrTimestamp;
+      const date =
+        typeof dateOrTimestamp === 'string' ||
+        typeof dateOrTimestamp === 'number'
+          ? new Date(dateOrTimestamp)
+          : dateOrTimestamp;
 
       return date.toLocaleString('en-US', {
         weekday: 'short',
@@ -110,9 +112,11 @@ export abstract class PromptTemplate {
    */
   protected formatTime(dateOrTimestamp: Date | string | number): string {
     try {
-      const date = typeof dateOrTimestamp === 'string' || typeof dateOrTimestamp === 'number'
-        ? new Date(dateOrTimestamp)
-        : dateOrTimestamp;
+      const date =
+        typeof dateOrTimestamp === 'string' ||
+        typeof dateOrTimestamp === 'number'
+          ? new Date(dateOrTimestamp)
+          : dateOrTimestamp;
 
       return date.toLocaleTimeString('en-US', {
         hour: '2-digit',
@@ -128,9 +132,11 @@ export abstract class PromptTemplate {
    */
   protected formatDayOfWeek(dateOrTimestamp: Date | string | number): string {
     try {
-      const date = typeof dateOrTimestamp === 'string' || typeof dateOrTimestamp === 'number'
-        ? new Date(dateOrTimestamp)
-        : dateOrTimestamp;
+      const date =
+        typeof dateOrTimestamp === 'string' ||
+        typeof dateOrTimestamp === 'number'
+          ? new Date(dateOrTimestamp)
+          : dateOrTimestamp;
 
       return date.toLocaleDateString('en-US', {
         weekday: 'short',

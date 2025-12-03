@@ -10,7 +10,12 @@ interface ChartCardProps {
   style?: ViewStyle;
 }
 
-export const ChartCard: React.FC<ChartCardProps> = ({ title, subtitle, children, style }) => {
+export const ChartCard: React.FC<ChartCardProps> = ({
+  title,
+  subtitle,
+  children,
+  style,
+}) => {
   const { theme } = useTheme();
   const { colors, shadows } = theme;
 

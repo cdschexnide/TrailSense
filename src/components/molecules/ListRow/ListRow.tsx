@@ -75,11 +75,7 @@ export const ListRow: React.FC<ListRowProps> = ({
     switch (accessoryType) {
       case 'disclosureIndicator':
         return (
-          <Icon
-            name="chevron-forward"
-            size={20}
-            color={colors.tertiaryLabel}
-          />
+          <Icon name="chevron-forward" size={20} color={colors.tertiaryLabel} />
         );
       case 'detailButton':
         return (
@@ -96,9 +92,7 @@ export const ListRow: React.FC<ListRowProps> = ({
           </Pressable>
         );
       case 'checkmark':
-        return (
-          <Icon name="checkmark" size={22} color={colors.systemBlue} />
-        );
+        return <Icon name="checkmark" size={22} color={colors.systemBlue} />;
       case 'detailDisclosureButton':
         return (
           <View style={styles.detailDisclosureContainer}>
@@ -144,10 +138,7 @@ export const ListRow: React.FC<ListRowProps> = ({
       {leftImage && (
         <Image
           source={leftImage}
-          style={[
-            styles.leftImage,
-            { backgroundColor: colors.systemGray5 },
-          ]}
+          style={[styles.leftImage, { backgroundColor: colors.systemGray5 }]}
         />
       )}
 
@@ -157,7 +148,11 @@ export const ListRow: React.FC<ListRowProps> = ({
           {title}
         </Text>
         {subtitle && (
-          <Text variant="footnote" color="secondaryLabel" style={styles.subtitle}>
+          <Text
+            variant="footnote"
+            color="secondaryLabel"
+            style={styles.subtitle}
+          >
             {subtitle}
           </Text>
         )}
@@ -165,11 +160,7 @@ export const ListRow: React.FC<ListRowProps> = ({
 
       {/* Right text */}
       {rightText && (
-        <Text
-          variant="body"
-          color="tertiaryLabel"
-          style={styles.rightText}
-        >
+        <Text variant="body" color="tertiaryLabel" style={styles.rightText}>
           {rightText}
         </Text>
       )}

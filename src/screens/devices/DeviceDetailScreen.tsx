@@ -40,8 +40,11 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   };
 
   const formatDate = (dateString: string) => {
-    // TODO: Implement proper date formatting
-    return dateString;
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch {
+      return dateString;
+    }
   };
 
   return (
@@ -52,7 +55,9 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
         rightActions: (
           <Button
             buttonStyle="plain"
-            onPress={() => navigation.navigate('DeviceSettings', { id: deviceId })}
+            onPress={() =>
+              navigation.navigate('DeviceSettings', { id: deviceId })
+            }
           >
             Edit
           </Button>
@@ -67,7 +72,8 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
             {device.online ? 'Online' : 'Offline'}
           </Text>
           <Text variant="footnote" color="secondaryLabel">
-            Battery: {device.batteryPercent || device.battery || 0}% • Signal: {device.signalStrength}
+            Battery: {device.batteryPercent || device.battery || 0}% • Signal:{' '}
+            {device.signalStrength}
           </Text>
         </View>
       </Card>
@@ -76,7 +82,9 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
         <ListRow title="Name" rightText={device.name} accessoryType="none" />
         <ListRow
           title="Firmware"
-          rightText={(device as any).firmwareVersion || (device as any).firmware || 'N/A'}
+          rightText={
+            (device as any).firmwareVersion || (device as any).firmware || 'N/A'
+          }
           accessoryType="none"
         />
         <ListRow
@@ -105,11 +113,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
       </ListSection>
 
       <View style={styles.actions}>
-        <Button
-          buttonStyle="filled"
-          role="destructive"
-          onPress={handleDelete}
-        >
+        <Button buttonStyle="filled" role="destructive" onPress={handleDelete}>
           Remove Device
         </Button>
       </View>

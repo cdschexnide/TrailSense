@@ -190,7 +190,8 @@ export const Input: React.FC<InputProps> = ({
   const shouldShowClearButton = (): boolean => {
     if (clearButtonMode === 'never') return false;
     if (clearButtonMode === 'always') return true;
-    if (clearButtonMode === 'while-editing') return isFocused && value.length > 0;
+    if (clearButtonMode === 'while-editing')
+      return isFocused && value.length > 0;
     if (clearButtonMode === 'unless-editing')
       return !isFocused && value.length > 0;
     return false;

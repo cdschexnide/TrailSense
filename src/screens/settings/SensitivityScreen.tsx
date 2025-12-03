@@ -9,7 +9,8 @@ const SENSITIVITY_LEVELS = [
   {
     value: 'low',
     label: 'Low',
-    description: 'Only detect strong signals. Fewer false positives but may miss some threats.',
+    description:
+      'Only detect strong signals. Fewer false positives but may miss some threats.',
   },
   {
     value: 'medium',
@@ -19,17 +20,20 @@ const SENSITIVITY_LEVELS = [
   {
     value: 'high',
     label: 'High',
-    description: 'Detect weaker signals. More comprehensive but may have false positives.',
+    description:
+      'Detect weaker signals. More comprehensive but may have false positives.',
   },
   {
     value: 'maximum',
     label: 'Maximum',
-    description: 'Detect all signals. Maximum protection but highest false positive rate.',
+    description:
+      'Detect all signals. Maximum protection but highest false positive rate.',
   },
 ];
 
 export const SensitivityScreen = ({ navigation }: any) => {
-  const currentSensitivity = useAppSelector(state => state.settings?.sensitivity) || 'medium';
+  const currentSensitivity =
+    useAppSelector(state => state.settings?.sensitivity) || 'medium';
   const dispatch = useAppDispatch();
 
   const [selectedLevel, setSelectedLevel] = useState(currentSensitivity);
@@ -50,7 +54,7 @@ export const SensitivityScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        {SENSITIVITY_LEVELS.map((level) => (
+        {SENSITIVITY_LEVELS.map(level => (
           <View key={level.value} style={styles.levelCard}>
             <Button
               title={level.label}
@@ -65,11 +69,7 @@ export const SensitivityScreen = ({ navigation }: any) => {
         ))}
 
         <View style={styles.footer}>
-          <Button
-            title="Save Changes"
-            variant="primary"
-            onPress={handleSave}
-          />
+          <Button title="Save Changes" variant="primary" onPress={handleSave} />
         </View>
       </ScrollView>
     </ScreenLayout>

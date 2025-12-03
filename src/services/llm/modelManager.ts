@@ -1,57 +1,83 @@
 import { Platform } from 'react-native';
 import { llmLogger } from '@/utils/llmLogger';
 import { performanceTracker } from '@/utils/llmPerformance';
-import { LLMError, LLMErrorCode } from '@/types/llm';
+import { LLMError, LLMErrorCode, Message } from '@/types/llm';
 import { LLM_CONFIG } from '@/config/llmConfig';
 
 // Conditionally import react-native-executorch to avoid crashes in Expo managed workflow
-let LLMController: any = null;
+let LLMModule: any = null;
 let LLAMA3_2_1B: any = null;
-let LLAMA3_2_TOKENIZER: any = null;
-let LLAMA3_2_TOKENIZER_CONFIG: any = null;
+let LLAMA3_2_1B_SPINQUANT: any = null;
+let HAMMER2_1_1_5B_QUANTIZED: any = null;
 
 try {
   const executorch = require('react-native-executorch');
-  const controllers = require('react-native-executorch/src/controllers/LLMController');
 
-  LLMController = controllers.LLMController;
+  // Import LLMModule class and model constants directly
+  LLMModule = executorch.LLMModule;
   LLAMA3_2_1B = executorch.LLAMA3_2_1B;
-  LLAMA3_2_TOKENIZER = executorch.LLAMA3_2_TOKENIZER;
-  LLAMA3_2_TOKENIZER_CONFIG = executorch.LLAMA3_2_TOKENIZER_CONFIG;
+  LLAMA3_2_1B_SPINQUANT = executorch.LLAMA3_2_1B_SPINQUANT;
+  HAMMER2_1_1_5B_QUANTIZED = executorch.HAMMER2_1_1_5B_QUANTIZED;
+
+  console.log('[ModelManager] react-native-executorch loaded successfully');
+  console.log('[ModelManager] LLMModule:', typeof LLMModule);
+  console.log('[ModelManager] Available models:', {
+    LLAMA3_2_1B: !!LLAMA3_2_1B,
+    LLAMA3_2_1B_SPINQUANT: !!LLAMA3_2_1B_SPINQUANT,
+    HAMMER2_1_1_5B_QUANTIZED: !!HAMMER2_1_1_5B_QUANTIZED,
+  });
 } catch (error) {
-  console.warn('[ModelManager] react-native-executorch not available. LLM features disabled.');
+  console.warn(
+    '[ModelManager] react-native-executorch not available. LLM features disabled.'
+  );
+  console.warn('[ModelManager] Error details:', error);
 }
 
 /**
  * Model Manager Service
  * Handles loading, unloading, and managing the LLM model using react-native-executorch
+ *
+ * Based on working implementation from mobile-llm using LLMModule API
  */
 export class ModelManager {
-  private llmController: LLMController | null = null;
+  private llmModule: any = null;
   private isLoading: boolean = false;
   private isLoaded: boolean = false;
   private loadAttempts: number = 0;
   private readonly MAX_LOAD_ATTEMPTS = 3;
   private downloadProgress: number = 0;
 
+  // Response state (updated via callbacks)
+  private _response: string = '';
+  private _token: string = '';
+  private _messageHistory: Message[] = [];
+  private _isGenerating: boolean = false;
+
+  // Callbacks for external listeners
+  public onTokenReceived?: (token: string) => void;
+  public onResponseUpdated?: (response: string) => void;
+  public onGeneratingChanged?: (isGenerating: boolean) => void;
+
   /**
    * Check if ExecuTorch module is available
    */
   async isModuleAvailable(): Promise<boolean> {
     // Check if module was loaded
-    if (!LLMController) {
-      llmLogger.warn('react-native-executorch module not available (not installed or Expo managed workflow)');
+    if (!LLMModule) {
+      llmLogger.warn(
+        'react-native-executorch LLMModule not available (not installed or Expo managed workflow)'
+      );
       return false;
     }
 
-    if (Platform.OS !== 'android') {
-      llmLogger.warn('ExecuTorch only supported on Android');
+    // Check platform - now supporting both Android and iOS
+    if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
+      llmLogger.warn('ExecuTorch only supported on Android and iOS');
       return false;
     }
 
     try {
-      // The react-native-executorch package handles availability checks internally
-      llmLogger.info('ExecuTorch module is available (using react-native-executorch package)');
+      llmLogger.info('ExecuTorch LLMModule is available');
       return true;
     } catch (error) {
       llmLogger.error('Error checking ExecuTorch availability', error);
@@ -61,10 +87,11 @@ export class ModelManager {
 
   /**
    * Load the LLM model into memory
+   * Uses the correct LLMModule API from react-native-executorch
    */
   async loadModel(): Promise<void> {
     // Check if already loaded
-    if (this.isLoaded && this.llmController) {
+    if (this.isLoaded && this.llmModule) {
       llmLogger.info('Model already loaded');
       return;
     }
@@ -76,20 +103,12 @@ export class ModelManager {
       return this.waitForLoad();
     }
 
-    // Check platform support
-    if (!LLM_CONFIG.IS_PLATFORM_SUPPORTED) {
-      throw new LLMError(
-        LLMErrorCode.PLATFORM_NOT_SUPPORTED,
-        'LLM features not supported on this platform'
-      );
-    }
-
     // Check if module is available
     const moduleAvailable = await this.isModuleAvailable();
     if (!moduleAvailable) {
       throw new LLMError(
         LLMErrorCode.MODULE_NOT_AVAILABLE,
-        'ExecuTorch module not available'
+        'ExecuTorch LLMModule not available'
       );
     }
 
@@ -98,34 +117,61 @@ export class ModelManager {
     const endTimer = performanceTracker.startTimer('Model Load');
 
     try {
-      llmLogger.info('Loading Llama 3.2 1B model (built-in)...', {
+      llmLogger.info('Loading LLM model...', {
         attempt: this.loadAttempts,
+        platform: Platform.OS,
       });
 
-      // Create LLMController instance
-      this.llmController = new LLMController({
-        tokenCallback: (token: string) => {
-          // Handle streaming tokens if needed
-          llmLogger.debug('Token received:', token.substring(0, 10) + '...');
+      // Create LLMModule instance with callback handlers (mobile-llm pattern)
+      this.llmModule = new LLMModule({
+        tokenCallback: (newToken: string) => {
+          this._token = newToken;
+          this._response += newToken;
+
+          // Notify external listeners
+          if (this.onTokenReceived) {
+            this.onTokenReceived(newToken);
+          }
+          if (this.onResponseUpdated) {
+            this.onResponseUpdated(this._response);
+          }
+
+          llmLogger.debug('Token received:', newToken.substring(0, 20) + '...');
         },
-        isReadyCallback: (ready: boolean) => {
-          llmLogger.info(`Model ready state: ${ready}`);
-          this.isLoaded = ready;
+        messageHistoryCallback: (messageHistory: Message[]) => {
+          this._messageHistory = messageHistory;
+          llmLogger.debug(
+            'Message history updated:',
+            messageHistory.length,
+            'messages'
+          );
         },
-        isGeneratingCallback: (generating: boolean) => {
-          llmLogger.debug(`Model generating: ${generating}`);
-        },
-        onDownloadProgressCallback: (progress: number) => {
-          this.downloadProgress = progress;
-          llmLogger.info(`Model download progress: ${(progress * 100).toFixed(1)}%`);
+        responseCallback: (response: string) => {
+          this._response = response;
+          if (this.onResponseUpdated) {
+            this.onResponseUpdated(response);
+          }
         },
       });
 
-      // Load the built-in Llama 3.2 1B model
-      await this.llmController.load({
-        modelSource: LLAMA3_2_1B,
-        tokenizerSource: LLAMA3_2_TOKENIZER,
-        tokenizerConfigSource: LLAMA3_2_TOKENIZER_CONFIG,
+      // Select the best model based on availability
+      // LLAMA3_2_1B_SPINQUANT is smaller/faster, LLAMA3_2_1B is standard
+      const modelToUse = LLAMA3_2_1B_SPINQUANT || LLAMA3_2_1B;
+
+      if (!modelToUse) {
+        throw new Error('No LLM model configuration available');
+      }
+
+      llmLogger.info(
+        'Using model:',
+        modelToUse ? 'LLAMA3_2_1B variant' : 'Unknown'
+      );
+
+      // Load model using the correct API: load(MODEL_CONSTANT, progressCallback)
+      await this.llmModule.load(modelToUse, (progress: number) => {
+        this.downloadProgress = progress;
+        const percentage = (progress * 100).toFixed(1);
+        llmLogger.info(`Model download/load progress: ${percentage}%`);
       });
 
       const loadTime = endTimer();
@@ -141,7 +187,9 @@ export class ModelManager {
 
       // Retry logic
       if (this.loadAttempts < this.MAX_LOAD_ATTEMPTS) {
-        llmLogger.info(`Retrying model load (attempt ${this.loadAttempts + 1}/${this.MAX_LOAD_ATTEMPTS})`);
+        llmLogger.info(
+          `Retrying model load (attempt ${this.loadAttempts + 1}/${this.MAX_LOAD_ATTEMPTS})`
+        );
 
         // Wait before retry
         await this.sleep(LLM_CONFIG.RETRY_DELAY_MS);
@@ -172,21 +220,25 @@ export class ModelManager {
     try {
       llmLogger.info('Unloading model...');
 
-      // Release model resources using LLMController
-      if (this.llmController) {
-        this.llmController.delete();
+      // Release model resources using LLMModule.delete()
+      if (this.llmModule) {
+        this.llmModule.delete();
       }
 
-      // Clear references
-      this.llmController = null;
+      // Clear references and state
+      this.llmModule = null;
       this.isLoaded = false;
+      this._response = '';
+      this._token = '';
+      this._messageHistory = [];
+      this._isGenerating = false;
 
       llmLogger.info('Model unloaded successfully');
     } catch (error) {
       llmLogger.error('Error unloading model', error);
 
       // Force clear even if release failed
-      this.llmController = null;
+      this.llmModule = null;
       this.isLoaded = false;
 
       throw new LLMError(
@@ -198,10 +250,133 @@ export class ModelManager {
   }
 
   /**
+   * Generate response from messages
+   * Uses LLMModule.generate() API
+   */
+  async generate(messages: Message[]): Promise<string> {
+    if (!this.isLoaded || !this.llmModule) {
+      throw new LLMError(
+        LLMErrorCode.MODEL_NOT_LOADED,
+        'Model not loaded. Call loadModel() first.'
+      );
+    }
+
+    this._response = '';
+    this._isGenerating = true;
+
+    if (this.onGeneratingChanged) {
+      this.onGeneratingChanged(true);
+    }
+
+    try {
+      llmLogger.info('Starting generation...', {
+        messageCount: messages.length,
+      });
+
+      // Use LLMModule.generate() which streams tokens via tokenCallback
+      const result = await this.llmModule.generate(messages);
+
+      // Result is the final complete response
+      this._response = result;
+
+      llmLogger.info('Generation complete', {
+        responseLength: this._response.length,
+      });
+
+      return this._response;
+    } catch (error) {
+      llmLogger.error('Generation failed', error);
+      throw new LLMError(
+        LLMErrorCode.INFERENCE_FAILED,
+        'Failed to generate response',
+        error
+      );
+    } finally {
+      this._isGenerating = false;
+      if (this.onGeneratingChanged) {
+        this.onGeneratingChanged(false);
+      }
+    }
+  }
+
+  /**
+   * Send a single message (simplified API)
+   * Uses LLMModule.sendMessage() API
+   */
+  async sendMessage(message: string): Promise<string> {
+    if (!this.isLoaded || !this.llmModule) {
+      throw new LLMError(
+        LLMErrorCode.MODEL_NOT_LOADED,
+        'Model not loaded. Call loadModel() first.'
+      );
+    }
+
+    this._response = '';
+    this._isGenerating = true;
+
+    if (this.onGeneratingChanged) {
+      this.onGeneratingChanged(true);
+    }
+
+    try {
+      llmLogger.info('Sending message...');
+
+      // Use LLMModule.sendMessage() for single message conversation
+      await this.llmModule.sendMessage(message);
+
+      llmLogger.info('Message sent, response received', {
+        responseLength: this._response.length,
+      });
+
+      return this._response;
+    } catch (error) {
+      llmLogger.error('sendMessage failed', error);
+      throw new LLMError(
+        LLMErrorCode.INFERENCE_FAILED,
+        'Failed to send message',
+        error
+      );
+    } finally {
+      this._isGenerating = false;
+      if (this.onGeneratingChanged) {
+        this.onGeneratingChanged(false);
+      }
+    }
+  }
+
+  /**
+   * Interrupt current generation
+   */
+  interrupt(): void {
+    if (this.llmModule && this._isGenerating) {
+      try {
+        this.llmModule.interrupt();
+        llmLogger.info('Generation interrupted');
+      } catch (error) {
+        llmLogger.error('Failed to interrupt generation', error);
+      }
+    }
+  }
+
+  /**
+   * Delete a message from history
+   */
+  deleteMessage(index: number): void {
+    if (this.llmModule) {
+      try {
+        this.llmModule.deleteMessage(index);
+        llmLogger.debug('Message deleted at index', index);
+      } catch (error) {
+        llmLogger.error('Failed to delete message', error);
+      }
+    }
+  }
+
+  /**
    * Check if model is currently loaded
    */
   isModelLoaded(): boolean {
-    return this.isLoaded && this.llmController !== null;
+    return this.isLoaded && this.llmModule !== null;
   }
 
   /**
@@ -212,17 +387,45 @@ export class ModelManager {
   }
 
   /**
-   * Get the loaded LLM controller instance
+   * Check if currently generating
    */
-  getModel(): LLMController {
-    if (!this.isLoaded || !this.llmController) {
+  isGenerating(): boolean {
+    return this._isGenerating;
+  }
+
+  /**
+   * Get the loaded LLM module instance
+   */
+  getModel(): any {
+    if (!this.isLoaded || !this.llmModule) {
       throw new LLMError(
         LLMErrorCode.MODEL_NOT_LOADED,
         'Model not loaded. Call loadModel() first.'
       );
     }
 
-    return this.llmController;
+    return this.llmModule;
+  }
+
+  /**
+   * Get current response (built from streaming tokens)
+   */
+  get response(): string {
+    return this._response;
+  }
+
+  /**
+   * Get last received token
+   */
+  get token(): string {
+    return this._token;
+  }
+
+  /**
+   * Get message history
+   */
+  get messageHistory(): Message[] {
+    return this._messageHistory;
   }
 
   /**
@@ -238,12 +441,16 @@ export class ModelManager {
   getStatus(): {
     isLoaded: boolean;
     isLoading: boolean;
+    isGenerating: boolean;
     loadAttempts: number;
+    responseLength: number;
   } {
     return {
       isLoaded: this.isLoaded,
       isLoading: this.isLoading,
+      isGenerating: this._isGenerating,
       loadAttempts: this.loadAttempts,
+      responseLength: this._response.length,
     };
   }
 
@@ -283,18 +490,22 @@ export class ModelManager {
    * Reset the manager state (for testing)
    */
   reset(): void {
-    if (this.llmController) {
+    if (this.llmModule) {
       try {
-        this.llmController.delete();
+        this.llmModule.delete();
       } catch (error) {
-        llmLogger.error('Error deleting LLM controller during reset', error);
+        llmLogger.error('Error deleting LLM module during reset', error);
       }
     }
-    this.llmController = null;
+    this.llmModule = null;
     this.isLoaded = false;
     this.isLoading = false;
     this.loadAttempts = 0;
     this.downloadProgress = 0;
+    this._response = '';
+    this._token = '';
+    this._messageHistory = [];
+    this._isGenerating = false;
   }
 }
 

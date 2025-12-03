@@ -16,7 +16,7 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: (updates: Partial<User>) => userApi.updateProfile(updates),
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Update profile in cache
       queryClient.setQueryData<User>([USER_QUERY_KEY, 'profile'], data);
     },
@@ -25,8 +25,13 @@ export const useUpdateProfile = () => {
 
 export const useChangePassword = () => {
   return useMutation({
-    mutationFn: ({ oldPassword, newPassword }: { oldPassword: string; newPassword: string }) =>
-      userApi.changePassword(oldPassword, newPassword),
+    mutationFn: ({
+      oldPassword,
+      newPassword,
+    }: {
+      oldPassword: string;
+      newPassword: string;
+    }) => userApi.changePassword(oldPassword, newPassword),
   });
 };
 

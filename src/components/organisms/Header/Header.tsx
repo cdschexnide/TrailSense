@@ -69,10 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
                 size={22}
                 color={theme.colors.systemBlue}
               />
-              <Text
-                variant="body"
-                style={{ color: theme.colors.systemBlue }}
-              >
+              <Text variant="body" style={{ color: theme.colors.systemBlue }}>
                 {backTitle}
               </Text>
             </View>
@@ -85,7 +82,11 @@ export const Header: React.FC<HeaderProps> = ({
             {title}
           </Text>
           {subtitle && !largeTitle && (
-            <Text variant="caption1" color="secondaryLabel" style={styles.subtitle}>
+            <Text
+              variant="caption1"
+              color="secondaryLabel"
+              style={styles.subtitle}
+            >
               {subtitle}
             </Text>
           )}
@@ -104,7 +105,11 @@ export const Header: React.FC<HeaderProps> = ({
             {title}
           </Text>
           {subtitle && (
-            <Text variant="caption1" color="secondaryLabel" style={styles.largeTitleSubtitle}>
+            <Text
+              variant="caption1"
+              color="secondaryLabel"
+              style={styles.largeTitleSubtitle}
+            >
               {subtitle}
             </Text>
           )}

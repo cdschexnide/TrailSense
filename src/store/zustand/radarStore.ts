@@ -34,8 +34,7 @@ export const useRadarStore = create<RadarState>(set => ({
 
   setZoomLevel: level => set({ zoomLevel: level }),
 
-  setCenter: (latitude, longitude) =>
-    set({ center: { latitude, longitude } }),
+  setCenter: (latitude, longitude) => set({ center: { latitude, longitude } }),
 
   setSelectedLayer: layerId => set({ selectedLayerId: layerId }),
 

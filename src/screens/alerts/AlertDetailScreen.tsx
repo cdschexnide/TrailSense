@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Platform,
+} from 'react-native';
 import { Button } from '@components/atoms/Button';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
@@ -91,35 +97,38 @@ export const AlertDetailScreen = ({ navigation }: any) => {
         />
       </ListSection>
 
-      {/* AI Summary Section */}
-      {FEATURE_FLAGS.LLM_ALERT_SUMMARIES && Platform.OS === 'android' && (
-        <View style={styles.aiSummarySection}>
-          {!summary && !isGeneratingSummary && !summaryError && (
-            <TouchableOpacity
-              onPress={generateSummary}
-              style={styles.explainButton}
-              accessibilityLabel="Explain alert with AI"
-              accessibilityRole="button"
-            >
-              <Text style={styles.explainButtonText}>✨ Explain with AI</Text>
-            </TouchableOpacity>
-          )}
+      {/* AI Summary Section - Now available on both Android and iOS */}
+      {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
+        (Platform.OS === 'android' || Platform.OS === 'ios') && (
+          <View style={styles.aiSummarySection}>
+            {!summary && !isGeneratingSummary && !summaryError && (
+              <TouchableOpacity
+                onPress={generateSummary}
+                style={styles.explainButton}
+                accessibilityLabel="Explain alert with AI"
+                accessibilityRole="button"
+              >
+                <Text style={styles.explainButtonText}>✨ Explain with AI</Text>
+              </TouchableOpacity>
+            )}
 
-          <AlertSummaryCard
-            summary={summary}
-            isLoading={isGeneratingSummary}
-            error={summaryError}
-            onRegenerate={regenerateSummary}
-            onFeedback={handleFeedback}
-          />
-        </View>
-      )}
+            <AlertSummaryCard
+              summary={summary}
+              isLoading={isGeneratingSummary}
+              error={summaryError}
+              onRegenerate={regenerateSummary}
+              onFeedback={handleFeedback}
+            />
+          </View>
+        )}
 
       <ListSection header="DEVICE INFORMATION" style={styles.section}>
         <ListRow
           title="Device"
           rightText={alert.deviceId}
-          onPress={() => navigation.navigate('DeviceDetail', { id: alert.deviceId })}
+          onPress={() =>
+            navigation.navigate('DeviceDetail', { id: alert.deviceId })
+          }
           accessoryType="disclosureIndicator"
         />
         {alert.location && (
@@ -152,11 +161,7 @@ export const AlertDetailScreen = ({ navigation }: any) => {
         >
           Mark as Reviewed
         </Button>
-        <Button
-          buttonStyle="filled"
-          role="destructive"
-          onPress={handleDelete}
-        >
+        <Button buttonStyle="filled" role="destructive" onPress={handleDelete}>
           Delete Alert
         </Button>
       </View>

@@ -11,7 +11,7 @@ export const useNotifications = () => {
     const setupNotifications = async () => {
       // Request notification permissions
       const hasPermission = await NotificationService.requestPermission();
-      
+
       if (!hasPermission) {
         console.log('Notification permission denied');
         return;
@@ -25,15 +25,15 @@ export const useNotifications = () => {
       await NotificationService.registerDevice(fcmToken);
 
       // Handle foreground notifications
-      unsubscribeForeground = NotificationService.onMessage(async (message) => {
+      unsubscribeForeground = NotificationService.onMessage(async message => {
         console.log('Foreground notification:', message);
-        
+
         // Show local notification or update UI
         // You can use expo-notifications here if needed
       });
 
       // Handle background notifications
-      NotificationService.onBackgroundMessage(async (message) => {
+      NotificationService.onBackgroundMessage(async message => {
         console.log('Background notification:', message);
       });
     };

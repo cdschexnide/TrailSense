@@ -32,11 +32,14 @@ export interface FeatureFlags {
  * These can be overridden by remote config, local storage, or A/B testing
  */
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
-  // LLM Features - Start with Android only, disabled by default for safety
-  LLM_ENABLED: __DEV__ && Platform.OS === 'android',
-  LLM_ALERT_SUMMARIES: __DEV__ && Platform.OS === 'android',
-  LLM_PATTERN_ANALYSIS: false, // Phase 2 feature
-  LLM_CONVERSATIONAL_ASSISTANT: false, // Phase 2 feature
+  // LLM Features - Now supporting both Android and iOS
+  LLM_ENABLED: __DEV__ && (Platform.OS === 'android' || Platform.OS === 'ios'),
+  LLM_ALERT_SUMMARIES:
+    __DEV__ && (Platform.OS === 'android' || Platform.OS === 'ios'),
+  LLM_PATTERN_ANALYSIS:
+    __DEV__ && (Platform.OS === 'android' || Platform.OS === 'ios'),
+  LLM_CONVERSATIONAL_ASSISTANT:
+    __DEV__ && (Platform.OS === 'android' || Platform.OS === 'ios'),
 
   // A/B Testing - Start with 50% rollout
   LLM_AB_TEST_ENABLED: false, // Disable until ready for production
@@ -168,7 +171,8 @@ class FeatureFlagsManager {
    */
   async loadFromStorage(): Promise<void> {
     try {
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      const AsyncStorage =
+        require('@react-native-async-storage/async-storage').default;
       const stored = await AsyncStorage.getItem('@feature_flags');
 
       if (stored) {
@@ -185,7 +189,8 @@ class FeatureFlagsManager {
    */
   async saveToStorage(): Promise<void> {
     try {
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      const AsyncStorage =
+        require('@react-native-async-storage/async-storage').default;
       await AsyncStorage.setItem('@feature_flags', JSON.stringify(this.flags));
     } catch (error) {
       console.warn('Failed to save feature flags to storage:', error);
@@ -221,7 +226,7 @@ class FeatureFlagsManager {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -256,8 +261,9 @@ export function shouldShowLLMFeatures(userId?: string): boolean {
     return false;
   }
 
-  if (Platform.OS !== 'android') {
-    return false; // iOS not supported yet
+  // Now supporting both Android and iOS
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
+    return false;
   }
 
   if (FEATURE_FLAGS.LLM_AB_TEST_ENABLED && userId) {

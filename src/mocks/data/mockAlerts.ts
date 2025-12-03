@@ -2,7 +2,11 @@ import type { Alert, ThreatLevel, DetectionType } from '@/types/alert';
 import { mockDevices } from './mockDevices';
 
 // Helper to generate timestamps over the last 30 days
-const generateTimestamp = (daysAgo: number, hour: number = 12, minute: number = 0): string => {
+const generateTimestamp = (
+  daysAgo: number,
+  hour: number = 12,
+  minute: number = 0
+): string => {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
   date.setHours(hour, minute, 0, 0);
@@ -17,7 +21,7 @@ const generateMac = (index: number): string => {
 
 // Helper to generate location with slight variations
 const generateLocation = (deviceId: string, variance: number = 0.0005) => {
-  const device = mockDevices.find((d) => d.id === deviceId);
+  const device = mockDevices.find(d => d.id === deviceId);
   if (!device) return undefined;
 
   return {
@@ -228,7 +232,7 @@ export const mockAlerts: Alert[] = [
   ...Array.from({ length: 45 }, (_, i) => {
     const index = i + 11;
     const daysAgo = Math.floor(index / 2);
-    const hour = (index % 24);
+    const hour = index % 24;
     const threatLevels: ThreatLevel[] = ['low', 'medium', 'high', 'critical'];
     const detectionTypes: DetectionType[] = ['cellular', 'wifi', 'bluetooth'];
     const deviceIds = mockDevices.filter(d => d.online).map(d => d.id);
@@ -248,7 +252,8 @@ export const mockAlerts: Alert[] = [
       detectionType,
       rssi: -60 - (index % 30),
       macAddress: generateMac(index),
-      cellularStrength: detectionType === 'cellular' ? -55 - (index % 25) : undefined,
+      cellularStrength:
+        detectionType === 'cellular' ? -55 - (index % 25) : undefined,
       isReviewed,
       isFalsePositive,
       location: generateLocation(deviceId),
@@ -258,16 +263,21 @@ export const mockAlerts: Alert[] = [
       isStationary: index % 4 === 0,
       seenCount: 1 + (index % 10),
       duration: 30 + (index % 600),
-      metadata: detectionType === 'wifi' ? { ssid: `Device-${index}` } : undefined,
+      metadata:
+        detectionType === 'wifi' ? { ssid: `Device-${index}` } : undefined,
     } as Alert;
   }),
 ];
 
 // Filtered alert collections
-export const mockUnreviewedAlerts = mockAlerts.filter((a) => !a.isReviewed);
-export const mockCriticalAlerts = mockAlerts.filter((a) => a.threatLevel === 'critical');
-export const mockHighAlerts = mockAlerts.filter((a) => a.threatLevel === 'high');
-export const mockMediumAlerts = mockAlerts.filter((a) => a.threatLevel === 'medium');
-export const mockLowAlerts = mockAlerts.filter((a) => a.threatLevel === 'low');
-export const mockMultibandAlerts = mockAlerts.filter((a) => a.multiband);
+export const mockUnreviewedAlerts = mockAlerts.filter(a => !a.isReviewed);
+export const mockCriticalAlerts = mockAlerts.filter(
+  a => a.threatLevel === 'critical'
+);
+export const mockHighAlerts = mockAlerts.filter(a => a.threatLevel === 'high');
+export const mockMediumAlerts = mockAlerts.filter(
+  a => a.threatLevel === 'medium'
+);
+export const mockLowAlerts = mockAlerts.filter(a => a.threatLevel === 'low');
+export const mockMultibandAlerts = mockAlerts.filter(a => a.multiband);
 export const mockRecentAlerts = mockAlerts.slice(0, 20);

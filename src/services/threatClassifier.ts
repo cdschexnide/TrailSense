@@ -101,12 +101,15 @@ export class ThreatClassifier {
     }
 
     // Calculate average duration
-    const totalDuration = alerts.reduce((sum, alert) => sum + alert.duration, 0);
+    const totalDuration = alerts.reduce(
+      (sum, alert) => sum + alert.duration,
+      0
+    );
     const averageDuration = totalDuration / alerts.length;
 
     // Find common hours
     const hourCounts: Record<number, number> = {};
-    alerts.forEach((alert) => {
+    alerts.forEach(alert => {
       const hour = new Date(alert.timestamp).getHours();
       hourCounts[hour] = (hourCounts[hour] || 0) + 1;
     });
@@ -118,7 +121,7 @@ export class ThreatClassifier {
 
     // Determine if recurring (seen on multiple days)
     const dates = new Set(
-      alerts.map((alert) => new Date(alert.timestamp).toDateString())
+      alerts.map(alert => new Date(alert.timestamp).toDateString())
     );
     const isRecurring = dates.size >= 3;
 

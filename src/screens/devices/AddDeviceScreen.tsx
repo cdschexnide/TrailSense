@@ -44,8 +44,8 @@ export const AddDeviceScreen = ({ navigation }: any) => {
             Scan QR Code
           </Text>
           <Text variant="caption" style={styles.description}>
-            Scan the QR code on your TrailSense device to automatically configure
-            it.
+            Scan the QR code on your TrailSense device to automatically
+            configure it.
           </Text>
           <Button
             title="Open QR Scanner"

@@ -506,7 +506,10 @@ export const getBorderRadius = (size: BorderRadiusSize): number => {
  * Helper function to calculate spacing multiples
  * Ensures values stay on 8pt grid
  */
-export const multiplySpacing = (baseSize: SpacingSize, multiplier: number): number => {
+export const multiplySpacing = (
+  baseSize: SpacingSize,
+  multiplier: number
+): number => {
   const baseValue = Spacing[baseSize];
   return baseValue * multiplier;
 };

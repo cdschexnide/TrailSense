@@ -239,15 +239,22 @@ class LLMService {
     // For now, treat the entire response as the summary
 
     // Try to extract sections if they exist
-    const lines = text.trim().split('\n').filter(line => line.trim());
+    const lines = text
+      .trim()
+      .split('\n')
+      .filter(line => line.trim());
 
     let summary = text;
-    let threatExplanation = 'Threat level determined by proximity and behavior patterns';
+    let threatExplanation =
+      'Threat level determined by proximity and behavior patterns';
     let recommendedActions: string[] = [];
 
     // Try to extract numbered or bulleted actions
-    const actionLines = lines.filter(line =>
-      line.match(/^[\d\-\•]\s*/) || line.toLowerCase().includes('action') || line.toLowerCase().includes('recommend')
+    const actionLines = lines.filter(
+      line =>
+        line.match(/^[\d\-\•]\s*/) ||
+        line.toLowerCase().includes('action') ||
+        line.toLowerCase().includes('recommend')
     );
 
     if (actionLines.length > 0) {
@@ -285,18 +292,30 @@ class LLMService {
       patternType = 'neighbor';
     } else if (textLower.includes('routine') || textLower.includes('regular')) {
       patternType = 'routine';
-    } else if (textLower.includes('suspicious') || textLower.includes('concern')) {
+    } else if (
+      textLower.includes('suspicious') ||
+      textLower.includes('concern')
+    ) {
       patternType = 'suspicious';
     }
 
     // Detect confidence
     let confidence = 0.7;
 
-    if (textLower.includes('high confidence') || textLower.includes('very confident')) {
+    if (
+      textLower.includes('high confidence') ||
+      textLower.includes('very confident')
+    ) {
       confidence = 0.9;
-    } else if (textLower.includes('medium confidence') || textLower.includes('moderate')) {
+    } else if (
+      textLower.includes('medium confidence') ||
+      textLower.includes('moderate')
+    ) {
       confidence = 0.7;
-    } else if (textLower.includes('low confidence') || textLower.includes('uncertain')) {
+    } else if (
+      textLower.includes('low confidence') ||
+      textLower.includes('uncertain')
+    ) {
       confidence = 0.5;
     }
 
@@ -305,9 +324,12 @@ class LLMService {
 
     if (textLower.includes('whitelist') && textLower.includes('suggest')) {
       whitelistSuggestion = {
-        name: patternType === 'delivery' ? 'Delivery Driver' :
-              patternType === 'neighbor' ? 'Neighbor Device' :
-              'Routine Visitor',
+        name:
+          patternType === 'delivery'
+            ? 'Delivery Driver'
+            : patternType === 'neighbor'
+              ? 'Neighbor Device'
+              : 'Routine Visitor',
         category: patternType,
         reason: 'Regular detection pattern identified',
       };
@@ -379,13 +401,20 @@ class LLMService {
 
       // Filter to high/critical alerts only
       const criticalAlerts = alerts
-        .filter(a => LLM_CONFIG.ALERT_SUMMARIES.AUTO_GENERATE_FOR_THREATS.includes(a.threat_level))
+        .filter(a =>
+          LLM_CONFIG.ALERT_SUMMARIES.AUTO_GENERATE_FOR_THREATS.includes(
+            a.threat_level
+          )
+        )
         .slice(0, LLM_CONFIG.ALERT_SUMMARIES.PRELOAD_LIMIT);
 
       // Generate summaries in background (don't await)
       const promises = criticalAlerts.map(alert =>
         this.generateAlertSummary({ alert }).catch(error => {
-          llmLogger.debug('Preload failed for alert', { alertId: alert.id, error });
+          llmLogger.debug('Preload failed for alert', {
+            alertId: alert.id,
+            error,
+          });
         })
       );
 

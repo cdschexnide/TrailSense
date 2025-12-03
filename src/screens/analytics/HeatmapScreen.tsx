@@ -5,13 +5,15 @@ import { useHeatmapData } from '@hooks/useAnalytics';
 import { DetectionType } from '@types';
 
 export const HeatmapScreen = () => {
-  const [selectedType, setSelectedType] = useState<DetectionType | 'all'>('all');
+  const [selectedType, setSelectedType] = useState<DetectionType | 'all'>(
+    'all'
+  );
   const { data: heatmapPoints, isLoading } = useHeatmapData();
 
   const filteredPoints =
     selectedType === 'all'
       ? heatmapPoints
-      : heatmapPoints?.filter((point) => point.type === selectedType);
+      : heatmapPoints?.filter(point => point.type === selectedType);
 
   return (
     <View style={styles.container}>
@@ -102,7 +104,7 @@ export const HeatmapScreen = () => {
         >
           {filteredPoints && filteredPoints.length > 0 && (
             <Heatmap
-              points={filteredPoints.map((point) => ({
+              points={filteredPoints.map(point => ({
                 latitude: point.latitude,
                 longitude: point.longitude,
                 weight: point.weight || 1,
