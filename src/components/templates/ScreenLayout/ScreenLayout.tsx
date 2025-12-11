@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '@components/organisms';
-import { Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 
 interface ScreenLayoutProps {
@@ -83,13 +82,6 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         contentStyle,
       ]}
     >
-      {hasLargeTitle && headerConfig && (
-        <View style={styles.largeTitleContainer}>
-          <Text variant="largeTitle" weight="bold" style={styles.largeTitle}>
-            {headerConfig.title}
-          </Text>
-        </View>
-      )}
       {children}
     </View>
   );
@@ -139,11 +131,12 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
     >
       {headerConfig && (
         <Header
-          title={hasLargeTitle ? '' : headerConfig.title}
+          title={headerConfig.title}
           subtitle={headerConfig.subtitle}
           showBack={headerConfig.showBack}
           onBackPress={headerConfig.onBackPress}
           rightActions={headerConfig.rightActions}
+          largeTitle={hasLargeTitle}
         />
       )}
       {keyboardAvoidingContent}
@@ -166,13 +159,5 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  largeTitleContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
-  },
-  largeTitle: {
-    // Large title styling handled by Text component
   },
 });

@@ -50,7 +50,8 @@ export const Header: React.FC<HeaderProps> = ({
       ]}
       testID={testID}
     >
-      {/* Standard iOS navigation bar - 44pt height */}
+      {/* Standard iOS navigation bar - 44pt height, hidden for large title without back */}
+      {(!largeTitle || showBack) && (
       <View style={styles.navBar}>
         {/* Back button - 44x44pt minimum touch target */}
         {showBack && (
@@ -76,34 +77,44 @@ export const Header: React.FC<HeaderProps> = ({
           </Pressable>
         )}
 
-        {/* Center title */}
+        {/* Center title - hidden when using large title */}
         <View style={styles.titleContainer}>
-          <Text variant="title3" color="label" style={styles.title}>
-            {title}
-          </Text>
-          {subtitle && !largeTitle && (
-            <Text
-              variant="caption1"
-              color="secondaryLabel"
-              style={styles.subtitle}
-            >
-              {subtitle}
-            </Text>
+          {!largeTitle && (
+            <>
+              <Text variant="title3" color="label" style={styles.title}>
+                {title}
+              </Text>
+              {subtitle && (
+                <Text
+                  variant="caption1"
+                  color="secondaryLabel"
+                  style={styles.subtitle}
+                >
+                  {subtitle}
+                </Text>
+              )}
+            </>
           )}
         </View>
 
-        {/* Right actions */}
-        {rightActions && (
+        {/* Right actions - only in navBar when not using large title */}
+        {rightActions && !largeTitle && (
           <View style={styles.rightActions}>{rightActions}</View>
         )}
       </View>
+      )}
 
       {/* Large title (iOS 11+ pattern) */}
       {largeTitle && (
         <View style={styles.largeTitleContainer}>
-          <Text variant="largeTitle" color="label" style={styles.largeTitle}>
-            {title}
-          </Text>
+          <View style={styles.largeTitleRow}>
+            <Text variant="largeTitle" color="label" style={styles.largeTitle}>
+              {title}
+            </Text>
+            {rightActions && (
+              <View style={styles.largeTitleActions}>{rightActions}</View>
+            )}
+          </View>
           {subtitle && (
             <Text
               variant="caption1"
@@ -164,11 +175,18 @@ const styles = StyleSheet.create({
   },
   largeTitleContainer: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingBottom: 8,
+  },
+  largeTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   largeTitle: {
-    marginBottom: 4,
+    flex: 1,
+  },
+  largeTitleActions: {
+    marginLeft: 16,
   },
   largeTitleSubtitle: {
     marginTop: 2,

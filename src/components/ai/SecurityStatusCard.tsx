@@ -1,98 +1,157 @@
+/**
+ * SecurityStatusCard - REDESIGNED
+ *
+ * Beautiful status display with:
+ * - Gradient header based on status
+ * - Clean metrics grid
+ * - Animated indicators
+ */
+
 import React, { memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
+import { Text } from '@components/atoms/Text';
+import { Icon } from '@components/atoms/Icon';
 import { SecurityContextData } from '@/hooks/useSecurityContext';
+import { useTheme } from '@hooks/useTheme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface SecurityStatusCardProps {
   context: SecurityContextData;
   compact?: boolean;
+  onPress?: () => void;
 }
 
-/**
- * Security Status Card
- * Displays current security status summary for AI Assistant context
- */
+const STATUS_CONFIG = {
+  critical: {
+    label: 'Critical',
+    icon: 'alert-circle',
+    gradient: ['#FF3B30', '#D70015'] as [string, string],
+  },
+  alert: {
+    label: 'Alert',
+    icon: 'warning',
+    gradient: ['#FF9500', '#E08600'] as [string, string],
+  },
+  warning: {
+    label: 'Warning',
+    icon: 'information-circle',
+    gradient: ['#FFCC00', '#E6B800'] as [string, string],
+  },
+  normal: {
+    label: 'All Clear',
+    icon: 'checkmark-circle',
+    gradient: ['#34C759', '#28A745'] as [string, string],
+  },
+};
+
 export const SecurityStatusCard = memo<SecurityStatusCardProps>(
-  ({ context, compact = false }) => {
-    const getStatusColor = () => {
-      if (context.criticalAlerts > 0) return '#FF3B30';
-      if (context.highAlerts > 0) return '#FF9500';
-      if (context.offlineDevices > 0) return '#FFCC00';
-      return '#34C759';
+  ({ context, compact = false, onPress }) => {
+    const { theme } = useTheme();
+    const colors = theme.colors;
+
+    const getStatus = () => {
+      if (context.criticalAlerts > 0) return STATUS_CONFIG.critical;
+      if (context.highAlerts > 0) return STATUS_CONFIG.alert;
+      if (context.offlineDevices > 0) return STATUS_CONFIG.warning;
+      return STATUS_CONFIG.normal;
     };
 
-    const getStatusText = () => {
-      if (context.criticalAlerts > 0) return 'Critical';
-      if (context.highAlerts > 0) return 'Alert';
-      if (context.offlineDevices > 0) return 'Warning';
-      return 'Normal';
-    };
+    const status = getStatus();
 
+    // Compact mode - inline badge
     if (compact) {
       return (
         <View style={styles.compactContainer}>
-          <View
-            style={[styles.statusDot, { backgroundColor: getStatusColor() }]}
-          />
-          <Text style={styles.compactText}>
-            {context.alertsLast24h} alerts today • {context.onlineDevices}/
-            {context.totalDevices} sensors online
+          <View style={[styles.compactDot, { backgroundColor: status.gradient[0] }]} />
+          <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+            {context.alertsLast24h} alerts today • {context.onlineDevices}/{context.totalDevices} online
           </Text>
         </View>
       );
     }
 
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.statusBadge}>
-            <View
-              style={[styles.statusDot, { backgroundColor: getStatusColor() }]}
-            />
-            <Text style={[styles.statusText, { color: getStatusColor() }]}>
-              {getStatusText()}
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.container,
+          { backgroundColor: colors.secondarySystemBackground },
+          pressed && onPress && { opacity: 0.8 },
+        ]}
+      >
+        {/* Status Header */}
+        <LinearGradient
+          colors={status.gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.statusHeader}
+        >
+          <View style={styles.statusLeft}>
+            <View style={styles.statusIconBg}>
+              <Icon name={status.icon as any} size={20} color="#FFFFFF" />
+            </View>
+            <View>
+              <Text variant="caption2" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                SECURITY STATUS
+              </Text>
+              <Text variant="headline" weight="bold" style={{ color: '#FFFFFF' }}>
+                {status.label}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.liveBadge}>
+            <View style={styles.liveIndicator} />
+            <Text variant="caption2" weight="semibold" style={{ color: '#FFFFFF' }}>
+              LIVE
             </Text>
           </View>
-          <Text style={styles.timestamp}>Live</Text>
-        </View>
+        </LinearGradient>
 
-        <View style={styles.statsGrid}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{context.alertsLast24h}</Text>
-            <Text style={styles.statLabel}>Today</Text>
+        {/* Metrics Grid */}
+        <View style={styles.metricsGrid}>
+          <View style={styles.metricItem}>
+            <Text variant="title1" weight="bold" color="label">
+              {context.alertsLast24h}
+            </Text>
+            <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+              Today
+            </Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{context.unreviewedAlerts}</Text>
-            <Text style={styles.statLabel}>Unreviewed</Text>
+          <View style={[styles.metricDivider, { backgroundColor: colors.separator }]} />
+          <View style={styles.metricItem}>
+            <Text variant="title1" weight="bold" color="label">
+              {context.unreviewedAlerts}
+            </Text>
+            <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+              Unreviewed
+            </Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>
+          <View style={[styles.metricDivider, { backgroundColor: colors.separator }]} />
+          <View style={styles.metricItem}>
+            <Text variant="title1" weight="bold" color="label">
               {context.onlineDevices}/{context.totalDevices}
             </Text>
-            <Text style={styles.statLabel}>Sensors</Text>
+            <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+              Sensors
+            </Text>
           </View>
         </View>
 
-        {/* Alert breakdown */}
+        {/* Alert Breakdown */}
         {(context.criticalAlerts > 0 || context.highAlerts > 0) && (
           <View style={styles.alertBreakdown}>
             {context.criticalAlerts > 0 && (
-              <View style={styles.alertBadge}>
-                <View
-                  style={[styles.alertDot, { backgroundColor: '#FF3B30' }]}
-                />
-                <Text style={styles.alertBadgeText}>
+              <View style={[styles.alertPill, { backgroundColor: '#FF3B30' + '20' }]}>
+                <Icon name="alert-circle" size={14} color="#FF3B30" />
+                <Text variant="caption1" weight="semibold" style={{ color: '#FF3B30', marginLeft: 4 }}>
                   {context.criticalAlerts} Critical
                 </Text>
               </View>
             )}
             {context.highAlerts > 0 && (
-              <View style={styles.alertBadge}>
-                <View
-                  style={[styles.alertDot, { backgroundColor: '#FF9500' }]}
-                />
-                <Text style={styles.alertBadgeText}>
+              <View style={[styles.alertPill, { backgroundColor: '#FF9500' + '20' }]}>
+                <Icon name="warning" size={14} color="#FF9500" />
+                <Text variant="caption1" weight="semibold" style={{ color: '#FF9500', marginLeft: 4 }}>
                   {context.highAlerts} High
                 </Text>
               </View>
@@ -102,130 +161,117 @@ export const SecurityStatusCard = memo<SecurityStatusCardProps>(
 
         {/* Issues */}
         {(context.offlineDevices > 0 || context.lowBatteryDevices > 0) && (
-          <View style={styles.issuesContainer}>
+          <View style={[styles.issuesContainer, { borderTopColor: colors.separator }]}>
             {context.offlineDevices > 0 && (
-              <Text style={styles.issueText}>
-                ⚠️ {context.offlineDevices} sensor
-                {context.offlineDevices > 1 ? 's' : ''} offline
-              </Text>
+              <View style={styles.issueRow}>
+                <Icon name="cloud-offline-outline" size={16} color={colors.systemYellow} />
+                <Text variant="subheadline" style={{ color: colors.systemYellow, marginLeft: 8 }}>
+                  {context.offlineDevices} sensor{context.offlineDevices > 1 ? 's' : ''} offline
+                </Text>
+              </View>
             )}
             {context.lowBatteryDevices > 0 && (
-              <Text style={styles.issueText}>
-                🔋 {context.lowBatteryDevices} sensor
-                {context.lowBatteryDevices > 1 ? 's' : ''} low battery
-              </Text>
+              <View style={styles.issueRow}>
+                <Icon name="battery-half" size={16} color={colors.systemOrange} />
+                <Text variant="subheadline" style={{ color: colors.systemOrange, marginLeft: 8 }}>
+                  {context.lowBatteryDevices} sensor{context.lowBatteryDevices > 1 ? 's' : ''} low battery
+                </Text>
+              </View>
             )}
           </View>
         )}
-      </View>
+      </Pressable>
     );
   }
 );
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 20,
+    overflow: 'hidden',
     marginHorizontal: 16,
     marginTop: 8,
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  statusLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  statusIconBg: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 6,
+  },
+  liveIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
+  },
+  metricsGrid: {
+    flexDirection: 'row',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  metricItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  metricDivider: {
+    width: 1,
+    height: 44,
+    alignSelf: 'center',
+  },
+  alertBreakdown: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    gap: 10,
+  },
+  alertPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  issuesContainer: {
+    borderTopWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  issueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   compactContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginHorizontal: 16,
-    marginVertical: 4,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statusDot: {
+  compactDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginRight: 8,
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#8E8E93',
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#8E8E93',
-    marginTop: 4,
-  },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#38383A',
-  },
-  alertBreakdown: {
-    flexDirection: 'row',
-    marginTop: 16,
-    gap: 12,
-  },
-  alertBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  alertDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 6,
-  },
-  alertBadgeText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    fontWeight: '500',
-  },
-  issuesContainer: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#38383A',
-  },
-  issueText: {
-    fontSize: 13,
-    color: '#FFCC00',
-    marginBottom: 4,
-  },
-  compactText: {
-    fontSize: 12,
-    color: '#8E8E93',
   },
 });
 

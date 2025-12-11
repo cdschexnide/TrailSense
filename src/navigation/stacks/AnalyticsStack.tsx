@@ -11,22 +11,14 @@ const Stack = createNativeStackNavigator<AnalyticsStackParamList>();
 
 export const AnalyticsStack = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Dashboard"
-        component={DashboardScreen}
-        options={{ title: 'Analytics' }}
-      />
-      <Stack.Screen
-        name="Heatmap"
-        component={HeatmapScreen}
-        options={{ title: 'Heatmap' }}
-      />
-      <Stack.Screen
-        name="Reports"
-        component={ReportsScreen}
-        options={{ title: 'Reports' }}
-      />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen name="Heatmap" component={HeatmapScreen} />
+      <Stack.Screen name="Reports" component={ReportsScreen} />
     </Stack.Navigator>
   );
 };

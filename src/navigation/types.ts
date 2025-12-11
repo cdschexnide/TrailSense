@@ -50,6 +50,14 @@ export type SettingsStackParamList = {
   Profile: undefined;
   Whitelist: undefined;
   NotificationSettings: undefined;
+  Theme: undefined;
+  AlertSound: undefined;
+  Biometric: undefined;
+  Security: undefined;
+  Sensitivity: undefined;
+  QuietHours: undefined;
+  VacationMode: undefined;
+  AddWhitelist: undefined;
 };
 
 export type AIStackParamList = {

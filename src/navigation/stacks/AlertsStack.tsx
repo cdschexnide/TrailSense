@@ -11,22 +11,14 @@ const Stack = createNativeStackNavigator<AlertsStackParamList>();
 
 export const AlertsStack = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="AlertList"
-        component={AlertListScreen}
-        options={{ title: 'Alerts' }}
-      />
-      <Stack.Screen
-        name="AlertDetail"
-        component={AlertDetailScreen}
-        options={{ title: 'Alert Detail' }}
-      />
-      <Stack.Screen
-        name="AlertFilter"
-        component={AlertFilterScreen}
-        options={{ title: 'Filter Alerts' }}
-      />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="AlertList" component={AlertListScreen} />
+      <Stack.Screen name="AlertDetail" component={AlertDetailScreen} />
+      <Stack.Screen name="AlertFilter" component={AlertFilterScreen} />
     </Stack.Navigator>
   );
 };

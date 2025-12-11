@@ -6,3 +6,7 @@ export { NotificationSettingsScreen } from './NotificationSettingsScreen';
 export { AddWhitelistScreen } from './AddWhitelistScreen';
 export { SensitivityScreen } from './SensitivityScreen';
 export { QuietHoursScreen } from './QuietHoursScreen';
+export { ThemeScreen } from './ThemeScreen';
+export { AlertSoundScreen } from './AlertSoundScreen';
+export { BiometricScreen } from './BiometricScreen';
+export { SecurityScreen } from './SecurityScreen';

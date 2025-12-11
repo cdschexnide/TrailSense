@@ -10,6 +10,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { SectionList, RefreshControl, StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useDevices } from '@hooks/api/useDevices';
 import { DeviceCard } from '@components/organisms';
@@ -96,73 +97,76 @@ export const DeviceListScreen = ({ navigation }: any) => {
     setRefreshing(false);
   };
 
-  // Stats header component
+  // Stats header component - Enhanced design
   const renderStatsHeader = () => (
     <View style={styles.statsHeader}>
       {/* Total Devices */}
-      <View
-        style={[
-          styles.statCard,
-          {
-            backgroundColor: isDark
-              ? 'rgba(10, 132, 255, 0.12)'
-              : 'rgba(0, 122, 255, 0.08)',
-          },
-        ]}
-      >
-        <Icon name="hardware-chip" size={24} color={colors.systemBlue} />
-        <Text variant="title2" style={styles.statValue}>
-          {stats.total}
-        </Text>
-        <Text variant="caption1" color="secondaryLabel">
-          Total
-        </Text>
+      <View style={styles.statCardWrapper}>
+        <LinearGradient
+          colors={isDark
+            ? ['#1E3A5F', '#0D2137']
+            : ['#E8F4FD', '#D0E8FA']
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.statCard, styles.statCardTotal]}
+        >
+          <View style={[styles.statIconBg, { backgroundColor: 'rgba(10, 132, 255, 0.2)' }]}>
+            <Icon name="hardware-chip" size={22} color={colors.systemBlue} />
+          </View>
+          <Text variant="largeTitle" weight="bold" style={[styles.statValue, { color: colors.systemBlue }]}>
+            {stats.total}
+          </Text>
+          <Text variant="caption1" weight="medium" color="secondaryLabel">
+            Total
+          </Text>
+        </LinearGradient>
       </View>
 
       {/* Online */}
-      <View
-        style={[
-          styles.statCard,
-          {
-            backgroundColor: isDark
-              ? 'rgba(48, 209, 88, 0.12)'
-              : 'rgba(52, 199, 89, 0.08)',
-          },
-        ]}
-      >
-        <Icon name="checkmark-circle" size={24} color={colors.systemGreen} />
-        <Text
-          variant="title2"
-          style={[styles.statValue, { color: colors.systemGreen }]}
+      <View style={styles.statCardWrapper}>
+        <LinearGradient
+          colors={isDark
+            ? ['#1A3D2E', '#0D2518']
+            : ['#E6F7ED', '#CCF0DB']
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.statCard, styles.statCardOnline]}
         >
-          {stats.online}
-        </Text>
-        <Text variant="caption1" color="secondaryLabel">
-          Online
-        </Text>
+          <View style={[styles.statIconBg, { backgroundColor: 'rgba(48, 209, 88, 0.2)' }]}>
+            <Icon name="checkmark-circle" size={22} color={colors.systemGreen} />
+          </View>
+          <Text variant="largeTitle" weight="bold" style={[styles.statValue, { color: colors.systemGreen }]}>
+            {stats.online}
+          </Text>
+          <Text variant="caption1" weight="medium" color="secondaryLabel">
+            Online
+          </Text>
+        </LinearGradient>
       </View>
 
       {/* Offline */}
-      <View
-        style={[
-          styles.statCard,
-          {
-            backgroundColor: isDark
-              ? 'rgba(255, 69, 58, 0.12)'
-              : 'rgba(255, 59, 48, 0.08)',
-          },
-        ]}
-      >
-        <Icon name="close-circle" size={24} color={colors.systemRed} />
-        <Text
-          variant="title2"
-          style={[styles.statValue, { color: colors.systemRed }]}
+      <View style={styles.statCardWrapper}>
+        <LinearGradient
+          colors={isDark
+            ? ['#3D1E1E', '#251010']
+            : ['#FDECEC', '#FAD4D4']
+          }
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.statCard, styles.statCardOffline]}
         >
-          {stats.offline}
-        </Text>
-        <Text variant="caption1" color="secondaryLabel">
-          Offline
-        </Text>
+          <View style={[styles.statIconBg, { backgroundColor: 'rgba(255, 69, 58, 0.2)' }]}>
+            <Icon name="close-circle" size={22} color={colors.systemRed} />
+          </View>
+          <Text variant="largeTitle" weight="bold" style={[styles.statValue, { color: colors.systemRed }]}>
+            {stats.offline}
+          </Text>
+          <Text variant="caption1" weight="medium" color="secondaryLabel">
+            Offline
+          </Text>
+        </LinearGradient>
       </View>
     </View>
   );
@@ -270,18 +274,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    gap: 12,
+    gap: 10,
+  },
+  statCardWrapper: {
+    flex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
   },
   statCard: {
-    flex: 1,
     alignItems: 'center',
     paddingVertical: 16,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    gap: 6,
+    borderWidth: 1,
+  },
+  statCardTotal: {
+    borderColor: 'rgba(10, 132, 255, 0.3)',
+  },
+  statCardOnline: {
+    borderColor: 'rgba(48, 209, 88, 0.3)',
+  },
+  statCardOffline: {
+    borderColor: 'rgba(255, 69, 58, 0.3)',
+  },
+  statIconBg: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
-    gap: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   statValue: {
-    fontWeight: '700',
-    fontSize: 24,
+    fontSize: 28,
   },
   sectionHeader: {
     flexDirection: 'row',

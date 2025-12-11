@@ -7,17 +7,13 @@ const Stack = createNativeStackNavigator<RadarStackParamList>();
 
 export const RadarStack = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="LiveRadar"
-        component={ProximityHeatmapScreen}
-        options={{ title: 'Proximity Heatmap' }}
-      />
-      <Stack.Screen
-        name="RadarSettings"
-        component={RadarSettingsScreen}
-        options={{ title: 'Radar Settings' }}
-      />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="LiveRadar" component={ProximityHeatmapScreen} />
+      <Stack.Screen name="RadarSettings" component={RadarSettingsScreen} />
     </Stack.Navigator>
   );
 };

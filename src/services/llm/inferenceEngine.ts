@@ -130,6 +130,14 @@ export class InferenceEngine {
     // Trim whitespace
     processed = processed.trim();
 
+    // Remove surrounding quotes if present (LLM sometimes wraps responses in quotes)
+    if (
+      (processed.startsWith('"') && processed.endsWith('"')) ||
+      (processed.startsWith("'") && processed.endsWith("'"))
+    ) {
+      processed = processed.slice(1, -1).trim();
+    }
+
     // Remove any trailing incomplete sentences (optional)
     // This is commented out as it might cut off valid responses
     // processed = processed.replace(/[^.!?]*$/, '').trim();

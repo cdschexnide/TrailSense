@@ -32,29 +32,16 @@ interface AlertCardProps {
 }
 
 /**
- * Get threat background colors for dark mode
+ * Get threat stripe width based on severity
  */
-const getThreatBackground = (threatLevel: ThreatLevel, isDark: boolean) => {
-  const backgrounds = {
-    critical: isDark ? 'rgba(255, 69, 58, 0.15)' : 'rgba(255, 59, 48, 0.12)',
-    high: isDark ? 'rgba(255, 159, 10, 0.12)' : 'rgba(255, 149, 0, 0.10)',
-    medium: isDark ? 'rgba(255, 214, 10, 0.10)' : 'rgba(255, 204, 0, 0.08)',
-    low: isDark ? 'rgba(48, 209, 88, 0.08)' : 'rgba(52, 199, 89, 0.06)',
+const getThreatStripeWidth = (threatLevel: ThreatLevel) => {
+  const widths = {
+    critical: 5,
+    high: 4,
+    medium: 4,
+    low: 3,
   };
-  return backgrounds[threatLevel] || backgrounds.low;
-};
-
-/**
- * Get threat border colors
- */
-const getThreatBorder = (threatLevel: ThreatLevel, isDark: boolean) => {
-  const borders = {
-    critical: isDark ? 'rgba(255, 69, 58, 0.40)' : 'rgba(255, 59, 48, 0.35)',
-    high: isDark ? 'rgba(255, 159, 10, 0.35)' : 'rgba(255, 149, 0, 0.30)',
-    medium: isDark ? 'rgba(255, 214, 10, 0.30)' : 'rgba(255, 204, 0, 0.25)',
-    low: isDark ? 'rgba(48, 209, 88, 0.25)' : 'rgba(52, 199, 89, 0.20)',
-  };
-  return borders[threatLevel] || borders.low;
+  return widths[threatLevel] || 3;
 };
 
 /**
@@ -202,18 +189,9 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   // Get RSSI interpretation
   const rssiInfo = interpretRSSI(alert.rssi);
 
-  // Get background and border colors based on threat level
-  const backgroundColor = useMemo(
-    () => getThreatBackground(alert.threatLevel, isDark),
-    [alert.threatLevel, isDark]
-  );
-
-  const borderColor = useMemo(
-    () => getThreatBorder(alert.threatLevel, isDark),
-    [alert.threatLevel, isDark]
-  );
-
+  // Get threat color and stripe width
   const threatColor = getThreatColor(alert.threatLevel);
+  const stripeWidth = getThreatStripeWidth(alert.threatLevel);
 
   // Interpolate pulse opacity
   const pulseOpacity = pulseAnim.interpolate({
@@ -226,9 +204,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
       style={[
         styles.card,
         {
-          backgroundColor,
-          borderColor,
-          borderWidth: 1,
+          backgroundColor: theme.colors.secondarySystemBackground,
           opacity: opacityAnim,
           transform: [
             { translateX: translateXAnim },
@@ -238,33 +214,46 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         style,
       ]}
     >
+      {/* Left threat stripe indicator */}
+      <View
+        style={[
+          styles.threatStripe,
+          {
+            backgroundColor: threatColor,
+            width: stripeWidth,
+          },
+        ]}
+      />
+
+      {/* Pulse glow for critical alerts */}
+      {alert.threatLevel === 'critical' && (
+        <Animated.View
+          style={[
+            styles.threatStripe,
+            {
+              backgroundColor: threatColor,
+              width: stripeWidth + 4,
+              opacity: pulseOpacity,
+            },
+          ]}
+          pointerEvents="none"
+        />
+      )}
+
       <Pressable
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
+        style={styles.cardContent}
         accessibilityRole="button"
         accessibilityLabel={`${alert.threatLevel} ${alert.detectionType} alert`}
       >
-        {/* Pulse overlay for critical alerts */}
-        {alert.threatLevel === 'critical' && (
-          <Animated.View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: threatColor, opacity: pulseOpacity },
-            ]}
-            pointerEvents="none"
-          />
-        )}
 
         {/* Header: Badge + Timestamp */}
         <View style={styles.header}>
-          <View style={styles.badgeRow}>
-            <Badge variant={alert.threatLevel as any} size="sm">
-              {alert.threatLevel.toUpperCase()}
-            </Badge>
-            {/* Threat level indicator bar */}
-            <View style={[styles.threatBar, { backgroundColor: threatColor }]} />
-          </View>
+          <Badge variant={alert.threatLevel as any} size="sm">
+            {alert.threatLevel.toUpperCase()}
+          </Badge>
           <Text variant="caption1" color="secondaryLabel">
             {formatTimestamp(alert.timestamp)}
           </Text>
@@ -421,25 +410,28 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginVertical: 8,
-    padding: 16,
     borderRadius: 16,
     overflow: 'hidden',
+    flexDirection: 'row',
+  },
+  threatStripe: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
+  },
+  cardContent: {
+    flex: 1,
+    padding: 16,
+    paddingLeft: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 14,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  threatBar: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
   },
   detectionRow: {
     flexDirection: 'row',

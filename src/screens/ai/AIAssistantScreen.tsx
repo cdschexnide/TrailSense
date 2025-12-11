@@ -1,3 +1,14 @@
+/**
+ * AIAssistantScreen - REDESIGNED
+ *
+ * Beautiful AI chat interface with:
+ * - Modern header with gradient AI icon
+ * - Enhanced status display
+ * - Improved chat bubbles
+ * - Better input design
+ * - Smooth animations
+ */
+
 import React, {
   useState,
   useCallback,
@@ -7,23 +18,29 @@ import React, {
 } from 'react';
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
   Alert,
   Keyboard,
+  Pressable,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { useAI } from '@/services/llm';
 import { FEATURE_FLAGS, shouldShowLLMFeatures } from '@/config/featureFlags';
 import { ChatMessage as ChatMessageType } from '@/types/llm';
 import { useSecurityContext } from '@/hooks/useSecurityContext';
+import { useTheme } from '@hooks/useTheme';
+import { Text } from '@components/atoms/Text';
+import { Icon } from '@components/atoms/Icon';
+import { Button } from '@components/atoms/Button';
 import {
   ChatMessage,
   SuggestionChips,
@@ -36,18 +53,11 @@ import {
 const CHAT_STORAGE_KEY = '@trailsense/ai_chat_history';
 const MAX_STORED_MESSAGES = 50;
 
-/**
- * AI Assistant Screen
- * Production-grade conversational security assistant for TrailSense
- *
- * Features:
- * - Real-time security context awareness
- * - Smart suggestion chips based on current status
- * - Chat history persistence
- * - Streaming responses
- * - Professional UI/UX
- */
 export const AIAssistantScreen: React.FC = () => {
+  const { theme, colorScheme } = useTheme();
+  const colors = theme.colors;
+  const isDark = colorScheme === 'dark';
+
   // AI context
   const {
     isReady,
@@ -59,7 +69,7 @@ export const AIAssistantScreen: React.FC = () => {
     error,
   } = useAI();
 
-  // Security context for AI awareness
+  // Security context
   const securityContext = useSecurityContext();
 
   // Local state
@@ -71,11 +81,11 @@ export const AIAssistantScreen: React.FC = () => {
   const flatListRef = useRef<FlatList>(null);
   const inputRef = useRef<TextInput>(null);
 
-  // Check if feature is enabled
+  // Feature check
   const isFeatureEnabled =
     shouldShowLLMFeatures() && FEATURE_FLAGS.LLM_CONVERSATIONAL_ASSISTANT;
 
-  // Generate contextual suggestions based on current security status
+  // Contextual suggestions
   const contextualSuggestions = useMemo(() => {
     return getContextualSuggestions({
       unreviewedAlerts: securityContext.unreviewedAlerts,
@@ -85,31 +95,29 @@ export const AIAssistantScreen: React.FC = () => {
     });
   }, [securityContext]);
 
-  // Combine contextual and default suggestions
   const allSuggestions = useMemo(() => {
     const combined = [...contextualSuggestions];
-    // Add default suggestions not already covered
-    DEFAULT_SUGGESTIONS.forEach(suggestion => {
-      if (!combined.find(s => s.id === suggestion.id)) {
+    DEFAULT_SUGGESTIONS.forEach((suggestion) => {
+      if (!combined.find((s) => s.id === suggestion.id)) {
         combined.push(suggestion);
       }
     });
-    return combined.slice(0, 6); // Max 6 suggestions
+    return combined.slice(0, 6);
   }, [contextualSuggestions]);
 
-  // Load chat history on mount
+  // Load chat history
   useEffect(() => {
     loadChatHistory();
   }, []);
 
-  // Save chat history when messages change
+  // Save chat history
   useEffect(() => {
     if (messages.length > 0) {
       saveChatHistory();
     }
   }, [messages]);
 
-  // Scroll to bottom when new messages arrive
+  // Scroll to bottom
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => {
@@ -118,10 +126,10 @@ export const AIAssistantScreen: React.FC = () => {
     }
   }, [messages]);
 
-  // Update response in real-time during generation
+  // Update streaming response
   useEffect(() => {
     if (isGenerating && response) {
-      setMessages(prev => {
+      setMessages((prev) => {
         const lastMsg = prev[prev.length - 1];
         if (lastMsg?.role === 'assistant') {
           return [...prev.slice(0, -1), { ...lastMsg, content: response }];
@@ -131,9 +139,6 @@ export const AIAssistantScreen: React.FC = () => {
     }
   }, [response, isGenerating]);
 
-  /**
-   * Load chat history from AsyncStorage
-   */
   const loadChatHistory = async () => {
     try {
       const stored = await AsyncStorage.getItem(CHAT_STORAGE_KEY);
@@ -147,9 +152,6 @@ export const AIAssistantScreen: React.FC = () => {
     }
   };
 
-  /**
-   * Save chat history to AsyncStorage
-   */
   const saveChatHistory = async () => {
     try {
       const toStore = messages.slice(-MAX_STORED_MESSAGES);
@@ -159,10 +161,8 @@ export const AIAssistantScreen: React.FC = () => {
     }
   };
 
-  /**
-   * Clear chat history
-   */
   const handleClearChat = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
       'Clear Conversation',
       'Are you sure you want to clear the conversation history?',
@@ -181,10 +181,8 @@ export const AIAssistantScreen: React.FC = () => {
     );
   }, []);
 
-  /**
-   * Handle enabling AI
-   */
   const handleEnableAI = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await enableAI();
     } catch (err) {
@@ -196,60 +194,51 @@ export const AIAssistantScreen: React.FC = () => {
     }
   }, [enableAI]);
 
-  /**
-   * Send a message to the AI
-   */
   const handleSendMessage = useCallback(
     async (messageText?: string) => {
       const text = messageText || inputText.trim();
       if (!text || isGenerating) return;
 
-      // Clear input immediately
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setInputText('');
       setShowSuggestions(false);
       Keyboard.dismiss();
 
-      // Add user message
       const userMessage: ChatMessageType = {
         role: 'user',
         content: text,
         timestamp: Date.now(),
       };
-      setMessages(prev => [...prev, userMessage]);
+      setMessages((prev) => [...prev, userMessage]);
 
-      // Add placeholder for assistant response
       const assistantPlaceholder: ChatMessageType = {
         role: 'assistant',
         content: '',
         timestamp: Date.now(),
       };
-      setMessages(prev => [...prev, assistantPlaceholder]);
+      setMessages((prev) => [...prev, assistantPlaceholder]);
 
       try {
-        // Build the prompt with security context
         const contextualPrompt = `
 ${securityContext.contextString}
 
 USER QUESTION: ${text}
 
 Respond helpfully based on the security context above. Be concise and actionable.
-      `.trim();
+        `.trim();
 
-        // Use the LLM service to chat
         const { chat } = await import('@/services/llm');
-        const llmService = (await import('@/services/llm/LLMService'))
-          .llmService;
+        const llmService = (await import('@/services/llm/LLMService')).llmService;
 
         const chatResponse = await llmService.chat({
-          messages: [...messages.filter(m => m.role !== 'system'), userMessage],
+          messages: [...messages.filter((m) => m.role !== 'system'), userMessage],
           securityContext: {
             recentAlerts: securityContext.recentAlerts,
             deviceStatus: [],
           },
         });
 
-        // Update the last message with final response
-        setMessages(prev => {
+        setMessages((prev) => {
           const updatedMessages = [...prev];
           updatedMessages[updatedMessages.length - 1] = {
             role: 'assistant',
@@ -263,13 +252,11 @@ Respond helpfully based on the security context above. Be concise and actionable
         });
       } catch (err) {
         console.error('Chat error:', err);
-        // Update with error message
-        setMessages(prev => {
+        setMessages((prev) => {
           const updatedMessages = [...prev];
           updatedMessages[updatedMessages.length - 1] = {
             role: 'assistant',
-            content:
-              'I encountered an error processing your request. Please try again.',
+            content: 'I encountered an error processing your request. Please try again.',
             timestamp: Date.now(),
           };
           return updatedMessages;
@@ -279,40 +266,27 @@ Respond helpfully based on the security context above. Be concise and actionable
     [inputText, messages, isGenerating, securityContext, response]
   );
 
-  /**
-   * Handle suggestion selection
-   */
   const handleSuggestionSelect = useCallback(
     (suggestion: Suggestion) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       handleSendMessage(suggestion.query);
     },
     [handleSendMessage]
   );
 
-  /**
-   * Handle message copy
-   */
   const handleCopyMessage = useCallback((text: string) => {
-    // Could show a toast here
-    console.log('Copied to clipboard');
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, []);
 
-  /**
-   * Handle feedback
-   */
   const handleFeedback = useCallback((positive: boolean) => {
-    // Track feedback for analytics
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     console.log('Feedback:', positive ? 'positive' : 'negative');
   }, []);
 
-  /**
-   * Render a single message
-   */
   const renderMessage = useCallback(
     ({ item, index }: { item: ChatMessageType; index: number }) => {
       const isLastMessage = index === messages.length - 1;
-      const isStreaming =
-        isGenerating && isLastMessage && item.role === 'assistant';
+      const isStreaming = isGenerating && isLastMessage && item.role === 'assistant';
 
       return (
         <ChatMessage
@@ -327,9 +301,7 @@ Respond helpfully based on the security context above. Be concise and actionable
     [messages.length, isGenerating, handleCopyMessage, handleFeedback]
   );
 
-  /**
-   * Render welcome screen
-   */
+  // Welcome screen
   const renderWelcome = () => (
     <View style={styles.welcomeContainer}>
       {/* Security Status */}
@@ -337,15 +309,18 @@ Respond helpfully based on the security context above. Be concise and actionable
         <SecurityStatusCard context={securityContext} />
       )}
 
-      {/* Welcome Message */}
-      <View style={styles.welcomeContent}>
-        <View style={styles.aiIconLarge}>
-          <Text style={styles.aiIconText}>AI</Text>
-        </View>
-        <Text style={styles.welcomeTitle}>TrailSense AI</Text>
-        <Text style={styles.welcomeSubtitle}>
-          Your on-device security assistant. Ask about alerts, detection
-          patterns, sensor status, and more.
+      {/* AI Branding */}
+      <View style={styles.brandingContainer}>
+        <Image
+          source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+          style={styles.aiIconLarge}
+          resizeMode="contain"
+        />
+        <Text variant="largeTitle" weight="bold" color="label" style={styles.brandTitle}>
+          TrailSense AI
+        </Text>
+        <Text variant="body" style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}>
+          Your on-device security assistant. Ask about alerts, detection patterns, sensor status, and more.
         </Text>
       </View>
 
@@ -358,119 +333,154 @@ Respond helpfully based on the security context above. Be concise and actionable
     </View>
   );
 
-  /**
-   * Render enable AI prompt
-   */
+  // Enable AI prompt
   const renderEnablePrompt = () => (
     <View style={styles.enableContainer}>
-      <View style={styles.aiIconLarge}>
-        <Text style={styles.aiIconText}>AI</Text>
-      </View>
-      <Text style={styles.enableTitle}>Enable TrailSense AI</Text>
-      <Text style={styles.enableSubtitle}>
-        Download the on-device AI model to enable intelligent security analysis.
-        {'\n\n'}
-        <Text style={styles.enableNote}>
-          ~400MB one-time download{'\n'}
-          Runs 100% on-device{'\n'}
-          No data sent to cloud
-        </Text>
+      <Image
+        source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+        style={styles.aiIconLarge}
+        resizeMode="contain"
+      />
+
+      <Text variant="title1" weight="bold" color="label" style={styles.enableTitle}>
+        Enable TrailSense AI
       </Text>
+
+      <Text variant="body" style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}>
+        Download the on-device AI model to enable intelligent security analysis.
+      </Text>
+
+      <View style={[styles.featureList, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View style={styles.featureRow}>
+          <Icon name="cloud-download-outline" size={20} color={colors.systemBlue} />
+          <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
+            ~400MB one-time download
+          </Text>
+        </View>
+        <View style={styles.featureRow}>
+          <Icon name="phone-portrait-outline" size={20} color={colors.systemGreen} />
+          <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
+            Runs 100% on-device
+          </Text>
+        </View>
+        <View style={styles.featureRow}>
+          <Icon name="shield-checkmark-outline" size={20} color={colors.systemPurple} />
+          <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
+            No data sent to cloud
+          </Text>
+        </View>
+      </View>
 
       {isEnabling && (
         <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${downloadProgress * 100}%` },
-              ]}
+          <View style={[styles.progressBar, { backgroundColor: colors.systemGray5 }]}>
+            <LinearGradient
+              colors={['#667EEA', '#764BA2']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.progressFill, { width: `${downloadProgress * 100}%` }]}
             />
           </View>
-          <Text style={styles.progressText}>
+          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 8 }}>
             Downloading... {(downloadProgress * 100).toFixed(0)}%
           </Text>
         </View>
       )}
 
-      <TouchableOpacity
-        style={[styles.enableButton, isEnabling && styles.enableButtonDisabled]}
+      <Pressable
         onPress={handleEnableAI}
         disabled={isEnabling}
+        style={({ pressed }) => [pressed && { opacity: 0.8 }]}
       >
-        {isEnabling ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <Text style={styles.enableButtonText}>Download & Enable</Text>
-        )}
-      </TouchableOpacity>
+        <LinearGradient
+          colors={isEnabling ? ['#636366', '#8E8E93'] : ['#667EEA', '#764BA2']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.enableButton}
+        >
+          {isEnabling ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <>
+              <Icon name="download-outline" size={20} color="#FFFFFF" />
+              <Text variant="headline" weight="semibold" style={{ color: '#FFFFFF', marginLeft: 8 }}>
+                Download & Enable
+              </Text>
+            </>
+          )}
+        </LinearGradient>
+      </Pressable>
     </View>
   );
 
-  /**
-   * Render not available message
-   */
+  // Not available
   const renderNotAvailable = () => (
     <View style={styles.enableContainer}>
-      <Text style={styles.enableTitle}>AI Not Available</Text>
-      <Text style={styles.enableSubtitle}>
-        The AI assistant feature is not available on your device or has been
-        disabled.
+      <View style={[styles.aiIconLarge, { backgroundColor: colors.systemGray4 }]}>
+        <Icon name="close" size={36} color={colors.secondaryLabel} />
+      </View>
+      <Text variant="title1" weight="bold" color="label" style={styles.enableTitle}>
+        AI Not Available
+      </Text>
+      <Text variant="body" style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}>
+        The AI assistant feature is not available on your device or has been disabled.
       </Text>
     </View>
   );
 
-  // Feature not enabled
   if (!isFeatureEnabled) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.systemBackground }]} edges={['top', 'bottom']}>
         {renderNotAvailable()}
       </SafeAreaView>
     );
   }
 
-  // AI not ready
   if (!isReady) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.systemBackground }]} edges={['top', 'bottom']}>
         {renderEnablePrompt()}
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.systemBackground }]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { borderBottomColor: colors.separator }]}>
           <View style={styles.headerLeft}>
-            <View style={styles.aiIconSmall}>
-              <Text style={styles.aiIconTextSmall}>AI</Text>
-            </View>
-            <View>
-              <Text style={styles.headerTitle}>TrailSense AI</Text>
+            <Image
+              source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+              style={styles.aiIconSmall}
+              resizeMode="contain"
+            />
+            <View style={styles.headerTitleContainer}>
+              <Text variant="headline" weight="semibold" color="label">
+                TrailSense AI
+              </Text>
               <SecurityStatusCard context={securityContext} compact />
             </View>
           </View>
           <View style={styles.headerRight}>
             {isGenerating && (
-              <ActivityIndicator
-                size="small"
-                color="#007AFF"
-                style={styles.headerLoader}
-              />
+              <View style={styles.generatingBadge}>
+                <ActivityIndicator size="small" color={colors.systemBlue} />
+              </View>
             )}
             {messages.length > 0 && (
-              <TouchableOpacity
+              <Pressable
                 onPress={handleClearChat}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.clearButton}>Clear</Text>
-              </TouchableOpacity>
+                <Text variant="subheadline" style={{ color: colors.systemRed }}>
+                  Clear
+                </Text>
+              </Pressable>
             )}
           </View>
         </View>
@@ -487,13 +497,21 @@ Respond helpfully based on the security context above. Be concise and actionable
               keyExtractor={(item, index) => `${item.timestamp}-${index}`}
               renderItem={renderMessage}
               contentContainerStyle={styles.messageListContent}
-              onContentSizeChange={() =>
-                flatListRef.current?.scrollToEnd({ animated: true })
-              }
+              onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
               showsVerticalScrollIndicator={false}
+              ListHeaderComponent={
+                <View style={styles.conversationHeader}>
+                  <View style={[styles.dateBadge, { backgroundColor: colors.secondarySystemBackground }]}>
+                    <Icon name="calendar-outline" size={12} color={colors.secondaryLabel} />
+                    <Text variant="caption2" style={{ color: colors.secondaryLabel, marginLeft: 4 }}>
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                    </Text>
+                  </View>
+                </View>
+              }
             />
 
-            {/* Quick suggestions when not typing */}
+            {/* Quick suggestions - Enhanced */}
             {!inputText && messages.length > 0 && !isGenerating && (
               <SuggestionChips
                 suggestions={contextualSuggestions.slice(0, 3)}
@@ -504,36 +522,68 @@ Respond helpfully based on the security context above. Be concise and actionable
           </>
         )}
 
-        {/* Input */}
-        <View style={styles.inputContainer}>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              ref={inputRef}
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Ask about your security..."
-              placeholderTextColor="#8E8E93"
-              multiline
-              maxLength={500}
-              returnKeyType="default"
-              editable={!isGenerating}
-            />
+        {/* Enhanced Input Area */}
+        <View style={[styles.inputContainer, { backgroundColor: colors.systemBackground }]}>
+          {/* Subtle top border with gradient */}
+          <LinearGradient
+            colors={['rgba(74,82,64,0.2)', 'rgba(184,166,124,0.25)', 'rgba(74,82,64,0.2)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.inputBorderGradient}
+          />
+          <View style={styles.inputInner}>
+            <View
+              style={[
+                styles.inputWrapper,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(44, 44, 46, 0.8)'
+                    : 'rgba(242, 242, 247, 0.9)',
+                  borderColor: inputText.trim()
+                    ? 'rgba(74, 82, 64, 0.4)'
+                    : 'transparent',
+                }
+              ]}
+            >
+              <TextInput
+                ref={inputRef}
+                style={[styles.input, { color: colors.label }]}
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder="Ask about your security..."
+                placeholderTextColor={colors.placeholderText}
+                multiline
+                maxLength={500}
+                returnKeyType="default"
+                editable={!isGenerating}
+              />
+            </View>
+            <Pressable
+              onPress={() => handleSendMessage()}
+              disabled={!inputText.trim() || isGenerating}
+              style={({ pressed }) => [
+                styles.sendButtonWrapper,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] }
+              ]}
+            >
+              <LinearGradient
+                colors={
+                  !inputText.trim() || isGenerating
+                    ? [colors.systemGray4, colors.systemGray3]
+                    : ['#4A5240', '#3D4536']
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.sendButton}
+              >
+                {isGenerating ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Icon name="arrow-up" size={20} color="#FFFFFF" />
+                )}
+              </LinearGradient>
+            </Pressable>
           </View>
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              (!inputText.trim() || isGenerating) && styles.sendButtonDisabled,
-            ]}
-            onPress={() => handleSendMessage()}
-            disabled={!inputText.trim() || isGenerating}
-          >
-            {isGenerating ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.sendButtonIcon}>↑</Text>
-            )}
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -543,7 +593,6 @@ Respond helpfully based on the security context above. Be concise and actionable
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
   },
   keyboardAvoid: {
     flex: 1,
@@ -554,121 +603,112 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#000000',
     borderBottomWidth: 1,
-    borderBottomColor: '#1C1C1E',
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
+  headerTitleContainer: {
+    marginLeft: 12,
+  },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
   aiIconSmall: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: '#007AFF',
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
-  aiIconTextSmall: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  headerLoader: {
-    marginRight: 12,
-  },
-  clearButton: {
-    fontSize: 15,
-    color: '#FF3B30',
+  generatingBadge: {
+    padding: 4,
   },
   messageList: {
     flex: 1,
   },
   messageListContent: {
-    paddingVertical: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
+  conversationHeader: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginBottom: 8,
+  },
+  dateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   inputContainer: {
+    paddingBottom: 4,
+  },
+  inputBorderGradient: {
+    height: 1,
+  },
+  inputInner: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#000000',
-    borderTopWidth: 1,
-    borderTopColor: '#1C1C1E',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
+    gap: 8,
   },
   inputWrapper: {
     flex: 1,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 24,
+    borderRadius: 22,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    marginRight: 8,
+    borderWidth: 1.5,
+    minHeight: 44,
+    justifyContent: 'center',
   },
   input: {
     fontSize: 16,
-    color: '#FFFFFF',
     maxHeight: 100,
-    minHeight: 24,
+    minHeight: 22,
+  },
+  sendButtonWrapper: {
+    shadowColor: '#4A5240',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
   sendButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  sendButtonDisabled: {
-    backgroundColor: '#38383A',
-  },
-  sendButtonIcon: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '700',
   },
   welcomeContainer: {
     flex: 1,
   },
-  welcomeContent: {
+  brandingContainer: {
     alignItems: 'center',
     paddingHorizontal: 32,
-    paddingVertical: 24,
+    paddingVertical: 32,
   },
   aiIconLarge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#007AFF',
+    width: 80,
+    height: 80,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  aiIconText: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  welcomeTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  brandTitle: {
     marginBottom: 8,
   },
-  welcomeSubtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
+  brandSubtitle: {
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -679,58 +719,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   enableTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    marginTop: 20,
     marginBottom: 12,
   },
   enableSubtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
   },
-  enableNote: {
-    fontSize: 14,
-    color: '#8E8E93',
+  featureList: {
+    width: '100%',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    gap: 14,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   progressContainer: {
     width: '100%',
     marginBottom: 24,
   },
   progressBar: {
-    height: 6,
-    backgroundColor: '#1C1C1E',
-    borderRadius: 3,
+    height: 8,
+    borderRadius: 4,
     overflow: 'hidden',
-    marginBottom: 8,
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    textAlign: 'center',
+    borderRadius: 4,
   },
   enableButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 32,
     paddingVertical: 16,
-    minWidth: 200,
-    alignItems: 'center',
-  },
-  enableButtonDisabled: {
-    backgroundColor: '#38383A',
-  },
-  enableButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '600',
+    borderRadius: 16,
+    minWidth: 220,
   },
 });
 

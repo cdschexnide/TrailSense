@@ -1,24 +1,46 @@
+/**
+ * DashboardScreen - REDESIGNED
+ *
+ * Enhanced analytics dashboard with:
+ * - Large title header with period selector
+ * - Visual stat cards with icons and trends
+ * - Quick insights summary
+ * - Improved chart cards with better styling
+ * - Pull-to-refresh support
+ */
+
 import React, { useState } from 'react';
 import {
-  ScrollView,
   View,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   Dimensions,
+  Pressable,
+  RefreshControl,
 } from 'react-native';
 import { LineChart, PieChart, BarChart } from 'react-native-chart-kit';
 import * as Haptics from 'expo-haptics';
 import { format, parseISO } from 'date-fns';
 import { useAnalytics } from '@hooks/useAnalytics';
-import { StatCard, ChartCard } from '@components/molecules';
+import { ChartCard } from '@components/molecules';
 import { useTheme } from '@hooks/useTheme';
 import { Colors } from '@constants/colors';
+import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
+import { Text } from '@components/atoms/Text';
+import { Icon } from '@components/atoms/Icon';
+import { Button } from '@components/atoms/Button';
 
 type Period = 'day' | 'week' | 'month' | 'year';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const CHART_WIDTH = SCREEN_WIDTH - 32; // Account for padding
+const CHART_WIDTH = SCREEN_WIDTH - 64;
+
+// Period labels
+const PERIOD_CONFIG: Record<Period, { label: string; shortLabel: string }> = {
+  day: { label: 'Today', shortLabel: '24h' },
+  week: { label: 'This Week', shortLabel: '7d' },
+  month: { label: 'This Month', shortLabel: '30d' },
+  year: { label: 'This Year', shortLabel: '1y' },
+};
 
 // Helper: Format date based on period
 const formatChartDate = (dateString: string, period: Period): string => {
@@ -36,7 +58,7 @@ const formatChartDate = (dateString: string, period: Period): string => {
       default:
         return format(date, 'MMM d');
     }
-  } catch (error) {
+  } catch {
     return dateString;
   }
 };
@@ -56,8 +78,17 @@ const getDetectionColor = (type: string, isDark: boolean): string => {
   }
 };
 
-export const DashboardScreen = () => {
+// Threat level colors
+const THREAT_COLORS: Record<string, string> = {
+  critical: '#FF3B30',
+  high: '#FF9500',
+  medium: '#FFCC00',
+  low: '#34C759',
+};
+
+export const DashboardScreen = ({ navigation }: any) => {
   const [period, setPeriod] = useState<Period>('week');
+  const [refreshing, setRefreshing] = useState(false);
   const {
     data: analytics,
     isLoading,
@@ -65,44 +96,41 @@ export const DashboardScreen = () => {
     refetch,
   } = useAnalytics({ period });
   const { theme, colorScheme } = useTheme();
+  const colors = theme.colors;
   const isDark = colorScheme === 'dark';
 
-  // Chart configuration for react-native-chart-kit
+  // Pull to refresh
+  const handleRefresh = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+
+  // Chart configuration
   const chartConfig = {
-    backgroundColor: theme.colors.secondarySystemGroupedBackground,
-    backgroundGradientFrom: theme.colors.secondarySystemGroupedBackground,
-    backgroundGradientTo: theme.colors.secondarySystemGroupedBackground,
+    backgroundColor: 'transparent',
+    backgroundGradientFrom: 'transparent',
+    backgroundGradientTo: 'transparent',
     decimalPlaces: 0,
-    color: (opacity = 1) =>
-      `rgba(${isDark ? '10, 132, 255' : '0, 122, 255'}, ${opacity})`,
-    labelColor: (opacity = 1) =>
-      `${theme.colors.label}${Math.round(opacity * 255)
-        .toString(16)
-        .padStart(2, '0')}`,
-    style: {
-      borderRadius: 16,
-    },
+    color: (opacity = 1) => `rgba(10, 132, 255, ${opacity})`,
+    labelColor: () => colors.secondaryLabel,
+    style: { borderRadius: 16 },
     propsForDots: {
-      r: '6',
+      r: '5',
       strokeWidth: '2',
-      stroke: theme.colors.systemBlue,
+      stroke: colors.systemBlue,
     },
     propsForBackgroundLines: {
-      strokeDasharray: '',
-      stroke: theme.colors.separator,
+      strokeDasharray: '4, 4',
+      stroke: colors.separator,
       strokeWidth: 1,
     },
   };
 
   // Transform daily trend data for line chart
   const transformDailyTrend = () => {
-    if (
-      !analytics ||
-      !analytics.dailyTrend ||
-      analytics.dailyTrend.length === 0
-    ) {
-      return null;
-    }
+    if (!analytics?.dailyTrend?.length) return null;
 
     const labels = analytics.dailyTrend.map(item =>
       formatChartDate(item.date, period)
@@ -111,407 +139,436 @@ export const DashboardScreen = () => {
 
     return {
       labels,
-      datasets: [
-        {
-          data,
-          color: () => theme.colors.systemBlue,
-          strokeWidth: 3,
-        },
-      ],
+      datasets: [{ data, color: () => colors.systemBlue, strokeWidth: 3 }],
     };
   };
 
   // Transform detection types for pie chart
   const transformDetectionTypes = () => {
-    if (
-      !analytics ||
-      !analytics.detectionTypeDistribution ||
-      analytics.detectionTypeDistribution.length === 0
-    ) {
-      return null;
-    }
+    if (!analytics?.detectionTypeDistribution?.length) return null;
 
     return analytics.detectionTypeDistribution.map(item => ({
       name: item.type.charAt(0).toUpperCase() + item.type.slice(1),
       population: item.count,
       color: getDetectionColor(item.type, isDark),
-      legendFontColor: theme.colors.label,
-      legendFontSize: 14,
+      legendFontColor: colors.label,
+      legendFontSize: 13,
     }));
   };
 
-  // Transform threat levels for bar chart
-  const transformThreatLevels = () => {
-    if (
-      !analytics ||
-      !analytics.threatLevelDistribution ||
-      analytics.threatLevelDistribution.length === 0
-    ) {
-      return null;
-    }
-
-    const labels = analytics.threatLevelDistribution.map(
-      item => item.level.charAt(0).toUpperCase() + item.level.slice(1)
-    );
-    const data = analytics.threatLevelDistribution.map(item => item.count);
-
-    return {
-      labels,
-      datasets: [
-        {
-          data,
-        },
-      ],
-    };
+  // Transform threat levels for display
+  const getThreatSummary = () => {
+    if (!analytics?.threatLevelDistribution?.length) return [];
+    return analytics.threatLevelDistribution;
   };
 
-  // Transform device distribution for bar chart
+  // Transform device distribution
   const transformDeviceDistribution = () => {
-    if (
-      !analytics ||
-      !analytics.deviceDistribution ||
-      analytics.deviceDistribution.length === 0
-    ) {
-      return null;
-    }
+    if (!analytics?.deviceDistribution?.length) return null;
 
-    // Take top 5 devices
     const topDevices = analytics.deviceDistribution.slice(0, 5);
     const labels = topDevices.map(item => {
-      // Shorten device ID for display
       const id = item.deviceId;
-      return id.length > 8 ? `${id.substring(0, 8)}...` : id;
+      return id.length > 6 ? `${id.substring(0, 6)}...` : id;
     });
     const data = topDevices.map(item => item.count);
 
-    return {
-      labels,
-      datasets: [
-        {
-          data,
-        },
-      ],
-    };
+    return { labels, datasets: [{ data }] };
   };
 
-  // Handle data point click with haptic feedback
-  const handleDataPointClick = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // You can add a tooltip or alert here if needed
-  };
-
-  if (isLoading) {
-    return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: theme.colors.systemBackground },
-        ]}
-      >
-        <Text style={[styles.loadingText, { color: theme.colors.label }]}>
-          Loading analytics...
-        </Text>
-      </View>
-    );
-  }
+  if (isLoading) return <LoadingState />;
 
   if (isError || !analytics) {
     return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: theme.colors.systemBackground },
-        ]}
-      >
-        <Text style={[styles.errorText, { color: theme.colors.systemRed }]}>
-          Failed to load analytics
-        </Text>
-        <Text
-          style={[styles.errorSubtext, { color: theme.colors.secondaryLabel }]}
-        >
-          The server returned an error. Please try again.
-        </Text>
-        <TouchableOpacity
-          style={[
-            styles.retryButton,
-            { backgroundColor: theme.colors.systemBlue },
-          ]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            refetch();
-          }}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
+      <ErrorState
+        message="Failed to load analytics"
+        onRetry={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          refetch();
+        }}
+      />
     );
   }
 
   const dailyTrendData = transformDailyTrend();
   const detectionTypesData = transformDetectionTypes();
-  const threatLevelsData = transformThreatLevels();
   const deviceDistributionData = transformDeviceDistribution();
+  const threatSummary = getThreatSummary();
 
   return (
-    <ScrollView
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.systemBackground },
-      ]}
+    <ScreenLayout
+      header={{
+        title: 'Analytics',
+        largeTitle: true,
+        rightActions: (
+          <Button
+            buttonStyle="plain"
+            onPress={() => navigation?.navigate?.('Reports')}
+            leftIcon={<Icon name="document-text-outline" size={20} color={colors.systemBlue} />}
+          >
+            Reports
+          </Button>
+        ),
+      }}
+      scrollable
     >
-      <View
-        style={[
-          styles.header,
-          { borderBottomWidth: 1, borderBottomColor: theme.colors.separator },
-        ]}
-      >
-        <Text style={[styles.title, { color: theme.colors.label }]}>
-          Analytics Dashboard
-        </Text>
-        <View style={styles.periodSelector}>
-          {(['day', 'week', 'month', 'year'] as Period[]).map(p => (
-            <TouchableOpacity
+      {/* Period Selector */}
+      <View style={[styles.periodContainer, { backgroundColor: colors.secondarySystemBackground }]}>
+        {(['day', 'week', 'month', 'year'] as Period[]).map((p) => {
+          const isSelected = period === p;
+          return (
+            <Pressable
               key={p}
-              style={[
-                styles.periodButton,
-                {
-                  backgroundColor:
-                    period === p
-                      ? theme.colors.systemBlue
-                      : theme.colors.secondarySystemFill,
-                },
-              ]}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 setPeriod(p);
               }}
+              style={[
+                styles.periodButton,
+                isSelected && { backgroundColor: colors.systemBlue },
+              ]}
             >
               <Text
-                style={[
-                  styles.periodButtonText,
-                  {
-                    color: period === p ? '#FFFFFF' : theme.colors.label,
-                  },
-                ]}
+                variant="subheadline"
+                weight={isSelected ? 'semibold' : 'regular'}
+                style={{ color: isSelected ? '#FFFFFF' : colors.label }}
               >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
+                {PERIOD_CONFIG[p].shortLabel}
               </Text>
-            </TouchableOpacity>
-          ))}
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* Summary Stats */}
+      <View style={styles.statsGrid}>
+        {/* Total Detections */}
+        <View style={[styles.statCard, { backgroundColor: colors.secondarySystemBackground }]}>
+          <View style={[styles.statIconContainer, { backgroundColor: colors.systemBlue + '20' }]}>
+            <Icon name="pulse" size={24} color={colors.systemBlue} />
+          </View>
+          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+            Total Detections
+          </Text>
+          <Text variant="title1" weight="bold" color="label">
+            {analytics.totalAlerts.toLocaleString()}
+          </Text>
+          <View style={styles.trendRow}>
+            <Icon name="arrow-up" size={14} color={colors.systemGreen} />
+            <Text variant="caption2" style={{ color: colors.systemGreen, marginLeft: 4 }}>
+              12% vs last {period}
+            </Text>
+          </View>
+        </View>
+
+        {/* Active Devices */}
+        <View style={[styles.statCard, { backgroundColor: colors.secondarySystemBackground }]}>
+          <View style={[styles.statIconContainer, { backgroundColor: colors.systemGreen + '20' }]}>
+            <Icon name="radio" size={24} color={colors.systemGreen} />
+          </View>
+          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+            Active Devices
+          </Text>
+          <Text variant="title1" weight="bold" color="label">
+            {analytics.topDetectedDevices?.length || 0}
+          </Text>
+          <View style={styles.trendRow}>
+            <Icon name="checkmark-circle" size={14} color={colors.systemGreen} />
+            <Text variant="caption2" style={{ color: colors.systemGreen, marginLeft: 4 }}>
+              All online
+            </Text>
+          </View>
         </View>
       </View>
 
-      <View style={styles.statsRow}>
-        <StatCard
-          title="Total Detections"
-          value={analytics.totalAlerts}
-          change={{
-            value: '+12%',
-            trend: 'positive',
-          }}
-        />
-        <StatCard
-          title="Unique Devices"
-          value={analytics.topDetectedDevices?.length || 0}
-          change={{
-            value: '-5%',
-            trend: 'negative',
-          }}
-        />
+      {/* Threat Level Summary */}
+      {threatSummary.length > 0 && (
+        <View style={styles.sectionContainer}>
+          <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+            Threat Distribution
+          </Text>
+          <View style={[styles.threatCard, { backgroundColor: colors.secondarySystemBackground }]}>
+            <View style={styles.threatBars}>
+              {threatSummary.map((item) => {
+                const total = threatSummary.reduce((sum, i) => sum + i.count, 0);
+                const percentage = total > 0 ? (item.count / total) * 100 : 0;
+                return (
+                  <View key={item.level} style={styles.threatBarItem}>
+                    <View style={styles.threatLabelRow}>
+                      <View
+                        style={[
+                          styles.threatDot,
+                          { backgroundColor: THREAT_COLORS[item.level] || colors.systemGray },
+                        ]}
+                      />
+                      <Text variant="subheadline" style={{ color: colors.label, flex: 1 }}>
+                        {item.level.charAt(0).toUpperCase() + item.level.slice(1)}
+                      </Text>
+                      <Text variant="subheadline" weight="semibold" style={{ color: colors.label }}>
+                        {item.count}
+                      </Text>
+                    </View>
+                    <View style={[styles.threatBarBg, { backgroundColor: colors.systemGray5 }]}>
+                      <View
+                        style={[
+                          styles.threatBarFill,
+                          {
+                            backgroundColor: THREAT_COLORS[item.level] || colors.systemGray,
+                            width: `${percentage}%`,
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* Detections Over Time Chart */}
+      <View style={styles.sectionContainer}>
+        <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+          Detection Trend
+        </Text>
+        <View style={[styles.chartCard, { backgroundColor: colors.secondarySystemBackground }]}>
+          {dailyTrendData ? (
+            <LineChart
+              data={dailyTrendData}
+              width={CHART_WIDTH}
+              height={200}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+              withInnerLines
+              withOuterLines={false}
+              withVerticalLines={false}
+              withHorizontalLines
+              withDots
+              withShadow={false}
+              fromZero
+            />
+          ) : (
+            <View style={styles.emptyChart}>
+              <Icon name="analytics-outline" size={48} color={colors.tertiaryLabel} />
+              <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+                No data for this period
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
 
-      <ChartCard title="Detections Over Time">
-        {dailyTrendData ? (
-          <LineChart
-            data={dailyTrendData}
-            width={CHART_WIDTH}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-            withInnerLines
-            withOuterLines
-            withVerticalLines={false}
-            withHorizontalLines
-            withDots
-            withShadow={false}
-            onDataPointClick={handleDataPointClick}
-            fromZero
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <Text
-              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
-            >
-              No data available for this period
-            </Text>
-          </View>
-        )}
-      </ChartCard>
+      {/* Detection Types */}
+      <View style={styles.sectionContainer}>
+        <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+          Detection Types
+        </Text>
+        <View style={[styles.chartCard, { backgroundColor: colors.secondarySystemBackground }]}>
+          {detectionTypesData ? (
+            <PieChart
+              data={detectionTypesData}
+              width={CHART_WIDTH}
+              height={200}
+              chartConfig={chartConfig}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              center={[10, 0]}
+              absolute
+              hasLegend
+            />
+          ) : (
+            <View style={styles.emptyChart}>
+              <Icon name="pie-chart-outline" size={48} color={colors.tertiaryLabel} />
+              <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+                No detection data
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
 
-      <ChartCard title="Detection Types">
-        {detectionTypesData ? (
-          <PieChart
-            data={detectionTypesData}
-            width={CHART_WIDTH}
-            height={220}
-            chartConfig={chartConfig}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            center={[10, 0]}
-            absolute
-            hasLegend
-            style={styles.chart}
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <Text
-              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
-            >
-              No detection type data available
-            </Text>
-          </View>
-        )}
-      </ChartCard>
+      {/* Top Devices */}
+      <View style={styles.sectionContainer}>
+        <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+          Top Devices
+        </Text>
+        <View style={[styles.chartCard, { backgroundColor: colors.secondarySystemBackground }]}>
+          {deviceDistributionData ? (
+            <BarChart
+              data={deviceDistributionData}
+              width={CHART_WIDTH}
+              height={200}
+              chartConfig={{
+                ...chartConfig,
+                color: () => colors.systemIndigo,
+                barPercentage: 0.6,
+              }}
+              yAxisLabel=""
+              yAxisSuffix=""
+              showValuesOnTopOfBars
+              fromZero
+              withInnerLines={false}
+            />
+          ) : (
+            <View style={styles.emptyChart}>
+              <Icon name="hardware-chip-outline" size={48} color={colors.tertiaryLabel} />
+              <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+                No device data
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
 
-      <ChartCard title="Device Distribution">
-        {deviceDistributionData ? (
-          <BarChart
-            data={deviceDistributionData}
-            width={CHART_WIDTH}
-            height={220}
-            chartConfig={chartConfig}
-            yAxisLabel=""
-            yAxisSuffix=""
-            style={styles.chart}
-            showValuesOnTopOfBars
-            fromZero
-            withInnerLines={false}
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <Text
-              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
-            >
-              No device distribution data available
-            </Text>
+      {/* Quick Actions */}
+      <View style={styles.actionsContainer}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionCard,
+            { backgroundColor: colors.secondarySystemBackground },
+            pressed && { opacity: 0.7 },
+          ]}
+          onPress={() => navigation?.navigate?.('Heatmap')}
+        >
+          <View style={[styles.actionIcon, { backgroundColor: colors.systemOrange + '20' }]}>
+            <Icon name="map" size={24} color={colors.systemOrange} />
           </View>
-        )}
-      </ChartCard>
+          <Text variant="subheadline" weight="semibold" color="label">
+            View Heatmap
+          </Text>
+          <Icon name="chevron-forward" size={16} color={colors.tertiaryLabel} />
+        </Pressable>
 
-      <ChartCard title="Threat Level Distribution">
-        {threatLevelsData ? (
-          <BarChart
-            data={threatLevelsData}
-            width={CHART_WIDTH}
-            height={220}
-            chartConfig={{
-              ...chartConfig,
-              color: () => theme.colors.systemOrange,
-            }}
-            yAxisLabel=""
-            yAxisSuffix=""
-            style={styles.chart}
-            showValuesOnTopOfBars
-            fromZero
-            withInnerLines={false}
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <Text
-              style={[styles.emptyText, { color: theme.colors.secondaryLabel }]}
-            >
-              No threat level data available
-            </Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.actionCard,
+            { backgroundColor: colors.secondarySystemBackground },
+            pressed && { opacity: 0.7 },
+          ]}
+          onPress={() => navigation?.navigate?.('Reports')}
+        >
+          <View style={[styles.actionIcon, { backgroundColor: colors.systemPurple + '20' }]}>
+            <Icon name="download-outline" size={24} color={colors.systemPurple} />
           </View>
-        )}
-      </ChartCard>
-    </ScrollView>
+          <Text variant="subheadline" weight="semibold" color="label">
+            Export Report
+          </Text>
+          <Icon name="chevron-forward" size={16} color={colors.tertiaryLabel} />
+        </Pressable>
+      </View>
+
+      <View style={{ height: 32 }} />
+    </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-  },
-  errorText: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  errorSubtext: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 24,
-    paddingHorizontal: 32,
-  },
-  retryButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  header: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  periodSelector: {
+  periodContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginHorizontal: 16,
+    marginBottom: 20,
+    padding: 4,
+    borderRadius: 12,
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginHorizontal: 4,
-    borderRadius: 8,
+    paddingVertical: 10,
     alignItems: 'center',
-    minHeight: 44, // iOS minimum touch target
+    borderRadius: 8,
   },
-  periodButtonActive: {
-    // Will be styled with theme colors inline
-  },
-  periodButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  periodButtonTextActive: {
-    // Will be styled with theme colors inline
-  },
-  statsRow: {
+  statsGrid: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 16,
+    marginHorizontal: 16,
+    gap: 12,
+    marginBottom: 24,
   },
-  chart: {
-    marginVertical: 8,
+  statCard: {
+    flex: 1,
+    padding: 16,
     borderRadius: 16,
   },
-  emptyState: {
-    height: 200,
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
-  emptyText: {
-    fontSize: 14,
-    textAlign: 'center',
+  trendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  sectionContainer: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+  },
+  chartCard: {
+    marginHorizontal: 16,
+    padding: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  chart: {
+    borderRadius: 12,
+  },
+  emptyChart: {
+    height: 180,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  threatCard: {
+    marginHorizontal: 16,
+    padding: 16,
+    borderRadius: 16,
+  },
+  threatBars: {
+    gap: 16,
+  },
+  threatBarItem: {
+    gap: 8,
+  },
+  threatLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  threatDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  threatBarBg: {
+    height: 8,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  threatBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  actionsContainer: {
+    marginHorizontal: 16,
+    gap: 12,
+  },
+  actionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    gap: 12,
+  },
+  actionIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

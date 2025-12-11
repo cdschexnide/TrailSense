@@ -82,10 +82,8 @@ export const AlertListScreen = ({ navigation }: any) => {
     return counts;
   }, [alerts]);
 
-  if (isLoading) return <LoadingState />;
-  if (error) return <ErrorState message="Failed to load alerts" />;
-
   // Filter alerts by search and selected threat level
+  // NOTE: This must be before any early returns to maintain hook order
   const filteredAlerts = useMemo(() => {
     let result = alerts || [];
 
@@ -109,6 +107,9 @@ export const AlertListScreen = ({ navigation }: any) => {
 
     return result;
   }, [alerts, search, selectedThreatFilter]);
+
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState message="Failed to load alerts" />;
 
   const handleDismiss = (alertId: string) => {
     console.log('Dismissing alert:', alertId);
