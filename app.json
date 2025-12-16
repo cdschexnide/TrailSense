@@ -21,10 +21,7 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "TrailSense needs background location access to monitor your property even when the app is closed.",
         "NSCameraUsageDescription": "TrailSense needs camera access to scan device QR codes.",
         "UIBackgroundModes": [
-          "location",
-          "remote-notification",
-          "location",
-          "remote-notification"
+          "location"
         ],
         "ITSAppUsesNonExemptEncryption": false
       }
