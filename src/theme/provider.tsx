@@ -20,7 +20,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const systemColorScheme = useColorScheme();
   const [userPreference, setUserPreference] = useState<ColorScheme | 'auto'>(
-    'auto'
+    'dark'
   );
 
   const activeColorScheme: ColorScheme =

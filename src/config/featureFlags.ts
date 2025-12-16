@@ -51,7 +51,7 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   LLM_ENABLE_STREAMING: false, // Not yet implemented
 
   // Developer Features
-  LLM_MOCK_MODE: false, // Mock mode disabled - using real Llama 3.2 1B model
+  LLM_MOCK_MODE: true, // Mock mode enabled - ExecuTorch requires Expo 54+
   LLM_DEBUG_MODE: __DEV__,
   LLM_PERFORMANCE_OVERLAY: __DEV__,
 };

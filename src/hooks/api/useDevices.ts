@@ -4,10 +4,18 @@ import { Device, CreateDeviceDTO } from '@types';
 
 export const DEVICES_QUERY_KEY = 'devices';
 
+// Auto-refresh interval for devices (30 seconds)
+const DEVICES_REFETCH_INTERVAL = 30 * 1000;
+
 export const useDevices = () => {
   return useQuery({
     queryKey: [DEVICES_QUERY_KEY],
     queryFn: () => devicesApi.getDevices(),
+    // Auto-refresh every 30 seconds for real-time updates
+    // (detection counts, battery, signal, GPS coordinates)
+    refetchInterval: DEVICES_REFETCH_INTERVAL,
+    // Pause polling when app is in background (saves battery)
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -16,6 +24,9 @@ export const useDevice = (id: string) => {
     queryKey: [DEVICES_QUERY_KEY, id],
     queryFn: () => devicesApi.getDeviceById(id),
     enabled: !!id,
+    // Auto-refresh individual device details too
+    refetchInterval: DEVICES_REFETCH_INTERVAL,
+    refetchIntervalInBackground: false,
   });
 };
 

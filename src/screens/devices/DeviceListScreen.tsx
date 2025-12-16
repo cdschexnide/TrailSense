@@ -1,19 +1,25 @@
 /**
- * DeviceListScreen - REDESIGNED
+ * DeviceListScreen - Production Grade
  *
- * Enhanced device list with:
- * - Stats summary header showing device counts
+ * Premium device list with:
+ * - Animated header with blur on scroll
+ * - Stats summary hero section with gradient cards
  * - Grouped sections (Online/Offline)
  * - Staggered entrance animations for cards
  * - Pull-to-refresh with haptic feedback
  */
 
-import React, { useState, useMemo } from 'react';
-import { SectionList, RefreshControl, StyleSheet, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useMemo, useRef } from 'react';
+import {
+  SectionList,
+  RefreshControl,
+  StyleSheet,
+  View,
+  Animated,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useDevices } from '@hooks/api/useDevices';
-import { DeviceCard } from '@components/organisms';
+import { DeviceCard, DevicesHeaderHero } from '@components/organisms';
 import {
   ScreenLayout,
   LoadingState,
@@ -39,6 +45,9 @@ export const DeviceListScreen = ({ navigation }: any) => {
   const colors = theme.colors;
   const { data: devices, isLoading, error, refetch } = useDevices();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Animated scroll value for header
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   // Group devices by online/offline status
   const { sections, stats } = useMemo(() => {
@@ -89,91 +98,27 @@ export const DeviceListScreen = ({ navigation }: any) => {
   };
 
   const handleRefresh = async () => {
-    // Trigger haptic feedback when pull-to-refresh is triggered
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
     setRefreshing(true);
     await refetch();
     setRefreshing(false);
   };
 
-  // Stats header component - Enhanced design
-  const renderStatsHeader = () => (
-    <View style={styles.statsHeader}>
-      {/* Total Devices */}
-      <View style={styles.statCardWrapper}>
-        <LinearGradient
-          colors={isDark
-            ? ['#1E3A5F', '#0D2137']
-            : ['#E8F4FD', '#D0E8FA']
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.statCard, styles.statCardTotal]}
-        >
-          <View style={[styles.statIconBg, { backgroundColor: 'rgba(10, 132, 255, 0.2)' }]}>
-            <Icon name="hardware-chip" size={22} color={colors.systemBlue} />
-          </View>
-          <Text variant="largeTitle" weight="bold" style={[styles.statValue, { color: colors.systemBlue }]}>
-            {stats.total}
-          </Text>
-          <Text variant="caption1" weight="medium" color="secondaryLabel">
-            Total
-          </Text>
-        </LinearGradient>
-      </View>
-
-      {/* Online */}
-      <View style={styles.statCardWrapper}>
-        <LinearGradient
-          colors={isDark
-            ? ['#1A3D2E', '#0D2518']
-            : ['#E6F7ED', '#CCF0DB']
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.statCard, styles.statCardOnline]}
-        >
-          <View style={[styles.statIconBg, { backgroundColor: 'rgba(48, 209, 88, 0.2)' }]}>
-            <Icon name="checkmark-circle" size={22} color={colors.systemGreen} />
-          </View>
-          <Text variant="largeTitle" weight="bold" style={[styles.statValue, { color: colors.systemGreen }]}>
-            {stats.online}
-          </Text>
-          <Text variant="caption1" weight="medium" color="secondaryLabel">
-            Online
-          </Text>
-        </LinearGradient>
-      </View>
-
-      {/* Offline */}
-      <View style={styles.statCardWrapper}>
-        <LinearGradient
-          colors={isDark
-            ? ['#3D1E1E', '#251010']
-            : ['#FDECEC', '#FAD4D4']
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.statCard, styles.statCardOffline]}
-        >
-          <View style={[styles.statIconBg, { backgroundColor: 'rgba(255, 69, 58, 0.2)' }]}>
-            <Icon name="close-circle" size={22} color={colors.systemRed} />
-          </View>
-          <Text variant="largeTitle" weight="bold" style={[styles.statValue, { color: colors.systemRed }]}>
-            {stats.offline}
-          </Text>
-          <Text variant="caption1" weight="medium" color="secondaryLabel">
-            Offline
-          </Text>
-        </LinearGradient>
-      </View>
+  // Hero section with stats
+  const renderListHeader = () => (
+    <View>
+      {stats.total > 0 && <DevicesHeaderHero stats={stats} />}
     </View>
   );
 
   // Section header component
   const renderSectionHeader = ({ section }: { section: DeviceSection }) => (
-    <View style={styles.sectionHeader}>
+    <View
+      style={[
+        styles.sectionHeader,
+        { backgroundColor: colors.systemBackground },
+      ]}
+    >
       <View style={styles.sectionTitleRow}>
         <View
           style={[
@@ -205,20 +150,19 @@ export const DeviceListScreen = ({ navigation }: any) => {
           <Button
             buttonStyle="plain"
             onPress={handleAddDevice}
-            leftIcon={<Icon name="add" size={22} color="systemBlue" />}
+            leftIcon={<Icon name="add" size={20} color="systemBlue" />}
           >
             Add
           </Button>
         ),
       }}
+      variant="devices"
       scrollable={false}
     >
       <SectionList
         sections={sections}
         renderItem={({ item, index, section }) => {
           // Calculate global index for staggered animation
-          // Items in online section get indices 0, 1, 2...
-          // Items in offline section start after online items
           const sectionIndex = sections.indexOf(section);
           const previousItemsCount = sections
             .slice(0, sectionIndex)
@@ -237,7 +181,12 @@ export const DeviceListScreen = ({ navigation }: any) => {
         renderSectionHeader={renderSectionHeader}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={stats.total > 0 ? renderStatsHeader : null}
+        ListHeaderComponent={renderListHeader}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -269,47 +218,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 4,
     paddingBottom: 20,
-  },
-  statsHeader: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 10,
-  },
-  statCardWrapper: {
-    flex: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  statCard: {
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 8,
-    borderRadius: 16,
-    gap: 6,
-    borderWidth: 1,
-  },
-  statCardTotal: {
-    borderColor: 'rgba(10, 132, 255, 0.3)',
-  },
-  statCardOnline: {
-    borderColor: 'rgba(48, 209, 88, 0.3)',
-  },
-  statCardOffline: {
-    borderColor: 'rgba(255, 69, 58, 0.3)',
-  },
-  statIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 28,
   },
   sectionHeader: {
     flexDirection: 'row',

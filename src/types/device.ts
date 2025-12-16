@@ -6,8 +6,8 @@ export interface Device {
   battery?: number; // Legacy field
   signalStrength?: string;
   detectionCount?: number;
-  latitude: number;
-  longitude: number;
+  latitude?: number;  // GPS latitude from device (null if no fix yet)
+  longitude?: number; // GPS longitude from device (null if no fix yet)
   lastSeen?: string;
   firmwareVersion?: string;
   firmware?: string; // Legacy field

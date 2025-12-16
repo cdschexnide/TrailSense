@@ -60,6 +60,18 @@ const getSignalIcon = (strength: string | undefined): string => {
 };
 
 /**
+ * Format coordinates in user-friendly format (e.g., "31.5308°N, 110.2878°W")
+ */
+const formatCoordinates = (lat?: number, lon?: number): string => {
+  if (lat === undefined || lon === undefined || lat === null || lon === null) {
+    return 'Awaiting GPS fix...';
+  }
+  const latDir = lat >= 0 ? 'N' : 'S';
+  const lonDir = lon >= 0 ? 'E' : 'W';
+  return `${Math.abs(lat).toFixed(4)}°${latDir}, ${Math.abs(lon).toFixed(4)}°${lonDir}`;
+};
+
+/**
  * Simple status dot component with optional pulse animation
  */
 const StatusDot: React.FC<{
@@ -384,8 +396,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
               color="secondaryLabel"
               style={styles.locationText}
             >
-              {device.latitude?.toFixed(4) || 'N/A'},{' '}
-              {device.longitude?.toFixed(4) || 'N/A'}
+              {formatCoordinates(device.latitude, device.longitude)}
+              {!device.online && device.latitude != null && ' (Last known)'}
             </Text>
           </View>
           <Icon

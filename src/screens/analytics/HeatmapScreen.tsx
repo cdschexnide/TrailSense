@@ -96,8 +96,9 @@ export const HeatmapScreen = () => {
           provider={PROVIDER_GOOGLE}
           style={styles.map}
           initialRegion={{
-            latitude: filteredPoints?.[0]?.latitude || 37.78825,
-            longitude: filteredPoints?.[0]?.longitude || -122.4324,
+            // Use first point's location, or Sierra Vista, AZ as default (device deployment area)
+            latitude: filteredPoints?.[0]?.latitude || 31.530757,
+            longitude: filteredPoints?.[0]?.longitude || -110.287842,
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
           }}

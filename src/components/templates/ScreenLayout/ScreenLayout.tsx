@@ -1,4 +1,15 @@
-import React, { useRef } from 'react';
+/**
+ * ScreenLayout Component - Production Grade
+ *
+ * Master layout wrapper providing:
+ * - Consistent header with scroll-linked animations
+ * - Safe area handling
+ * - Keyboard avoiding behavior
+ * - Scrollable and non-scrollable variants
+ * - Screen variant styling support
+ */
+
+import React, { useRef, useCallback } from 'react';
 import {
   View,
   ScrollView,
@@ -7,10 +18,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '@components/organisms';
 import { useTheme } from '@hooks/useTheme';
+
+type ScreenVariant = 'default' | 'alerts' | 'devices' | 'map' | 'analytics' | 'settings' | 'ai';
 
 interface ScreenLayoutProps {
   children: React.ReactNode;
@@ -22,6 +38,8 @@ interface ScreenLayoutProps {
     rightActions?: React.ReactNode;
     largeTitle?: boolean;
   };
+  // Screen variant for header styling
+  variant?: ScreenVariant;
   // Legacy props for backward compatibility
   title?: string;
   subtitle?: string;
@@ -34,11 +52,20 @@ interface ScreenLayoutProps {
   style?: ViewStyle;
   contentStyle?: ViewStyle;
   testID?: string;
+  // Callback for scroll events
+  onScroll?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  // Whether to use animated scroll handling
+  animatedHeader?: boolean;
+  // Custom header component to render instead of default
+  customHeader?: React.ReactNode;
+  // Content to render below header but above scrollable content
+  stickyHeader?: React.ReactNode;
 }
 
 export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   children,
   header,
+  variant = 'default',
   // Legacy props
   title,
   subtitle,
@@ -51,9 +78,16 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   style,
   contentStyle,
   testID,
+  onScroll,
+  animatedHeader = true,
+  customHeader,
+  stickyHeader,
 }) => {
-  const { theme } = useTheme();
+  const { theme, colorScheme } = useTheme();
   const { colors } = theme;
+  const isDark = colorScheme === 'dark';
+
+  // Animated scroll value for header animations
   const scrollY = useRef(new Animated.Value(0)).current;
 
   // Use new header prop or fall back to legacy props
@@ -71,6 +105,19 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
 
   const hasLargeTitle = headerConfig?.largeTitle;
 
+  // Handle scroll events
+  const handleScroll = useCallback(
+    Animated.event(
+      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      {
+        useNativeDriver: false,
+        listener: onScroll,
+      }
+    ),
+    [scrollY, onScroll]
+  );
+
+  // Main content wrapper
   const content = (
     <View
       style={[
@@ -78,7 +125,7 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         {
           backgroundColor: colors.systemBackground,
         },
-        !scrollable && { paddingHorizontal: 0 },
+        !scrollable && styles.contentNonScrollable,
         contentStyle,
       ]}
     >
@@ -86,27 +133,25 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
     </View>
   );
 
+  // Scrollable content with animated scroll tracking
   const wrappedContent = scrollable ? (
-    <ScrollView
+    <Animated.ScrollView
       style={styles.scrollView}
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={false}
-      onScroll={
-        hasLargeTitle
-          ? Animated.event(
-              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-              { useNativeDriver: false }
-            )
-          : undefined
-      }
-      scrollEventThrottle={hasLargeTitle ? 16 : undefined}
+      scrollEventThrottle={16}
+      onScroll={hasLargeTitle && animatedHeader ? handleScroll : onScroll}
+      // Pull-to-refresh needs content inset adjustment on iOS
+      automaticallyAdjustContentInsets={false}
+      contentInsetAdjustmentBehavior="never"
     >
       {content}
-    </ScrollView>
+    </Animated.ScrollView>
   ) : (
     content
   );
 
+  // Keyboard avoiding wrapper
   const keyboardAvoidingContent = keyboardAvoiding ? (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -129,7 +174,14 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       edges={['top', 'left', 'right', 'bottom']}
       testID={testID}
     >
-      {headerConfig && (
+      {/* Status bar styling */}
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.systemBackground}
+      />
+
+      {/* Custom header or default header */}
+      {customHeader || (headerConfig && (
         <Header
           title={headerConfig.title}
           subtitle={headerConfig.subtitle}
@@ -137,8 +189,17 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
           onBackPress={headerConfig.onBackPress}
           rightActions={headerConfig.rightActions}
           largeTitle={hasLargeTitle}
+          scrollY={hasLargeTitle && animatedHeader ? scrollY : undefined}
+          variant={variant}
         />
+      ))}
+
+      {/* Sticky header content (e.g., search bars, filters) */}
+      {stickyHeader && (
+        <View style={styles.stickyHeader}>{stickyHeader}</View>
       )}
+
+      {/* Main content */}
       {keyboardAvoidingContent}
     </SafeAreaView>
   );
@@ -159,5 +220,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  contentNonScrollable: {
+    paddingHorizontal: 0,
+  },
+  stickyHeader: {
+    zIndex: 50,
   },
 });

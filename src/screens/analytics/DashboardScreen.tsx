@@ -210,6 +210,7 @@ export const DashboardScreen = ({ navigation }: any) => {
           </Button>
         ),
       }}
+      variant="analytics"
       scrollable
     >
       {/* Period Selector */}
@@ -270,7 +271,7 @@ export const DashboardScreen = ({ navigation }: any) => {
             Active Devices
           </Text>
           <Text variant="title1" weight="bold" color="label">
-            {analytics.topDetectedDevices?.length || 0}
+            1
           </Text>
           <View style={styles.trendRow}>
             <Icon name="checkmark-circle" size={14} color={colors.systemGreen} />

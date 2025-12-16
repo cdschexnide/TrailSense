@@ -4,10 +4,17 @@ import { Alert, AlertFilters } from '@types';
 
 export const ALERTS_QUERY_KEY = 'alerts';
 
+// Auto-refresh interval for alerts (30 seconds)
+const ALERTS_REFETCH_INTERVAL = 30 * 1000;
+
 export const useAlerts = (filters?: AlertFilters) => {
   return useQuery({
     queryKey: [ALERTS_QUERY_KEY, filters],
     queryFn: () => alertsApi.getAlerts(filters),
+    // Auto-refresh every 30 seconds for real-time updates
+    refetchInterval: ALERTS_REFETCH_INTERVAL,
+    // Pause polling when app is in background (saves battery)
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -16,6 +23,9 @@ export const useAlert = (id: string) => {
     queryKey: [ALERTS_QUERY_KEY, id],
     queryFn: () => alertsApi.getAlertById(id),
     enabled: !!id,
+    // Auto-refresh individual alert details too
+    refetchInterval: ALERTS_REFETCH_INTERVAL,
+    refetchIntervalInBackground: false,
   });
 };
 

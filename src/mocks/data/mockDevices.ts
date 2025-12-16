@@ -1,85 +1,77 @@
 import type { Device } from '@/types/device';
 
+// Mock devices located in Sierra Vista, Arizona area (where real device is deployed)
+// Real device coordinates: 31.530757, -110.287842
 export const mockDevices: Device[] = [
   {
     id: 'device-001',
     name: 'North Gate Sensor',
     online: true,
-    battery: 87,
+    batteryPercent: 87,
     signalStrength: 'excellent',
     detectionCount: 142,
-    location: {
-      latitude: 29.7604,
-      longitude: -95.3698,
-    },
-    lastSeen: '2025-11-16T09:45:00Z',
-    firmware: 'v2.1.3',
+    latitude: 31.530757,   // Sierra Vista, AZ - primary device location
+    longitude: -110.287842,
+    lastSeen: '2025-12-16T09:45:00Z',
+    firmwareVersion: 'v2.1.3',
     createdAt: '2025-01-10T08:00:00Z',
-    updatedAt: '2025-11-16T09:45:00Z',
+    updatedAt: '2025-12-16T09:45:00Z',
   },
   {
     id: 'device-002',
     name: 'South Boundary',
     online: true,
-    battery: 92,
+    batteryPercent: 92,
     signalStrength: 'good',
     detectionCount: 87,
-    location: {
-      latitude: 29.7589,
-      longitude: -95.371,
-    },
-    lastSeen: '2025-11-16T09:47:00Z',
-    firmware: 'v2.1.3',
+    latitude: 31.528500,   // ~0.15 miles south
+    longitude: -110.289100,
+    lastSeen: '2025-12-16T09:47:00Z',
+    firmwareVersion: 'v2.1.3',
     createdAt: '2025-01-10T08:15:00Z',
-    updatedAt: '2025-11-16T09:47:00Z',
+    updatedAt: '2025-12-16T09:47:00Z',
   },
   {
     id: 'device-003',
     name: 'East Trail Monitor',
     online: true,
-    battery: 65,
+    batteryPercent: 65,
     signalStrength: 'fair',
     detectionCount: 213,
-    location: {
-      latitude: 29.7615,
-      longitude: -95.3685,
-    },
-    lastSeen: '2025-11-16T09:44:00Z',
-    firmware: 'v2.1.2',
+    latitude: 31.531200,   // ~0.1 miles east
+    longitude: -110.285500,
+    lastSeen: '2025-12-16T09:44:00Z',
+    firmwareVersion: 'v2.1.2',
     createdAt: '2025-01-15T10:30:00Z',
-    updatedAt: '2025-11-16T09:44:00Z',
+    updatedAt: '2025-12-16T09:44:00Z',
   },
   {
     id: 'device-004',
     name: 'West Perimeter',
     online: false,
-    battery: 12,
+    batteryPercent: 12,
     signalStrength: 'poor',
     detectionCount: 45,
-    location: {
-      latitude: 29.7595,
-      longitude: -95.3715,
-    },
-    lastSeen: '2025-11-14T16:22:00Z',
-    firmware: 'v2.0.9',
+    latitude: 31.529800,   // Offline device with last known location
+    longitude: -110.290500,
+    lastSeen: '2025-12-14T16:22:00Z',
+    firmwareVersion: 'v2.0.9',
     createdAt: '2025-02-01T12:00:00Z',
-    updatedAt: '2025-11-14T16:22:00Z',
+    updatedAt: '2025-12-14T16:22:00Z',
   },
   {
     id: 'device-005',
     name: 'Cabin Approach',
     online: false,
-    battery: 0,
+    batteryPercent: 0,
     signalStrength: 'offline',
     detectionCount: 156,
-    location: {
-      latitude: 29.762,
-      longitude: -95.3695,
-    },
-    lastSeen: '2025-11-12T08:15:00Z',
-    firmware: 'v2.1.1',
+    latitude: undefined,   // Device without GPS fix yet
+    longitude: undefined,
+    lastSeen: '2025-12-12T08:15:00Z',
+    firmwareVersion: 'v2.1.1',
     createdAt: '2025-01-20T14:00:00Z',
-    updatedAt: '2025-11-12T08:15:00Z',
+    updatedAt: '2025-12-12T08:15:00Z',
   },
 ];
 

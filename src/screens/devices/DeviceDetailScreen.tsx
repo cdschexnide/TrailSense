@@ -291,7 +291,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
           title="View History"
           subtitle="Detection events and alerts"
           leftIcon={<Icon name="time-outline" size={20} color={colors.systemOrange} />}
-          onPress={() => navigation.navigate('DeviceHistory', { id: deviceId })}
+          onPress={() => navigation.navigate('DeviceHistory', { macAddress: deviceId })}
           accessoryType="disclosureIndicator"
         />
         <ListRow
