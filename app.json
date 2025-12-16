@@ -52,13 +52,6 @@
       "expo-secure-store",
       "expo-location",
       [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/notification-icon.png",
-          "color": "#ffffff"
-        }
-      ],
-      [
         "@rnmapbox/maps",
         {
           "RNMapboxMapsDownloadToken": "sk.eyJ1IjoiY2RzY2hleG5pZGUiLCJhIjoiY21pcWp4bDluMGQ3ZDNlcTY3bnE0ejAwNSJ9.PdKsayMY-QseM7yYjbBAmQ",
