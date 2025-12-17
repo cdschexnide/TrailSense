@@ -121,10 +121,16 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
   const [selectedDeviceIndex, setSelectedDeviceIndex] = useState(0);
   const [showSatellite, setShowSatellite] = useState(true);
   const cameraRef = useRef<Camera>(null);
+  const mapViewRef = useRef<MapView>(null);
 
   // Animation for GPS update indicator
   const gpsUpdateAnim = useRef(new Animated.Value(0)).current;
   const [lastGpsUpdate, setLastGpsUpdate] = useState<Date | null>(null);
+
+  // Gesture tracking state for SVG overlay synchronization
+  const [deviceScreenPos, setDeviceScreenPos] = useState({ x: CENTER_X, y: CENTER_Y });
+  const [zoomScale, setZoomScale] = useState(1);
+  const initialZoomRef = useRef<number | null>(null);
 
   // Track previous coordinates to detect changes
   const prevCoordsRef = useRef<{ lat: number | null; lon: number | null }>({
@@ -231,8 +237,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
       const coordsChanged =
         prevLat !== null &&
         prevLon !== null &&
-        (Math.abs((prevLat - newLat!) > 0.000001) ||
-         Math.abs((prevLon - newLon!) > 0.000001));
+        (Math.abs(prevLat - newLat!) > 0.000001 ||
+         Math.abs(prevLon - newLon!) > 0.000001);
 
       // Update camera with smooth animation
       cameraRef.current.setCamera({
@@ -270,6 +276,59 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
     hasValidLocation,
     gpsUpdateAnim,
   ]);
+
+  // Handle camera changes from user gestures (pinch/zoom/pan)
+  const handleCameraChanged = useCallback(async (event: any) => {
+    if (!mapViewRef.current || !hasValidLocation) return;
+
+    const { zoom } = event.properties;
+
+    // Store initial zoom level on first camera change
+    if (initialZoomRef.current === null) {
+      initialZoomRef.current = zoom;
+    }
+
+    // Calculate scale factor based on zoom difference
+    // Each zoom level doubles/halves the scale
+    const newScale = Math.pow(2, zoom - initialZoomRef.current!);
+    setZoomScale(newScale);
+
+    // Get device position in screen coordinates
+    try {
+      const screenPoint = await mapViewRef.current.getPointInView([
+        deviceCoordinates.longitude!,
+        deviceCoordinates.latitude!,
+      ]);
+      setDeviceScreenPos({ x: screenPoint[0], y: screenPoint[1] });
+    } catch (error) {
+      // Fallback to center if getPointInView fails
+      console.warn('Failed to get device screen position:', error);
+    }
+  }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
+
+  // Reset map to center on device with initial zoom
+  const resetMapView = useCallback(() => {
+    if (cameraRef.current && hasValidLocation) {
+      // Reset zoom scale and position
+      setZoomScale(1);
+      setDeviceScreenPos({ x: CENTER_X, y: CENTER_Y });
+      initialZoomRef.current = getZoomForRadius(MAX_RADIUS_METERS);
+
+      // Animate camera back to device location
+      cameraRef.current.setCamera({
+        centerCoordinate: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
+        zoomLevel: getZoomForRadius(MAX_RADIUS_METERS),
+        animationDuration: 500,
+      });
+    }
+  }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
+
+  // Reset overlay position when device changes
+  useEffect(() => {
+    setDeviceScreenPos({ x: CENTER_X, y: CENTER_Y });
+    setZoomScale(1);
+    initialZoomRef.current = null;
+  }, [selectedDeviceIndex]);
 
   if (devicesLoading) {
     return (
@@ -407,8 +466,9 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
           <View style={styles.mapContainer}>
             {hasValidLocation ? (
               <>
-                {/* MapBox Satellite View */}
+                {/* MapBox Satellite View - Gestures enabled for pan/zoom */}
                 <MapView
+                  ref={mapViewRef}
                   style={styles.map}
                   styleURL={
                     showSatellite
@@ -419,10 +479,11 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                   attributionEnabled={false}
                   scaleBarEnabled={false}
                   compassEnabled={false}
-                  scrollEnabled={false}
+                  scrollEnabled={true}
                   pitchEnabled={false}
                   rotateEnabled={false}
-                  zoomEnabled={false}
+                  zoomEnabled={true}
+                  onCameraChanged={handleCameraChanged}
                 >
                   <Camera
                     ref={cameraRef}
@@ -436,22 +497,28 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                   />
                 </MapView>
 
-            {/* SVG Heatmap Overlay */}
-            <View style={styles.heatmapOverlay}>
-              <Svg width={MAP_SIZE} height={MAP_SIZE}>
+            {/* SVG Heatmap Overlay - syncs with map gestures */}
+            <View style={styles.heatmapOverlay} pointerEvents="none">
+              <Svg width={MAP_SIZE} height={MAP_SIZE} style={{ overflow: 'visible' }}>
                 <Defs>
                   {/* Gradients defined but we'll use solid fills for zone bands */}
                 </Defs>
 
                 {/* Draw zone bands - REVERSE order so inner zones appear on top */}
+                {/* Position and scale sync with map camera via deviceScreenPos and zoomScale */}
                 {[...ZONES].reverse().map((zone, reverseIndex) => {
                   const index = ZONES.length - 1 - reverseIndex;
                   const maxRadius = MAP_SIZE / 2 - 10;
 
-                  // Calculate TRUE proportional radii based on distance
-                  const outerRadius = (zone.max / 800) * maxRadius;
-                  const innerRadius = index === 0 ? 0 : (ZONES[index - 1].max / 800) * maxRadius;
-                  const bandWidth = outerRadius - innerRadius;
+                  // Calculate TRUE proportional radii based on distance, then apply zoom scale
+                  const baseOuterRadius = (zone.max / 800) * maxRadius;
+                  const baseInnerRadius = index === 0 ? 0 : (ZONES[index - 1].max / 800) * maxRadius;
+                  const baseBandWidth = baseOuterRadius - baseInnerRadius;
+
+                  // Apply zoom scale to radii
+                  const outerRadius = baseOuterRadius * zoomScale;
+                  const innerRadius = baseInnerRadius * zoomScale;
+                  const bandWidth = baseBandWidth * zoomScale;
                   const midRadius = innerRadius + bandWidth / 2;
 
                   const detectionCount = proximityData[index].count;
@@ -469,16 +536,16 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                       <G key={`zone-band-${index}`}>
                         {/* Innermost zone - filled circle at TRUE proportional size */}
                         <Circle
-                          cx={CENTER_X}
-                          cy={CENTER_Y}
+                          cx={deviceScreenPos.x}
+                          cy={deviceScreenPos.y}
                           r={outerRadius}
                           fill={zone.color}
                           fillOpacity={fillOpacity}
                         />
                         {/* Border */}
                         <Circle
-                          cx={CENTER_X}
-                          cy={CENTER_Y}
+                          cx={deviceScreenPos.x}
+                          cy={deviceScreenPos.y}
                           r={outerRadius}
                           fill="none"
                           stroke={zone.color}
@@ -493,8 +560,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                     <G key={`zone-band-${index}`}>
                       {/* Zone band fill - thick stroke creates ring shape */}
                       <Circle
-                        cx={CENTER_X}
-                        cy={CENTER_Y}
+                        cx={deviceScreenPos.x}
+                        cy={deviceScreenPos.y}
                         r={midRadius}
                         fill="none"
                         stroke={zone.color}
@@ -503,8 +570,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                       />
                       {/* Outer border of this zone */}
                       <Circle
-                        cx={CENTER_X}
-                        cy={CENTER_Y}
+                        cx={deviceScreenPos.x}
+                        cy={deviceScreenPos.y}
                         r={outerRadius}
                         fill="none"
                         stroke={zone.color}
@@ -517,10 +584,11 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
 
 
                 {/* Center device marker - minimal target reticle */}
+                {/* Marker size stays constant regardless of zoom for visibility */}
                 {/* Outer shadow for visibility on any background */}
                 <Circle
-                  cx={CENTER_X}
-                  cy={CENTER_Y}
+                  cx={deviceScreenPos.x}
+                  cy={deviceScreenPos.y}
                   r={5}
                   fill="none"
                   stroke="rgba(0,0,0,0.5)"
@@ -528,8 +596,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                 />
                 {/* Inner white ring */}
                 <Circle
-                  cx={CENTER_X}
-                  cy={CENTER_Y}
+                  cx={deviceScreenPos.x}
+                  cy={deviceScreenPos.y}
                   r={5}
                   fill="none"
                   stroke="#FFFFFF"
@@ -537,13 +605,29 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                 />
                 {/* Center dot */}
                 <Circle
-                  cx={CENTER_X}
-                  cy={CENTER_Y}
+                  cx={deviceScreenPos.x}
+                  cy={deviceScreenPos.y}
                   r={2}
                   fill="#FFFFFF"
                 />
               </Svg>
             </View>
+
+            {/* Reset View Button - appears when map has been panned/zoomed */}
+            {(Math.abs(zoomScale - 1) > 0.01 ||
+              Math.abs(deviceScreenPos.x - CENTER_X) > 5 ||
+              Math.abs(deviceScreenPos.y - CENTER_Y) > 5) && (
+              <TouchableOpacity
+                style={styles.resetButton}
+                onPress={resetMapView}
+                activeOpacity={0.8}
+              >
+                <Icon name="locate" size={18} color="white" />
+                <Text variant="caption1" weight="semibold" style={styles.resetButtonText}>
+                  Reset
+                </Text>
+              </TouchableOpacity>
+            )}
               </>
             ) : (
               /* No GPS location available */
@@ -828,6 +912,27 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'visible',
+  },
+  resetButton: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 122, 255, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  resetButtonText: {
+    color: '#FFFFFF',
   },
   // Zone Legend Card
   legendCard: {

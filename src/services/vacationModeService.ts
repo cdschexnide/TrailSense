@@ -1,5 +1,4 @@
 import { settingsApi } from '@api/settings';
-import * as Notifications from 'expo-notifications';
 
 interface VacationModeSettings {
   enabled: boolean;
@@ -24,26 +23,16 @@ export class VacationModeService {
       notificationVolume: 'max',
     });
 
+    // TODO: Re-enable when expo-notifications is available with paid Apple Developer account
     // Schedule local notification reminders
-    await this.scheduleNotification({
-      title: 'Vacation Mode Active',
-      body: 'TrailSense is monitoring your property with heightened sensitivity',
-      date: startDate,
-    });
-
-    // Schedule reminder notification for end date
-    await this.scheduleNotification({
-      title: 'Vacation Mode Ending',
-      body: 'Your vacation mode will end today. Welcome back!',
-      date: endDate,
-    });
+    console.log('Vacation mode enabled:', startDate, '-', endDate);
   }
 
   static async disableVacationMode(): Promise<void> {
     await settingsApi.updateVacationMode({ enabled: false });
 
-    // Cancel any scheduled notifications
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    // TODO: Re-enable when expo-notifications is available
+    console.log('Vacation mode disabled');
   }
 
   static async getVacationModeStatus(): Promise<VacationModeSettings> {
@@ -54,24 +43,6 @@ export class VacationModeService {
     settings: Partial<VacationModeSettings>
   ): Promise<void> {
     await settingsApi.updateVacationMode(settings);
-  }
-
-  private static async scheduleNotification(params: {
-    title: string;
-    body: string;
-    date: Date;
-  }): Promise<string> {
-    return await Notifications.scheduleNotificationAsync({
-      content: {
-        title: params.title,
-        body: params.body,
-        sound: 'default',
-        priority: Notifications.AndroidNotificationPriority.MAX,
-      },
-      trigger: {
-        date: params.date,
-      },
-    });
   }
 
   /**
