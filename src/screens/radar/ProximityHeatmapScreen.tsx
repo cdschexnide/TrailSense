@@ -128,9 +128,12 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
   const [lastGpsUpdate, setLastGpsUpdate] = useState<Date | null>(null);
 
   // Gesture tracking state for SVG overlay synchronization
-  const [deviceScreenPos, setDeviceScreenPos] = useState({ x: CENTER_X, y: CENTER_Y });
-  const [zoomScale, setZoomScale] = useState(1);
-  const initialZoomRef = useRef<number | null>(null);
+  const [overlayTransform, setOverlayTransform] = useState({
+    translateX: 0,
+    translateY: 0,
+    scale: 1,
+  });
+  const initialCameraRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
 
   // Track previous coordinates to detect changes
   const prevCoordsRef = useRef<{ lat: number | null; lon: number | null }>({
@@ -283,36 +286,40 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
 
     const { zoom } = event.properties;
 
-    // Store initial zoom level on first camera change
-    if (initialZoomRef.current === null) {
-      initialZoomRef.current = zoom;
+    // Store initial zoom on first change
+    if (initialCameraRef.current === null) {
+      initialCameraRef.current = {
+        center: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
+        zoom: zoom,
+      };
     }
 
     // Calculate scale factor based on zoom difference
-    // Each zoom level doubles/halves the scale
-    const newScale = Math.pow(2, zoom - initialZoomRef.current!);
-    setZoomScale(newScale);
+    const scale = Math.pow(2, zoom - initialCameraRef.current.zoom);
 
-    // Get device position in screen coordinates
+    // Get device position in screen coordinates to calculate pan offset
     try {
       const screenPoint = await mapViewRef.current.getPointInView([
         deviceCoordinates.longitude!,
         deviceCoordinates.latitude!,
       ]);
-      setDeviceScreenPos({ x: screenPoint[0], y: screenPoint[1] });
+      // Calculate how far from center the device has moved due to panning
+      const translateX = screenPoint[0] - CENTER_X;
+      const translateY = screenPoint[1] - CENTER_Y;
+
+      setOverlayTransform({ translateX, translateY, scale });
     } catch (error) {
-      // Fallback to center if getPointInView fails
-      console.warn('Failed to get device screen position:', error);
+      // On error, just update scale without translation
+      setOverlayTransform(prev => ({ ...prev, scale }));
     }
   }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
 
   // Reset map to center on device with initial zoom
   const resetMapView = useCallback(() => {
     if (cameraRef.current && hasValidLocation) {
-      // Reset zoom scale and position
-      setZoomScale(1);
-      setDeviceScreenPos({ x: CENTER_X, y: CENTER_Y });
-      initialZoomRef.current = getZoomForRadius(MAX_RADIUS_METERS);
+      // Reset transform
+      setOverlayTransform({ translateX: 0, translateY: 0, scale: 1 });
+      initialCameraRef.current = null;
 
       // Animate camera back to device location
       cameraRef.current.setCamera({
@@ -323,11 +330,10 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
     }
   }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
 
-  // Reset overlay position when device changes
+  // Reset overlay when device changes
   useEffect(() => {
-    setDeviceScreenPos({ x: CENTER_X, y: CENTER_Y });
-    setZoomScale(1);
-    initialZoomRef.current = null;
+    setOverlayTransform({ translateX: 0, translateY: 0, scale: 1 });
+    initialCameraRef.current = null;
   }, [selectedDeviceIndex]);
 
   if (devicesLoading) {
@@ -497,28 +503,34 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                   />
                 </MapView>
 
-            {/* SVG Heatmap Overlay - syncs with map gestures */}
-            <View style={styles.heatmapOverlay} pointerEvents="none">
-              <Svg width={MAP_SIZE} height={MAP_SIZE} style={{ overflow: 'visible' }}>
+            {/* SVG Heatmap Overlay - syncs with map gestures via transform */}
+            <View
+              style={[
+                styles.heatmapOverlay,
+                {
+                  transform: [
+                    { translateX: overlayTransform.translateX },
+                    { translateY: overlayTransform.translateY },
+                    { scale: overlayTransform.scale },
+                  ],
+                },
+              ]}
+              pointerEvents="none"
+            >
+              <Svg width={MAP_SIZE} height={MAP_SIZE}>
                 <Defs>
                   {/* Gradients defined but we'll use solid fills for zone bands */}
                 </Defs>
 
                 {/* Draw zone bands - REVERSE order so inner zones appear on top */}
-                {/* Position and scale sync with map camera via deviceScreenPos and zoomScale */}
                 {[...ZONES].reverse().map((zone, reverseIndex) => {
                   const index = ZONES.length - 1 - reverseIndex;
                   const maxRadius = MAP_SIZE / 2 - 10;
 
-                  // Calculate TRUE proportional radii based on distance, then apply zoom scale
-                  const baseOuterRadius = (zone.max / 800) * maxRadius;
-                  const baseInnerRadius = index === 0 ? 0 : (ZONES[index - 1].max / 800) * maxRadius;
-                  const baseBandWidth = baseOuterRadius - baseInnerRadius;
-
-                  // Apply zoom scale to radii
-                  const outerRadius = baseOuterRadius * zoomScale;
-                  const innerRadius = baseInnerRadius * zoomScale;
-                  const bandWidth = baseBandWidth * zoomScale;
+                  // Calculate TRUE proportional radii based on distance
+                  const outerRadius = (zone.max / 800) * maxRadius;
+                  const innerRadius = index === 0 ? 0 : (ZONES[index - 1].max / 800) * maxRadius;
+                  const bandWidth = outerRadius - innerRadius;
                   const midRadius = innerRadius + bandWidth / 2;
 
                   const detectionCount = proximityData[index].count;
@@ -536,16 +548,16 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                       <G key={`zone-band-${index}`}>
                         {/* Innermost zone - filled circle at TRUE proportional size */}
                         <Circle
-                          cx={deviceScreenPos.x}
-                          cy={deviceScreenPos.y}
+                          cx={CENTER_X}
+                          cy={CENTER_Y}
                           r={outerRadius}
                           fill={zone.color}
                           fillOpacity={fillOpacity}
                         />
                         {/* Border */}
                         <Circle
-                          cx={deviceScreenPos.x}
-                          cy={deviceScreenPos.y}
+                          cx={CENTER_X}
+                          cy={CENTER_Y}
                           r={outerRadius}
                           fill="none"
                           stroke={zone.color}
@@ -560,8 +572,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                     <G key={`zone-band-${index}`}>
                       {/* Zone band fill - thick stroke creates ring shape */}
                       <Circle
-                        cx={deviceScreenPos.x}
-                        cy={deviceScreenPos.y}
+                        cx={CENTER_X}
+                        cy={CENTER_Y}
                         r={midRadius}
                         fill="none"
                         stroke={zone.color}
@@ -570,8 +582,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                       />
                       {/* Outer border of this zone */}
                       <Circle
-                        cx={deviceScreenPos.x}
-                        cy={deviceScreenPos.y}
+                        cx={CENTER_X}
+                        cy={CENTER_Y}
                         r={outerRadius}
                         fill="none"
                         stroke={zone.color}
@@ -584,11 +596,10 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
 
 
                 {/* Center device marker - minimal target reticle */}
-                {/* Marker size stays constant regardless of zoom for visibility */}
                 {/* Outer shadow for visibility on any background */}
                 <Circle
-                  cx={deviceScreenPos.x}
-                  cy={deviceScreenPos.y}
+                  cx={CENTER_X}
+                  cy={CENTER_Y}
                   r={5}
                   fill="none"
                   stroke="rgba(0,0,0,0.5)"
@@ -596,8 +607,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                 />
                 {/* Inner white ring */}
                 <Circle
-                  cx={deviceScreenPos.x}
-                  cy={deviceScreenPos.y}
+                  cx={CENTER_X}
+                  cy={CENTER_Y}
                   r={5}
                   fill="none"
                   stroke="#FFFFFF"
@@ -605,8 +616,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                 />
                 {/* Center dot */}
                 <Circle
-                  cx={deviceScreenPos.x}
-                  cy={deviceScreenPos.y}
+                  cx={CENTER_X}
+                  cy={CENTER_Y}
                   r={2}
                   fill="#FFFFFF"
                 />
@@ -614,9 +625,9 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
             </View>
 
             {/* Reset View Button - appears when map has been panned/zoomed */}
-            {(Math.abs(zoomScale - 1) > 0.01 ||
-              Math.abs(deviceScreenPos.x - CENTER_X) > 5 ||
-              Math.abs(deviceScreenPos.y - CENTER_Y) > 5) && (
+            {(Math.abs(overlayTransform.scale - 1) > 0.01 ||
+              Math.abs(overlayTransform.translateX) > 5 ||
+              Math.abs(overlayTransform.translateY) > 5) && (
               <TouchableOpacity
                 style={styles.resetButton}
                 onPress={resetMapView}
