@@ -188,6 +188,74 @@ export const AlertDetailScreen = () => {
         </View>
       </View>
 
+      {/* Summary Details Section */}
+      {alert.metadata?.source === 'summary' && (
+        <View
+          style={[
+            styles.summaryCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
+          <View style={styles.summaryHeader}>
+            <Icon name="layers-outline" size={20} color={colors.systemIndigo} />
+            <Text
+              variant="headline"
+              weight="semibold"
+              color="label"
+              style={{ marginLeft: 8 }}
+            >
+              Detection Summary
+            </Text>
+          </View>
+
+          <View style={styles.summaryGrid}>
+            {alert.metadata.signalCount && (
+              <View style={styles.summaryItem}>
+                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                  Detections
+                </Text>
+                <Text variant="title3" weight="semibold" color="label">
+                  {alert.metadata.signalCount}x
+                </Text>
+              </View>
+            )}
+
+            {alert.metadata.windowDuration && (
+              <View style={styles.summaryItem}>
+                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                  Window
+                </Text>
+                <Text variant="title3" weight="semibold" color="label">
+                  {alert.metadata.windowDuration}s
+                </Text>
+              </View>
+            )}
+
+            {alert.metadata.distance && (
+              <View style={styles.summaryItem}>
+                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                  Distance
+                </Text>
+                <Text variant="title3" weight="semibold" color="label">
+                  {alert.metadata.distance.toFixed(1)}m
+                </Text>
+              </View>
+            )}
+
+            {alert.metadata.burstCount && (
+              <View style={styles.summaryItem}>
+                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                  Bursts
+                </Text>
+                <Text variant="title3" weight="semibold" color="label">
+                  {alert.metadata.burstCount}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
+
       {/* AI Summary Section */}
       {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
         (Platform.OS === 'android' || Platform.OS === 'ios') && (
@@ -355,6 +423,26 @@ const styles = StyleSheet.create({
   section: {
     marginHorizontal: 16,
     marginBottom: 16,
+  },
+  summaryCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 16,
+  },
+  summaryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  summaryItem: {
+    minWidth: '45%',
+    flex: 1,
   },
   actions: {
     padding: 16,
