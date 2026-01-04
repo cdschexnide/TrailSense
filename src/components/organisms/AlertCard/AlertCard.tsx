@@ -340,7 +340,54 @@ export const AlertCard: React.FC<AlertCardProps> = ({
                   </Text>
                 </View>
               )}
+
+              {/* Signal count from summary */}
+              {alert.metadata?.signalCount && (
+                <View style={styles.metadataRow}>
+                  <Icon
+                    name="repeat"
+                    size={14}
+                    color={theme.colors.secondaryLabel}
+                  />
+                  <Text
+                    variant="caption1"
+                    color="secondaryLabel"
+                    style={styles.metadataText}
+                  >
+                    Detected {alert.metadata.signalCount}x
+                    {alert.metadata.windowDuration
+                      ? ` in ${alert.metadata.windowDuration}s`
+                      : ''}
+                  </Text>
+                </View>
+              )}
             </View>
+
+              {/* Summary source badge */}
+              {alert.metadata?.source === 'summary' && (
+                <View
+                  style={[
+                    styles.sourceBadge,
+                    { backgroundColor: theme.colors.systemIndigo + '15' },
+                  ]}
+                >
+                  <Icon
+                    name="layers-outline"
+                    size={12}
+                    color={theme.colors.systemIndigo}
+                  />
+                  <Text
+                    variant="caption2"
+                    style={{
+                      color: theme.colors.systemIndigo,
+                      marginLeft: 4,
+                      fontWeight: '600',
+                    }}
+                  >
+                    Aggregated
+                  </Text>
+                </View>
+              )}
           </View>
 
           {/* Chevron */}
@@ -473,6 +520,15 @@ const styles = StyleSheet.create({
   macAddress: {
     fontFamily: 'monospace',
     fontSize: 12,
+  },
+  sourceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 8,
+    alignSelf: 'flex-start',
   },
   actionRow: {
     flexDirection: 'row',
