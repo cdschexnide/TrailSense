@@ -9,8 +9,9 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import MapView, { Marker, Circle } from 'react-native-maps';
 import { Button } from '@components/atoms/Button';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
@@ -42,6 +43,16 @@ const DETECTION_ICONS: Record<string, string> = {
   bluetooth: 'bluetooth',
   cellular: 'cellular',
   default: 'radio',
+};
+
+const openInMaps = (latitude: number, longitude: number) => {
+  const url = Platform.select({
+    ios: `maps://app?daddr=${latitude},${longitude}`,
+    android: `google.navigation:q=${latitude},${longitude}`,
+  });
+  if (url) {
+    Linking.openURL(url);
+  }
 };
 
 export const AlertDetailScreen = () => {
@@ -256,6 +267,102 @@ export const AlertDetailScreen = () => {
         </View>
       )}
 
+      {/* Triangulated Position Section */}
+      {alert.metadata?.triangulatedPosition && (
+        <View style={styles.sectionContainer}>
+          <View style={styles.positionHeader}>
+            <Icon name="navigate" size={20} color={colors.systemGreen} />
+            <Text
+              variant="headline"
+              weight="semibold"
+              color="label"
+              style={{ marginLeft: 8 }}
+            >
+              Estimated Device Location
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.miniMapContainer,
+              { backgroundColor: colors.secondarySystemBackground },
+            ]}
+          >
+            <MapView
+              style={styles.miniMap}
+              initialRegion={{
+                latitude: alert.metadata.triangulatedPosition.latitude,
+                longitude: alert.metadata.triangulatedPosition.longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              }}
+              scrollEnabled={false}
+              zoomEnabled={false}
+            >
+              <Circle
+                center={{
+                  latitude: alert.metadata.triangulatedPosition.latitude,
+                  longitude: alert.metadata.triangulatedPosition.longitude,
+                }}
+                radius={alert.metadata.triangulatedPosition.accuracyMeters}
+                fillColor={`${colors.systemGreen}20`}
+                strokeColor={colors.systemGreen}
+                strokeWidth={2}
+              />
+              <Marker
+                coordinate={{
+                  latitude: alert.metadata.triangulatedPosition.latitude,
+                  longitude: alert.metadata.triangulatedPosition.longitude,
+                }}
+              />
+            </MapView>
+
+            <View style={styles.positionDetails}>
+              <View style={styles.positionRow}>
+                <Text variant="caption1" style={{ color: '#FFFFFF99' }}>
+                  Accuracy
+                </Text>
+                <Text
+                  variant="subheadline"
+                  weight="semibold"
+                  style={{ color: '#FFFFFF' }}
+                >
+                  +/-{alert.metadata.triangulatedPosition.accuracyMeters.toFixed(1)}m
+                </Text>
+              </View>
+              <View style={styles.positionRow}>
+                <Text variant="caption1" style={{ color: '#FFFFFF99' }}>
+                  Confidence
+                </Text>
+                <Text
+                  variant="subheadline"
+                  weight="semibold"
+                  style={{ color: '#FFFFFF' }}
+                >
+                  {alert.metadata.triangulatedPosition.confidence}%
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <Button
+            buttonStyle="tinted"
+            role="default"
+            onPress={() =>
+              openInMaps(
+                alert.metadata.triangulatedPosition.latitude,
+                alert.metadata.triangulatedPosition.longitude
+              )
+            }
+            leftIcon={
+              <Icon name="open-outline" size={18} color={colors.systemBlue} />
+            }
+          >
+            Open in Maps
+          </Button>
+        </View>
+      )}
+
       {/* AI Summary Section */}
       {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
         (Platform.OS === 'android' || Platform.OS === 'ios') && (
@@ -443,6 +550,37 @@ const styles = StyleSheet.create({
   summaryItem: {
     minWidth: '45%',
     flex: 1,
+  },
+  sectionContainer: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  positionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  miniMapContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  miniMap: {
+    height: 180,
+  },
+  positionDetails: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 8,
+    padding: 8,
+  },
+  positionRow: {
+    alignItems: 'center',
   },
   actions: {
     padding: 16,
