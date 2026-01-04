@@ -1,6 +1,42 @@
 export type ThreatLevel = 'low' | 'medium' | 'high' | 'critical';
 export type DetectionType = 'cellular' | 'wifi' | 'bluetooth';
 
+/**
+ * Typed metadata for alerts
+ * Provides IDE autocomplete and type safety
+ */
+export interface AlertMetadata {
+  // Location/distance info
+  zone?: number;
+  distance?: number;
+
+  // WiFi-specific
+  channel?: number;
+
+  // BLE-specific
+  deviceName?: string;
+
+  // Cellular-specific
+  cellularPeak?: number;
+  cellularAvg?: number;
+  cellularDelta?: number;
+  burstCount?: number;
+  clusterIndex?: number;
+
+  // Summary-specific fields
+  source?: 'legacy' | 'summary';
+  signalCount?: number;
+  windowDuration?: number;
+
+  // Triangulation-specific fields
+  triangulatedPosition?: {
+    latitude: number;
+    longitude: number;
+    accuracyMeters: number;
+    confidence: number;
+  };
+}
+
 export interface Alert {
   id: string;
   deviceId: string;
@@ -16,7 +52,7 @@ export interface Alert {
     latitude: number;
     longitude: number;
   };
-  metadata?: Record<string, any>;
+  metadata?: AlertMetadata;
   // Additional properties for threat classification
   wifiDetected?: boolean;
   bluetoothDetected?: boolean;
