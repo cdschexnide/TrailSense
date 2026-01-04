@@ -9,3 +9,6 @@ export * from './device';
 
 // Whitelist types
 export * from './whitelist';
+
+// Triangulation types
+export * from './triangulation';
