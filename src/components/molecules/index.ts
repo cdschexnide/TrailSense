@@ -1,8 +1,9 @@
-export { StatCard } from './StatCard';
 export { ChartCard } from './ChartCard';
-export * from './ListItem';
-export * from './SwipeableRow';
 export * from './DetectedDeviceMarker';
+export { FilterChip } from './FilterChip';
+export * from './ListItem';
 export * from './PositionInfoPopup';
-export * from './TrailSenseDeviceMarker';
 export * from './PositionListItem';
+export { StatCard } from './StatCard';
+export * from './SwipeableRow';
+export * from './TrailSenseDeviceMarker';
