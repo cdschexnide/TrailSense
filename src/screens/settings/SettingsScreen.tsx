@@ -8,7 +8,7 @@
  * - App info footer
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -18,30 +18,9 @@ import { Icon } from '@components/atoms/Icon';
 import { Text } from '@components/atoms/Text';
 import { useAppSelector } from '@store';
 import { ScreenLayout } from '@components/templates';
-import { ListSection } from '@components/molecules/ListSection';
-import { ListRow } from '@components/molecules/ListRow';
+import { GroupedListSection } from '@components/molecules/GroupedListSection';
+import { GroupedListRow } from '@components/molecules/GroupedListRow';
 import { useTheme } from '@hooks/useTheme';
-
-// Icon wrapper component
-const IconBox = ({ name, color, gradient }: { name: string; color: string; gradient?: [string, string] }) => {
-  if (gradient) {
-    return (
-      <LinearGradient
-        colors={gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.iconBox}
-      >
-        <Icon name={name as any} size={20} color="#FFFFFF" />
-      </LinearGradient>
-    );
-  }
-  return (
-    <View style={[styles.iconBox, { backgroundColor: color + '20' }]}>
-      <Icon name={name as any} size={20} color={color} />
-    </View>
-  );
-};
 
 export const SettingsScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -126,145 +105,124 @@ export const SettingsScreen = ({ navigation }: any) => {
       </Pressable>
 
       {/* Detection Settings */}
-      <ListSection header="DETECTION" style={styles.section}>
-        <ListRow
-          leftIcon={<IconBox name="speedometer-outline" color={colors.systemOrange} />}
+      <GroupedListSection title="Detection">
+        <GroupedListRow
+          icon="speedometer-outline"
+          iconColor={colors.systemOrange}
           title="Detection Sensitivity"
           subtitle="Adjust alert threshold"
-          rightText={settings?.sensitivity || 'Medium'}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Sensitivity');
-          }}
-          accessoryType="disclosureIndicator"
+          value={settings?.sensitivity || 'Medium'}
+          showChevron
+          onPress={() => navigation.navigate('Sensitivity')}
         />
-        <ListRow
-          leftIcon={<IconBox name="moon-outline" color={colors.systemIndigo} />}
+        <GroupedListRow
+          icon="moon-outline"
+          iconColor={colors.systemIndigo}
           title="Quiet Hours"
           subtitle="Silence notifications at night"
-          rightText={settings?.quietHoursEnabled ? 'On' : 'Off'}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('QuietHours');
-          }}
-          accessoryType="disclosureIndicator"
+          value={settings?.quietHoursEnabled ? 'On' : 'Off'}
+          showChevron
+          onPress={() => navigation.navigate('QuietHours')}
         />
-        <ListRow
-          leftIcon={<IconBox name="airplane-outline" color={colors.systemCyan} />}
+        <GroupedListRow
+          icon="airplane-outline"
+          iconColor={colors.systemTeal}
           title="Vacation Mode"
           subtitle="Enhanced monitoring while away"
-          rightText={settings?.vacationMode ? 'On' : 'Off'}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('VacationMode');
-          }}
-          accessoryType="disclosureIndicator"
+          value={settings?.vacationMode ? 'On' : 'Off'}
+          showChevron
+          onPress={() => navigation.navigate('VacationMode')}
         />
-      </ListSection>
+      </GroupedListSection>
 
       {/* Notifications */}
-      <ListSection header="NOTIFICATIONS" style={styles.section}>
-        <ListRow
-          leftIcon={<IconBox name="notifications-outline" color={colors.systemRed} />}
+      <GroupedListSection title="Notifications">
+        <GroupedListRow
+          icon="notifications-outline"
+          iconColor={colors.systemRed}
           title="Push Notifications"
           subtitle="Manage alert preferences"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('NotificationSettings');
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => navigation.navigate('NotificationSettings')}
         />
-        <ListRow
-          leftIcon={<IconBox name="musical-notes-outline" color={colors.systemPink} />}
+        <GroupedListRow
+          icon="musical-notes-outline"
+          iconColor={colors.systemPink}
           title="Alert Sounds"
           subtitle="Customize notification sounds"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('AlertSound');
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => navigation.navigate('AlertSound')}
         />
-      </ListSection>
+      </GroupedListSection>
 
       {/* Appearance */}
-      <ListSection header="APPEARANCE" style={styles.section}>
-        <ListRow
-          leftIcon={<IconBox name="color-palette-outline" color={colors.systemPurple} />}
+      <GroupedListSection title="Appearance">
+        <GroupedListRow
+          icon="color-palette-outline"
+          iconColor={colors.systemPurple}
           title="Theme"
           subtitle="Light, dark, or system"
-          rightText={themePreference}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Theme');
-          }}
-          accessoryType="disclosureIndicator"
+          value={themePreference}
+          showChevron
+          onPress={() => navigation.navigate('Theme')}
         />
-      </ListSection>
+      </GroupedListSection>
 
       {/* Security */}
-      <ListSection header="SECURITY" style={styles.section}>
-        <ListRow
-          leftIcon={<IconBox name="finger-print-outline" color={colors.systemGreen} />}
+      <GroupedListSection title="Security">
+        <GroupedListRow
+          icon="finger-print-outline"
+          iconColor={colors.systemGreen}
           title="Biometric Authentication"
           subtitle="Use Face ID or fingerprint"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Biometric');
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => navigation.navigate('Biometric')}
         />
-        <ListRow
-          leftIcon={<IconBox name="shield-checkmark-outline" color={colors.systemTeal} />}
+        <GroupedListRow
+          icon="shield-checkmark-outline"
+          iconColor={colors.systemTeal}
           title="Whitelist"
           subtitle="Trusted devices and networks"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Whitelist');
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => navigation.navigate('Whitelist')}
         />
-        <ListRow
-          leftIcon={<IconBox name="lock-closed-outline" color={colors.systemOrange} />}
+        <GroupedListRow
+          icon="lock-closed-outline"
+          iconColor={colors.systemOrange}
           title="Privacy & Security"
           subtitle="Data and account protection"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate('Security');
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => navigation.navigate('Security')}
         />
-      </ListSection>
+      </GroupedListSection>
 
       {/* Support */}
-      <ListSection header="SUPPORT" style={styles.section}>
-        <ListRow
-          leftIcon={<IconBox name="help-circle-outline" color={colors.systemBlue} />}
+      <GroupedListSection title="Support">
+        <GroupedListRow
+          icon="help-circle-outline"
+          iconColor={colors.systemBlue}
           title="Help & FAQ"
           subtitle="Get answers to common questions"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => {}}
         />
-        <ListRow
-          leftIcon={<IconBox name="chatbubble-outline" color={colors.systemGreen} />}
+        <GroupedListRow
+          icon="chatbubble-outline"
+          iconColor={colors.systemGreen}
           title="Contact Support"
           subtitle="Reach our support team"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => {}}
         />
-        <ListRow
-          leftIcon={<IconBox name="document-text-outline" color={colors.systemGray} />}
+        <GroupedListRow
+          icon="document-text-outline"
+          iconColor={colors.systemGray}
           title="Terms & Privacy"
           subtitle="Legal information"
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          }}
-          accessoryType="disclosureIndicator"
+          showChevron
+          onPress={() => {}}
         />
-      </ListSection>
+      </GroupedListSection>
 
       {/* Logout */}
       <View style={styles.logoutSection}>
@@ -320,17 +278,6 @@ const styles = StyleSheet.create({
   profileInfo: {
     flex: 1,
     marginLeft: 14,
-  },
-  section: {
-    marginHorizontal: 16,
-    marginBottom: 24,
-  },
-  iconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   logoutSection: {
     marginHorizontal: 16,
