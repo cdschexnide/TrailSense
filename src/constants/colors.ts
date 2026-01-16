@@ -278,6 +278,24 @@ export const Colors = {
     info: '#007AFF',
 
     // ======================
+    // TrailSense Brand Accent
+    // ======================
+
+    /**
+     * Brand accent color - Golden tan from logo
+     * Use for primary actions, selected states, brand moments
+     */
+    brandAccent: '#C9B896',
+    brandAccentLight: '#D4C9A8',
+    brandAccentDark: '#B5A682',
+
+    /**
+     * Brand accent with opacity for backgrounds
+     */
+    brandAccentBackground: 'rgba(201, 184, 150, 0.12)',
+    brandAccentBorder: 'rgba(201, 184, 150, 0.30)',
+
+    // ======================
     // Additional Status Colors
     // ======================
 
@@ -475,6 +493,23 @@ export const Colors = {
     warning: '#FF9F0A',
     error: '#FF453A',
     info: '#0A84FF',
+
+    // ======================
+    // TrailSense Brand Accent
+    // ======================
+
+    /**
+     * Brand accent color - Golden tan from logo (adjusted for dark mode)
+     */
+    brandAccent: '#D4C9A8',
+    brandAccentLight: '#E0D6BE',
+    brandAccentDark: '#C9B896',
+
+    /**
+     * Brand accent with opacity for backgrounds
+     */
+    brandAccentBackground: 'rgba(212, 201, 168, 0.15)',
+    brandAccentBorder: 'rgba(212, 201, 168, 0.35)',
 
     // ======================
     // Additional Status Colors (Dark Mode)
