@@ -10,7 +10,7 @@
  * - Press scale feedback with haptics
  */
 
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Alert, ThreatLevel } from '@types';
@@ -22,7 +22,9 @@ import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
 interface AlertCardProps {
   alert: Alert;
   onPress?: (alertId: string) => void;
+  /** Used by parent swipeable wrapper for swipe-to-dismiss action */
   onDismiss?: (alertId: string) => void;
+  /** Used by parent swipeable wrapper for swipe-to-whitelist action */
   onWhitelist?: (macAddress: string) => void;
   style?: ViewStyle;
   /** Index for staggered entrance animation */
@@ -170,16 +172,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.(alert.id);
-  };
-
-  const handleDelete = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onDismiss?.(alert.id);
-  };
-
-  const handleWhitelist = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onWhitelist?.(alert.macAddress);
   };
 
   // Get detection config
