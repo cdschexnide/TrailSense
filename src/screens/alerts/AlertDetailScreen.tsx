@@ -10,14 +10,13 @@
 
 import React from 'react';
 import { View, StyleSheet, Platform, Linking } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import { Button } from '@components/atoms/Button';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { GroupedListSection, GroupedListRow } from '@components/molecules';
-import { RouteProp, useRoute } from '@react-navigation/native';
 import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
 import { formatTime } from '@utils/dateUtils';
