@@ -85,8 +85,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   index = 0,
   animateEntrance = true,
 }) => {
-  const { theme, colorScheme } = useTheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useTheme();
 
   // Animation values using React Native's built-in Animated API
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -398,56 +397,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
           />
         </View>
 
-        {/* Action buttons */}
-        <View style={styles.actionRow}>
-          <Pressable
-            onPress={handleWhitelist}
-            style={({ pressed }) => [
-              styles.actionButton,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(255, 159, 10, 0.15)'
-                  : 'rgba(255, 149, 0, 0.12)',
-                borderColor: theme.colors.systemOrange,
-              },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Icon
-              name="shield-checkmark"
-              size={18}
-              color={theme.colors.systemOrange}
-            />
-            <Text
-              variant="caption1"
-              style={{ color: theme.colors.systemOrange, fontWeight: '600' }}
-            >
-              Whitelist
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={handleDelete}
-            style={({ pressed }) => [
-              styles.actionButton,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(255, 69, 58, 0.15)'
-                  : 'rgba(255, 59, 48, 0.12)',
-                borderColor: theme.colors.systemRed,
-              },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Icon name="trash-outline" size={18} color={theme.colors.systemRed} />
-            <Text
-              variant="caption1"
-              style={{ color: theme.colors.systemRed, fontWeight: '600' }}
-            >
-              Delete
-            </Text>
-          </Pressable>
-        </View>
       </Pressable>
     </Animated.View>
   );
@@ -471,20 +420,20 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding: 16,
-    paddingLeft: 20,
+    padding: 14,
+    paddingLeft: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 10,
   },
   detectionRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 14,
-    marginBottom: 16,
+    marginBottom: 0,
   },
   iconCircle: {
     width: 52,
@@ -529,23 +478,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginTop: 8,
     alignSelf: 'flex-start',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    gap: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(128, 128, 128, 0.2)',
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 10,
-    borderWidth: 1,
   },
 });
 
