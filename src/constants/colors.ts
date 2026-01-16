@@ -253,9 +253,10 @@ export const Colors = {
     // ======================
 
     /**
-     * Primary color for the app - System Blue
+     * Primary color for the app - Brand Accent (Golden Tan)
+     * @note systemBlue still available for iOS-native interactive elements
      */
-    primary: '#007AFF',
+    primary: '#C9B896',
 
     /**
      * Success color - System Green
@@ -488,7 +489,11 @@ export const Colors = {
     // Semantic Aliases (Dark Mode)
     // ======================
 
-    primary: '#0A84FF',
+    /**
+     * Primary color for the app - Brand Accent (Golden Tan)
+     * @note systemBlue still available for iOS-native interactive elements
+     */
+    primary: '#D4C9A8',
     success: '#30D158',
     warning: '#FF9F0A',
     error: '#FF453A',
