@@ -565,171 +565,18 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  heatmapOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'visible',
-  },
   resetButton: {
     position: 'absolute',
     bottom: 12,
     right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     backgroundColor: 'rgba(0, 122, 255, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    padding: 10,
     borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
-  },
-  resetButtonText: {
-    color: '#FFFFFF',
-  },
-  // Zone Legend Card
-  legendCard: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    padding: 12,
-  },
-  legendHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  legendHeaderRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  positionsCount: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  zoneSummaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  zoneSummaryItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  zoneSummaryColor: {
-    width: '80%',
-    height: 4,
-    borderRadius: 2,
-    marginBottom: 8,
-  },
-  zoneSummaryLabel: {
-    marginTop: 2,
-  },
-  // Detection Type Card
-  typeCard: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    padding: 12,
-  },
-  typeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  typeItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  typeCount: {
-    marginVertical: 4,
-  },
-  typeDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#3a3a3c',
-  },
-  // Details Card
-  detailsCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 12,
-  },
-  detailsTitle: {
-    marginBottom: 12,
-    letterSpacing: 0.5,
-  },
-  zoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-    paddingBottom: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#3a3a3c',
-  },
-  zoneLeftSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    flex: 1,
-  },
-  zoneRightSection: {
-    alignItems: 'flex-end',
-    marginLeft: 12,
-  },
-  colorIndicator: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginRight: 12,
-    marginTop: 2,
-  },
-  zoneInfo: {
-    flex: 1,
-  },
-  zoneNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  threatLabel: {
-    marginLeft: 8,
-    opacity: 0.7,
-  },
-  zoneTypeIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  typeIconBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    gap: 4,
-  },
-  zoneBar: {
-    width: 60,
-    height: 6,
-    backgroundColor: '#3a3a3c',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginTop: 6,
-  },
-  zoneBarFill: {
-    height: '100%',
-    borderRadius: 3,
   },
   popupOverlay: {
     position: 'absolute',
@@ -738,5 +585,28 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     zIndex: 100,
+  },
+  // Detected Devices List
+  listCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingBottom: 0,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#3a3a3c',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    gap: 8,
+  },
+  emptyText: {
+    marginTop: 4,
   },
 });
