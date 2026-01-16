@@ -1,6 +1,7 @@
 export { ChartCard } from './ChartCard';
 export * from './DetectedDeviceMarker';
 export { FilterChip } from './FilterChip';
+export { InlineFilterBar } from './InlineFilterBar';
 export * from './ListItem';
 export * from './PositionInfoPopup';
 export * from './PositionListItem';
