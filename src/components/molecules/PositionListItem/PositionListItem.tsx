@@ -1,8 +1,10 @@
 /**
  * PositionListItem
  *
- * Minimal list item for a triangulated device position.
- * Shows signal type icon, fingerprint hash, and confidence %.
+ * Two-line list item for a triangulated device position.
+ * Line 1: Signal type label (WiFi/Bluetooth/Cellular Device)
+ * Line 2: Fingerprint hash, confidence %, and accuracy in meters.
+ * Includes navigation chevron on the right.
  */
 
 import React from 'react';
@@ -28,6 +30,12 @@ const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, string> = {
   cellular: 'cellular',
 };
 
+const SIGNAL_TYPE_LABELS: Record<TriangulationSignalType, string> = {
+  wifi: 'WiFi',
+  bluetooth: 'Bluetooth',
+  cellular: 'Cellular',
+};
+
 export const PositionListItem: React.FC<PositionListItemProps> = ({
   position,
   onPress,
@@ -40,12 +48,15 @@ export const PositionListItem: React.FC<PositionListItemProps> = ({
       <View style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
         <Icon name={iconName} size={18} color={color} />
       </View>
-      <Text variant="body" weight="medium" color="label" style={styles.fingerprint}>
-        {position.fingerprintHash}
-      </Text>
-      <Text variant="body" color="secondaryLabel">
-        {position.confidence}%
-      </Text>
+      <View style={styles.content}>
+        <Text variant="body" weight="medium" color="label">
+          {SIGNAL_TYPE_LABELS[position.signalType]} Device
+        </Text>
+        <Text variant="footnote" color="secondaryLabel">
+          {position.fingerprintHash} · {position.confidence}% · ±{position.accuracyMeters?.toFixed(1) || '?'}m
+        </Text>
+      </View>
+      <Icon name="chevron-forward" size={16} color="#8E8E93" />
     </TouchableOpacity>
   );
 };
@@ -67,8 +78,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 12,
   },
-  fingerprint: {
+  content: {
     flex: 1,
+    gap: 2,
   },
 });
 
