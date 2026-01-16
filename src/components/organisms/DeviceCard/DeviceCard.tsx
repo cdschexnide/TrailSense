@@ -1,10 +1,10 @@
 /**
- * DeviceCard Component - REDESIGNED
+ * DeviceCard Component
  *
- * Enhanced device status card with:
- * - Status-based background tinting (green=online, red=offline)
+ * Clean device status card with:
+ * - Neutral background (Apple-native polish)
  * - Animated status indicator with pulsing glow
- * - Color-coded battery and signal indicators
+ * - Simplified inline stats row
  * - Staggered entrance animations
  * - Press scale feedback with haptics
  */
@@ -15,11 +15,6 @@ import * as Haptics from 'expo-haptics';
 import { Device } from '@types';
 import { Icon, Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
-import {
-  getBatteryColor,
-  getSignalColor,
-  getSignalStrengthCategory,
-} from '@utils/visualEffects';
 
 interface DeviceCardProps {
   device: Device;
@@ -30,34 +25,6 @@ interface DeviceCardProps {
   /** Enable entrance animation */
   animateEntrance?: boolean;
 }
-
-/**
- * Get battery icon based on level
- */
-const getBatteryIcon = (level: number): string => {
-  if (level >= 80) return 'battery-full';
-  if (level >= 50) return 'battery-half';
-  if (level >= 20) return 'battery-charging';
-  return 'battery-dead';
-};
-
-/**
- * Get signal icon based on strength
- */
-const getSignalIcon = (strength: string | undefined): string => {
-  const category = getSignalStrengthCategory(strength);
-  switch (category) {
-    case 'excellent':
-    case 'good':
-      return 'cellular';
-    case 'fair':
-      return 'cellular';
-    case 'poor':
-      return 'cellular-outline';
-    default:
-      return 'cellular-outline';
-  }
-};
 
 /**
  * Format coordinates in user-friendly format (e.g., "31.5308°N, 110.2878°W")
@@ -168,8 +135,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   index = 0,
   animateEntrance = true,
 }) => {
-  const { theme, colorScheme } = useTheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useTheme();
 
   // Animation values using React Native's built-in Animated API
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -224,30 +190,19 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
     onPress?.(device.id);
   };
 
-  // Get battery level and color
+  // Get battery level and signal strength
   const batteryLevel = device.batteryPercent || device.battery || 0;
-  const batteryColor = getBatteryColor(batteryLevel);
-
-  // Get signal strength and color
   const signalStrength = device.signalStrength || 'N/A';
-  const signalCategory = getSignalStrengthCategory(signalStrength);
-  const signalColor = getSignalColor(signalCategory);
 
-  // Background color based on online/offline status
+  // Neutral card background
   const cardBackgroundColor = useMemo(() => {
-    if (device.online) {
-      return isDark ? 'rgba(48, 209, 88, 0.08)' : 'rgba(52, 199, 89, 0.06)';
-    }
-    return isDark ? 'rgba(255, 69, 58, 0.10)' : 'rgba(255, 59, 48, 0.08)';
-  }, [device.online, isDark]);
+    return theme.colors.secondarySystemBackground;
+  }, [theme.colors.secondarySystemBackground]);
 
-  // Border color based on status
+  // Neutral border color
   const borderColor = useMemo(() => {
-    if (device.online) {
-      return isDark ? 'rgba(48, 209, 88, 0.25)' : 'rgba(52, 199, 89, 0.20)';
-    }
-    return isDark ? 'rgba(255, 69, 58, 0.30)' : 'rgba(255, 59, 48, 0.25)';
-  }, [device.online, isDark]);
+    return theme.colors.separator;
+  }, [theme.colors.separator]);
 
   return (
     <Animated.View
@@ -300,91 +255,19 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           </View>
         </View>
 
-        {/* Enhanced Stats grid (3 columns) */}
-        <View
-          style={[
-            styles.statsGrid,
-            {
-              backgroundColor: isDark
-                ? 'rgba(255, 255, 255, 0.05)'
-                : 'rgba(0, 0, 0, 0.03)',
-            },
-          ]}
-        >
-          {/* Battery */}
-          <View style={styles.statColumn}>
-            <View
-              style={[
-                styles.iconCircle,
-                { backgroundColor: `${batteryColor}20` },
-              ]}
-            >
-              <Icon
-                name={getBatteryIcon(batteryLevel) as any}
-                size={24}
-                color={batteryColor}
-              />
-            </View>
-            <Text
-              variant="title3"
-              style={[
-                styles.statValue,
-                { color: batteryLevel <= 20 ? batteryColor : theme.colors.label },
-              ]}
-            >
-              {batteryLevel}%
-            </Text>
-            <Text variant="caption2" color="secondaryLabel">
-              Battery
-            </Text>
-          </View>
-
-          {/* Divider */}
-          <View
-            style={[styles.divider, { backgroundColor: theme.colors.separator }]}
-          />
-
-          {/* Signal */}
-          <View style={styles.statColumn}>
-            <View
-              style={[styles.iconCircle, { backgroundColor: `${signalColor}20` }]}
-            >
-              <Icon
-                name={getSignalIcon(signalStrength) as any}
-                size={24}
-                color={signalColor}
-              />
-            </View>
-            <Text variant="title3" style={styles.statValue} color="label">
-              {signalStrength}
-            </Text>
-            <Text variant="caption2" color="secondaryLabel">
-              Signal
-            </Text>
-          </View>
-
-          {/* Divider */}
-          <View
-            style={[styles.divider, { backgroundColor: theme.colors.separator }]}
-          />
-
-          {/* Detections */}
-          <View style={styles.statColumn}>
-            <View
-              style={[
-                styles.iconCircle,
-                { backgroundColor: `${theme.colors.systemBlue}20` },
-              ]}
-            >
-              <Icon name="eye" size={24} color={theme.colors.systemBlue} />
-            </View>
-            <Text variant="title3" style={styles.statValue} color="label">
-              {device.detectionCount || 0}
-            </Text>
-            <Text variant="caption2" color="secondaryLabel">
-              Detections
-            </Text>
-          </View>
+        {/* Stats row - simplified */}
+        <View style={styles.statsRow}>
+          <Text variant="subheadline" color="secondaryLabel">
+            {batteryLevel}%
+          </Text>
+          <Text variant="subheadline" color="tertiaryLabel"> · </Text>
+          <Text variant="subheadline" color="secondaryLabel">
+            {signalStrength}
+          </Text>
+          <Text variant="subheadline" color="tertiaryLabel"> · </Text>
+          <Text variant="subheadline" color="secondaryLabel">
+            {(device.detectionCount || 0).toLocaleString()}
+          </Text>
         </View>
 
         {/* Location row with chevron */}
@@ -447,31 +330,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  statsGrid: {
+  statsRow: {
     flexDirection: 'row',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-  },
-  statColumn: {
-    flex: 1,
     alignItems: 'center',
-    gap: 6,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statValue: {
-    fontWeight: '700',
-    fontSize: 18,
-  },
-  divider: {
-    width: 1,
-    marginVertical: 8,
+    marginTop: 4,
+    marginBottom: 8,
   },
   locationRow: {
     flexDirection: 'row',
