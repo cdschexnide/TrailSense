@@ -21,7 +21,7 @@ import { LineChart, PieChart, BarChart } from 'react-native-chart-kit';
 import * as Haptics from 'expo-haptics';
 import { format, parseISO } from 'date-fns';
 import { useAnalytics } from '@hooks/useAnalytics';
-import { ChartCard } from '@components/molecules';
+import { ChartCard, GroupedListSection, GroupedListRow } from '@components/molecules';
 import { useTheme } from '@hooks/useTheme';
 import { Colors } from '@constants/colors';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
@@ -226,7 +226,7 @@ export const DashboardScreen = ({ navigation }: any) => {
               }}
               style={[
                 styles.periodButton,
-                isSelected && { backgroundColor: colors.systemBlue },
+                isSelected && { backgroundColor: colors.brandAccent || colors.primary },
               ]}
             >
               <Text
@@ -241,46 +241,25 @@ export const DashboardScreen = ({ navigation }: any) => {
         })}
       </View>
 
-      {/* Summary Stats */}
-      <View style={styles.statsGrid}>
-        {/* Total Detections */}
-        <View style={[styles.statCard, { backgroundColor: colors.secondarySystemBackground }]}>
-          <View style={[styles.statIconContainer, { backgroundColor: colors.systemBlue + '20' }]}>
-            <Icon name="pulse" size={24} color={colors.systemBlue} />
-          </View>
-          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
-            Total Detections
-          </Text>
-          <Text variant="title1" weight="bold" color="label">
-            {analytics.totalAlerts.toLocaleString()}
-          </Text>
-          <View style={styles.trendRow}>
-            <Icon name="arrow-up" size={14} color={colors.systemGreen} />
-            <Text variant="caption2" style={{ color: colors.systemGreen, marginLeft: 4 }}>
-              12% vs last {period}
-            </Text>
-          </View>
-        </View>
-
-        {/* Active Devices */}
-        <View style={[styles.statCard, { backgroundColor: colors.secondarySystemBackground }]}>
-          <View style={[styles.statIconContainer, { backgroundColor: colors.systemGreen + '20' }]}>
-            <Icon name="radio" size={24} color={colors.systemGreen} />
-          </View>
-          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
-            Active Devices
-          </Text>
-          <Text variant="title1" weight="bold" color="label">
-            1
-          </Text>
-          <View style={styles.trendRow}>
-            <Icon name="checkmark-circle" size={14} color={colors.systemGreen} />
-            <Text variant="caption2" style={{ color: colors.systemGreen, marginLeft: 4 }}>
-              All online
-            </Text>
-          </View>
-        </View>
-      </View>
+      {/* Overview Stats */}
+      <GroupedListSection title="OVERVIEW">
+        <GroupedListRow
+          icon="pulse"
+          iconColor={colors.systemBlue}
+          iconBackgroundColor={`${colors.systemBlue}20`}
+          title="Detections"
+          value={analytics.totalAlerts.toLocaleString()}
+          subtitle="↑ 12% vs last period"
+        />
+        <GroupedListRow
+          icon="radio"
+          iconColor={colors.systemGreen}
+          iconBackgroundColor={`${colors.systemGreen}20`}
+          title="Active Devices"
+          value="1"
+          subtitle="All online"
+        />
+      </GroupedListSection>
 
       {/* Threat Level Summary */}
       {threatSummary.length > 0 && (
@@ -479,29 +458,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     borderRadius: 8,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
-  },
-  statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  trendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
   },
   sectionContainer: {
     marginBottom: 24,
