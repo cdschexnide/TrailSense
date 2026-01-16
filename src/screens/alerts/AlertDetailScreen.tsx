@@ -1,11 +1,11 @@
 /**
  * AlertDetailScreen - REDESIGNED
  *
- * Enhanced alert detail view with:
- * - Threat level banner with color indicator
- * - Improved card-based layout
- * - Better visual hierarchy
- * - AI summary integration
+ * iOS Settings-style alert detail view with:
+ * - Detection type as screen title
+ * - Grouped sections: Signal, Location, Source, Actions
+ * - Uses GroupedListSection/GroupedListRow components
+ * - Clean, native iOS appearance
  */
 
 import React from 'react';
@@ -16,34 +16,18 @@ import { Button } from '@components/atoms/Button';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
-import { ListSection } from '@components/molecules/ListSection';
-import { ListRow } from '@components/molecules/ListRow';
+import { GroupedListSection, GroupedListRow } from '@components/molecules';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
-import { formatTimestamp } from '@utils/dateUtils';
+import { formatTime } from '@utils/dateUtils';
 import { useAlertSummary } from '@/hooks/useAlertSummary';
 import { AlertSummaryCard } from '@/components/organisms/AlertSummaryCard';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
 import { useTheme } from '@hooks/useTheme';
-import { getThreatColor } from '@utils/visualEffects';
 import { ThreatLevel } from '@types';
 
 type AlertDetailRouteProp = RouteProp<AlertsStackParamList, 'AlertDetail'>;
-
-const THREAT_ICONS: Record<ThreatLevel, string> = {
-  critical: 'alert-circle',
-  high: 'warning',
-  medium: 'information-circle',
-  low: 'checkmark-circle',
-};
-
-const DETECTION_ICONS: Record<string, string> = {
-  wifi: 'wifi',
-  bluetooth: 'bluetooth',
-  cellular: 'cellular',
-  default: 'radio',
-};
 
 const openInMaps = (latitude: number, longitude: number) => {
   const url = Platform.select({
@@ -52,6 +36,27 @@ const openInMaps = (latitude: number, longitude: number) => {
   });
   if (url) {
     Linking.openURL(url);
+  }
+};
+
+const getProximityLabel = (rssi: number): string => {
+  if (rssi > -60) return 'Strong';
+  if (rssi > -70) return 'Moderate';
+  return 'Weak';
+};
+
+const getPriorityLabel = (threatLevel: ThreatLevel): string => {
+  switch (threatLevel) {
+    case 'critical':
+      return 'Critical Priority';
+    case 'high':
+      return 'High Priority';
+    case 'medium':
+      return 'Medium Priority';
+    case 'low':
+      return 'Low Priority';
+    default:
+      return 'Priority';
   }
 };
 
@@ -76,13 +81,12 @@ export const AlertDetailScreen = () => {
   if (error) return <ErrorState message="Failed to load alert" />;
   if (!alert) return <ErrorState message="Alert not found" />;
 
-  const threatColor = getThreatColor(alert.threatLevel);
-  const detectionIcon =
-    DETECTION_ICONS[alert.detectionType.toLowerCase()] ||
-    DETECTION_ICONS.default;
-
   const handleMarkReviewed = async () => {
     console.log('Marking alert as reviewed:', alertId);
+  };
+
+  const handleMarkFalsePositive = async () => {
+    console.log('Marking alert as false positive:', alertId);
   };
 
   const handleDelete = async () => {
@@ -98,108 +102,44 @@ export const AlertDetailScreen = () => {
     });
   };
 
+  const priorityLabel = getPriorityLabel(alert.threatLevel);
+  const timeLabel = formatTime(alert.timestamp);
+
   return (
     <ScreenLayout
       header={{
-        title: 'Alert Details',
+        title: `${alert.detectionType} Detection`,
+        subtitle: `${priorityLabel} · ${timeLabel}`,
         showBack: true,
         onBackPress: () => navigation.goBack(),
       }}
       scrollable
     >
-      {/* Threat Level Banner */}
-      <View style={[styles.threatBanner, { backgroundColor: `${threatColor}15` }]}>
-        <View style={[styles.threatIconContainer, { backgroundColor: threatColor }]}>
-          <Icon
-            name={THREAT_ICONS[alert.threatLevel] as any}
-            size={28}
-            color="#FFFFFF"
+      {/* SIGNAL Section */}
+      <GroupedListSection title="Signal">
+        <GroupedListRow
+          icon="cellular"
+          iconColor={colors.systemBlue}
+          title="Signal Strength"
+          value={`${alert.rssi} dBm`}
+        />
+        <GroupedListRow
+          icon="radio-outline"
+          iconColor={colors.systemGreen}
+          title="Proximity"
+          value={getProximityLabel(alert.rssi)}
+        />
+        {alert.macAddress && (
+          <GroupedListRow
+            icon="qr-code-outline"
+            iconColor={colors.systemPurple}
+            title="MAC Address"
+            value={alert.macAddress}
           />
-        </View>
-        <View style={styles.threatInfo}>
-          <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
-            THREAT LEVEL
-          </Text>
-          <Text
-            variant="title2"
-            weight="bold"
-            style={{ color: threatColor, textTransform: 'capitalize' }}
-          >
-            {alert.threatLevel}
-          </Text>
-        </View>
-        <View style={styles.timestampContainer}>
-          <Text variant="caption2" style={{ color: colors.tertiaryLabel }}>
-            {formatTimestamp(alert.timestamp)}
-          </Text>
-        </View>
-      </View>
+        )}
+      </GroupedListSection>
 
-      {/* Detection Type Card */}
-      <View
-        style={[
-          styles.detectionCard,
-          { backgroundColor: colors.secondarySystemBackground },
-        ]}
-      >
-        <View
-          style={[
-            styles.detectionIconContainer,
-            { backgroundColor: colors.systemBlue + '20' },
-          ]}
-        >
-          <Icon name={detectionIcon as any} size={32} color={colors.systemBlue} />
-        </View>
-        <View style={styles.detectionInfo}>
-          <Text variant="headline" weight="semibold" color="label">
-            {alert.detectionType} Detection
-          </Text>
-          <View style={styles.signalRow}>
-            <Icon name="cellular" size={14} color={colors.secondaryLabel} />
-            <Text variant="subheadline" style={{ color: colors.secondaryLabel }}>
-              {alert.rssi} dBm
-            </Text>
-            <View
-              style={[
-                styles.signalBadge,
-                {
-                  backgroundColor:
-                    alert.rssi > -60
-                      ? colors.systemGreen + '20'
-                      : alert.rssi > -70
-                        ? colors.systemYellow + '20'
-                        : colors.systemOrange + '20',
-                },
-              ]}
-            >
-              <Text
-                variant="caption2"
-                weight="semibold"
-                style={{
-                  color:
-                    alert.rssi > -60
-                      ? colors.systemGreen
-                      : alert.rssi > -70
-                        ? colors.systemYellow
-                        : colors.systemOrange,
-                }}
-              >
-                {alert.rssi > -60 ? 'Strong' : alert.rssi > -70 ? 'Moderate' : 'Weak'}
-              </Text>
-            </View>
-          </View>
-          {alert.macAddress && (
-            <Text
-              variant="caption1"
-              style={{ color: colors.tertiaryLabel, marginTop: 4 }}
-            >
-              MAC: {alert.macAddress}
-            </Text>
-          )}
-        </View>
-      </View>
-
-      {/* Summary Details Section */}
+      {/* Summary Details Section (if from summary source) */}
       {alert.metadata?.source === 'summary' && (
         <View
           style={[
@@ -350,8 +290,8 @@ export const AlertDetailScreen = () => {
             role="default"
             onPress={() =>
               openInMaps(
-                alert.metadata.triangulatedPosition.latitude,
-                alert.metadata.triangulatedPosition.longitude
+                alert.metadata!.triangulatedPosition!.latitude,
+                alert.metadata!.triangulatedPosition!.longitude
               )
             }
             leftIcon={
@@ -388,137 +328,73 @@ export const AlertDetailScreen = () => {
           </View>
         )}
 
-      {/* Device Information */}
-      <ListSection header="DEVICE" style={styles.section}>
-        <ListRow
-          title="Source Device"
-          rightText={alert.deviceId}
-          leftIcon={<Icon name="hardware-chip-outline" size={20} color={colors.systemBlue} />}
+      {/* LOCATION Section */}
+      {alert.location && (
+        <GroupedListSection title="Location">
+          <GroupedListRow
+            icon="location-outline"
+            iconColor={colors.systemGreen}
+            title="GPS Coordinates"
+            value={`${alert.location.latitude.toFixed(2)}, ${alert.location.longitude.toFixed(2)}`}
+          />
+          <GroupedListRow
+            icon="map-outline"
+            iconColor={colors.systemBlue}
+            title="View on Map"
+            showChevron
+            onPress={() => openInMaps(alert.location!.latitude, alert.location!.longitude)}
+          />
+        </GroupedListSection>
+      )}
+
+      {/* SOURCE DEVICE Section */}
+      <GroupedListSection title="Source Device">
+        <GroupedListRow
+          icon="hardware-chip-outline"
+          iconColor={colors.systemTeal}
+          title={alert.deviceId}
+          showChevron
           onPress={() =>
-            navigation.navigate('Devices', {
+            (navigation as any).navigate('DevicesTab', {
               screen: 'DeviceDetail',
-              params: { id: alert.deviceId },
+              params: { deviceId: alert.deviceId },
             })
           }
-          accessoryType="disclosureIndicator"
         />
-        {alert.location && (
-          <ListRow
-            title="Location"
-            rightText={`${alert.location.latitude.toFixed(4)}, ${alert.location.longitude.toFixed(4)}`}
-            leftIcon={<Icon name="location-outline" size={20} color={colors.systemGreen} />}
-            accessoryType="none"
+      </GroupedListSection>
+
+      {/* ACTIONS Section */}
+      <GroupedListSection title="Actions">
+        {!alert.isReviewed && (
+          <GroupedListRow
+            icon="checkmark-circle"
+            iconColor={colors.systemGreen}
+            title="Mark Reviewed"
+            onPress={handleMarkReviewed}
           />
         )}
-      </ListSection>
-
-      {/* Status */}
-      <ListSection header="STATUS" style={styles.section}>
-        <ListRow
-          title="Reviewed"
-          leftIcon={
-            <Icon
-              name={alert.isReviewed ? 'checkmark-circle' : 'ellipse-outline'}
-              size={20}
-              color={alert.isReviewed ? colors.systemGreen : colors.tertiaryLabel}
-            />
-          }
-          rightText={alert.isReviewed ? 'Yes' : 'No'}
-          accessoryType="none"
-        />
-        <ListRow
-          title="False Positive"
-          leftIcon={
-            <Icon
-              name={alert.isFalsePositive ? 'close-circle' : 'ellipse-outline'}
-              size={20}
-              color={alert.isFalsePositive ? colors.systemOrange : colors.tertiaryLabel}
-            />
-          }
-          rightText={alert.isFalsePositive ? 'Yes' : 'No'}
-          accessoryType="none"
-        />
-      </ListSection>
-
-      {/* Actions */}
-      <View style={styles.actions}>
-        {!alert.isReviewed && (
-          <Button
-            buttonStyle="filled"
-            role="default"
-            onPress={handleMarkReviewed}
-            leftIcon={<Icon name="checkmark-circle" size={20} color="#FFFFFF" />}
-          >
-            Mark as Reviewed
-          </Button>
+        {!alert.isFalsePositive && (
+          <GroupedListRow
+            icon="flag-outline"
+            iconColor={colors.systemOrange}
+            title="Mark as False Positive"
+            onPress={handleMarkFalsePositive}
+          />
         )}
-        <Button
-          buttonStyle="tinted"
-          role="destructive"
+        <GroupedListRow
+          icon="trash-outline"
+          iconColor={colors.systemRed}
+          title="Delete Alert"
+          destructive
           onPress={handleDelete}
-          leftIcon={<Icon name="trash-outline" size={20} color={colors.systemRed} />}
-        >
-          Delete Alert
-        </Button>
-      </View>
+        />
+      </GroupedListSection>
     </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  threatBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 16,
-  },
-  threatIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  threatInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  timestampContainer: {
-    alignItems: 'flex-end',
-  },
-  detectionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 16,
-  },
-  detectionIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  detectionInfo: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  signalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  signalBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
+  // AI Summary section
   aiSection: {
     marginHorizontal: 16,
     marginBottom: 16,
@@ -527,15 +403,12 @@ const styles = StyleSheet.create({
   sparkle: {
     fontSize: 16,
   },
-  section: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
+  // Summary card (for aggregate alerts)
   summaryCard: {
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 24,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
   },
   summaryHeader: {
     flexDirection: 'row',
@@ -551,9 +424,10 @@ const styles = StyleSheet.create({
     minWidth: '45%',
     flex: 1,
   },
+  // Triangulated position section
   sectionContainer: {
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   positionHeader: {
     flexDirection: 'row',
@@ -561,7 +435,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   miniMapContainer: {
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 12,
   },
@@ -581,10 +455,5 @@ const styles = StyleSheet.create({
   },
   positionRow: {
     alignItems: 'center',
-  },
-  actions: {
-    padding: 16,
-    paddingBottom: 32,
-    gap: 12,
   },
 });
