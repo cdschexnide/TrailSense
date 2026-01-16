@@ -5,20 +5,12 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  Platform,
   Animated,
 } from 'react-native';
-import { Text, Button, Card, Icon } from '@components/atoms';
+import { Text, Card, Icon } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
-import { useTheme } from '@hooks/useTheme';
 import { useDevices } from '@hooks/api/useDevices';
-import Mapbox, {
-  Camera,
-  MapView,
-  RasterLayer,
-  RasterSource,
-  PointAnnotation,
-} from '@rnmapbox/maps';
+import Mapbox, { Camera, MapView } from '@rnmapbox/maps';
 import { usePositions, POSITIONS_QUERY_KEY } from '@hooks/api/usePositions';
 import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
 import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
@@ -41,8 +33,7 @@ Mapbox.setAccessToken(MAPBOX_TOKEN || '');
 const { width } = Dimensions.get('window');
 const MAP_SIZE = width - 40;
 
-export const ProximityHeatmapScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
+export const ProximityHeatmapScreen = () => {
   const [selectedDeviceIndex, setSelectedDeviceIndex] = useState(0);
   const [showSatellite, setShowSatellite] = useState(true);
   const cameraRef = useRef<Camera>(null);
@@ -50,7 +41,6 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
 
   // Animation for GPS update indicator
   const gpsUpdateAnim = useRef(new Animated.Value(0)).current;
-  const [lastGpsUpdate, setLastGpsUpdate] = useState<Date | null>(null);
 
   // Selected position for popup
   const [selectedPosition, setSelectedPosition] = useState<TriangulatedPosition | null>(null);
@@ -132,7 +122,6 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
 
       // Trigger pulse animation if coordinates changed (not just initial load)
       if (coordsChanged) {
-        setLastGpsUpdate(new Date());
         // Pulse animation: 0 -> 1 -> 0
         gpsUpdateAnim.setValue(0);
         Animated.sequence([
