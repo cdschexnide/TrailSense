@@ -1,3 +1,15 @@
+/**
+ * EmptyState Component
+ *
+ * Displays a centered empty state with icon, title, message, and optional action.
+ * Used when a list or screen has no content to display.
+ *
+ * Design Guidelines:
+ * - Use outline-style icons (e.g., 'alert-circle-outline', 'document-text-outline')
+ * - Keep title short and clear (max ~4 words)
+ * - Keep message to 1-2 lines max
+ */
+
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text, Button, Icon } from '@components/atoms';
