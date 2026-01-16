@@ -12,22 +12,20 @@ import { Text, Button, Card, Icon } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
 import { useTheme } from '@hooks/useTheme';
 import { useDevices } from '@hooks/api/useDevices';
-import { useAlerts } from '@hooks/api/useAlerts';
-import Svg, {
-  Circle,
-  Text as SvgText,
-  G,
-  Defs,
-  RadialGradient,
-  Stop,
-  Line,
-} from 'react-native-svg';
 import Mapbox, {
   Camera,
   MapView,
   RasterLayer,
   RasterSource,
+  PointAnnotation,
 } from '@rnmapbox/maps';
+import { usePositions, POSITIONS_QUERY_KEY } from '@hooks/api/usePositions';
+import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
+import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
+import { PositionInfoPopup } from '@components/molecules/PositionInfoPopup';
+import { TriangulatedPosition } from '@/types/triangulation';
+import { websocketService } from '@api/websocket';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Initialize MapBox with access token
 // Uses EXPO_PUBLIC_ prefix for Expo SDK 49+ env variable access
@@ -39,82 +37,8 @@ if (!MAPBOX_TOKEN) {
 }
 Mapbox.setAccessToken(MAPBOX_TOKEN || '');
 
-// ============================================================
-// MOCK DATA TOGGLE - Set to true to test heatmap zone shading
-// ============================================================
-const USE_MOCK_HEATMAP_DATA = true;
-
-// Generate mock alerts with varying distances to test zone shading
-const generateMockAlerts = () => {
-  const mockAlerts: any[] = [];
-
-  // Zone distribution: more detections in closer zones (realistic pattern)
-  // Zone 0-50ft:    15 detections (IMMEDIATE - high threat)
-  // Zone 50-150ft:  25 detections (NEAR - medium-high)
-  // Zone 150-300ft: 10 detections (MEDIUM)
-  // Zone 300-500ft: 5 detections  (FAR)
-  // Zone 500-800ft: 3 detections  (DISTANT)
-
-  const zoneConfig = [
-    { minDist: 5, maxDist: 45, count: 15, zone: '0-50ft' },
-    { minDist: 55, maxDist: 140, count: 25, zone: '50-150ft' },
-    { minDist: 160, maxDist: 290, count: 10, zone: '150-300ft' },
-    { minDist: 310, maxDist: 480, count: 5, zone: '300-500ft' },
-    { minDist: 520, maxDist: 780, count: 3, zone: '500-800ft' },
-  ];
-
-  const detectionTypes = ['wifi', 'bluetooth', 'cellular'];
-
-  zoneConfig.forEach(({ minDist, maxDist, count }) => {
-    for (let i = 0; i < count; i++) {
-      const distance = minDist + Math.random() * (maxDist - minDist);
-      mockAlerts.push({
-        id: `mock-${mockAlerts.length}`,
-        deviceId: 'mock-device',
-        timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
-        threatLevel: distance < 50 ? 'critical' : distance < 150 ? 'high' : distance < 300 ? 'medium' : 'low',
-        detectionType: detectionTypes[Math.floor(Math.random() * 3)],
-        rssi: -30 - (distance / 10), // Approximate RSSI from distance
-        macAddress: `${Math.random().toString(16).slice(2, 14).toUpperCase()}`,
-        metadata: { distance },
-      });
-    }
-  });
-
-  return mockAlerts;
-};
-
-const MOCK_ALERTS = generateMockAlerts();
-
 const { width } = Dimensions.get('window');
-const CHART_SIZE = width - 40;
-const MAP_SIZE = CHART_SIZE;
-const CENTER_X = CHART_SIZE / 2;
-const CENTER_Y = CHART_SIZE / 2;
-
-// Distance zones (in feet) - threat gradient: red → orange → yellow → lime → green
-const ZONES = [
-  { max: 50, label: '0-50ft', shortLabel: '50ft', color: '#FF3B30', threatLevel: 'IMMEDIATE', meters: 15 },
-  { max: 150, label: '50-150ft', shortLabel: '150ft', color: '#FF9500', threatLevel: 'NEAR', meters: 46 },
-  { max: 300, label: '150-300ft', shortLabel: '300ft', color: '#FFCC00', threatLevel: 'MEDIUM', meters: 91 },
-  { max: 500, label: '300-500ft', shortLabel: '500ft', color: '#A8D600', threatLevel: 'FAR', meters: 152 },
-  { max: 800, label: '500-800ft', shortLabel: '800ft', color: '#34C759', threatLevel: 'DISTANT', meters: 244 },
-];
-
-// Max radius in meters for map zoom calculation
-const MAX_RADIUS_METERS = 244;
-
-interface ProximityData {
-  zone: string;
-  count: number;
-  percentage: number;
-  color: string;
-  threatLevel: string;
-  // Detection type breakdown
-  wifiCount: number;
-  bleCount: number;
-  cellularCount: number;
-}
+const MAP_SIZE = width - 40;
 
 export const ProximityHeatmapScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -127,13 +51,8 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
   const gpsUpdateAnim = useRef(new Animated.Value(0)).current;
   const [lastGpsUpdate, setLastGpsUpdate] = useState<Date | null>(null);
 
-  // Gesture tracking state for SVG overlay synchronization
-  const [overlayTransform, setOverlayTransform] = useState({
-    translateX: 0,
-    translateY: 0,
-    scale: 1,
-  });
-  const initialCameraRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
+  // Selected position for popup
+  const [selectedPosition, setSelectedPosition] = useState<TriangulatedPosition | null>(null);
 
   // Track previous coordinates to detect changes
   const prevCoordsRef = useRef<{ lat: number | null; lon: number | null }>({
@@ -143,17 +62,26 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
 
   // Fetch devices - uses shared hook with 30s auto-refresh
   const { data: devices = [], isLoading: devicesLoading } = useDevices();
-
-  // Fetch alerts for selected device - uses shared hook with 30s auto-refresh
   const selectedDevice = devices[selectedDeviceIndex];
-  const { data: fetchedAlerts = [] } = useAlerts(
-    !USE_MOCK_HEATMAP_DATA && selectedDevice?.id
-      ? { deviceId: selectedDevice.id }
-      : undefined
-  );
 
-  // Use mock alerts when testing, otherwise use fetched alerts
-  const alerts = USE_MOCK_HEATMAP_DATA ? MOCK_ALERTS : fetchedAlerts;
+  // Fetch triangulated positions for selected device
+  const { data: positionsData } = usePositions(selectedDevice?.id);
+  const positions = positionsData?.positions ?? [];
+
+  // Handle WebSocket position updates
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handlePositionsUpdated = (data: { deviceId: string; positions: any[] }) => {
+      // Invalidate positions query for this device to trigger refetch
+      if (data.deviceId === selectedDevice?.id) {
+        queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, data.deviceId] });
+      }
+    };
+
+    websocketService.on('positions-updated', handlePositionsUpdated);
+    return () => websocketService.off('positions-updated', handlePositionsUpdated);
+  }, [selectedDevice?.id, queryClient]);
 
   // Get device coordinates (null if device has no GPS fix yet)
   const deviceCoordinates = {
@@ -164,55 +92,6 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
   // Check if device has valid GPS coordinates
   const hasValidLocation = deviceCoordinates.latitude !== null &&
                            deviceCoordinates.longitude !== null;
-
-  // Calculate zoom level to show 800ft radius
-  // At zoom 16, roughly 1000m visible, zoom 17 ~500m, zoom 15 ~2000m
-  const getZoomForRadius = (radiusMeters: number) => {
-    // Approximate formula: zoom = 14.5 - log2(radius/500)
-    return Math.max(14, Math.min(18, 16 - Math.log2(radiusMeters / 300)));
-  };
-
-  // Calculate proximity data with detection type breakdown
-  const proximityData: ProximityData[] = ZONES.map((zone, index) => {
-    const minDistance = index === 0 ? 0 : ZONES[index - 1].max;
-    const maxDistance = zone.max;
-
-    // Filter alerts in this zone
-    const zoneAlerts = alerts.filter(alert => {
-      let distance = 0;
-      try {
-        const metadata = typeof alert.metadata === 'string'
-          ? JSON.parse(alert.metadata || '{}')
-          : (alert.metadata || {});
-        distance = metadata.distance || 0;
-      } catch (e) {
-        distance = estimateDistanceFromRSSI(alert.rssi);
-      }
-      return distance > minDistance && distance <= maxDistance;
-    });
-
-    // Count by detection type
-    const wifiCount = zoneAlerts.filter(a => a.detectionType === 'wifi').length;
-    const bleCount = zoneAlerts.filter(a => a.detectionType === 'bluetooth').length;
-    const cellularCount = zoneAlerts.filter(a => a.detectionType === 'cellular').length;
-
-    return {
-      zone: zone.label,
-      count: zoneAlerts.length,
-      percentage: alerts.length > 0 ? (zoneAlerts.length / alerts.length) * 100 : 0,
-      color: zone.color,
-      threatLevel: zone.threatLevel,
-      wifiCount,
-      bleCount,
-      cellularCount,
-    };
-  });
-
-  const totalDetections = proximityData.reduce(
-    (sum, zone) => sum + zone.count,
-    0
-  );
-  const maxCount = Math.max(...proximityData.map(z => z.count), 1);
 
   const cycleToNextDevice = () => {
     if (devices.length > 0) {
@@ -246,7 +125,7 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
       // Update camera with smooth animation
       cameraRef.current.setCamera({
         centerCoordinate: [newLon!, newLat!],
-        zoomLevel: getZoomForRadius(MAX_RADIUS_METERS),
+        zoomLevel: 16,
         animationDuration: coordsChanged ? 1000 : 500, // Slower animation for GPS updates
       });
 
@@ -280,60 +159,32 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
     gpsUpdateAnim,
   ]);
 
-  // Handle camera changes from user gestures (pinch/zoom/pan)
-  const handleCameraChanged = useCallback(async (event: any) => {
-    if (!mapViewRef.current || !hasValidLocation) return;
-
-    const { zoom } = event.properties;
-
-    // Store initial zoom on first change
-    if (initialCameraRef.current === null) {
-      initialCameraRef.current = {
-        center: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
-        zoom: zoom,
-      };
-    }
-
-    // Calculate scale factor based on zoom difference
-    const scale = Math.pow(2, zoom - initialCameraRef.current.zoom);
-
-    // Get device position in screen coordinates to calculate pan offset
-    try {
-      const screenPoint = await mapViewRef.current.getPointInView([
-        deviceCoordinates.longitude!,
-        deviceCoordinates.latitude!,
-      ]);
-      // Calculate how far from center the device has moved due to panning
-      const translateX = screenPoint[0] - CENTER_X;
-      const translateY = screenPoint[1] - CENTER_Y;
-
-      setOverlayTransform({ translateX, translateY, scale });
-    } catch (error) {
-      // On error, just update scale without translation
-      setOverlayTransform(prev => ({ ...prev, scale }));
-    }
-  }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
-
-  // Reset map to center on device with initial zoom
+  // Reset map to center on device
   const resetMapView = useCallback(() => {
     if (cameraRef.current && hasValidLocation) {
-      // Reset transform
-      setOverlayTransform({ translateX: 0, translateY: 0, scale: 1 });
-      initialCameraRef.current = null;
-
-      // Animate camera back to device location
       cameraRef.current.setCamera({
         centerCoordinate: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
-        zoomLevel: getZoomForRadius(MAX_RADIUS_METERS),
+        zoomLevel: 16,
         animationDuration: 500,
       });
     }
   }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
 
-  // Reset overlay when device changes
+  // Center map on a specific position and show its popup
+  const centerOnPosition = useCallback((position: TriangulatedPosition) => {
+    if (cameraRef.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: [position.longitude, position.latitude],
+        zoomLevel: 17,
+        animationDuration: 500,
+      });
+    }
+    setSelectedPosition(position);
+  }, []);
+
+  // Clear popup when device changes
   useEffect(() => {
-    setOverlayTransform({ translateX: 0, translateY: 0, scale: 1 });
-    initialCameraRef.current = null;
+    setSelectedPosition(null);
   }, [selectedDeviceIndex]);
 
   if (devicesLoading) {
@@ -501,6 +352,27 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                     animationMode="flyTo"
                     animationDuration={500}
                   />
+
+                  {/* TrailSense Device Marker */}
+                  {hasValidLocation && (
+                    <TrailSenseDeviceMarker
+                      id={selectedDevice?.id || 'device'}
+                      coordinate={[deviceCoordinates.longitude!, deviceCoordinates.latitude!]}
+                      isOnline={selectedDevice?.online}
+                    />
+                  )}
+
+                  {/* Detected Device Position Markers */}
+                  {positions.map((position) => (
+                    <DetectedDeviceMarker
+                      key={position.id}
+                      id={position.id}
+                      coordinate={[position.longitude, position.latitude]}
+                      signalType={position.signalType}
+                      confidence={position.confidence}
+                      onPress={() => setSelectedPosition(position)}
+                    />
+                  ))}
                 </MapView>
 
             {/* SVG Heatmap Overlay - syncs with map gestures via transform */}
@@ -639,6 +511,18 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                 </Text>
               </TouchableOpacity>
             )}
+
+                {/* Position Info Popup */}
+                {selectedPosition && (
+                  <View style={styles.popupOverlay}>
+                    <PositionInfoPopup
+                      signalType={selectedPosition.signalType}
+                      confidence={selectedPosition.confidence}
+                      accuracyMeters={selectedPosition.accuracyMeters}
+                      onClose={() => setSelectedPosition(null)}
+                    />
+                  </View>
+                )}
               </>
             ) : (
               /* No GPS location available */
@@ -664,9 +548,19 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
             <Text variant="headline" weight="semibold" color="label">
               Zone Summary
             </Text>
-            <Text variant="footnote" color="secondaryLabel">
-              {totalDetections} total detection{totalDetections !== 1 ? 's' : ''}
-            </Text>
+            <View style={styles.legendHeaderRight}>
+              {positions.length > 0 && (
+                <View style={styles.positionsCount}>
+                  <Icon name="location" size={14} color="systemGreen" />
+                  <Text variant="footnote" color="systemGreen">
+                    {positions.length} triangulated
+                  </Text>
+                </View>
+              )}
+              <Text variant="footnote" color="secondaryLabel">
+                {totalDetections} detection{totalDetections !== 1 ? 's' : ''}
+              </Text>
+            </View>
           </View>
 
           {/* Compact zone row with color bars */}
@@ -957,6 +851,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  legendHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  positionsCount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   zoneSummaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1070,5 +974,13 @@ const styles = StyleSheet.create({
   zoneBarFill: {
     height: '100%',
     borderRadius: 3,
+  },
+  popupOverlay: {
+    position: 'absolute',
+    top: 16,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 100,
   },
 });
