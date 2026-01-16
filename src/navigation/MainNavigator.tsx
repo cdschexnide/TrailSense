@@ -19,11 +19,11 @@ export const MainNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary[500],
-        tabBarInactiveTintColor: theme.colors.text.secondary,
+        tabBarActiveTintColor: theme.colors.brandAccent || theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.secondaryLabel,
         tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.border,
+          backgroundColor: theme.colors.systemBackground,
+          borderTopColor: theme.colors.separator,
         },
       }}
     >
@@ -71,7 +71,7 @@ export const MainNavigator = () => {
         name="AITab"
         component={AIStack}
         options={{
-          title: 'TrailSenseAI',
+          title: 'AI',
           tabBarIcon: ({ color }) => (
             <Icon name="sparkles-outline" color={color} size="base" />
           ),
