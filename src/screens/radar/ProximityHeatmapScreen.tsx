@@ -23,6 +23,7 @@ import { usePositions, POSITIONS_QUERY_KEY } from '@hooks/api/usePositions';
 import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
 import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
 import { PositionInfoPopup } from '@components/molecules/PositionInfoPopup';
+import { PositionListItem } from '@components/molecules/PositionListItem';
 import { TriangulatedPosition } from '@/types/triangulation';
 import { websocketService } from '@api/websocket';
 import { useQueryClient } from '@tanstack/react-query';
@@ -340,7 +341,6 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                   pitchEnabled={false}
                   rotateEnabled={false}
                   zoomEnabled={true}
-                  onCameraChanged={handleCameraChanged}
                 >
                   <Camera
                     ref={cameraRef}
@@ -348,7 +348,7 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                       deviceCoordinates.longitude!,
                       deviceCoordinates.latitude!,
                     ]}
-                    zoomLevel={getZoomForRadius(MAX_RADIUS_METERS)}
+                    zoomLevel={16}
                     animationMode="flyTo"
                     animationDuration={500}
                   />
@@ -375,142 +375,14 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
                   ))}
                 </MapView>
 
-            {/* SVG Heatmap Overlay - syncs with map gestures via transform */}
-            <View
-              style={[
-                styles.heatmapOverlay,
-                {
-                  transform: [
-                    { translateX: overlayTransform.translateX },
-                    { translateY: overlayTransform.translateY },
-                    { scale: overlayTransform.scale },
-                  ],
-                },
-              ]}
-              pointerEvents="none"
-            >
-              <Svg width={MAP_SIZE} height={MAP_SIZE}>
-                <Defs>
-                  {/* Gradients defined but we'll use solid fills for zone bands */}
-                </Defs>
-
-                {/* Draw zone bands - REVERSE order so inner zones appear on top */}
-                {[...ZONES].reverse().map((zone, reverseIndex) => {
-                  const index = ZONES.length - 1 - reverseIndex;
-                  const maxRadius = MAP_SIZE / 2 - 10;
-
-                  // Calculate TRUE proportional radii based on distance
-                  const outerRadius = (zone.max / 800) * maxRadius;
-                  const innerRadius = index === 0 ? 0 : (ZONES[index - 1].max / 800) * maxRadius;
-                  const bandWidth = outerRadius - innerRadius;
-                  const midRadius = innerRadius + bandWidth / 2;
-
-                  const detectionCount = proximityData[index].count;
-                  const hasDetections = detectionCount > 0;
-
-                  // Calculate fill opacity based on detection count relative to max
-                  // Range: 0.2 (few detections) to 0.65 (max detections)
-                  const fillOpacity = hasDetections
-                    ? 0.2 + (detectionCount / Math.max(maxCount, 1)) * 0.45
-                    : 0;
-
-                  // Innermost zone - draw as filled circle (no inner radius)
-                  if (index === 0) {
-                    return (
-                      <G key={`zone-band-${index}`}>
-                        {/* Innermost zone - filled circle at TRUE proportional size */}
-                        <Circle
-                          cx={CENTER_X}
-                          cy={CENTER_Y}
-                          r={outerRadius}
-                          fill={zone.color}
-                          fillOpacity={fillOpacity}
-                        />
-                        {/* Border */}
-                        <Circle
-                          cx={CENTER_X}
-                          cy={CENTER_Y}
-                          r={outerRadius}
-                          fill="none"
-                          stroke={zone.color}
-                          strokeWidth={1.5}
-                          strokeOpacity={hasDetections ? 0.9 : 0.5}
-                        />
-                      </G>
-                    );
-                  }
-
-                  return (
-                    <G key={`zone-band-${index}`}>
-                      {/* Zone band fill - thick stroke creates ring shape */}
-                      <Circle
-                        cx={CENTER_X}
-                        cy={CENTER_Y}
-                        r={midRadius}
-                        fill="none"
-                        stroke={zone.color}
-                        strokeWidth={bandWidth}
-                        strokeOpacity={fillOpacity}
-                      />
-                      {/* Outer border of this zone */}
-                      <Circle
-                        cx={CENTER_X}
-                        cy={CENTER_Y}
-                        r={outerRadius}
-                        fill="none"
-                        stroke={zone.color}
-                        strokeWidth={1.5}
-                        strokeOpacity={hasDetections ? 0.9 : 0.5}
-                      />
-                    </G>
-                  );
-                })}
-
-
-                {/* Center device marker - minimal target reticle */}
-                {/* Outer shadow for visibility on any background */}
-                <Circle
-                  cx={CENTER_X}
-                  cy={CENTER_Y}
-                  r={5}
-                  fill="none"
-                  stroke="rgba(0,0,0,0.5)"
-                  strokeWidth={3}
-                />
-                {/* Inner white ring */}
-                <Circle
-                  cx={CENTER_X}
-                  cy={CENTER_Y}
-                  r={5}
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeWidth={1.5}
-                />
-                {/* Center dot */}
-                <Circle
-                  cx={CENTER_X}
-                  cy={CENTER_Y}
-                  r={2}
-                  fill="#FFFFFF"
-                />
-              </Svg>
-            </View>
-
-            {/* Reset View Button - appears when map has been panned/zoomed */}
-            {(Math.abs(overlayTransform.scale - 1) > 0.01 ||
-              Math.abs(overlayTransform.translateX) > 5 ||
-              Math.abs(overlayTransform.translateY) > 5) && (
-              <TouchableOpacity
-                style={styles.resetButton}
-                onPress={resetMapView}
-                activeOpacity={0.8}
-              >
-                <Icon name="locate" size={18} color="white" />
-                <Text variant="caption1" weight="semibold" style={styles.resetButtonText}>
-                  Reset
-                </Text>
-              </TouchableOpacity>
-            )}
+                {/* Reset View Button */}
+                <TouchableOpacity
+                  style={styles.resetButton}
+                  onPress={resetMapView}
+                  activeOpacity={0.8}
+                >
+                  <Icon name="locate" size={18} color="white" />
+                </TouchableOpacity>
 
                 {/* Position Info Popup */}
                 {selectedPosition && (
@@ -542,154 +414,38 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
           </View>
         </Card>
 
-        {/* Zone Legend - Compact Summary */}
-        <Card variant="grouped" style={styles.legendCard}>
-          <View style={styles.legendHeader}>
+        {/* Detected Devices List */}
+        <Card variant="grouped" style={styles.listCard}>
+          <View style={styles.listHeader}>
             <Text variant="headline" weight="semibold" color="label">
-              Zone Summary
+              Detected Devices
             </Text>
-            <View style={styles.legendHeaderRight}>
-              {positions.length > 0 && (
-                <View style={styles.positionsCount}>
-                  <Icon name="location" size={14} color="systemGreen" />
-                  <Text variant="footnote" color="systemGreen">
-                    {positions.length} triangulated
-                  </Text>
-                </View>
-              )}
-              <Text variant="footnote" color="secondaryLabel">
-                {totalDetections} detection{totalDetections !== 1 ? 's' : ''}
-              </Text>
-            </View>
+            <Text variant="footnote" color="secondaryLabel">
+              {positions.length}
+            </Text>
           </View>
 
-          {/* Compact zone row with color bars */}
-          <View style={styles.zoneSummaryRow}>
-            {proximityData.map((zone, index) => (
-              <View key={index} style={styles.zoneSummaryItem}>
-                <View style={[styles.zoneSummaryColor, { backgroundColor: zone.color }]} />
-                <Text variant="title2" weight="bold" color="label">
-                  {zone.count}
-                </Text>
-                <Text variant="caption2" color="secondaryLabel" style={styles.zoneSummaryLabel}>
-                  {ZONES[index].shortLabel}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </Card>
-
-        {/* Detection Type Totals */}
-        <Card variant="grouped" style={styles.typeCard}>
-          <View style={styles.typeRow}>
-            <View style={styles.typeItem}>
-              <Icon name="wifi" size={20} color="systemBlue" />
-              <Text variant="title3" weight="semibold" color="label" style={styles.typeCount}>
-                {proximityData.reduce((sum, z) => sum + z.wifiCount, 0)}
+          {positions.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Icon name="radio-outline" size={32} color="systemGray" />
+              <Text variant="subheadline" color="secondaryLabel" style={styles.emptyText}>
+                No detected devices
               </Text>
-              <Text variant="caption1" color="secondaryLabel">WiFi</Text>
             </View>
-            <View style={styles.typeDivider} />
-            <View style={styles.typeItem}>
-              <Icon name="bluetooth" size={20} color="systemIndigo" />
-              <Text variant="title3" weight="semibold" color="label" style={styles.typeCount}>
-                {proximityData.reduce((sum, z) => sum + z.bleCount, 0)}
-              </Text>
-              <Text variant="caption1" color="secondaryLabel">Bluetooth</Text>
-            </View>
-            <View style={styles.typeDivider} />
-            <View style={styles.typeItem}>
-              <Icon name="cellular" size={20} color="systemOrange" />
-              <Text variant="title3" weight="semibold" color="label" style={styles.typeCount}>
-                {proximityData.reduce((sum, z) => sum + z.cellularCount, 0)}
-              </Text>
-              <Text variant="caption1" color="secondaryLabel">Cellular</Text>
-            </View>
-          </View>
-        </Card>
-
-        {/* Detailed Zone Breakdown */}
-        <Card variant="grouped" style={styles.detailsCard}>
-          <Text
-            variant="subheadline"
-            weight="semibold"
-            color="secondaryLabel"
-            style={styles.detailsTitle}
-          >
-            DETECTION BREAKDOWN BY ZONE
-          </Text>
-          {proximityData.map((zone, index) => (
-            <View key={index} style={styles.zoneRow}>
-              <View style={styles.zoneLeftSection}>
-                <View
-                  style={[styles.colorIndicator, { backgroundColor: zone.color }]}
-                />
-                <View style={styles.zoneInfo}>
-                  <View style={styles.zoneNameRow}>
-                    <Text variant="body" weight="medium" color="label">
-                      {zone.zone}
-                    </Text>
-                    <Text variant="caption1" color="secondaryLabel" style={styles.threatLabel}>
-                      {zone.threatLevel}
-                    </Text>
-                  </View>
-                  {/* Detection type icons for this zone */}
-                  <View style={styles.zoneTypeIcons}>
-                    {zone.wifiCount > 0 && (
-                      <View style={styles.typeIconBadge}>
-                        <Icon name="wifi" size={12} color="systemBlue" />
-                        <Text variant="caption2" color="secondaryLabel">{zone.wifiCount}</Text>
-                      </View>
-                    )}
-                    {zone.bleCount > 0 && (
-                      <View style={styles.typeIconBadge}>
-                        <Icon name="bluetooth" size={12} color="systemIndigo" />
-                        <Text variant="caption2" color="secondaryLabel">{zone.bleCount}</Text>
-                      </View>
-                    )}
-                    {zone.cellularCount > 0 && (
-                      <View style={styles.typeIconBadge}>
-                        <Icon name="cellular" size={12} color="systemOrange" />
-                        <Text variant="caption2" color="secondaryLabel">{zone.cellularCount}</Text>
-                      </View>
-                    )}
-                    {zone.count === 0 && (
-                      <Text variant="caption2" color="tertiaryLabel">No detections</Text>
-                    )}
-                  </View>
-                </View>
-              </View>
-              <View style={styles.zoneRightSection}>
-                <Text variant="title3" weight="bold" color="label">
-                  {zone.count}
-                </Text>
-                <View style={styles.zoneBar}>
-                  <View
-                    style={[
-                      styles.zoneBarFill,
-                      {
-                        width: `${Math.max(zone.percentage, zone.count > 0 ? 10 : 0)}%`,
-                        backgroundColor: zone.color,
-                      },
-                    ]}
-                  />
-                </View>
-              </View>
-            </View>
-          ))}
+          ) : (
+            positions.map(position => (
+              <PositionListItem
+                key={position.id}
+                position={position}
+                onPress={() => centerOnPosition(position)}
+              />
+            ))
+          )}
         </Card>
       </ScrollView>
     </ScreenLayout>
   );
 };
-
-// Helper function to estimate distance from RSSI
-function estimateDistanceFromRSSI(rssi: number): number {
-  const txPower = -30;
-  const n = 2;
-  const distanceMeters = Math.pow(10, (txPower - rssi) / (10 * n));
-  return distanceMeters * 3.28084; // Convert to feet
-}
 
 const styles = StyleSheet.create({
   centerContainer: {
