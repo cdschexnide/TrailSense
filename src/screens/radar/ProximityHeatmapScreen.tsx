@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  Animated,
 } from 'react-native';
 import { Text, Card, Icon } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
@@ -19,6 +18,7 @@ import { PositionListItem } from '@components/molecules/PositionListItem';
 import { TriangulatedPosition } from '@/types/triangulation';
 import { websocketService } from '@api/websocket';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTheme } from '@theme/provider';
 
 // Initialize MapBox with access token
 // Uses EXPO_PUBLIC_ prefix for Expo SDK 49+ env variable access
@@ -34,13 +34,12 @@ const { width } = Dimensions.get('window');
 const MAP_SIZE = width - 40;
 
 export const ProximityHeatmapScreen = () => {
-  const [selectedDeviceIndex, setSelectedDeviceIndex] = useState(0);
+  const { theme } = useTheme();
+  const colors = theme.colors;
+  const [selectedDeviceIndex] = useState(0);
   const [showSatellite, setShowSatellite] = useState(true);
   const cameraRef = useRef<Camera>(null);
   const mapViewRef = useRef<MapView>(null);
-
-  // Animation for GPS update indicator
-  const gpsUpdateAnim = useRef(new Animated.Value(0)).current;
 
   // Selected position for popup
   const [selectedPosition, setSelectedPosition] = useState<TriangulatedPosition | null>(null);
@@ -84,20 +83,6 @@ export const ProximityHeatmapScreen = () => {
   const hasValidLocation = deviceCoordinates.latitude !== null &&
                            deviceCoordinates.longitude !== null;
 
-  const cycleToNextDevice = () => {
-    if (devices.length > 0) {
-      setSelectedDeviceIndex(prev => (prev + 1) % devices.length);
-    }
-  };
-
-  const cycleToPreviousDevice = () => {
-    if (devices.length > 0) {
-      setSelectedDeviceIndex(
-        prev => (prev - 1 + devices.length) % devices.length
-      );
-    }
-  };
-
   // Update camera when device changes or GPS updates (only if valid coordinates)
   useEffect(() => {
     if (cameraRef.current && selectedDevice && hasValidLocation) {
@@ -120,24 +105,6 @@ export const ProximityHeatmapScreen = () => {
         animationDuration: coordsChanged ? 1000 : 500, // Slower animation for GPS updates
       });
 
-      // Trigger pulse animation if coordinates changed (not just initial load)
-      if (coordsChanged) {
-        // Pulse animation: 0 -> 1 -> 0
-        gpsUpdateAnim.setValue(0);
-        Animated.sequence([
-          Animated.timing(gpsUpdateAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(gpsUpdateAnim, {
-            toValue: 0,
-            duration: 2000,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }
-
       // Update previous coordinates ref
       prevCoordsRef.current = { lat: newLat, lon: newLon };
     }
@@ -146,7 +113,6 @@ export const ProximityHeatmapScreen = () => {
     deviceCoordinates.latitude,
     deviceCoordinates.longitude,
     hasValidLocation,
-    gpsUpdateAnim,
   ]);
 
   // Reset map to center on device
@@ -209,104 +175,36 @@ export const ProximityHeatmapScreen = () => {
     );
   }
 
+  // Format coordinates for display
+  const formatCoordinates = (coords: { latitude: number | null; longitude: number | null }) => {
+    if (coords.latitude === null || coords.longitude === null) {
+      return 'Awaiting GPS...';
+    }
+    return `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+  };
+
   return (
     <ScreenLayout
       header={{
-        title: 'Proximity Heatmap',
-        largeTitle: true,
+        title: selectedDevice?.name || 'Map',
+        largeTitle: false,
+        showBack: true,
       }}
       variant="map"
     >
       <ScrollView>
-        {/* Compact Device Info Header */}
-        <Card variant="grouped" style={styles.compactHeader}>
-          {/* Row 1: Device name + Status + Battery */}
-          <View style={styles.deviceRow}>
-            {devices.length > 1 && (
-              <TouchableOpacity
-                onPress={cycleToPreviousDevice}
-                style={styles.compactArrow}
-              >
-                <Icon name="chevron-back" size={20} color="systemBlue" />
-              </TouchableOpacity>
-            )}
-            <Text variant="headline" weight="semibold" color="label" style={styles.deviceName}>
-              {selectedDevice?.name || 'Unknown Device'}
+        {/* Simple status subtitle */}
+        <View style={styles.statusSubtitle}>
+          <View style={[styles.statusDot, { backgroundColor: selectedDevice?.online ? colors.systemGreen : colors.systemRed }]} />
+          <Text variant="subheadline" color="secondaryLabel">
+            {selectedDevice?.online ? 'Online' : 'Offline'} · {selectedDevice?.batteryPercent || 0}% · {formatCoordinates(deviceCoordinates)}
+          </Text>
+          {devices.length > 1 && (
+            <Text variant="caption1" color="tertiaryLabel" style={styles.deviceIndicator}>
+              {selectedDeviceIndex + 1}/{devices.length}
             </Text>
-            {devices.length > 1 && (
-              <TouchableOpacity
-                onPress={cycleToNextDevice}
-                style={styles.compactArrow}
-              >
-                <Icon name="chevron-forward" size={20} color="systemBlue" />
-              </TouchableOpacity>
-            )}
-            <View style={styles.statusBadge}>
-              <View
-                style={[
-                  styles.statusDot,
-                  { backgroundColor: selectedDevice?.online ? '#34C759' : '#FF3B30' },
-                ]}
-              />
-              <Text variant="caption1" color={selectedDevice?.online ? 'systemGreen' : 'systemRed'}>
-                {selectedDevice?.online ? 'Online' : 'Offline'}
-              </Text>
-            </View>
-            <View style={styles.batteryBadge}>
-              <Icon name="battery-half" size={16} color="secondaryLabel" />
-              <Text variant="caption1" color="secondaryLabel">
-                {selectedDevice?.batteryPercent || selectedDevice?.battery || 0}%
-              </Text>
-            </View>
-          </View>
-          {/* Row 2: Coordinates + GPS Updated indicator + Satellite toggle */}
-          <View style={styles.coordsRow}>
-            <Icon name="location" size={14} color="tertiaryLabel" />
-            <Text variant="caption2" color="tertiaryLabel" style={styles.coordsTextCompact}>
-              {hasValidLocation
-                ? `${deviceCoordinates.latitude!.toFixed(6)}, ${deviceCoordinates.longitude!.toFixed(6)}`
-                : 'Awaiting GPS fix...'}
-              {!selectedDevice?.online && hasValidLocation && ' (Last known)'}
-            </Text>
-            {/* GPS Updated indicator - fades in/out when location updates */}
-            <Animated.View
-              style={[
-                styles.gpsUpdatedBadge,
-                {
-                  opacity: gpsUpdateAnim,
-                  transform: [
-                    {
-                      scale: gpsUpdateAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.8, 1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <Icon name="checkmark-circle" size={12} color="systemGreen" />
-              <Text variant="caption2" color="systemGreen">
-                Updated
-              </Text>
-            </Animated.View>
-            {hasValidLocation && (
-              <TouchableOpacity
-                onPress={() => setShowSatellite(!showSatellite)}
-                style={styles.satelliteToggleCompact}
-              >
-                <Icon
-                  name={showSatellite ? 'earth' : 'map'}
-                  size={14}
-                  color="systemBlue"
-                />
-                <Text variant="caption2" color="systemBlue">
-                  {showSatellite ? 'Satellite' : 'Map'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </Card>
+          )}
+        </View>
 
         {/* Map + Heatmap Overlay */}
         <Card variant="grouped" style={styles.heatmapCard}>
@@ -364,14 +262,25 @@ export const ProximityHeatmapScreen = () => {
                   ))}
                 </MapView>
 
-                {/* Reset View Button */}
-                <TouchableOpacity
-                  style={styles.resetButton}
-                  onPress={resetMapView}
-                  activeOpacity={0.8}
-                >
-                  <Icon name="locate" size={18} color="white" />
-                </TouchableOpacity>
+                {/* Floating Map Controls */}
+                <View style={styles.floatingControls}>
+                  {/* Satellite Toggle */}
+                  <TouchableOpacity
+                    style={styles.floatingButton}
+                    onPress={() => setShowSatellite(!showSatellite)}
+                    activeOpacity={0.8}
+                  >
+                    <Icon name={showSatellite ? 'map-outline' : 'earth'} size={18} color="white" />
+                  </TouchableOpacity>
+                  {/* Reset View Button */}
+                  <TouchableOpacity
+                    style={styles.floatingButton}
+                    onPress={resetMapView}
+                    activeOpacity={0.8}
+                  >
+                    <Icon name="locate" size={18} color="white" />
+                  </TouchableOpacity>
+                </View>
 
                 {/* Position Info Popup */}
                 {selectedPosition && (
@@ -475,68 +384,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  // Compact Header (replaces 3 separate cards)
-  compactHeader: {
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  deviceRow: {
+  // Status subtitle row
+  statusSubtitle: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  compactArrow: {
-    padding: 4,
-  },
-  deviceName: {
-    flex: 1,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 8,
-    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 6,
   },
   statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  batteryBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 12,
-    gap: 4,
-  },
-  coordsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-    gap: 4,
-  },
-  coordsTextCompact: {
-    flex: 1,
-  },
-  gpsUpdatedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    backgroundColor: 'rgba(48, 209, 88, 0.15)',
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  satelliteToggleCompact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
-    borderRadius: 6,
+  deviceIndicator: {
+    marginLeft: 'auto',
   },
   heatmapCard: {
     marginHorizontal: 16,
@@ -554,10 +416,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  resetButton: {
+  // Floating map controls
+  floatingControls: {
     position: 'absolute',
     bottom: 12,
     right: 12,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  floatingButton: {
     backgroundColor: 'rgba(0, 122, 255, 0.9)',
     padding: 10,
     borderRadius: 20,
