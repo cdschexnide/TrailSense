@@ -30,14 +30,17 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   const { theme } = useTheme();
   const colors = theme.colors;
 
-  const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handlePress = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
   };
 
   return (
     <Pressable
       onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={`${label} filter, ${count} items`}
+      accessibilityState={{ selected: isSelected }}
       style={({ pressed }) => [
         styles.container,
         {
