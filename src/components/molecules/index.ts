@@ -3,6 +3,7 @@ export { ChartCard } from './ChartCard';
 export * from './DetailHero';
 export * from './DetectedDeviceMarker';
 export { FilterChip } from './FilterChip';
+export * from './FloatingActionBar';
 export { GlowContainer } from './GlowContainer';
 export { GroupedListRow } from './GroupedListRow';
 export { GroupedListSection } from './GroupedListSection';
