@@ -1,12 +1,16 @@
 export { ChartCard } from './ChartCard';
+export * from './DetailHero';
 export * from './DetectedDeviceMarker';
 export { FilterChip } from './FilterChip';
+export { GlowContainer } from './GlowContainer';
 export { GroupedListRow } from './GroupedListRow';
 export { GroupedListSection } from './GroupedListSection';
 export { InlineFilterBar } from './InlineFilterBar';
 export * from './ListItem';
+export { MetricsBar } from './MetricsBar';
 export * from './PositionInfoPopup';
 export * from './PositionListItem';
 export { StatCard } from './StatCard';
 export * from './SwipeableRow';
+export { TabSegment } from './TabSegment';
 export * from './TrailSenseDeviceMarker';
