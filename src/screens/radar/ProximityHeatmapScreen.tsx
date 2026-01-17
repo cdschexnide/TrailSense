@@ -145,7 +145,7 @@ export const ProximityHeatmapScreen = () => {
 
   if (devicesLoading) {
     return (
-      <ScreenLayout header={{ title: 'Proximity Heatmap', largeTitle: true }} variant="map">
+      <ScreenLayout header={{ title: 'Proximity Heatmap', largeTitle: true }}>
         <View style={styles.centerContainer}>
           <Text variant="body" color="secondaryLabel">
             Loading devices...
@@ -157,7 +157,7 @@ export const ProximityHeatmapScreen = () => {
 
   if (devices.length === 0) {
     return (
-      <ScreenLayout header={{ title: 'Proximity Heatmap', largeTitle: true }} variant="map">
+      <ScreenLayout header={{ title: 'Proximity Heatmap', largeTitle: true }}>
         <View style={styles.centerContainer}>
           <Icon name="alert-circle-outline" size={64} color="systemGray" />
           <Text variant="title3" color="label" style={styles.emptyTitle}>
@@ -190,7 +190,6 @@ export const ProximityHeatmapScreen = () => {
         largeTitle: false,
         showBack: true,
       }}
-      variant="map"
     >
       <ScrollView>
         {/* Simple status subtitle */}

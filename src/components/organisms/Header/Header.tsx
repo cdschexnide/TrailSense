@@ -1,12 +1,11 @@
 /**
- * Header Component - Production Grade
+ * Header Component - Apple Native Style
  *
- * Premium header with:
- * - Animated collapsible large title (iOS 11+ style)
- * - Glassmorphism blur background on scroll
- * - Gradient accent decorations
- * - Polished action buttons
- * - Smooth spring animations
+ * Clean, minimal header with:
+ * - Animated collapsible large title (iOS style)
+ * - Plain text/icon actions (no pill background)
+ * - No accent stripes
+ * - Frosted glass background on scroll
  */
 
 import React from 'react';
@@ -16,7 +15,6 @@ import {
   Pressable,
   ViewStyle,
   Animated,
-  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Icon } from '@components/atoms';
@@ -42,26 +40,11 @@ interface HeaderProps {
   // Style
   style?: ViewStyle;
   testID?: string;
-
-  // Variant for screen-specific styling
-  variant?: 'default' | 'alerts' | 'devices' | 'map' | 'analytics' | 'settings' | 'ai';
 }
 
 // Animation constants
 const SCROLL_THRESHOLD = 50;
-const LARGE_TITLE_HEIGHT = 52;
 const NAV_BAR_HEIGHT = 44;
-
-// Gradient accent colors for different screen variants
-const VARIANT_GRADIENTS: Record<string, [string, string]> = {
-  default: ['#007AFF', '#5856D6'],
-  alerts: ['#FF453A', '#FF9F0A'],
-  devices: ['#30D158', '#64D2FF'],
-  map: ['#5856D6', '#BF5AF2'],
-  analytics: ['#007AFF', '#30D158'],
-  settings: ['#8E8E93', '#636366'],
-  ai: ['#BF5AF2', '#FF375F'],
-};
 
 export const Header: React.FC<HeaderProps> = ({
   showBack = false,
@@ -74,7 +57,6 @@ export const Header: React.FC<HeaderProps> = ({
   scrollY,
   style,
   testID,
-  variant = 'default',
 }) => {
   const { theme, colorScheme } = useTheme();
   const isDark = colorScheme === 'dark';
@@ -119,16 +101,8 @@ export const Header: React.FC<HeaderProps> = ({
           outputRange: [0, 1],
           extrapolate: 'clamp',
         }),
-        // Gradient accent line scale
-        accentScale: scrollY.interpolate({
-          inputRange: [0, SCROLL_THRESHOLD],
-          outputRange: [1, 0],
-          extrapolate: 'clamp',
-        }),
       }
     : null;
-
-  const gradientColors = VARIANT_GRADIENTS[variant] || VARIANT_GRADIENTS.default;
 
   // Render the navigation bar (compact header)
   const renderNavBar = () => (
@@ -211,21 +185,10 @@ export const Header: React.FC<HeaderProps> = ({
         ) : null}
       </View>
 
-      {/* Right actions with pill background */}
+      {/* Right actions - plain, no pill background */}
       {rightActions && (
         <View style={styles.rightActionsContainer}>
-          <View
-            style={[
-              styles.actionPill,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(120, 120, 128, 0.24)'
-                  : 'rgba(120, 120, 128, 0.12)',
-              },
-            ]}
-          >
-            {rightActions}
-          </View>
+          {rightActions}
         </View>
       )}
     </View>
@@ -237,34 +200,13 @@ export const Header: React.FC<HeaderProps> = ({
 
     const titleContent = (
       <View style={styles.largeTitleContent}>
-        {/* Gradient accent line */}
-        <Animated.View
-          style={[
-            styles.accentLine,
-            scrollAnimations && {
-              transform: [{ scaleX: scrollAnimations.accentScale }],
-              opacity: scrollAnimations.largeTitleOpacity,
-            },
-          ]}
-        >
-          <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.accentGradient}
-          />
-        </Animated.View>
-
-        {/* Title row with actions */}
+        {/* Title row */}
         <View style={styles.largeTitleRow}>
           <View style={styles.largeTitleTextContainer}>
             <Text
               variant="largeTitle"
               color="label"
-              style={[
-                styles.largeTitle,
-                { fontWeight: '700', letterSpacing: -0.5 },
-              ]}
+              style={styles.largeTitle}
             >
               {title}
             </Text>
@@ -425,29 +367,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
   },
-  actionPill: {
-    borderRadius: 20,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-  },
   largeTitleContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingBottom: 8,
-    transformOrigin: 'left center',
   },
   largeTitleContent: {
     gap: 2,
-  },
-  accentLine: {
-    height: 3,
-    width: 40,
-    borderRadius: 1.5,
-    marginBottom: 8,
-    transformOrigin: 'left center',
-  },
-  accentGradient: {
-    flex: 1,
-    borderRadius: 1.5,
   },
   largeTitleRow: {
     flexDirection: 'row',
@@ -460,6 +385,8 @@ const styles = StyleSheet.create({
   largeTitle: {
     fontSize: 34,
     lineHeight: 41,
+    fontWeight: '700',
+    letterSpacing: -0.5,
   },
   largeTitleSubtitle: {
     marginTop: 2,

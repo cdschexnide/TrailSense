@@ -70,7 +70,6 @@ export const SettingsScreen = ({ navigation }: any) => {
         title: 'Settings',
         largeTitle: true,
       }}
-      variant="settings"
       scrollable
     >
       {/* User Profile Card */}

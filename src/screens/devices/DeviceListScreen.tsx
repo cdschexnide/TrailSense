@@ -174,7 +174,6 @@ export const DeviceListScreen = ({ navigation }: any) => {
           </Button>
         ),
       }}
-      variant="devices"
       scrollable={false}
     >
       <SectionList

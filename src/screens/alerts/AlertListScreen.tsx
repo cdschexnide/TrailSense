@@ -152,7 +152,6 @@ export const AlertListScreen = ({ navigation }: any) => {
           </Button>
         ),
       }}
-      variant="alerts"
       scrollable={false}
       stickyHeader={
         <SearchBar

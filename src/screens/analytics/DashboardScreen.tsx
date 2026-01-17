@@ -210,7 +210,6 @@ export const DashboardScreen = ({ navigation }: any) => {
           </Button>
         ),
       }}
-      variant="analytics"
       scrollable
     >
       {/* Period Selector */}

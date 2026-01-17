@@ -26,8 +26,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '@components/organisms';
 import { useTheme } from '@hooks/useTheme';
 
-type ScreenVariant = 'default' | 'alerts' | 'devices' | 'map' | 'analytics' | 'settings' | 'ai';
-
 interface ScreenLayoutProps {
   children: React.ReactNode;
   header?: {
@@ -38,8 +36,6 @@ interface ScreenLayoutProps {
     rightActions?: React.ReactNode;
     largeTitle?: boolean;
   };
-  // Screen variant for header styling
-  variant?: ScreenVariant;
   // Legacy props for backward compatibility
   title?: string;
   subtitle?: string;
@@ -65,7 +61,6 @@ interface ScreenLayoutProps {
 export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   children,
   header,
-  variant = 'default',
   // Legacy props
   title,
   subtitle,
@@ -190,7 +185,6 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
           rightActions={headerConfig.rightActions}
           largeTitle={hasLargeTitle}
           scrollY={hasLargeTitle && animatedHeader ? scrollY : undefined}
-          variant={variant}
         />
       ))}
 
