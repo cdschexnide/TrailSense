@@ -46,37 +46,37 @@ export const Colors = {
      * Primary background color
      * Use for main screen backgrounds
      */
-    systemBackground: '#F8F6F1',
+    systemBackground: '#E9E8E3',
 
     /**
      * Secondary background color
      * Use for grouped content backgrounds
      */
-    secondarySystemBackground: '#F2EDE4',
+    secondarySystemBackground: '#DFDDD7',
 
     /**
      * Tertiary background color
      * Use for third-level grouped content
      */
-    tertiarySystemBackground: '#EDE7DB',
+    tertiarySystemBackground: '#D5D3CC',
 
     /**
      * Primary grouped background
      * Use for grouped table view backgrounds
      */
-    systemGroupedBackground: '#F5F2EB',
+    systemGroupedBackground: '#E4E3DD',
 
     /**
      * Secondary grouped background
      * Use for grouped table view cells
      */
-    secondarySystemGroupedBackground: '#FAF8F4',
+    secondarySystemGroupedBackground: '#EBEAE5',
 
     /**
      * Tertiary grouped background
      * Use for third-level grouped content
      */
-    tertiarySystemGroupedBackground: '#F0EBE2',
+    tertiarySystemGroupedBackground: '#D9D7D0',
 
     // ======================
     // iOS System Colors - Fill
@@ -111,69 +111,69 @@ export const Colors = {
     // ======================
 
     /**
-     * System Blue - NEW PRIMARY COLOR
+     * System Blue - BRAND OLIVE (replaced for earthy theme)
      * Use for interactive elements, links, and primary actions
      */
-    systemBlue: '#007AFF',
+    systemBlue: '#6B6B4E',
 
     /**
-     * System Green
+     * System Green - MUTED OLIVE-GREEN
      * Use for success states and positive actions
      */
-    systemGreen: '#34C759',
+    systemGreen: '#5A8A5A',
 
     /**
-     * System Orange
+     * System Orange - MUTED BURNT ORANGE
      * Use for warnings and medium-priority alerts
      */
-    systemOrange: '#FF9500',
+    systemOrange: '#C47F30',
 
     /**
-     * System Red
+     * System Red - MUTED DUSTY RED
      * Use for errors and destructive actions
      */
-    systemRed: '#FF3B30',
+    systemRed: '#B84A42',
 
     /**
-     * System Yellow
+     * System Yellow - MUTED OCHRE
      * Use for caution states
      */
-    systemYellow: '#FFCC00',
+    systemYellow: '#C9A030',
 
     /**
-     * System Purple
+     * System Purple - MUTED DUSTY PURPLE
      * Use for specialized features
      */
-    systemPurple: '#AF52DE',
+    systemPurple: '#8A6090',
 
     /**
-     * System Pink
+     * System Pink - MUTED DUSTY ROSE
      * Use for accents
      */
-    systemPink: '#FF2D55',
+    systemPink: '#A85060',
 
     /**
-     * System Teal
+     * System Teal - MUTED SAGE
      * Use for accents
      */
-    systemTeal: '#5AC8FA',
+    systemTeal: '#5A9090',
 
     /**
-     * System Indigo
+     * System Indigo - MUTED SLATE
      * Use for accents
      */
-    systemIndigo: '#5856D6',
+    systemIndigo: '#5A5A80',
 
     // ======================
     // iOS System Colors - Gray Scale
     // ======================
 
-    systemGray: '#8A8579',
-    systemGray2: '#ACA69A',
-    systemGray3: '#C5BFAE',
-    systemGray4: '#D0CABF',
-    systemGray5: '#E3DED3',
-    systemGray6: '#F0EBE2',
+    systemGray: '#7A7A70',
+    systemGray2: '#9A9A90',
+    systemGray3: '#B5B5AB',
+    systemGray4: '#C5C5BB',
+    systemGray5: '#D5D5CB',
+    systemGray6: '#E4E3DD',
 
     // ======================
     // iOS Separator Colors
@@ -183,13 +183,13 @@ export const Colors = {
      * Separator color
      * Use for thin borders and divider lines
      */
-    separator: 'rgba(45, 42, 36, 0.18)',
+    separator: 'rgba(90, 90, 80, 0.25)',
 
     /**
      * Opaque separator
      * Use for borders that don't need transparency
      */
-    opaqueSeparator: '#DDD8CE',
+    opaqueSeparator: '#C5C5BB',
 
     // ======================
     // TrailSense-Specific: Threat Levels
@@ -197,24 +197,24 @@ export const Colors = {
 
     threat: {
       /**
-       * Critical threat level - System Red
+       * Critical threat level - Muted Dusty Red
        */
-      critical: '#FF3B30',
+      critical: '#B84A42',
 
       /**
-       * High threat level - System Orange
+       * High threat level - Muted Burnt Orange
        */
-      high: '#FF9500',
+      high: '#C47F30',
 
       /**
-       * Medium threat level - System Yellow
+       * Medium threat level - Muted Ochre
        */
-      medium: '#FFCC00',
+      medium: '#C9A030',
 
       /**
-       * Low threat level - System Green
+       * Low threat level - Muted Olive-Green
        */
-      low: '#34C759',
+      low: '#5A8A5A',
     },
 
     // ======================
@@ -223,29 +223,29 @@ export const Colors = {
 
     detection: {
       /**
-       * Cellular detection - System Purple
+       * Cellular detection - Muted Dusty Purple
        */
-      cellular: '#AF52DE',
+      cellular: '#8A6090',
 
       /**
-       * WiFi detection - System Blue
+       * WiFi detection - Brand Olive
        */
-      wifi: '#007AFF',
+      wifi: '#6B6B4E',
 
       /**
-       * Bluetooth detection - System Teal
+       * Bluetooth detection - Muted Sage
        */
-      bluetooth: '#5AC8FA',
+      bluetooth: '#5A9090',
 
       /**
-       * Multi-band detection - System Indigo
+       * Multi-band detection - Muted Slate
        */
-      multiband: '#5856D6',
+      multiband: '#5A5A80',
 
       /**
        * @deprecated Use 'multiband' instead
        */
-      multi: '#5856D6',
+      multi: '#5A5A80',
     },
 
     // ======================
@@ -259,24 +259,24 @@ export const Colors = {
     primary: '#C9B896',
 
     /**
-     * Success color - System Green
+     * Success color - Muted Olive-Green
      */
-    success: '#34C759',
+    success: '#5A8A5A',
 
     /**
-     * Warning color - System Orange
+     * Warning color - Muted Burnt Orange
      */
-    warning: '#FF9500',
+    warning: '#C47F30',
 
     /**
-     * Error color - System Red
+     * Error color - Muted Dusty Red
      */
-    error: '#FF3B30',
+    error: '#B84A42',
 
     /**
-     * Info color - System Blue
+     * Info color - Brand Olive
      */
-    info: '#007AFF',
+    info: '#6B6B4E',
 
     // ======================
     // TrailSense Brand Accent
@@ -300,13 +300,13 @@ export const Colors = {
     // Additional Status Colors
     // ======================
 
-    online: '#34C759',
-    offline: '#8E8E93',
+    online: '#5A8A5A',
+    offline: '#7A7A70',
 
     battery: {
-      full: '#34C759',
-      medium: '#FF9500',
-      low: '#FF3B30',
+      full: '#5A8A5A',
+      medium: '#C47F30',
+      low: '#B84A42',
     },
 
     // ======================
@@ -318,14 +318,14 @@ export const Colors = {
      * Use these for full-card background washes
      */
     threatBackground: {
-      critical: 'rgba(255, 59, 48, 0.12)',
-      criticalBorder: 'rgba(255, 59, 48, 0.35)',
-      high: 'rgba(255, 149, 0, 0.10)',
-      highBorder: 'rgba(255, 149, 0, 0.30)',
-      medium: 'rgba(255, 204, 0, 0.08)',
-      mediumBorder: 'rgba(255, 204, 0, 0.25)',
-      low: 'rgba(52, 199, 89, 0.06)',
-      lowBorder: 'rgba(52, 199, 89, 0.20)',
+      critical: 'rgba(184, 74, 66, 0.15)',
+      criticalBorder: 'rgba(184, 74, 66, 0.40)',
+      high: 'rgba(196, 127, 48, 0.12)',
+      highBorder: 'rgba(196, 127, 48, 0.35)',
+      medium: 'rgba(201, 160, 48, 0.10)',
+      mediumBorder: 'rgba(201, 160, 48, 0.30)',
+      low: 'rgba(90, 138, 90, 0.08)',
+      lowBorder: 'rgba(90, 138, 90, 0.25)',
     },
 
     // ======================
@@ -336,8 +336,8 @@ export const Colors = {
      * Background tint colors for device status cards
      */
     deviceStatusBackground: {
-      online: 'rgba(52, 199, 89, 0.06)',
-      offline: 'rgba(255, 59, 48, 0.08)',
+      online: 'rgba(90, 138, 90, 0.08)',
+      offline: 'rgba(184, 74, 66, 0.10)',
     },
 
     // ======================
@@ -348,11 +348,11 @@ export const Colors = {
      * Gradient color arrays for various UI elements
      */
     gradients: {
-      cardHeader: ['rgba(45, 42, 36, 0.03)', 'rgba(45, 42, 36, 0)'],
-      statsBackground: ['#F5F2EB', '#E8E2D6'],
-      shimmer: ['rgba(45, 42, 36, 0)', 'rgba(45, 42, 36, 0.04)', 'rgba(45, 42, 36, 0)'],
-      onlineStatus: ['rgba(52, 199, 89, 0.12)', 'rgba(52, 199, 89, 0)'],
-      offlineStatus: ['rgba(255, 59, 48, 0.12)', 'rgba(255, 59, 48, 0)'],
+      cardHeader: ['rgba(90, 90, 80, 0.04)', 'rgba(90, 90, 80, 0)'],
+      statsBackground: ['#E4E3DD', '#D5D5CB'],
+      shimmer: ['rgba(90, 90, 80, 0)', 'rgba(90, 90, 80, 0.06)', 'rgba(90, 90, 80, 0)'],
+      onlineStatus: ['rgba(90, 138, 90, 0.15)', 'rgba(90, 138, 90, 0)'],
+      offlineStatus: ['rgba(184, 74, 66, 0.15)', 'rgba(184, 74, 66, 0)'],
     },
 
     // ======================
@@ -362,17 +362,17 @@ export const Colors = {
     /**
      * @deprecated Use systemBackground instead
      */
-    background: '#F8F6F1',
+    background: '#E9E8E3',
 
     /**
      * @deprecated Use secondarySystemBackground instead
      */
-    surface: '#F2EDE4',
+    surface: '#DFDDD7',
 
     /**
      * @deprecated Use tertiarySystemBackground instead
      */
-    surfaceVariant: '#E3DED3',
+    surfaceVariant: '#D5D3CC',
 
     /**
      * Text color aliases for backward compatibility
@@ -388,12 +388,12 @@ export const Colors = {
     /**
      * @deprecated Use separator instead
      */
-    border: 'rgba(45, 42, 36, 0.18)',
+    border: 'rgba(90, 90, 80, 0.25)',
 
     /**
      * @deprecated Use separator instead
      */
-    divider: 'rgba(45, 42, 36, 0.18)',
+    divider: 'rgba(90, 90, 80, 0.25)',
   },
 
   dark: {
