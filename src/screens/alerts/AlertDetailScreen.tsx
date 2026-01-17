@@ -1,25 +1,32 @@
 /**
- * AlertDetailScreen - REDESIGNED
+ * AlertDetailScreen - REDESIGNED with Tabs
  *
  * iOS Settings-style alert detail view with:
- * - Detection type as screen title
- * - Grouped sections: Signal, Location, Source, Actions
- * - Uses GroupedListSection/GroupedListRow components
- * - Clean, native iOS appearance
+ * - DetailHero with status dot and metrics
+ * - TabSegment: Signal | Location | History
+ * - FloatingActionBar with Mark Reviewed primary
+ * - Grouped sections for tab content
  */
 
-import React from 'react';
-import { View, StyleSheet, Platform, Linking } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Platform, Linking, ScrollView } from 'react-native';
 import { useNavigation, RouteProp, useRoute } from '@react-navigation/native';
 import MapView, { Marker, Circle } from 'react-native-maps';
 import { Button } from '@components/atoms/Button';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
-import { GroupedListSection, GroupedListRow } from '@components/molecules';
+import {
+  GroupedListSection,
+  GroupedListRow,
+  DetailHero,
+  TabSegment,
+  FloatingActionBar,
+} from '@components/molecules';
 import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
 import { formatTime } from '@utils/dateUtils';
+import { getThreatColor } from '@utils/visualEffects';
 import { useAlertSummary } from '@/hooks/useAlertSummary';
 import { AlertSummaryCard } from '@/components/organisms/AlertSummaryCard';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
@@ -59,6 +66,13 @@ const getPriorityLabel = (threatLevel: ThreatLevel): string => {
   }
 };
 
+// Tab configuration
+const TABS = [
+  { key: 'signal', label: 'Signal' },
+  { key: 'location', label: 'Location' },
+  { key: 'history', label: 'History' },
+];
+
 export const AlertDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
@@ -66,6 +80,9 @@ export const AlertDetailScreen = () => {
   const route = useRoute<AlertDetailRouteProp>();
   const { alertId } = route.params;
   const { data: alert, isLoading, error } = useAlert(alertId);
+
+  // Tab state
+  const [selectedTab, setSelectedTab] = useState('signal');
 
   // LLM Alert Summary Hook
   const {
@@ -88,11 +105,6 @@ export const AlertDetailScreen = () => {
     console.log('Marking alert as false positive:', alertId);
   };
 
-  const handleDelete = async () => {
-    console.log('Deleting alert:', alertId);
-    navigation.goBack();
-  };
-
   const handleFeedback = (positive: boolean) => {
     console.log('LLM feedback:', {
       alertId: alert.id,
@@ -101,25 +113,31 @@ export const AlertDetailScreen = () => {
     });
   };
 
+  const handleMorePress = () => {
+    // TODO: Show action sheet with Whitelist, Delete options
+    console.log('More options pressed');
+  };
+
   const priorityLabel = getPriorityLabel(alert.threatLevel);
   const timeLabel = formatTime(alert.timestamp);
+  const threatColor = getThreatColor(alert.threatLevel);
 
-  return (
-    <ScreenLayout
-      header={{
-        title: `${alert.detectionType} Detection`,
-        subtitle: `${priorityLabel} · ${timeLabel}`,
-        showBack: true,
-        onBackPress: () => navigation.goBack(),
-      }}
-      scrollable
-    >
+  // Build metrics for DetailHero
+  const heroMetrics = [
+    `${alert.rssi} dBm`,
+    getProximityLabel(alert.rssi),
+    alert.deviceId,
+  ];
+
+  // Render Signal tab content
+  const renderSignalTab = () => (
+    <>
       {/* SIGNAL Section */}
-      <GroupedListSection title="Signal">
+      <GroupedListSection title="Signal Strength">
         <GroupedListRow
           icon="cellular"
           iconColor={colors.systemBlue}
-          title="Signal Strength"
+          title="RSSI"
           value={`${alert.rssi} dBm`}
         />
         <GroupedListRow
@@ -128,6 +146,10 @@ export const AlertDetailScreen = () => {
           title="Proximity"
           value={getProximityLabel(alert.rssi)}
         />
+      </GroupedListSection>
+
+      {/* Device Fingerprint Section */}
+      <GroupedListSection title="Device Fingerprint">
         {alert.macAddress && (
           <GroupedListRow
             icon="qr-code-outline"
@@ -136,6 +158,12 @@ export const AlertDetailScreen = () => {
             value={alert.macAddress}
           />
         )}
+        <GroupedListRow
+          icon="finger-print-outline"
+          iconColor={colors.systemIndigo}
+          title="Detection Type"
+          value={alert.detectionType}
+        />
       </GroupedListSection>
 
       {/* Summary Details Section (if from summary source) */}
@@ -206,6 +234,36 @@ export const AlertDetailScreen = () => {
         </View>
       )}
 
+      {/* AI Summary Section */}
+      {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
+        (Platform.OS === 'android' || Platform.OS === 'ios') && (
+          <View style={styles.aiSection}>
+            {!summary && !isGeneratingSummary && !summaryError && (
+              <Button
+                buttonStyle="tinted"
+                role="default"
+                onPress={generateSummary}
+                leftIcon={<Text style={styles.sparkle}>✨</Text>}
+              >
+                Explain with AI
+              </Button>
+            )}
+
+            <AlertSummaryCard
+              summary={summary}
+              isLoading={isGeneratingSummary}
+              error={summaryError}
+              onRegenerate={regenerateSummary}
+              onFeedback={handleFeedback}
+            />
+          </View>
+        )}
+    </>
+  );
+
+  // Render Location tab content
+  const renderLocationTab = () => (
+    <>
       {/* Triangulated Position Section */}
       {alert.metadata?.triangulatedPosition && (
         <View style={styles.sectionContainer}>
@@ -302,39 +360,14 @@ export const AlertDetailScreen = () => {
         </View>
       )}
 
-      {/* AI Summary Section */}
-      {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
-        (Platform.OS === 'android' || Platform.OS === 'ios') && (
-          <View style={styles.aiSection}>
-            {!summary && !isGeneratingSummary && !summaryError && (
-              <Button
-                buttonStyle="tinted"
-                role="default"
-                onPress={generateSummary}
-                leftIcon={<Text style={styles.sparkle}>✨</Text>}
-              >
-                Explain with AI
-              </Button>
-            )}
-
-            <AlertSummaryCard
-              summary={summary}
-              isLoading={isGeneratingSummary}
-              error={summaryError}
-              onRegenerate={regenerateSummary}
-              onFeedback={handleFeedback}
-            />
-          </View>
-        )}
-
-      {/* LOCATION Section */}
+      {/* GPS Location Section */}
       {alert.location && (
-        <GroupedListSection title="Location">
+        <GroupedListSection title="GPS Coordinates">
           <GroupedListRow
             icon="location-outline"
             iconColor={colors.systemGreen}
-            title="GPS Coordinates"
-            value={`${alert.location.latitude.toFixed(2)}, ${alert.location.longitude.toFixed(2)}`}
+            title="Coordinates"
+            value={`${alert.location.latitude.toFixed(4)}, ${alert.location.longitude.toFixed(4)}`}
           />
           <GroupedListRow
             icon="map-outline"
@@ -361,38 +394,151 @@ export const AlertDetailScreen = () => {
           }
         />
       </GroupedListSection>
+    </>
+  );
 
-      {/* ACTIONS Section */}
-      <GroupedListSection title="Actions">
-        {!alert.isReviewed && (
-          <GroupedListRow
-            icon="checkmark-circle"
-            iconColor={colors.systemGreen}
-            title="Mark Reviewed"
-            onPress={handleMarkReviewed}
-          />
-        )}
-        {!alert.isFalsePositive && (
-          <GroupedListRow
-            icon="flag-outline"
-            iconColor={colors.systemOrange}
-            title="Mark as False Positive"
-            onPress={handleMarkFalsePositive}
-          />
-        )}
+  // Render History tab content
+  const renderHistoryTab = () => (
+    <>
+      {/* Detection Timeline Section */}
+      <GroupedListSection title="Detection Timeline">
         <GroupedListRow
-          icon="trash-outline"
-          iconColor={colors.systemRed}
-          title="Delete Alert"
-          destructive
-          onPress={handleDelete}
+          icon="time-outline"
+          iconColor={colors.systemBlue}
+          title="First Seen"
+          value={formatTime(alert.timestamp)}
+        />
+        <GroupedListRow
+          icon="timer-outline"
+          iconColor={colors.systemGreen}
+          title="Last Seen"
+          value={formatTime(alert.timestamp)}
+        />
+        {alert.metadata?.signalCount && (
+          <GroupedListRow
+            icon="repeat-outline"
+            iconColor={colors.systemOrange}
+            title="Times Seen"
+            value={`${alert.metadata.signalCount}x`}
+          />
+        )}
+      </GroupedListSection>
+
+      {/* Recent Sightings Section */}
+      <GroupedListSection title="Recent Sightings">
+        <GroupedListRow
+          icon="calendar-outline"
+          iconColor={colors.systemIndigo}
+          title="Today"
+          value={formatTime(alert.timestamp)}
+        />
+        {/* Additional sightings would be listed here from alert history data */}
+      </GroupedListSection>
+
+      {/* Alert Status Section */}
+      <GroupedListSection title="Status">
+        <GroupedListRow
+          icon={alert.isReviewed ? 'checkmark-circle' : 'ellipse-outline'}
+          iconColor={alert.isReviewed ? colors.systemGreen : colors.secondaryLabel}
+          title="Reviewed"
+          value={alert.isReviewed ? 'Yes' : 'No'}
+        />
+        <GroupedListRow
+          icon={alert.isFalsePositive ? 'flag' : 'flag-outline'}
+          iconColor={alert.isFalsePositive ? colors.systemOrange : colors.secondaryLabel}
+          title="False Positive"
+          value={alert.isFalsePositive ? 'Yes' : 'No'}
         />
       </GroupedListSection>
+    </>
+  );
+
+  // Render tab content based on selected tab
+  const renderTabContent = () => {
+    switch (selectedTab) {
+      case 'signal':
+        return renderSignalTab();
+      case 'location':
+        return renderLocationTab();
+      case 'history':
+        return renderHistoryTab();
+      default:
+        return renderSignalTab();
+    }
+  };
+
+  return (
+    <ScreenLayout
+      header={{
+        title: `${alert.detectionType} Detection`,
+        subtitle: `${priorityLabel} · ${timeLabel}`,
+        showBack: true,
+        onBackPress: () => navigation.goBack(),
+      }}
+    >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Detail Hero with status dot and metrics */}
+        <DetailHero
+          statusColor={threatColor}
+          title={`${alert.detectionType} Detection`}
+          subtitle={`${priorityLabel} · ${timeLabel}`}
+          metrics={heroMetrics}
+        />
+
+        {/* Tab Segment */}
+        <View style={styles.tabContainer}>
+          <TabSegment
+            tabs={TABS}
+            selectedKey={selectedTab}
+            onSelect={setSelectedTab}
+          />
+        </View>
+
+        {/* Tab Content */}
+        {renderTabContent()}
+      </ScrollView>
+
+      {/* Floating Action Bar */}
+      <FloatingActionBar
+        primaryAction={{
+          label: 'Mark Reviewed',
+          icon: 'checkmark-circle',
+          onPress: handleMarkReviewed,
+        }}
+        secondaryActions={[
+          {
+            icon: 'flag-outline',
+            label: 'Flag as False Positive',
+            onPress: handleMarkFalsePositive,
+          },
+          {
+            icon: 'sparkles-outline',
+            label: 'AI Explain',
+            onPress: generateSummary,
+          },
+        ]}
+        onMorePress={handleMorePress}
+      />
     </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Space for floating action bar
+  },
+  tabContainer: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 16,
+  },
   // AI Summary section
   aiSection: {
     marginHorizontal: 16,
