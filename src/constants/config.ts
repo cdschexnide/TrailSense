@@ -2,13 +2,13 @@
 // NOTE: process.env doesn't work in React Native without react-native-dotenv
 // Using hardcoded defaults for now
 
-// PRODUCTION: Using Railway backend (commented out - Railway is down)
-// const DEFAULT_API_URL = 'https://trailsense-production.up.railway.app';
-// const DEFAULT_WS_URL = 'wss://trailsense-production.up.railway.app';
+// PRODUCTION: Using Railway backend
+const DEFAULT_API_URL = 'https://trailsense-production.up.railway.app';
+const DEFAULT_WS_URL = 'wss://trailsense-production.up.railway.app';
 
-// LOCAL DEVELOPMENT:
-const DEFAULT_API_URL = 'http://192.168.12.63:3000';
-const DEFAULT_WS_URL = 'ws://192.168.12.63:3000';
+// LOCAL DEVELOPMENT: (uncomment to use local server)
+// const DEFAULT_API_URL = 'http://192.168.12.63:3000';
+// const DEFAULT_WS_URL = 'ws://192.168.12.63:3000';
 
 export const Config = {
   apiBaseUrl: DEFAULT_API_URL,

@@ -1,2 +1,2 @@
 export { InlineFilterBar } from './InlineFilterBar';
-export default InlineFilterBar;
+export { default } from './InlineFilterBar';

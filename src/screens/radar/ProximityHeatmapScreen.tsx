@@ -266,7 +266,7 @@ export const ProximityHeatmapScreen = () => {
                 <View style={styles.floatingControls}>
                   {/* Satellite Toggle */}
                   <TouchableOpacity
-                    style={styles.floatingButton}
+                    style={[styles.floatingButton, { backgroundColor: colors.systemBlue }]}
                     onPress={() => setShowSatellite(!showSatellite)}
                     activeOpacity={0.8}
                   >
@@ -274,7 +274,7 @@ export const ProximityHeatmapScreen = () => {
                   </TouchableOpacity>
                   {/* Reset View Button */}
                   <TouchableOpacity
-                    style={styles.floatingButton}
+                    style={[styles.floatingButton, { backgroundColor: colors.systemBlue }]}
                     onPress={resetMapView}
                     activeOpacity={0.8}
                   >
@@ -314,7 +314,7 @@ export const ProximityHeatmapScreen = () => {
 
         {/* Detected Devices List */}
         <Card variant="grouped" style={styles.listCard}>
-          <View style={styles.listHeader}>
+          <View style={[styles.listHeader, { borderBottomColor: colors.separator }]}>
             <Text variant="headline" weight="semibold" color="label">
               Detected Devices
             </Text>
@@ -425,7 +425,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   floatingButton: {
-    backgroundColor: 'rgba(0, 122, 255, 0.9)',
     padding: 10,
     borderRadius: 20,
     shadowColor: '#000',
@@ -455,7 +454,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#3a3a3c',
   },
   emptyState: {
     alignItems: 'center',

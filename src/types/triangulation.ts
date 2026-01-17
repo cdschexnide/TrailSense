@@ -8,15 +8,15 @@ export type TriangulationSignalType = 'wifi' | 'bluetooth' | 'cellular';
 
 export interface TriangulatedPosition {
   id: string;
-  timestamp: string;
+  deviceId: string;
   fingerprintHash: string;
   signalType: TriangulationSignalType;
   latitude: number;
   longitude: number;
   accuracyMeters: number;
   confidence: number;
-  measurementCount?: number;
-  deviceId?: string;
+  measurementCount: number;
+  updatedAt: string;
 }
 
 export interface TriangulatedMarker {

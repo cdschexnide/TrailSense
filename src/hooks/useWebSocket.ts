@@ -4,6 +4,7 @@ import { websocketService } from '@api/websocket';
 import { Alert, Device } from '@types';
 import { ALERTS_QUERY_KEY } from './api/useAlerts';
 import { DEVICES_QUERY_KEY } from './api/useDevices';
+import { POSITIONS_QUERY_KEY } from './api/usePositions';
 
 export const useWebSocket = (token: string | null) => {
   const queryClient = useQueryClient();
@@ -46,14 +47,24 @@ export const useWebSocket = (token: string | null) => {
       });
     };
 
+    // Handle positions-updated event
+    const handlePositionsUpdated = (data: { deviceId: string; positions: any[] }) => {
+      console.log('[WebSocket] Positions updated:', data.deviceId, data.positions.length);
+      // Invalidate React Query cache for positions
+      // This will trigger a refetch on any component using usePositions
+      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, data.deviceId] });
+    };
+
     // Subscribe to events
     websocketService.on('alert', handleAlert);
     websocketService.on('device-status', handleDeviceStatus);
+    websocketService.on('positions-updated', handlePositionsUpdated);
 
     // Cleanup on unmount
     return () => {
       websocketService.off('alert', handleAlert);
       websocketService.off('device-status', handleDeviceStatus);
+      websocketService.off('positions-updated', handlePositionsUpdated);
       websocketService.disconnect();
     };
   }, [token, queryClient]);

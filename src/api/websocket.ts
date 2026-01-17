@@ -23,6 +23,10 @@ class WebSocketService {
         this.emit('device-status', status);
       });
 
+      mockWebSocketService.on('positions-updated', (data: { deviceId: string; positions: any[] }) => {
+        this.emit('positions-updated', data);
+      });
+
       mockWebSocketService.on('connect', () => {
         this.emit('connect', {});
       });
@@ -57,6 +61,12 @@ class WebSocketService {
 
     this.socket.on('device-status', status => {
       this.emit('device-status', status);
+    });
+
+    // Handle positions-updated event
+    this.socket.on('positions-updated', (data: { deviceId: string; positions: any[] }) => {
+      console.log('[WebSocket] Positions updated:', data.deviceId, data.positions.length);
+      this.emit('positions-updated', data);
     });
   }
 

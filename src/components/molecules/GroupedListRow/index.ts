@@ -1,2 +1,2 @@
 export { GroupedListRow } from './GroupedListRow';
-export default GroupedListRow;
+export { default } from './GroupedListRow';

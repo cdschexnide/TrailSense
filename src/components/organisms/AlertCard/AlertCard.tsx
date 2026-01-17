@@ -1,12 +1,11 @@
 /**
  * AlertCard Component - REDESIGNED
  *
- * Compact alert card with:
- * - Top accent bar (3px) colored by threat level
+ * Compact alert card (~76px) with:
+ * - Top accent bar (3px, 5px for critical) colored by threat level
+ * - Critical alerts get 1px border around entire card
  * - Inline 20px icon next to detection title
- * - Single-line metadata with dot separators (rssi · proximity · device · mac)
- * - Pulsing animation for critical alerts
- * - Signal strength interpretation
+ * - Single-line metadata with dot separators
  * - Staggered entrance animations
  * - Press scale feedback with haptics
  */
@@ -15,7 +14,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Alert } from '@types';
-import { Badge, Icon, Text } from '@components/atoms';
+import { Icon, Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 import { formatTimestamp } from '@utils/dateUtils';
 import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
@@ -81,8 +80,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(animateEntrance ? 0 : 1)).current;
   const translateXAnim = useRef(new Animated.Value(animateEntrance ? 30 : 0)).current;
-  const pulseAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnimRef = useRef<Animated.CompositeAnimation | null>(null);
 
   // Entrance animation
   useEffect(() => {
@@ -107,36 +104,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
       }, delay);
     }
   }, [animateEntrance, index]);
-
-  // Pulse animation for critical alerts
-  useEffect(() => {
-    if (alert.threatLevel === 'critical') {
-      pulseAnimRef.current = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 750,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 0,
-            duration: 750,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulseAnimRef.current.start();
-    } else {
-      pulseAnimRef.current?.stop();
-      pulseAnim.setValue(0);
-    }
-
-    return () => {
-      pulseAnimRef.current?.stop();
-    };
-  }, [alert.threatLevel]);
 
   // Press handlers
   const handlePressIn = () => {
@@ -170,12 +137,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
 
   // Get threat color
   const threatColor = getThreatColor(alert.threatLevel);
-
-  // Interpolate pulse opacity
-  const pulseOpacity = pulseAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 0.15],
-  });
+  const isCritical = alert.threatLevel === 'critical';
 
   return (
     <Animated.View
@@ -188,34 +150,25 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             { translateX: translateXAnim },
             { scale: scaleAnim },
           ],
+          // Critical alerts get a border
+          ...(isCritical && {
+            borderWidth: 1,
+            borderColor: threatColor,
+          }),
         },
         style,
       ]}
     >
-      {/* Top accent bar */}
+      {/* Top accent bar - 5px for critical, 3px for others */}
       <View
         style={[
           styles.topAccentBar,
           {
             backgroundColor: threatColor,
+            height: isCritical ? 5 : 3,
           },
         ]}
       />
-
-      {/* Pulse glow for critical alerts */}
-      {alert.threatLevel === 'critical' && (
-        <Animated.View
-          style={[
-            styles.topAccentBar,
-            {
-              backgroundColor: threatColor,
-              height: 7,
-              opacity: pulseOpacity,
-            },
-          ]}
-          pointerEvents="none"
-        />
-      )}
 
       <Pressable
         onPress={handlePress}
@@ -226,85 +179,74 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         accessibilityLabel={`${alert.threatLevel} ${alert.detectionType} alert`}
       >
 
-        {/* Header: Badge + Timestamp */}
-        <View style={styles.header}>
-          <Badge variant={alert.threatLevel as any} size="sm">
-            {alert.threatLevel.toUpperCase()}
-          </Badge>
-          <Text variant="caption1" color="secondaryLabel">
+        {/* Title row with inline icon */}
+        <View style={styles.titleRow}>
+          <Icon
+            name={detectionConfig.icon as any}
+            size={20}
+            color={detectionConfig.color}
+          />
+          <Text variant="headline" color="label" style={styles.detectionTitle}>
+            {detectionConfig.label}
+          </Text>
+          <Text variant="caption1" color="secondaryLabel" style={styles.timestamp}>
             {formatTimestamp(alert.timestamp)}
           </Text>
         </View>
 
-        {/* Detection info */}
-        <View style={styles.detectionRow}>
-          <View style={styles.detectionContent}>
-            {/* Title row with inline icon */}
-            <View style={styles.titleRow}>
-              <Icon
-                name={detectionConfig.icon as any}
-                size={20}
-                color={detectionConfig.color}
-              />
-              <Text variant="headline" color="label" style={styles.detectionTitle}>
-                {detectionConfig.label}
-              </Text>
-            </View>
-
-            {/* Single-line metadata with dot separators */}
-            <View style={styles.metadataLine}>
-              <Text variant="caption1" color="secondaryLabel">
-                {alert.rssi} dBm
-              </Text>
-              <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
-                {' · '}
-              </Text>
-              <View
-                style={[
-                  styles.proximityPill,
-                  { backgroundColor: `${rssiInfo.color}20` },
-                ]}
+        {/* Single-line metadata with dot separators */}
+        <View style={styles.metadataRow}>
+          <View style={styles.metadataLine}>
+            <Text variant="caption1" color="secondaryLabel">
+              {alert.rssi} dBm
+            </Text>
+            <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+              {' · '}
+            </Text>
+            <View
+              style={[
+                styles.proximityPill,
+                { backgroundColor: `${rssiInfo.color}20` },
+              ]}
+            >
+              <Text
+                variant="caption2"
+                style={{ color: rssiInfo.color, fontWeight: '600' }}
               >
-                <Text
-                  variant="caption2"
-                  style={{ color: rssiInfo.color, fontWeight: '600' }}
-                >
-                  {rssiInfo.label}
-                </Text>
-              </View>
-              <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
-                {' · '}
+                {rssiInfo.label}
               </Text>
-              <Text variant="caption1" color="secondaryLabel">
-                {alert.deviceId}
-              </Text>
-              {alert.macAddress && (
-                <>
-                  <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
-                    {' · '}
-                  </Text>
-                  <Text variant="caption1" color="secondaryLabel" style={styles.macSuffix}>
-                    {alert.macAddress.slice(-5).replace(':', '').toLowerCase()}
-                  </Text>
-                </>
-              )}
-              {alert.metadata?.signalCount && (
-                <>
-                  <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
-                    {' · '}
-                  </Text>
-                  <Text variant="caption1" color="secondaryLabel">
-                    {alert.metadata.signalCount}x
-                  </Text>
-                </>
-              )}
             </View>
+            <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+              {' · '}
+            </Text>
+            <Text variant="caption1" color="secondaryLabel">
+              {alert.deviceId}
+            </Text>
+            {alert.macAddress && (
+              <>
+                <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                  {' · '}
+                </Text>
+                <Text variant="caption1" color="secondaryLabel" style={styles.macSuffix}>
+                  {alert.macAddress.slice(-5).replace(':', '').toLowerCase()}
+                </Text>
+              </>
+            )}
+            {alert.metadata?.signalCount && (
+              <>
+                <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                  {' · '}
+                </Text>
+                <Text variant="caption1" color="secondaryLabel">
+                  {alert.metadata.signalCount}x
+                </Text>
+              </>
+            )}
           </View>
-
           {/* Chevron */}
           <Icon
             name="chevron-forward"
-            size={20}
+            size={18}
             color={theme.colors.tertiaryLabel}
           />
         </View>
@@ -317,7 +259,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
-    marginVertical: 8,
+    marginVertical: 6,
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -326,39 +268,33 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 3,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
   cardContent: {
-    flex: 1,
-    padding: 14,
-    paddingTop: 16, // Extra padding to account for top accent bar
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  detectionRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 0,
-  },
-  detectionContent: {
-    flex: 1,
+    paddingHorizontal: 12,
+    paddingTop: 14,
+    paddingBottom: 10,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   detectionTitle: {
+    flex: 1,
     fontWeight: '600',
   },
+  timestamp: {
+    marginLeft: 'auto',
+  },
+  metadataRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   metadataLine: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',

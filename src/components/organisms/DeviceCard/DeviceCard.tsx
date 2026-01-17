@@ -44,7 +44,9 @@ const formatCoordinates = (lat?: number, lon?: number): string => {
 const StatusDot: React.FC<{
   isOnline: boolean;
   pulse?: boolean;
-}> = ({ isOnline, pulse = false }) => {
+  onlineColor: string;
+  offlineColor: string;
+}> = ({ isOnline, pulse = false, onlineColor, offlineColor }) => {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const pulseOpacityAnim = useRef(new Animated.Value(0.4)).current;
 
@@ -85,7 +87,7 @@ const StatusDot: React.FC<{
     }
   }, [pulse, isOnline]);
 
-  const color = isOnline ? '#30D158' : '#FF453A';
+  const color = isOnline ? onlineColor : offlineColor;
 
   return (
     <View style={statusDotStyles.container}>
@@ -231,7 +233,12 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
         {/* Header row: Status indicator + Device name + Status label */}
         <View style={styles.header}>
           <View style={styles.nameRow}>
-            <StatusDot isOnline={device.online} pulse={device.online} />
+            <StatusDot
+              isOnline={device.online}
+              pulse={device.online}
+              onlineColor={theme.colors.systemGreen}
+              offlineColor={theme.colors.systemRed}
+            />
             <View style={styles.nameContainer}>
               <Text variant="headline" color="label" style={styles.deviceName}>
                 {device.name}

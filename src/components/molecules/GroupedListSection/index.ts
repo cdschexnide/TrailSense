@@ -1,2 +1,2 @@
 export { GroupedListSection } from './GroupedListSection';
-export default GroupedListSection;
+export { default } from './GroupedListSection';

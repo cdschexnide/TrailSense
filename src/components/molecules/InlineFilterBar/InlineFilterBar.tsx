@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { FilterChip } from '../FilterChip';
 
 interface FilterOption {
