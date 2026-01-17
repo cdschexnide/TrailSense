@@ -4,6 +4,7 @@
  * Compact alert card with:
  * - Top accent bar (3px) colored by threat level
  * - Inline 20px icon next to detection title
+ * - Single-line metadata with dot separators (rssi · proximity · device · mac)
  * - Pulsing animation for critical alerts
  * - Signal strength interpretation
  * - Staggered entrance animations
@@ -250,114 +251,54 @@ export const AlertCard: React.FC<AlertCardProps> = ({
               </Text>
             </View>
 
-            {/* Metadata */}
-            <View style={styles.metadata}>
-              {/* Signal strength with interpretation */}
-              <View style={styles.metadataRow}>
-                <Icon name="cellular" size={14} color={rssiInfo.color} />
+            {/* Single-line metadata with dot separators */}
+            <View style={styles.metadataLine}>
+              <Text variant="caption1" color="secondaryLabel">
+                {alert.rssi} dBm
+              </Text>
+              <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                {' · '}
+              </Text>
+              <View
+                style={[
+                  styles.proximityPill,
+                  { backgroundColor: `${rssiInfo.color}20` },
+                ]}
+              >
                 <Text
-                  variant="subheadline"
-                  color="secondaryLabel"
-                  style={styles.metadataText}
+                  variant="caption2"
+                  style={{ color: rssiInfo.color, fontWeight: '600' }}
                 >
-                  {alert.rssi} dBm
-                </Text>
-                <View
-                  style={[
-                    styles.signalBadge,
-                    { backgroundColor: `${rssiInfo.color}20` },
-                  ]}
-                >
-                  <Text
-                    variant="caption2"
-                    style={{ color: rssiInfo.color, fontWeight: '600' }}
-                  >
-                    {rssiInfo.label}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Device */}
-              <View style={styles.metadataRow}>
-                <Icon
-                  name="hardware-chip-outline"
-                  size={14}
-                  color={theme.colors.secondaryLabel}
-                />
-                <Text
-                  variant="subheadline"
-                  color="secondaryLabel"
-                  style={styles.metadataText}
-                >
-                  {alert.deviceId}
+                  {rssiInfo.label}
                 </Text>
               </View>
-
-              {/* MAC Address */}
+              <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                {' · '}
+              </Text>
+              <Text variant="caption1" color="secondaryLabel">
+                {alert.deviceId}
+              </Text>
               {alert.macAddress && (
-                <View style={styles.metadataRow}>
-                  <Icon
-                    name="finger-print-outline"
-                    size={14}
-                    color={theme.colors.secondaryLabel}
-                  />
-                  <Text
-                    variant="caption1"
-                    color="tertiaryLabel"
-                    style={[styles.metadataText, styles.macAddress]}
-                  >
-                    {alert.macAddress}
+                <>
+                  <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                    {' · '}
                   </Text>
-                </View>
+                  <Text variant="caption1" color="secondaryLabel" style={styles.macSuffix}>
+                    {alert.macAddress.slice(-5).replace(':', '').toLowerCase()}
+                  </Text>
+                </>
               )}
-
-              {/* Signal count from summary */}
               {alert.metadata?.signalCount && (
-                <View style={styles.metadataRow}>
-                  <Icon
-                    name="repeat"
-                    size={14}
-                    color={theme.colors.secondaryLabel}
-                  />
-                  <Text
-                    variant="caption1"
-                    color="secondaryLabel"
-                    style={styles.metadataText}
-                  >
-                    Detected {alert.metadata.signalCount}x
-                    {alert.metadata.windowDuration
-                      ? ` in ${alert.metadata.windowDuration}s`
-                      : ''}
+                <>
+                  <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                    {' · '}
                   </Text>
-                </View>
+                  <Text variant="caption1" color="secondaryLabel">
+                    {alert.metadata.signalCount}x
+                  </Text>
+                </>
               )}
             </View>
-
-              {/* Summary source badge */}
-              {alert.metadata?.source === 'summary' && (
-                <View
-                  style={[
-                    styles.sourceBadge,
-                    { backgroundColor: theme.colors.systemIndigo + '15' },
-                  ]}
-                >
-                  <Icon
-                    name="layers-outline"
-                    size={12}
-                    color={theme.colors.systemIndigo}
-                  />
-                  <Text
-                    variant="caption2"
-                    style={{
-                      color: theme.colors.systemIndigo,
-                      marginLeft: 4,
-                      fontWeight: '600',
-                    }}
-                  >
-                    Aggregated
-                  </Text>
-                </View>
-              )}
           </View>
 
           {/* Chevron */}
@@ -417,35 +358,21 @@ const styles = StyleSheet.create({
   detectionTitle: {
     fontWeight: '600',
   },
-  metadata: {
-    gap: 6,
-  },
-  metadataRow: {
+  metadataLine: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    flexWrap: 'wrap',
   },
-  metadataText: {
-    marginLeft: 2,
+  dotSeparator: {
+    opacity: 0.6,
   },
-  signalBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    marginLeft: 6,
+  proximityPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
   },
-  macAddress: {
+  macSuffix: {
     fontFamily: 'monospace',
-    fontSize: 12,
-  },
-  sourceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginTop: 8,
-    alignSelf: 'flex-start',
   },
 });
 
