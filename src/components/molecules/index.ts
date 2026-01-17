@@ -1,3 +1,4 @@
+export { ActivityChart } from './ActivityChart';
 export { ChartCard } from './ChartCard';
 export * from './DetailHero';
 export * from './DetectedDeviceMarker';
