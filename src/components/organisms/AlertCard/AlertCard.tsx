@@ -1,11 +1,11 @@
 /**
  * AlertCard Component - REDESIGNED
  *
- * Enhanced alert card with:
- * - Threat-level background tinting
+ * Compact alert card with:
+ * - Top accent bar (3px) colored by threat level
+ * - Inline 20px icon next to detection title
  * - Pulsing animation for critical alerts
  * - Signal strength interpretation
- * - Enhanced visual hierarchy
  * - Staggered entrance animations
  * - Press scale feedback with haptics
  */
@@ -13,7 +13,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Alert, ThreatLevel } from '@types';
+import { Alert } from '@types';
 import { Badge, Icon, Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 import { formatTimestamp } from '@utils/dateUtils';
@@ -32,19 +32,6 @@ interface AlertCardProps {
   /** Enable entrance animation */
   animateEntrance?: boolean;
 }
-
-/**
- * Get threat stripe width based on severity
- */
-const getThreatStripeWidth = (threatLevel: ThreatLevel) => {
-  const widths = {
-    critical: 5,
-    high: 4,
-    medium: 4,
-    low: 3,
-  };
-  return widths[threatLevel] || 3;
-};
 
 /**
  * Get detection icon and color
@@ -180,9 +167,8 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   // Get RSSI interpretation
   const rssiInfo = interpretRSSI(alert.rssi);
 
-  // Get threat color and stripe width
+  // Get threat color
   const threatColor = getThreatColor(alert.threatLevel);
-  const stripeWidth = getThreatStripeWidth(alert.threatLevel);
 
   // Interpolate pulse opacity
   const pulseOpacity = pulseAnim.interpolate({
@@ -205,13 +191,12 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         style,
       ]}
     >
-      {/* Left threat stripe indicator */}
+      {/* Top accent bar */}
       <View
         style={[
-          styles.threatStripe,
+          styles.topAccentBar,
           {
             backgroundColor: threatColor,
-            width: stripeWidth,
           },
         ]}
       />
@@ -220,10 +205,10 @@ export const AlertCard: React.FC<AlertCardProps> = ({
       {alert.threatLevel === 'critical' && (
         <Animated.View
           style={[
-            styles.threatStripe,
+            styles.topAccentBar,
             {
               backgroundColor: threatColor,
-              width: stripeWidth + 4,
+              height: 7,
               opacity: pulseOpacity,
             },
           ]}
@@ -252,24 +237,18 @@ export const AlertCard: React.FC<AlertCardProps> = ({
 
         {/* Detection info */}
         <View style={styles.detectionRow}>
-          {/* Detection icon with colored background */}
-          <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: `${detectionConfig.color}20` },
-            ]}
-          >
-            <Icon
-              name={detectionConfig.icon as any}
-              size={28}
-              color={detectionConfig.color}
-            />
-          </View>
-
           <View style={styles.detectionContent}>
-            <Text variant="headline" color="label" style={styles.detectionTitle}>
-              {detectionConfig.label}
-            </Text>
+            {/* Title row with inline icon */}
+            <View style={styles.titleRow}>
+              <Icon
+                name={detectionConfig.icon as any}
+                size={20}
+                color={detectionConfig.color}
+              />
+              <Text variant="headline" color="label" style={styles.detectionTitle}>
+                {detectionConfig.label}
+              </Text>
+            </View>
 
             {/* Metadata */}
             <View style={styles.metadata}>
@@ -398,22 +377,22 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginVertical: 8,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
-    flexDirection: 'row',
   },
-  threatStripe: {
+  topAccentBar: {
     position: 'absolute',
-    left: 0,
     top: 0,
-    bottom: 0,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
+    left: 0,
+    right: 0,
+    height: 3,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
   cardContent: {
     flex: 1,
     padding: 14,
-    paddingLeft: 16,
+    paddingTop: 16, // Extra padding to account for top accent bar
   },
   header: {
     flexDirection: 'row',
@@ -424,22 +403,19 @@ const styles = StyleSheet.create({
   detectionRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 14,
     marginBottom: 0,
-  },
-  iconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   detectionContent: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
   detectionTitle: {
     fontWeight: '600',
-    marginBottom: 8,
   },
   metadata: {
     gap: 6,
