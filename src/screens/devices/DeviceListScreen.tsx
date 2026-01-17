@@ -45,6 +45,7 @@ export const DeviceListScreen = ({ navigation }: any) => {
   const colors = theme.colors;
   const { data: devices, isLoading, error, refetch } = useDevices();
   const [refreshing, setRefreshing] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'online' | 'offline' | null>(null);
 
   // Animated scroll value for header
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -58,20 +59,31 @@ export const DeviceListScreen = ({ navigation }: any) => {
     const onlineDevices = devices.filter((d: Device) => d.online);
     const offlineDevices = devices.filter((d: Device) => !d.online);
 
+    // Apply status filter
+    let filteredDevices = devices;
+    if (statusFilter === 'online') {
+      filteredDevices = onlineDevices;
+    } else if (statusFilter === 'offline') {
+      filteredDevices = offlineDevices;
+    }
+
     const deviceSections: DeviceSection[] = [];
 
-    if (onlineDevices.length > 0) {
+    const filteredOnline = filteredDevices.filter((d: Device) => d.online);
+    const filteredOffline = filteredDevices.filter((d: Device) => !d.online);
+
+    if (filteredOnline.length > 0) {
       deviceSections.push({
         title: 'Online',
-        data: onlineDevices,
+        data: filteredOnline,
         status: 'online',
       });
     }
 
-    if (offlineDevices.length > 0) {
+    if (filteredOffline.length > 0) {
       deviceSections.push({
         title: 'Offline',
-        data: offlineDevices,
+        data: filteredOffline,
         status: 'offline',
       });
     }
@@ -84,7 +96,7 @@ export const DeviceListScreen = ({ navigation }: any) => {
         offline: offlineDevices.length,
       },
     };
-  }, [devices]);
+  }, [devices, statusFilter]);
 
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState message="Failed to load devices" />;
@@ -104,10 +116,16 @@ export const DeviceListScreen = ({ navigation }: any) => {
     setRefreshing(false);
   };
 
-  // Hero section with stats
+  // Hero section with filter chips
   const renderListHeader = () => (
     <View>
-      {stats.total > 0 && <DevicesHeaderHero stats={stats} />}
+      {stats.total > 0 && (
+        <DevicesHeaderHero
+          deviceCounts={stats}
+          selectedFilter={statusFilter}
+          onFilterSelect={setStatusFilter}
+        />
+      )}
     </View>
   );
 
