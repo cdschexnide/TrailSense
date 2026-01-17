@@ -1,15 +1,17 @@
+// src/components/organisms/HeaderHero/AlertsHeaderHero.tsx
 /**
- * AlertsHeaderHero - Redesigned
+ * AlertsHeaderHero - Tesla Dashboard Style
  *
- * Clean inline filter bar replacing chunky gradient cards.
- * Uses FilterChip components for threat level filtering.
+ * Activity area chart showing detection volume over 24h,
+ * with filter chips below for threat level filtering.
  */
 
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
+import { ActivityChart } from '@components/molecules/ActivityChart';
 import { InlineFilterBar } from '@components/molecules/InlineFilterBar';
 import { useTheme } from '@hooks/useTheme';
-import { ThreatLevel } from '@types';
+import { ThreatLevel, Alert } from '@types';
 
 interface AlertsHeaderHeroProps {
   threatCounts: {
@@ -21,15 +23,38 @@ interface AlertsHeaderHeroProps {
   };
   selectedFilter: ThreatLevel | null;
   onFilterSelect: (level: ThreatLevel | null) => void;
+  alerts?: Alert[];
+  scrollY?: Animated.Value;
 }
 
 export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
   threatCounts,
   selectedFilter,
   onFilterSelect,
+  alerts = [],
+  scrollY,
 }) => {
   const { theme } = useTheme();
   const colors = theme.colors;
+
+  // Generate 24-hour activity data from alerts
+  const activityData = useMemo(() => {
+    const hourlyData = new Array(24).fill(0);
+    const now = new Date();
+
+    alerts.forEach((alert) => {
+      const alertTime = new Date(alert.timestamp);
+      const hoursAgo = Math.floor(
+        (now.getTime() - alertTime.getTime()) / (1000 * 60 * 60)
+      );
+
+      if (hoursAgo >= 0 && hoursAgo < 24) {
+        hourlyData[23 - hoursAgo]++;
+      }
+    });
+
+    return hourlyData;
+  }, [alerts]);
 
   const filterOptions = [
     {
@@ -58,8 +83,39 @@ export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
     },
   ];
 
+  // Collapse animation based on scroll
+  const chartHeight = scrollY
+    ? scrollY.interpolate({
+        inputRange: [0, 100],
+        outputRange: [80, 0],
+        extrapolate: 'clamp',
+      })
+    : 80;
+
+  const chartOpacity = scrollY
+    ? scrollY.interpolate({
+        inputRange: [0, 60],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+      })
+    : 1;
+
   return (
     <View style={styles.container}>
+      {/* Activity Chart - collapses on scroll */}
+      <Animated.View
+        style={[
+          styles.chartContainer,
+          {
+            height: chartHeight,
+            opacity: chartOpacity,
+          },
+        ]}
+      >
+        <ActivityChart data={activityData} height={80} />
+      </Animated.View>
+
+      {/* Filter Chips */}
       <InlineFilterBar
         options={filterOptions}
         selectedKey={selectedFilter}
@@ -71,6 +127,13 @@ export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 4,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  chartContainer: {
+    overflow: 'hidden',
+    marginBottom: 8,
   },
 });
+
+export default AlertsHeaderHero;

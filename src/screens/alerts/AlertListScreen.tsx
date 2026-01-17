@@ -132,6 +132,8 @@ export const AlertListScreen = ({ navigation }: any) => {
           threatCounts={threatCounts}
           selectedFilter={selectedThreatFilter}
           onFilterSelect={handleFilterSelect}
+          alerts={alerts || []}
+          scrollY={scrollY}
         />
       )}
     </View>
