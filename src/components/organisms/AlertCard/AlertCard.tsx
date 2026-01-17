@@ -2,8 +2,8 @@
  * AlertCard Component - REDESIGNED
  *
  * Compact alert card (~76px) with:
- * - Top accent bar (3px, 5px for critical) colored by threat level
- * - Critical alerts get 1px border around entire card
+ * - Critical alerts: wrapped with GlowContainer (subtle pulsing glow)
+ * - Non-critical alerts: 3px left accent line colored by threat level
  * - Inline 20px icon next to detection title
  * - Single-line metadata with dot separators
  * - Staggered entrance animations
@@ -15,6 +15,7 @@ import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-
 import * as Haptics from 'expo-haptics';
 import { Alert } from '@types';
 import { Icon, Text } from '@components/atoms';
+import { GlowContainer } from '@components/molecules/GlowContainer';
 import { useTheme } from '@hooks/useTheme';
 import { formatTimestamp } from '@utils/dateUtils';
 import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
@@ -139,10 +140,12 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   const threatColor = getThreatColor(alert.threatLevel);
   const isCritical = alert.threatLevel === 'critical';
 
-  return (
+  // Card content - used for both critical and non-critical alerts
+  const cardContent = (
     <Animated.View
       style={[
-        styles.card,
+        // Use different base styles for critical (no margins) vs non-critical (with margins)
+        isCritical ? styles.cardInGlow : styles.card,
         {
           backgroundColor: theme.colors.secondarySystemBackground,
           opacity: opacityAnim,
@@ -150,25 +153,20 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             { translateX: translateXAnim },
             { scale: scaleAnim },
           ],
-          // Critical alerts get a border
-          ...(isCritical && {
-            borderWidth: 1,
-            borderColor: threatColor,
-          }),
         },
-        style,
+        // Only apply custom style when not wrapped by GlowContainer
+        !isCritical && style,
       ]}
     >
-      {/* Top accent bar - 5px for critical, 3px for others */}
-      <View
-        style={[
-          styles.topAccentBar,
-          {
-            backgroundColor: threatColor,
-            height: isCritical ? 5 : 3,
-          },
-        ]}
-      />
+      {/* Left accent line for non-critical alerts */}
+      {!isCritical && (
+        <View
+          style={[
+            styles.leftAccent,
+            { backgroundColor: threatColor },
+          ]}
+        />
+      )}
 
       <Pressable
         onPress={handlePress}
@@ -254,22 +252,48 @@ export const AlertCard: React.FC<AlertCardProps> = ({
       </Pressable>
     </Animated.View>
   );
+
+  // Wrap critical alerts with GlowContainer
+  if (isCritical) {
+    return (
+      <GlowContainer
+        glowColor={threatColor}
+        intensity="subtle"
+        pulse={true}
+        style={{ ...styles.glowWrapper, ...style }}
+      >
+        {cardContent}
+      </GlowContainer>
+    );
+  }
+
+  return cardContent;
 };
 
 const styles = StyleSheet.create({
+  glowWrapper: {
+    marginHorizontal: 16,
+    marginVertical: 6,
+    borderRadius: 12,
+  },
   card: {
     marginHorizontal: 16,
     marginVertical: 6,
     borderRadius: 12,
     overflow: 'hidden',
   },
-  topAccentBar: {
+  cardInGlow: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  leftAccent: {
     position: 'absolute',
-    top: 0,
     left: 0,
-    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
     borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 12,
   },
   cardContent: {
     paddingHorizontal: 12,
