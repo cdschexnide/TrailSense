@@ -25,8 +25,7 @@ module.exports = function (api) {
     ],
   ];
 
-  // Temporarily disable reanimated plugin for Expo Go compatibility
-  // Only add reanimated plugin when not in test environment
+  // Reanimated plugin commented out - not needed without Skia
   // if (process.env.NODE_ENV !== 'test') {
   //   plugins.push('react-native-reanimated/plugin');
   // }
