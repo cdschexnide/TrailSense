@@ -18,25 +18,25 @@ export const Colors = {
      * Primary text color
      * Use for main content text
      */
-    label: '#000000',
+    label: '#2D2A24',
 
     /**
      * Secondary text color
      * Use for secondary or supplementary text
      */
-    secondaryLabel: 'rgba(60, 60, 67, 0.6)',
+    secondaryLabel: 'rgba(45, 42, 36, 0.60)',
 
     /**
      * Tertiary text color
      * Use for tertiary or de-emphasized text
      */
-    tertiaryLabel: 'rgba(60, 60, 67, 0.3)',
+    tertiaryLabel: 'rgba(45, 42, 36, 0.38)',
 
     /**
      * Quaternary text color
      * Use for watermarks and disabled text
      */
-    quaternaryLabel: 'rgba(60, 60, 67, 0.18)',
+    quaternaryLabel: 'rgba(45, 42, 36, 0.22)',
 
     // ======================
     // iOS System Colors - Backgrounds
@@ -46,37 +46,37 @@ export const Colors = {
      * Primary background color
      * Use for main screen backgrounds
      */
-    systemBackground: '#FFFFFF',
+    systemBackground: '#F8F6F1',
 
     /**
      * Secondary background color
      * Use for grouped content backgrounds
      */
-    secondarySystemBackground: '#F2F2F7',
+    secondarySystemBackground: '#F2EDE4',
 
     /**
      * Tertiary background color
      * Use for third-level grouped content
      */
-    tertiarySystemBackground: '#FFFFFF',
+    tertiarySystemBackground: '#EDE7DB',
 
     /**
      * Primary grouped background
      * Use for grouped table view backgrounds
      */
-    systemGroupedBackground: '#F2F2F7',
+    systemGroupedBackground: '#F5F2EB',
 
     /**
      * Secondary grouped background
      * Use for grouped table view cells
      */
-    secondarySystemGroupedBackground: '#FFFFFF',
+    secondarySystemGroupedBackground: '#FAF8F4',
 
     /**
      * Tertiary grouped background
      * Use for third-level grouped content
      */
-    tertiarySystemGroupedBackground: '#F2F2F7',
+    tertiarySystemGroupedBackground: '#F0EBE2',
 
     // ======================
     // iOS System Colors - Fill
@@ -86,25 +86,25 @@ export const Colors = {
      * Primary fill color
      * Use for thin overlays over backgrounds
      */
-    systemFill: 'rgba(120, 120, 128, 0.2)',
+    systemFill: 'rgba(90, 82, 70, 0.15)',
 
     /**
      * Secondary fill color
      * Use for medium-thickness overlays
      */
-    secondarySystemFill: 'rgba(120, 120, 128, 0.16)',
+    secondarySystemFill: 'rgba(90, 82, 70, 0.12)',
 
     /**
      * Tertiary fill color
      * Use for thin overlays over fills
      */
-    tertiarySystemFill: 'rgba(118, 118, 128, 0.12)',
+    tertiarySystemFill: 'rgba(90, 82, 70, 0.09)',
 
     /**
      * Quaternary fill color
      * Use for the thinnest overlays
      */
-    quaternarySystemFill: 'rgba(116, 116, 128, 0.08)',
+    quaternarySystemFill: 'rgba(90, 82, 70, 0.06)',
 
     // ======================
     // iOS System Colors - Semantic (Tint Colors)
@@ -168,12 +168,12 @@ export const Colors = {
     // iOS System Colors - Gray Scale
     // ======================
 
-    systemGray: '#8E8E93',
-    systemGray2: '#AEAEB2',
-    systemGray3: '#C7C7CC',
-    systemGray4: '#D1D1D6',
-    systemGray5: '#E5E5EA',
-    systemGray6: '#F2F2F7',
+    systemGray: '#8A8579',
+    systemGray2: '#ACA69A',
+    systemGray3: '#C5BFAE',
+    systemGray4: '#D0CABF',
+    systemGray5: '#E3DED3',
+    systemGray6: '#F0EBE2',
 
     // ======================
     // iOS Separator Colors
@@ -183,13 +183,13 @@ export const Colors = {
      * Separator color
      * Use for thin borders and divider lines
      */
-    separator: 'rgba(60, 60, 67, 0.29)',
+    separator: 'rgba(45, 42, 36, 0.18)',
 
     /**
      * Opaque separator
      * Use for borders that don't need transparency
      */
-    opaqueSeparator: '#C6C6C8',
+    opaqueSeparator: '#DDD8CE',
 
     // ======================
     // TrailSense-Specific: Threat Levels
@@ -348,9 +348,9 @@ export const Colors = {
      * Gradient color arrays for various UI elements
      */
     gradients: {
-      cardHeader: ['rgba(0, 0, 0, 0.02)', 'rgba(0, 0, 0, 0)'],
-      statsBackground: ['#F2F2F7', '#E5E5EA'],
-      shimmer: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.05)', 'rgba(0, 0, 0, 0)'],
+      cardHeader: ['rgba(45, 42, 36, 0.03)', 'rgba(45, 42, 36, 0)'],
+      statsBackground: ['#F5F2EB', '#E8E2D6'],
+      shimmer: ['rgba(45, 42, 36, 0)', 'rgba(45, 42, 36, 0.04)', 'rgba(45, 42, 36, 0)'],
       onlineStatus: ['rgba(52, 199, 89, 0.12)', 'rgba(52, 199, 89, 0)'],
       offlineStatus: ['rgba(255, 59, 48, 0.12)', 'rgba(255, 59, 48, 0)'],
     },
@@ -362,38 +362,38 @@ export const Colors = {
     /**
      * @deprecated Use systemBackground instead
      */
-    background: '#FFFFFF',
+    background: '#F8F6F1',
 
     /**
      * @deprecated Use secondarySystemBackground instead
      */
-    surface: '#F2F2F7',
+    surface: '#F2EDE4',
 
     /**
      * @deprecated Use tertiarySystemBackground instead
      */
-    surfaceVariant: '#E0E0E0',
+    surfaceVariant: '#E3DED3',
 
     /**
      * Text color aliases for backward compatibility
      * @deprecated Use label, secondaryLabel, etc. instead
      */
     text: {
-      primary: '#000000',
-      secondary: 'rgba(60, 60, 67, 0.6)',
-      disabled: 'rgba(60, 60, 67, 0.3)',
+      primary: '#2D2A24',
+      secondary: 'rgba(45, 42, 36, 0.60)',
+      disabled: 'rgba(45, 42, 36, 0.38)',
       inverse: '#FFFFFF',
     },
 
     /**
      * @deprecated Use separator instead
      */
-    border: 'rgba(60, 60, 67, 0.29)',
+    border: 'rgba(45, 42, 36, 0.18)',
 
     /**
      * @deprecated Use separator instead
      */
-    divider: 'rgba(60, 60, 67, 0.29)',
+    divider: 'rgba(45, 42, 36, 0.18)',
   },
 
   dark: {
