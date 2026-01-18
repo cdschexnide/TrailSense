@@ -515,11 +515,12 @@ export const AlertDetailScreen = () => {
             label: 'Flag as False Positive',
             onPress: handleMarkFalsePositive,
           },
-          {
-            icon: 'sparkles-outline',
-            label: 'AI Explain',
-            onPress: generateSummary,
-          },
+          // TODO: Re-enable when AI explain feature is ready
+          // {
+          //   icon: 'sparkles-outline',
+          //   label: 'AI Explain',
+          //   onPress: generateSummary,
+          // },
         ]}
         onMorePress={handleMorePress}
       />

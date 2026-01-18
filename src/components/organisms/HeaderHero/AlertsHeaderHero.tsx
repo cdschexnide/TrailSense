@@ -37,23 +37,24 @@ export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
   const { theme } = useTheme();
   const colors = theme.colors;
 
-  // Generate 24-hour activity data from alerts
+  // Generate 7-day activity data from alerts (one bar per day)
   const activityData = useMemo(() => {
-    const hourlyData = new Array(24).fill(0);
+    const dailyData = new Array(7).fill(0);
     const now = new Date();
+    now.setHours(23, 59, 59, 999); // End of today
 
     alerts.forEach((alert) => {
       const alertTime = new Date(alert.timestamp);
-      const hoursAgo = Math.floor(
-        (now.getTime() - alertTime.getTime()) / (1000 * 60 * 60)
+      const daysAgo = Math.floor(
+        (now.getTime() - alertTime.getTime()) / (1000 * 60 * 60 * 24)
       );
 
-      if (hoursAgo >= 0 && hoursAgo < 24) {
-        hourlyData[23 - hoursAgo]++;
+      if (daysAgo >= 0 && daysAgo < 7) {
+        dailyData[6 - daysAgo]++;
       }
     });
 
-    return hourlyData;
+    return dailyData;
   }, [alerts]);
 
   const filterOptions = [
