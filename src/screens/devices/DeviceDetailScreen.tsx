@@ -86,7 +86,6 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   if (error) return <ErrorState message="Failed to load device" />;
   if (!device) return <ErrorState message="Device not found" />;
 
-  const batteryPercent = device.batteryPercent || device.battery || 0;
   const signalLabel = getSignalLabel(device.signalStrength);
   // Calculate online status from lastSeen timestamp (online if seen within 5 minutes)
   const isOnline = isDeviceOnline(device.lastSeen);
@@ -144,9 +143,8 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   const lastSeenText = device.lastSeen ? formatRelativeTime(device.lastSeen) : 'Never';
   const heroSubtitle = `${isOnline ? 'Online' : 'Offline'} · Last seen ${lastSeenText}`;
 
-  // Build metrics array for hero
+  // Build metrics array for hero (battery removed - not measurable with 5V regulator)
   const heroMetrics = [
-    `${batteryPercent}% Battery`,
     signalLabel,
     `${detectionCount} Detections`,
   ];
@@ -155,12 +153,6 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   const renderStatusTab = () => (
     <>
       <GroupedListSection title="Device Status">
-        <GroupedListRow
-          icon="battery-full"
-          iconColor={colors.systemGreen}
-          title="Battery"
-          value={`${batteryPercent}%`}
-        />
         <GroupedListRow
           icon="wifi"
           iconColor={colors.systemBlue}

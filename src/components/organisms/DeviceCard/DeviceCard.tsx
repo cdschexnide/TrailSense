@@ -4,7 +4,7 @@
  * Clean device card with:
  * - Name + status dot on top line
  * - Status + last seen on second line
- * - Horizontal metrics bar (battery | signal | detections | location)
+ * - Horizontal metrics bar (signal | detections | location)
  * - Glow effect for offline devices
  */
 
@@ -108,13 +108,12 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
     onPress?.(device.id);
   };
 
-  const batteryLevel = device.batteryPercent || device.battery || 0;
   const signalStrength = device.signalStrength || '--';
   // Calculate online status from lastSeen timestamp (online if seen within 5 minutes)
   const isOnline = isDeviceOnline(device.lastSeen);
 
+  // Note: Battery removed - not measurable with 5V regulator hardware
   const metrics = [
-    { value: `${batteryLevel}%`, label: 'batt' },
     { value: typeof signalStrength === 'string' ? signalStrength : `${signalStrength}%`, label: 'signal' },
     { value: (device.detectionCount || 0).toLocaleString(), label: 'detections' },
     { value: formatCoordinate(device.latitude, device.longitude), label: 'loc' },
