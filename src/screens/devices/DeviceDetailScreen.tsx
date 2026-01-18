@@ -21,6 +21,7 @@ import { GroupedListRow } from '@components/molecules/GroupedListRow';
 import { DevicesStackParamList } from '@navigation/types';
 import { useDevice } from '@hooks/api/useDevices';
 import { useTheme } from '@hooks/useTheme';
+import { isDeviceOnline } from '@utils/dateUtils';
 
 type DeviceDetailRouteProp = RouteProp<DevicesStackParamList, 'DeviceDetail'>;
 
@@ -87,7 +88,8 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
 
   const batteryPercent = device.batteryPercent || device.battery || 0;
   const signalLabel = getSignalLabel(device.signalStrength);
-  const isOnline = device.online;
+  // Calculate online status from lastSeen timestamp (online if seen within 5 minutes)
+  const isOnline = isDeviceOnline(device.lastSeen);
   const detectionCount = device.detectionCount || 0;
 
   // Handlers

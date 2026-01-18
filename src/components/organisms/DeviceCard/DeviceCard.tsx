@@ -16,6 +16,7 @@ import { Text } from '@components/atoms';
 import { MetricsBar } from '@components/molecules/MetricsBar';
 import { GlowContainer } from '@components/molecules/GlowContainer';
 import { useTheme } from '@hooks/useTheme';
+import { isDeviceOnline } from '@utils/dateUtils';
 
 interface DeviceCardProps {
   device: Device;
@@ -109,7 +110,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
 
   const batteryLevel = device.batteryPercent || device.battery || 0;
   const signalStrength = device.signalStrength || '--';
-  const isOnline = device.online;
+  // Calculate online status from lastSeen timestamp (online if seen within 5 minutes)
+  const isOnline = isDeviceOnline(device.lastSeen);
 
   const metrics = [
     { value: `${batteryLevel}%`, label: 'batt' },

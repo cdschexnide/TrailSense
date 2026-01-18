@@ -51,3 +51,27 @@ export const formatShortDate = (timestamp: string): string => {
 export const formatTime = (timestamp: string): string => {
   return formatTimestamp(timestamp, 'h:mm a');
 };
+
+/**
+ * Threshold for considering a device offline (5 minutes)
+ */
+export const DEVICE_OFFLINE_THRESHOLD_MS = 5 * 60 * 1000;
+
+/**
+ * Calculate if a device is online based on lastSeen timestamp
+ * Device is online if lastSeen is within the threshold (default 5 minutes)
+ * @param lastSeen - ISO timestamp string of last heartbeat
+ * @returns true if device is online, false if offline or never seen
+ */
+export const isDeviceOnline = (lastSeen?: string | null): boolean => {
+  if (!lastSeen) return false;
+
+  try {
+    const lastSeenDate = parseISO(lastSeen);
+    const timeSinceLastSeen = Date.now() - lastSeenDate.getTime();
+    return timeSinceLastSeen < DEVICE_OFFLINE_THRESHOLD_MS;
+  } catch (error) {
+    console.error('Error calculating device online status:', error);
+    return false;
+  }
+};

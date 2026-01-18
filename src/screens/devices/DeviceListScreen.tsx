@@ -29,6 +29,7 @@ import { Button } from '@components/atoms/Button';
 import { Icon } from '@components/atoms/Icon';
 import { useTheme } from '@hooks/useTheme';
 import { Device } from '@types';
+import { isDeviceOnline } from '@utils/dateUtils';
 
 export const DeviceListScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -39,25 +40,30 @@ export const DeviceListScreen = ({ navigation }: any) => {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   // Sort devices: offline first, then by name
+  // Uses calculated online status based on lastSeen timestamp
   const sortedDevices = useMemo(() => {
     if (!devices) return [];
 
     return [...devices].sort((a: Device, b: Device) => {
+      const aOnline = isDeviceOnline(a.lastSeen);
+      const bOnline = isDeviceOnline(b.lastSeen);
       // Offline devices first
-      if (!a.online && b.online) return -1;
-      if (a.online && !b.online) return 1;
+      if (!aOnline && bOnline) return -1;
+      if (aOnline && !bOnline) return 1;
       // Then alphabetical
       return a.name.localeCompare(b.name);
     });
   }, [devices]);
 
+  // Calculate stats using lastSeen-based online status
   const stats = useMemo(() => {
     if (!devices) return { total: 0, online: 0, offline: 0 };
 
+    const onlineCount = devices.filter((d: Device) => isDeviceOnline(d.lastSeen)).length;
     return {
       total: devices.length,
-      online: devices.filter((d: Device) => d.online).length,
-      offline: devices.filter((d: Device) => !d.online).length,
+      online: onlineCount,
+      offline: devices.length - onlineCount,
     };
   }, [devices]);
 
