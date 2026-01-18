@@ -6,12 +6,11 @@
  * with filter chips below for threat level filtering.
  */
 
-import React, { useMemo } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import { ActivityChart } from '@components/molecules/ActivityChart';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { InlineFilterBar } from '@components/molecules/InlineFilterBar';
 import { useTheme } from '@hooks/useTheme';
-import { ThreatLevel, Alert } from '@types';
+import { ThreatLevel } from '@types';
 
 interface AlertsHeaderHeroProps {
   threatCounts: {
@@ -23,39 +22,15 @@ interface AlertsHeaderHeroProps {
   };
   selectedFilter: ThreatLevel | null;
   onFilterSelect: (level: ThreatLevel | null) => void;
-  alerts?: Alert[];
-  scrollY?: Animated.Value;
 }
 
 export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
   threatCounts,
   selectedFilter,
   onFilterSelect,
-  alerts = [],
-  scrollY,
 }) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-
-  // Generate 7-day activity data from alerts (one bar per day)
-  const activityData = useMemo(() => {
-    const dailyData = new Array(7).fill(0);
-    const now = new Date();
-    now.setHours(23, 59, 59, 999); // End of today
-
-    alerts.forEach((alert) => {
-      const alertTime = new Date(alert.timestamp);
-      const daysAgo = Math.floor(
-        (now.getTime() - alertTime.getTime()) / (1000 * 60 * 60 * 24)
-      );
-
-      if (daysAgo >= 0 && daysAgo < 7) {
-        dailyData[6 - daysAgo]++;
-      }
-    });
-
-    return dailyData;
-  }, [alerts]);
 
   const filterOptions = [
     {
@@ -84,38 +59,8 @@ export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
     },
   ];
 
-  // Collapse animation based on scroll
-  const chartHeight = scrollY
-    ? scrollY.interpolate({
-        inputRange: [0, 100],
-        outputRange: [80, 0],
-        extrapolate: 'clamp',
-      })
-    : 80;
-
-  const chartOpacity = scrollY
-    ? scrollY.interpolate({
-        inputRange: [0, 60],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-      })
-    : 1;
-
   return (
     <View style={styles.container}>
-      {/* Activity Chart - collapses on scroll */}
-      <Animated.View
-        style={[
-          styles.chartContainer,
-          {
-            height: chartHeight,
-            opacity: chartOpacity,
-          },
-        ]}
-      >
-        <ActivityChart data={activityData} height={80} />
-      </Animated.View>
-
       {/* Filter Chips */}
       <InlineFilterBar
         options={filterOptions}
@@ -130,10 +75,6 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 8,
     paddingBottom: 4,
-  },
-  chartContainer: {
-    overflow: 'hidden',
-    marginBottom: 8,
   },
 });
 

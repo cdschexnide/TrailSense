@@ -22,6 +22,8 @@ import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
 
 interface AlertCardProps {
   alert: Alert;
+  /** Device name to display instead of deviceId */
+  deviceName?: string;
   onPress?: (alertId: string) => void;
   /** Used by parent swipeable wrapper for swipe-to-dismiss action */
   onDismiss?: (alertId: string) => void;
@@ -68,6 +70,7 @@ const getDetectionConfig = (type: string, theme: any) => {
 
 export const AlertCard: React.FC<AlertCardProps> = ({
   alert,
+  deviceName,
   onPress,
   onDismiss,
   onWhitelist,
@@ -218,7 +221,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
               {' · '}
             </Text>
             <Text variant="caption1" color="secondaryLabel">
-              {alert.deviceId}
+              {deviceName || alert.deviceId}
             </Text>
             {alert.macAddress && (
               <>

@@ -25,6 +25,7 @@ import {
 } from '@components/molecules';
 import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
+import { useDevices } from '@hooks/api/useDevices';
 import { formatTime } from '@utils/dateUtils';
 import { getThreatColor } from '@utils/visualEffects';
 import { useAlertSummary } from '@/hooks/useAlertSummary';
@@ -80,9 +81,13 @@ export const AlertDetailScreen = () => {
   const route = useRoute<AlertDetailRouteProp>();
   const { alertId } = route.params;
   const { data: alert, isLoading, error } = useAlert(alertId);
+  const { data: devices } = useDevices();
 
   // Tab state
   const [selectedTab, setSelectedTab] = useState('signal');
+
+  // Get device name from deviceId
+  const deviceName = devices?.find((d: any) => d.id === alert?.deviceId)?.name;
 
   // LLM Alert Summary Hook
   const {
@@ -126,7 +131,7 @@ export const AlertDetailScreen = () => {
   const heroMetrics = [
     `${alert.rssi} dBm`,
     getProximityLabel(alert.rssi),
-    alert.deviceId,
+    deviceName || alert.deviceId,
   ];
 
   // Render Signal tab content
@@ -384,7 +389,7 @@ export const AlertDetailScreen = () => {
         <GroupedListRow
           icon="hardware-chip-outline"
           iconColor={colors.systemTeal}
-          title={alert.deviceId}
+          title={deviceName || alert.deviceId}
           showChevron
           onPress={() =>
             (navigation as any).navigate('DevicesTab', {

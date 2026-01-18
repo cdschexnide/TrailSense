@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useAlerts } from '@hooks/api/useAlerts';
+import { useDevices } from '@hooks/api/useDevices';
 import { AlertCard, AlertsHeaderHero } from '@components/organisms';
 import {
   ScreenLayout,
@@ -47,7 +48,19 @@ export const AlertListScreen = ({ navigation }: any) => {
   const isDark = colorScheme === 'dark';
   const colors = theme.colors;
   const { data: alerts, isLoading, error, refetch } = useAlerts();
+  const { data: devices } = useDevices();
   const [search, setSearch] = useState('');
+
+  // Create device name lookup map
+  const deviceNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (devices) {
+      devices.forEach((device: any) => {
+        map[device.id] = device.name;
+      });
+    }
+    return map;
+  }, [devices]);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedThreatFilter, setSelectedThreatFilter] =
     useState<ThreatLevel | null>(null);
@@ -132,8 +145,6 @@ export const AlertListScreen = ({ navigation }: any) => {
           threatCounts={threatCounts}
           selectedFilter={selectedThreatFilter}
           onFilterSelect={handleFilterSelect}
-          alerts={alerts || []}
-          scrollY={scrollY}
         />
       )}
     </View>
@@ -170,6 +181,7 @@ export const AlertListScreen = ({ navigation }: any) => {
         renderItem={({ item, index }) => (
           <AlertCard
             alert={item}
+            deviceName={deviceNameMap[item.deviceId]}
             onPress={() =>
               navigation.navigate('AlertDetail', { alertId: item.id })
             }

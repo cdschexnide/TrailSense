@@ -251,14 +251,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 </Text>
               </Pressable>
             </View>
-
-            {/* Security Badge */}
-            <View style={[styles.securityBadge, { backgroundColor: isDark ? 'rgba(52, 199, 89, 0.1)' : 'rgba(52, 199, 89, 0.08)' }]}>
-              <Icon name="shield-checkmark" size={16} color={colors.systemGreen} />
-              <Text variant="caption1" style={{ color: colors.systemGreen, marginLeft: 6 }}>
-                End-to-end encrypted
-              </Text>
-            </View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
