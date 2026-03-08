@@ -161,15 +161,13 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         !isCritical && style,
       ]}
     >
-      {/* Left accent line for non-critical alerts */}
-      {!isCritical && (
-        <View
-          style={[
-            styles.leftAccent,
-            { backgroundColor: threatColor },
-          ]}
-        />
-      )}
+      {/* Left accent line for all alerts including critical */}
+      <View
+        style={[
+          styles.leftAccent,
+          { backgroundColor: threatColor },
+        ]}
+      />
 
       <Pressable
         onPress={handlePress}

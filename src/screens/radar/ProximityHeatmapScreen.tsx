@@ -196,7 +196,7 @@ export const ProximityHeatmapScreen = () => {
         <View style={styles.statusSubtitle}>
           <View style={[styles.statusDot, { backgroundColor: selectedDevice?.online ? colors.systemGreen : colors.systemRed }]} />
           <Text variant="subheadline" color="secondaryLabel">
-            {selectedDevice?.online ? 'Online' : 'Offline'} · {selectedDevice?.batteryPercent || 0}% · {formatCoordinates(deviceCoordinates)}
+            {selectedDevice?.online ? 'Online' : 'Offline'} · {formatCoordinates(deviceCoordinates)}
           </Text>
           {devices.length > 1 && (
             <Text variant="caption1" color="tertiaryLabel" style={styles.deviceIndicator}>

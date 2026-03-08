@@ -1,13 +1,13 @@
 /**
  * FloatingActionBar Component
  *
- * Bottom action bar with a primary button and secondary icon actions.
- * Tesla/Rivian dashboard aesthetic for detail screens.
+ * Clean, modern bottom action bar for detail screens.
+ * Features a full-width primary button with iOS system blue styling.
  * Positioned fixed at the bottom with safe area handling.
  */
 
 import React from 'react';
-import { View, StyleSheet, Pressable, StyleSheet as RNStyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { Text, Icon } from '@components/atoms';
@@ -82,33 +82,35 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
       style={[
         styles.container,
         {
-          backgroundColor: colors.secondarySystemBackground,
-          borderTopColor: colors.separator,
           paddingBottom: bottomPadding,
         },
       ]}
     >
       <View style={styles.content}>
-        {/* Primary Action Button */}
+        {/* Primary Action Button - Full width with iOS blue */}
         <Pressable
           onPress={handlePrimaryPress}
           accessibilityRole="button"
           accessibilityLabel={primaryAction.label}
           style={({ pressed }) => [
             styles.primaryButton,
-            { backgroundColor: colors.brandAccent },
+            { backgroundColor: colors.systemBlue },
             pressed && styles.primaryPressed,
           ]}
         >
           {primaryAction.icon && (
             <Icon
               name={primaryAction.icon as any}
-              size={20}
-              color="white"
+              size={18}
+              color="#FFFFFF"
               style={styles.primaryIcon}
             />
           )}
-          <Text variant="body" weight="semibold" color="white">
+          <Text
+            variant="body"
+            weight="semibold"
+            style={styles.primaryText}
+          >
             {primaryAction.label}
           </Text>
         </Pressable>
@@ -124,13 +126,14 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
                 accessibilityLabel={action.label}
                 style={({ pressed }) => [
                   styles.secondaryButton,
+                  { backgroundColor: `${colors.systemGray}20` },
                   pressed && styles.secondaryPressed,
                 ]}
               >
                 <Icon
                   name={action.icon as any}
-                  size={24}
-                  color="secondaryLabel"
+                  size={22}
+                  color={colors.systemBlue}
                 />
               </Pressable>
             ))}
@@ -143,13 +146,14 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
                 accessibilityLabel="More options"
                 style={({ pressed }) => [
                   styles.secondaryButton,
+                  { backgroundColor: `${colors.systemGray}20` },
                   pressed && styles.secondaryPressed,
                 ]}
               >
                 <Icon
                   name="ellipsis-horizontal"
-                  size={24}
-                  color="secondaryLabel"
+                  size={22}
+                  color={colors.systemBlue}
                 />
               </Pressable>
             )}
@@ -170,9 +174,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopWidth: RNStyleSheet.hairlineWidth,
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 16,
   },
   content: {
     flexDirection: 'row',
@@ -184,30 +187,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 16,
+    borderRadius: 14,
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
   primaryPressed: {
-    opacity: 0.8,
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
   primaryIcon: {
     marginRight: 8,
   },
+  primaryText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    letterSpacing: -0.4,
+  },
   secondaryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   secondaryButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: 'rgba(128, 128, 128, 0.1)',
+    width: 50,
+    height: 50,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryPressed: {
     opacity: 0.7,
+    transform: [{ scale: 0.95 }],
   },
 });
 

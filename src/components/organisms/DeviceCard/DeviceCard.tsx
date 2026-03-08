@@ -112,11 +112,18 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   // Calculate online status from lastSeen timestamp (online if seen within 5 minutes)
   const isOnline = isDeviceOnline(device.lastSeen);
 
+  // Capitalize signal strength value
+  const capitalizeSignal = (value: string | number): string => {
+    if (typeof value === 'number') return `${value}%`;
+    if (value === '--') return value;
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
+
   // Note: Battery removed - not measurable with 5V regulator hardware
   const metrics = [
-    { value: typeof signalStrength === 'string' ? signalStrength : `${signalStrength}%`, label: 'signal' },
-    { value: (device.detectionCount || 0).toLocaleString(), label: 'detections' },
-    { value: formatCoordinate(device.latitude, device.longitude), label: 'loc' },
+    { value: capitalizeSignal(signalStrength), label: 'Signal' },
+    { value: (device.detectionCount || 0).toLocaleString(), label: 'Detections' },
+    { value: formatCoordinate(device.latitude, device.longitude), label: 'Loc' },
   ];
 
   const cardContent = (

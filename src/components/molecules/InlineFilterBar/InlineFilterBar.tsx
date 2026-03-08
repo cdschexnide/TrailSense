@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { FilterChip } from '../FilterChip';
 
 interface FilterOption {
@@ -33,11 +33,7 @@ export const InlineFilterBar: React.FC<InlineFilterBarProps> = ({
   };
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.container}
-    >
+    <View style={styles.container}>
       {options.map((option) => (
         <FilterChip
           key={option.key}
@@ -48,7 +44,7 @@ export const InlineFilterBar: React.FC<InlineFilterBarProps> = ({
           onPress={() => handlePress(option.key)}
         />
       ))}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -57,7 +53,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    gap: 8,
+    gap: 6,
   },
 });
 

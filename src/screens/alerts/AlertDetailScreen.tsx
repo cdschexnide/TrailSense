@@ -67,6 +67,11 @@ const getPriorityLabel = (threatLevel: ThreatLevel): string => {
   }
 };
 
+const capitalizeDetectionType = (type: string): string => {
+  if (type === 'wifi') return 'WiFi';
+  return type.charAt(0).toUpperCase() + type.slice(1);
+};
+
 // Tab configuration
 const TABS = [
   { key: 'signal', label: 'Signal' },
@@ -167,7 +172,7 @@ export const AlertDetailScreen = () => {
           icon="finger-print-outline"
           iconColor={colors.systemIndigo}
           title="Detection Type"
-          value={alert.detectionType}
+          value={capitalizeDetectionType(alert.detectionType)}
         />
       </GroupedListSection>
 
@@ -239,8 +244,8 @@ export const AlertDetailScreen = () => {
         </View>
       )}
 
-      {/* AI Summary Section */}
-      {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
+      {/* AI Summary Section - Commented out until feature is ready */}
+      {/* {FEATURE_FLAGS.LLM_ALERT_SUMMARIES &&
         (Platform.OS === 'android' || Platform.OS === 'ios') && (
           <View style={styles.aiSection}>
             {!summary && !isGeneratingSummary && !summaryError && (
@@ -262,7 +267,7 @@ export const AlertDetailScreen = () => {
               onFeedback={handleFeedback}
             />
           </View>
-        )}
+        )} */}
     </>
   );
 
@@ -448,12 +453,6 @@ export const AlertDetailScreen = () => {
           title="Reviewed"
           value={alert.isReviewed ? 'Yes' : 'No'}
         />
-        <GroupedListRow
-          icon={alert.isFalsePositive ? 'flag' : 'flag-outline'}
-          iconColor={alert.isFalsePositive ? colors.systemOrange : colors.secondaryLabel}
-          title="False Positive"
-          value={alert.isFalsePositive ? 'Yes' : 'No'}
-        />
       </GroupedListSection>
     </>
   );
@@ -475,7 +474,7 @@ export const AlertDetailScreen = () => {
   return (
     <ScreenLayout
       header={{
-        title: `${alert.detectionType} Detection`,
+        title: `${capitalizeDetectionType(alert.detectionType)} Detection`,
         subtitle: `${priorityLabel} · ${timeLabel}`,
         showBack: true,
         onBackPress: () => navigation.goBack(),
@@ -489,7 +488,7 @@ export const AlertDetailScreen = () => {
         {/* Detail Hero with status dot and metrics */}
         <DetailHero
           statusColor={threatColor}
-          title={`${alert.detectionType} Detection`}
+          title={`${capitalizeDetectionType(alert.detectionType)} Detection`}
           subtitle={`${priorityLabel} · ${timeLabel}`}
           metrics={heroMetrics}
         />
@@ -514,20 +513,6 @@ export const AlertDetailScreen = () => {
           icon: 'checkmark-circle',
           onPress: handleMarkReviewed,
         }}
-        secondaryActions={[
-          {
-            icon: 'flag-outline',
-            label: 'Flag as False Positive',
-            onPress: handleMarkFalsePositive,
-          },
-          // TODO: Re-enable when AI explain feature is ready
-          // {
-          //   icon: 'sparkles-outline',
-          //   label: 'AI Explain',
-          //   onPress: generateSummary,
-          // },
-        ]}
-        onMorePress={handleMorePress}
       />
     </ScreenLayout>
   );

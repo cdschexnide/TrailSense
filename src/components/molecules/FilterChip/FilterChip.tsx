@@ -76,24 +76,26 @@ export const FilterChip: React.FC<FilterChipProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
     borderRadius: 10,
     borderWidth: 1,
-    gap: 6,
+    gap: 4,
   },
   pressed: {
     opacity: 0.7,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   count: {
-    minWidth: 16,
+    minWidth: 12,
   },
   label: {
     textTransform: 'capitalize',
