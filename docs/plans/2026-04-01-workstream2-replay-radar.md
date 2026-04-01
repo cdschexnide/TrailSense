@@ -20,10 +20,10 @@
 |---|---------|-----|
 | 1 | Timestamp shared value never syncs | Removed dead `timestamp` shared value entirely. Radar takes plain `currentMinute` prop, filters dots via `useMemo`. Architecture updated to reflect JS-thread rendering with pre-computed coordinates. |
 | 2 | Mock data hardwired | New `useReplayPositions` hook wraps API with time-window params, falls back to mock in dev |
-| 3 | fingerprintHash vs macAddress | Mock generator co-produces positions + alerts with stable MACs per scenario. `useReplayData` returns both. `useTimeBucketing` joins on deviceId+timestamp with authoritative data. BucketEntry carries real `macAddress`; FingerprintPeek navigates with it. |
+| 3 | fingerprintHash vs macAddress | Added optional `macAddress` to `TriangulatedPosition` type. `findMatchingAlert` joins on `macAddress` (authoritative) with deviceId+timestamp fallback. Mock generator populates `macAddress` on every position. BucketEntry carries real `macAddress`; FingerprintPeek navigates with it. |
 | 4 | Scrubber has no pan gesture | `Gesture.Pan()` on scrub track maps drag X to minute index |
 | 5 | Tap handler accesses JS from worklet | `runOnJS` bridges tap callback; hit-test data stored as plain array, not Map |
-| 6 | threatLevel fabricated from confidence | Co-generated alerts carry authoritative `threatLevel` per scenario. Correlation is 1:1 by design in mock data. Real backend must return pre-joined data or correlated alerts alongside positions. |
+| 6 | threatLevel fabricated from confidence | Co-generated alerts carry authoritative `threatLevel`. `findMatchingAlert` uses `macAddress` as primary join key (authoritative in both mock and prod when backend populates it). Fallback to deviceId+timestamp for legacy data. |
 | 7 | Crossfade impossible with conditional mount | Both views always mounted; `pointerEvents="none"` + animated opacity |
 | 8 | Props contract mismatch | TimelineScrubberProps uses plain JS state; Task 12 test directly invokes and verifies navigation payload |
 
@@ -45,10 +45,17 @@
 | v4-2 | Task 12 test doesn't exercise real wiring | Test now renders the actual component, presses Pressable elements, and asserts `navigate` was called with `RadarTab` + `startHour` — proving the callback is wired through the real component tree. |
 | v4-3 | Re-navigation with new startHour not handled | `useEffect` tracks `startHour` via `prevStartHourRef`. On change: updates `minuteIndex`, switches to replay mode if needed. Deduplicates same-hour no-ops. |
 
+### v5 follow-up findings addressed
+
+| # | Finding | Fix |
+|---|---------|-----|
+| v5-1 | Production MAC/threat correlation still heuristic (no stable join key) | Add optional `macAddress` field to `TriangulatedPosition` type. Backend populates it (the triangulation system knows which MAC it's tracking). `findNearestAlert` joins on `macAddress` first, falls back to deviceId+timestamp only when MAC is absent. Mock generator populates `macAddress` on every position. |
+| v5-2 | Tab switch doesn't reset to live mode (unmountOnBlur not set) | Add `useFocusEffect` cleanup that resets mode to live on blur. No navigator config change needed. |
+
 ### Open questions resolved
 
 - **Timezone:** All time computations use the device's local timezone via `Date`. The replay window is "today midnight to now" in the viewer's local time. This matches ActivitySparkline's behavior (uses `Date.setHours(0,0,0,0)`). Property timezone awareness deferred to backend phase.
-- **startHour persistence:** `startHour` is tracked via `prevStartHourRef`. Initial mount initializes mode/fadeAnim synchronously. Re-navigation with a new startHour updates the scrubber and switches to replay. Navigating away resets to live (React Navigation unmounts/remounts the screen).
+- **startHour persistence:** `startHour` is tracked via `prevStartHourRef`. Initial mount initializes mode/fadeAnim synchronously. Re-navigation with a new startHour updates the scrubber and switches to replay. Navigating away from the Radar tab resets to live mode via `useFocusEffect` cleanup (does not rely on unmount).
 
 ---
 
@@ -106,7 +113,33 @@ export interface FingerprintPeekProps {
 export type RadarMode = 'live' | 'replay';
 ```
 
-**Step 2: Export from barrel**
+**Step 2: Add `macAddress` to TriangulatedPosition**
+
+In `src/types/triangulation.ts`, add an optional `macAddress` field to `TriangulatedPosition`:
+
+```typescript
+export interface TriangulatedPosition {
+  id: string;
+  deviceId: string;
+  fingerprintHash: string;
+  macAddress?: string; // stable MAC for alert join — backend populates from detection source
+  signalType: TriangulationSignalType;
+  latitude: number;
+  longitude: number;
+  accuracyMeters: number;
+  confidence: number;
+  measurementCount: number;
+  updatedAt: string;
+}
+```
+
+> **Why optional:** Existing code that creates `TriangulatedPosition` objects
+> (mock data, API responses) does not need to change immediately. The replay
+> correlation code uses it when present, falls back to deviceId+timestamp when absent.
+> The backend should populate this field — the triangulation system already knows
+> which MAC address it's tracking for each position.
+
+**Step 3: Export from barrel**
 
 Add to `src/types/index.ts`:
 ```typescript
@@ -339,6 +372,7 @@ function generateVisitPositions(
       id: `replay-${scenario.fingerprintHash}-${visit.startHour}-${i}`,
       deviceId: mockDevices[0].id,
       fingerprintHash: scenario.fingerprintHash,
+      macAddress: scenario.macAddress, // stable MAC for authoritative join
       signalType: scenario.signalType,
       latitude: PROPERTY_CENTER.latitude + latOffset + jitterLat,
       longitude: PROPERTY_CENTER.longitude + lngOffset + jitterLng,
@@ -729,26 +763,43 @@ function mapSignalType(signalType: string): 'cellular' | 'wifi' | 'bluetooth' {
   return 'cellular';
 }
 
-// Find the nearest alert by timestamp and deviceId within a 5-minute window
-function findNearestAlert(
+// Find the matching alert for a position.
+// Primary join: macAddress (authoritative when backend populates it).
+// Fallback join: deviceId + nearest timestamp within 5-min window
+// (for legacy data where macAddress is not on the position).
+function findMatchingAlert(
   pos: TriangulatedPosition,
   alerts: Alert[],
   posTimeMs: number
 ): Alert | undefined {
-  const WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+  const WINDOW_MS = 5 * 60 * 1000;
+
+  // Primary: match by macAddress (stable, authoritative)
+  if (pos.macAddress) {
+    let best: Alert | undefined;
+    let bestDist = Infinity;
+    for (const alert of alerts) {
+      if (alert.macAddress !== pos.macAddress) continue;
+      const dist = Math.abs(new Date(alert.timestamp).getTime() - posTimeMs);
+      if (dist < WINDOW_MS && dist < bestDist) {
+        bestDist = dist;
+        best = alert;
+      }
+    }
+    if (best) return best;
+  }
+
+  // Fallback: match by deviceId + timestamp (heuristic, for legacy data)
   let best: Alert | undefined;
   let bestDist = Infinity;
-
   for (const alert of alerts) {
     if (alert.deviceId !== pos.deviceId) continue;
-    const alertTime = new Date(alert.timestamp).getTime();
-    const dist = Math.abs(alertTime - posTimeMs);
+    const dist = Math.abs(new Date(alert.timestamp).getTime() - posTimeMs);
     if (dist < WINDOW_MS && dist < bestDist) {
       bestDist = dist;
       best = alert;
     }
   }
-
   return best;
 }
 
@@ -789,8 +840,9 @@ export function useTimeBucketing({
 
       const { x, y } = project(pos.latitude, pos.longitude);
 
-      // Correlate with nearest alert for real threat level and macAddress
-      const nearestAlert = findNearestAlert(pos, alerts, posTimeMs);
+      // Correlate with matching alert — uses macAddress when available (authoritative),
+      // falls back to deviceId+timestamp for legacy data without macAddress
+      const nearestAlert = findMatchingAlert(pos, alerts, posTimeMs);
 
       const entry: BucketEntry = {
         fingerprintHash: pos.fingerprintHash,
@@ -2352,6 +2404,7 @@ import { useTimeBucketing } from '@hooks/useTimeBucketing';
 import { useAutoPlay } from '@hooks/useAutoPlay';
 import { useReplayData } from '@hooks/api/useReplayPositions';
 import { useReducedMotion } from '@hooks/useReducedMotion';
+import { useFocusEffect } from '@react-navigation/native';
 import { RadarMode } from '@/types/replay';
 import Animated, {
   useSharedValue,
@@ -2452,6 +2505,19 @@ useEffect(() => {
   handleModeChange('replay');
   autoPlay.setMinuteIndex(startHour * 60);
 }, [startHour, mode, handleModeChange, autoPlay]);
+
+// Reset to live mode when navigating away from the Radar tab.
+// Does NOT rely on unmountOnBlur — works with default tab navigator config.
+useFocusEffect(
+  useCallback(() => {
+    // Screen gained focus — no action needed
+    return () => {
+      // Screen lost focus — reset to live mode
+      handleModeChange('live');
+      prevStartHourRef.current = undefined;
+    };
+  }, [handleModeChange])
+);
 ```
 
 > **Implementation note:** `mode` and `fadeAnim` are initialized synchronously
@@ -2459,7 +2525,8 @@ useEffect(() => {
 > `useEffect` on `startHour` handles re-navigation (tapping a different
 > sparkline hour while already on the Radar tab) by updating `minuteIndex`
 > and switching to replay mode if needed. `prevStartHourRef` deduplicates
-> so re-renders with the same startHour are no-ops.
+> so re-renders with the same startHour are no-ops. `useFocusEffect`
+> resets to live mode on blur — no dependency on `unmountOnBlur`.
 
 In the JSX, add the segmented control after `<ScreenLayout>` and before the content. Then wrap the existing MapBox content and add the replay content. Both are always mounted:
 
