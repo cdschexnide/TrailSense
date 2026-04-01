@@ -1,28 +1,46 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
-  View,
+  Dimensions,
+  Pressable,
   ScrollView,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { Text, Card, Icon } from '@components/atoms';
-import { ScreenLayout } from '@components/templates';
-import { useAlerts } from '@hooks/api/useAlerts';
-import { useDevices } from '@hooks/api/useDevices';
+import { useFocusEffect } from '@react-navigation/native';
+import { useQueryClient } from '@tanstack/react-query';
 import Mapbox, { Camera, MapView } from '@rnmapbox/maps';
-import { usePositions, POSITIONS_QUERY_KEY } from '@hooks/api/usePositions';
-import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
-import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { Button, Card, Icon, Text } from '@components/atoms';
+import { FingerprintPeek } from '@components/molecules/FingerprintPeek';
 import { PositionInfoPopup } from '@components/molecules/PositionInfoPopup';
 import { PositionListItem } from '@components/molecules/PositionListItem';
-import { TriangulatedPosition } from '@/types/triangulation';
+import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
+import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
+import { ReplayRadarDisplay } from '@components/organisms/ReplayRadarDisplay';
+import { TimelineScrubber } from '@components/organisms/TimelineScrubber';
+import { ScreenLayout } from '@components/templates';
 import { websocketService } from '@api/websocket';
-import { useQueryClient } from '@tanstack/react-query';
+import { useAlerts } from '@hooks/api/useAlerts';
+import { useDevices } from '@hooks/api/useDevices';
+import { POSITIONS_QUERY_KEY, usePositions } from '@hooks/api/usePositions';
+import { useReplayData } from '@hooks/api/useReplayPositions';
+import { useAutoPlay } from '@hooks/useAutoPlay';
+import { useReducedMotion } from '@hooks/useReducedMotion';
+import { useTimeBucketing } from '@hooks/useTimeBucketing';
+import { RadarMode } from '@/types/replay';
+import { TriangulatedPosition } from '@/types/triangulation';
 import { useTheme } from '@theme/provider';
 
-// Initialize MapBox with access token
-// Uses EXPO_PUBLIC_ prefix for Expo SDK 49+ env variable access
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 if (!MAPBOX_TOKEN) {
   console.warn(
@@ -34,101 +52,360 @@ Mapbox.setAccessToken(MAPBOX_TOKEN || '');
 const { width } = Dimensions.get('window');
 const MAP_SIZE = width - 40;
 
-export const ProximityHeatmapScreen = ({ navigation }: any) => {
+function formatCoordinates(coords: {
+  latitude: number | null;
+  longitude: number | null;
+}) {
+  if (coords.latitude === null || coords.longitude === null) {
+    return 'Awaiting GPS...';
+  }
+
+  return `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
+}
+
+function LiveMapContent({
+  colors,
+  selectedDevice,
+  devices,
+  hasValidLocation,
+  showSatellite,
+  setShowSatellite,
+  mapViewRef,
+  cameraRef,
+  deviceCoordinates,
+  positions,
+  selectedPosition,
+  setSelectedPosition,
+  resetMapView,
+  centerOnPosition,
+}: {
+  colors: any;
+  selectedDevice: any;
+  devices: any[];
+  hasValidLocation: boolean;
+  showSatellite: boolean;
+  setShowSatellite: React.Dispatch<React.SetStateAction<boolean>>;
+  mapViewRef: React.RefObject<MapView>;
+  cameraRef: React.RefObject<Camera>;
+  deviceCoordinates: { latitude: number | null; longitude: number | null };
+  positions: TriangulatedPosition[];
+  selectedPosition: TriangulatedPosition | null;
+  setSelectedPosition: React.Dispatch<
+    React.SetStateAction<TriangulatedPosition | null>
+  >;
+  resetMapView: () => void;
+  centerOnPosition: (position: TriangulatedPosition) => void;
+}) {
+  return (
+    <ScrollView>
+      <View style={styles.statusSubtitle}>
+        <View
+          style={[
+            styles.statusDot,
+            {
+              backgroundColor: selectedDevice?.online
+                ? colors.systemGreen
+                : colors.systemRed,
+            },
+          ]}
+        />
+        <Text variant="subheadline" color="secondaryLabel">
+          {selectedDevice?.online ? 'Online' : 'Offline'} ·{' '}
+          {formatCoordinates(deviceCoordinates)}
+        </Text>
+        {devices.length > 1 ? (
+          <Text
+            variant="caption1"
+            color="tertiaryLabel"
+            style={styles.deviceIndicator}
+          >
+            1/{devices.length}
+          </Text>
+        ) : null}
+      </View>
+
+      <Card variant="grouped" style={styles.heatmapCard}>
+        <View style={styles.mapContainer}>
+          {hasValidLocation ? (
+            <>
+              <MapView
+                ref={mapViewRef}
+                style={styles.map}
+                styleURL={
+                  showSatellite
+                    ? Mapbox.StyleURL.SatelliteStreet
+                    : Mapbox.StyleURL.Dark
+                }
+                logoEnabled={false}
+                attributionEnabled={false}
+                scaleBarEnabled={false}
+                compassEnabled={false}
+                scrollEnabled={true}
+                pitchEnabled={false}
+                rotateEnabled={false}
+                zoomEnabled={true}
+              >
+                <Camera
+                  ref={cameraRef}
+                  centerCoordinate={[
+                    deviceCoordinates.longitude!,
+                    deviceCoordinates.latitude!,
+                  ]}
+                  zoomLevel={16}
+                  animationMode="flyTo"
+                  animationDuration={500}
+                />
+
+                <TrailSenseDeviceMarker
+                  id={selectedDevice?.id || 'device'}
+                  coordinate={[
+                    deviceCoordinates.longitude!,
+                    deviceCoordinates.latitude!,
+                  ]}
+                  isOnline={selectedDevice?.online}
+                />
+
+                {positions.map(position => (
+                  <DetectedDeviceMarker
+                    key={position.id}
+                    id={position.id}
+                    coordinate={[position.longitude, position.latitude]}
+                    signalType={position.signalType}
+                    confidence={position.confidence}
+                    onPress={() => setSelectedPosition(position)}
+                  />
+                ))}
+              </MapView>
+
+              <View style={styles.floatingControls}>
+                <TouchableOpacity
+                  style={[
+                    styles.floatingButton,
+                    { backgroundColor: colors.systemBlue },
+                  ]}
+                  onPress={() => setShowSatellite(current => !current)}
+                  activeOpacity={0.8}
+                >
+                  <Icon
+                    name={showSatellite ? 'map-outline' : 'earth'}
+                    size={18}
+                    color="white"
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.floatingButton,
+                    { backgroundColor: colors.systemBlue },
+                  ]}
+                  onPress={resetMapView}
+                  activeOpacity={0.8}
+                >
+                  <Icon name="locate" size={18} color="white" />
+                </TouchableOpacity>
+              </View>
+
+              {selectedPosition ? (
+                <View style={styles.popupOverlay}>
+                  <PositionInfoPopup
+                    signalType={selectedPosition.signalType}
+                    confidence={selectedPosition.confidence}
+                    accuracyMeters={selectedPosition.accuracyMeters}
+                    onClose={() => setSelectedPosition(null)}
+                  />
+                </View>
+              ) : null}
+            </>
+          ) : (
+            <View style={styles.noLocationContainer}>
+              <Icon name="location-outline" size={48} color="systemGray" />
+              <Text variant="title3" color="label" style={styles.noLocationTitle}>
+                No GPS Location
+              </Text>
+              <Text
+                variant="body"
+                color="secondaryLabel"
+                style={styles.noLocationText}
+              >
+                This device hasn&apos;t reported GPS coordinates yet.
+              </Text>
+              <Text
+                variant="caption1"
+                color="tertiaryLabel"
+                style={styles.noLocationHint}
+              >
+                Device will report location once it has a GPS fix
+              </Text>
+            </View>
+          )}
+        </View>
+      </Card>
+
+      <Card variant="grouped" style={styles.listCard}>
+        <View
+          style={[styles.listHeader, { borderBottomColor: colors.separator }]}
+        >
+          <Text variant="headline" weight="semibold" color="label">
+            Detected Devices
+          </Text>
+          <Text variant="footnote" color="secondaryLabel">
+            {positions.length}
+          </Text>
+        </View>
+
+        {positions.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Icon name="radio-outline" size={32} color="systemGray" />
+            <Text
+              variant="subheadline"
+              color="secondaryLabel"
+              style={styles.emptyText}
+            >
+              No detected devices
+            </Text>
+          </View>
+        ) : (
+          positions.map(position => (
+            <PositionListItem
+              key={position.id}
+              position={position}
+              onPress={() => centerOnPosition(position)}
+            />
+          ))
+        )}
+      </Card>
+    </ScrollView>
+  );
+}
+
+export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const colors = theme.colors;
+  const reduceMotion = useReducedMotion();
+
   const [selectedDeviceIndex] = useState(0);
   const [showSatellite, setShowSatellite] = useState(true);
+  const [selectedPosition, setSelectedPosition] =
+    useState<TriangulatedPosition | null>(null);
+  const [peekMac, setPeekMac] = useState<string | null>(null);
+
+  const startHour: number | undefined = route?.params?.startHour;
+  const [mode, setMode] = useState<RadarMode>(
+    startHour !== undefined ? 'replay' : 'live'
+  );
+
   const cameraRef = useRef<Camera>(null);
   const mapViewRef = useRef<MapView>(null);
-
-  // Selected position for popup
-  const [selectedPosition, setSelectedPosition] = useState<TriangulatedPosition | null>(null);
-
-  // Track previous coordinates to detect changes
   const prevCoordsRef = useRef<{ lat: number | null; lon: number | null }>({
     lat: null,
     lon: null,
   });
 
-  // Fetch devices - uses shared hook with 30s auto-refresh
   const { data: devices = [], isLoading: devicesLoading } = useDevices();
   const { data: alerts = [] } = useAlerts();
   const selectedDevice = devices[selectedDeviceIndex];
 
-  // Fetch triangulated positions for selected device
   const { data: positionsData } = usePositions(selectedDevice?.id);
   const positions = positionsData?.positions ?? [];
 
-  // Handle WebSocket position updates
+  const { data: replayData } = useReplayData(selectedDevice?.id);
+  const replayPositions = replayData?.positions ?? [];
+  const replayAlerts = replayData?.alerts ?? [];
+
+  const propertyCenter = {
+    latitude: selectedDevice?.latitude ?? 31.530757,
+    longitude: selectedDevice?.longitude ?? -110.287842,
+  };
+
+  const bucketed = useTimeBucketing({
+    positions: replayPositions,
+    alerts: replayAlerts,
+    propertyCenter,
+    canvasSize: 350,
+    maxRange: 244,
+  });
+
+  const autoPlay = useAutoPlay({
+    buckets: bucketed.buckets,
+    initialMinute: startHour !== undefined ? startHour * 60 : 0,
+  });
+
+  const autoPlayRef = useRef(autoPlay);
+  autoPlayRef.current = autoPlay;
+
+  const fadeAnim = useSharedValue(startHour !== undefined ? 0 : 1);
+  const liveStyle = useAnimatedStyle(() => ({
+    opacity: fadeAnim.value,
+  }));
+  const replayStyle = useAnimatedStyle(() => ({
+    opacity: 1 - fadeAnim.value,
+  }));
+
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const handlePositionsUpdated = (data: { deviceId: string; positions: any[] }) => {
-      // Invalidate positions query for this device to trigger refetch
       if (data.deviceId === selectedDevice?.id) {
-        queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, data.deviceId] });
+        queryClient.invalidateQueries({
+          queryKey: [POSITIONS_QUERY_KEY, data.deviceId],
+        });
       }
     };
 
     websocketService.on('positions-updated', handlePositionsUpdated);
     return () => websocketService.off('positions-updated', handlePositionsUpdated);
-  }, [selectedDevice?.id, queryClient]);
+  }, [queryClient, selectedDevice?.id]);
 
-  // Get device coordinates (null if device has no GPS fix yet)
   const deviceCoordinates = {
     latitude: selectedDevice?.latitude ?? null,
     longitude: selectedDevice?.longitude ?? null,
   };
+  const hasValidLocation =
+    deviceCoordinates.latitude !== null && deviceCoordinates.longitude !== null;
 
-  // Check if device has valid GPS coordinates
-  const hasValidLocation = deviceCoordinates.latitude !== null &&
-                           deviceCoordinates.longitude !== null;
-
-  // Update camera when device changes or GPS updates (only if valid coordinates)
   useEffect(() => {
-    if (cameraRef.current && selectedDevice && hasValidLocation) {
-      const newLat = deviceCoordinates.latitude;
-      const newLon = deviceCoordinates.longitude;
-      const prevLat = prevCoordsRef.current.lat;
-      const prevLon = prevCoordsRef.current.lon;
-
-      // Check if coordinates actually changed (real GPS update)
-      const coordsChanged =
-        prevLat !== null &&
-        prevLon !== null &&
-        (Math.abs(prevLat - newLat!) > 0.000001 ||
-         Math.abs(prevLon - newLon!) > 0.000001);
-
-      // Update camera with smooth animation
-      cameraRef.current.setCamera({
-        centerCoordinate: [newLon!, newLat!],
-        zoomLevel: 16,
-        animationDuration: coordsChanged ? 1000 : 500, // Slower animation for GPS updates
-      });
-
-      // Update previous coordinates ref
-      prevCoordsRef.current = { lat: newLat, lon: newLon };
+    if (!cameraRef.current || !selectedDevice || !hasValidLocation) {
+      return;
     }
+
+    const newLat = deviceCoordinates.latitude;
+    const newLon = deviceCoordinates.longitude;
+    const prevLat = prevCoordsRef.current.lat;
+    const prevLon = prevCoordsRef.current.lon;
+    const coordsChanged =
+      prevLat !== null &&
+      prevLon !== null &&
+      (Math.abs(prevLat - newLat!) > 0.000001 ||
+        Math.abs(prevLon - newLon!) > 0.000001);
+
+    cameraRef.current.setCamera({
+      centerCoordinate: [newLon!, newLat!],
+      zoomLevel: 16,
+      animationDuration: coordsChanged ? 1000 : 500,
+    });
+    prevCoordsRef.current = { lat: newLat, lon: newLon };
   }, [
-    selectedDeviceIndex,
     deviceCoordinates.latitude,
     deviceCoordinates.longitude,
     hasValidLocation,
+    selectedDevice,
   ]);
 
-  // Reset map to center on device
-  const resetMapView = useCallback(() => {
-    if (cameraRef.current && hasValidLocation) {
-      cameraRef.current.setCamera({
-        centerCoordinate: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
-        zoomLevel: 16,
-        animationDuration: 500,
-      });
-    }
-  }, [hasValidLocation, deviceCoordinates.longitude, deviceCoordinates.latitude]);
+  useEffect(() => {
+    setSelectedPosition(null);
+  }, [selectedDeviceIndex]);
 
-  // Center map on a specific position and show its popup
+  const resetMapView = useCallback(() => {
+    if (!cameraRef.current || !hasValidLocation) {
+      return;
+    }
+
+    cameraRef.current.setCamera({
+      centerCoordinate: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
+      zoomLevel: 16,
+      animationDuration: 500,
+    });
+  }, [deviceCoordinates.latitude, deviceCoordinates.longitude, hasValidLocation]);
+
   const centerOnPosition = useCallback((position: TriangulatedPosition) => {
     if (cameraRef.current) {
       cameraRef.current.setCamera({
@@ -140,10 +417,35 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
     setSelectedPosition(position);
   }, []);
 
-  // Clear popup when device changes
+  const switchToLive = useCallback(() => {
+    setMode('live');
+    fadeAnim.value = reduceMotion ? 1 : withTiming(1, { duration: 300 });
+    autoPlayRef.current.pause();
+    setPeekMac(null);
+  }, [fadeAnim, reduceMotion]);
+
+  const switchToReplay = useCallback(() => {
+    setMode('replay');
+    fadeAnim.value = reduceMotion ? 0 : withTiming(0, { duration: 300 });
+  }, [fadeAnim, reduceMotion]);
+
   useEffect(() => {
-    setSelectedPosition(null);
-  }, [selectedDeviceIndex]);
+    if (startHour === undefined) {
+      return;
+    }
+
+    switchToReplay();
+    autoPlayRef.current.setMinuteIndex(startHour * 60);
+    navigation.setParams({ startHour: undefined });
+  }, [navigation, startHour, switchToReplay]);
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        switchToLive();
+      };
+    }, [switchToLive])
+  );
 
   if (devicesLoading) {
     return (
@@ -165,11 +467,7 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
           <Text variant="title3" color="label" style={styles.emptyTitle}>
             No Devices Found
           </Text>
-          <Text
-            variant="body"
-            color="secondaryLabel"
-            style={styles.emptySubtitle}
-          >
+          <Text variant="body" color="secondaryLabel" style={styles.emptySubtitle}>
             Add a TrailSense device to view proximity data
           </Text>
         </View>
@@ -177,184 +475,126 @@ export const ProximityHeatmapScreen = ({ navigation }: any) => {
     );
   }
 
-  // Format coordinates for display
-  const formatCoordinates = (coords: { latitude: number | null; longitude: number | null }) => {
-    if (coords.latitude === null || coords.longitude === null) {
-      return 'Awaiting GPS...';
-    }
-    return `${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
-  };
-
   return (
     <ScreenLayout
       header={{
         title: selectedDevice?.name || 'Map',
         largeTitle: false,
         showBack: true,
-        rightActions:
-          alerts[0]?.macAddress ? (
-            <Button
-              buttonStyle="plain"
-              onPress={() =>
-                navigation.navigate('DeviceFingerprint', {
-                  macAddress: alerts[0].macAddress,
-                })
-              }
-            >
-              Visitor
-            </Button>
-          ) : undefined,
+        rightActions: alerts[0]?.macAddress ? (
+          <Button
+            buttonStyle="plain"
+            onPress={() =>
+              navigation.navigate('DeviceFingerprint', {
+                macAddress: alerts[0].macAddress,
+              })
+            }
+          >
+            Visitor
+          </Button>
+        ) : undefined,
       }}
+      scrollable={false}
     >
-      <ScrollView>
-        {/* Simple status subtitle */}
-        <View style={styles.statusSubtitle}>
-          <View style={[styles.statusDot, { backgroundColor: selectedDevice?.online ? colors.systemGreen : colors.systemRed }]} />
-          <Text variant="subheadline" color="secondaryLabel">
-            {selectedDevice?.online ? 'Online' : 'Offline'} · {formatCoordinates(deviceCoordinates)}
+      <View style={styles.segmentedControl}>
+        <Pressable
+          style={[styles.segment, mode === 'live' && styles.segmentActive]}
+          onPress={switchToLive}
+        >
+          <Text
+            variant="subheadline"
+            weight={mode === 'live' ? 'semibold' : 'regular'}
+            color={mode === 'live' ? 'label' : 'secondaryLabel'}
+          >
+            Live Map
           </Text>
-          {devices.length > 1 && (
-            <Text variant="caption1" color="tertiaryLabel" style={styles.deviceIndicator}>
-              {selectedDeviceIndex + 1}/{devices.length}
-            </Text>
-          )}
-        </View>
+        </Pressable>
+        <Pressable
+          style={[styles.segment, mode === 'replay' && styles.segmentActive]}
+          onPress={switchToReplay}
+        >
+          <Text
+            variant="subheadline"
+            weight={mode === 'replay' ? 'semibold' : 'regular'}
+            color={mode === 'replay' ? 'label' : 'secondaryLabel'}
+          >
+            Replay
+          </Text>
+        </Pressable>
+      </View>
 
-        {/* Map + Heatmap Overlay */}
-        <Card variant="grouped" style={styles.heatmapCard}>
-          <View style={styles.mapContainer}>
-            {hasValidLocation ? (
-              <>
-                {/* MapBox Satellite View - Gestures enabled for pan/zoom */}
-                <MapView
-                  ref={mapViewRef}
-                  style={styles.map}
-                  styleURL={
-                    showSatellite
-                      ? Mapbox.StyleURL.SatelliteStreet
-                      : Mapbox.StyleURL.Dark
-                  }
-                  logoEnabled={false}
-                  attributionEnabled={false}
-                  scaleBarEnabled={false}
-                  compassEnabled={false}
-                  scrollEnabled={true}
-                  pitchEnabled={false}
-                  rotateEnabled={false}
-                  zoomEnabled={true}
-                >
-                  <Camera
-                    ref={cameraRef}
-                    centerCoordinate={[
-                      deviceCoordinates.longitude!,
-                      deviceCoordinates.latitude!,
-                    ]}
-                    zoomLevel={16}
-                    animationMode="flyTo"
-                    animationDuration={500}
-                  />
+      <View style={styles.modeContainer}>
+        <Animated.View
+          testID="live-map-content"
+          pointerEvents={mode === 'live' ? 'auto' : 'none'}
+          style={[StyleSheet.absoluteFillObject, liveStyle]}
+        >
+          <LiveMapContent
+            colors={colors}
+            selectedDevice={selectedDevice}
+            devices={devices}
+            hasValidLocation={hasValidLocation}
+            showSatellite={showSatellite}
+            setShowSatellite={setShowSatellite}
+            mapViewRef={mapViewRef}
+            cameraRef={cameraRef}
+            deviceCoordinates={deviceCoordinates}
+            positions={positions}
+            selectedPosition={selectedPosition}
+            setSelectedPosition={setSelectedPosition}
+            resetMapView={resetMapView}
+            centerOnPosition={centerOnPosition}
+          />
+        </Animated.View>
 
-                  {/* TrailSense Device Marker */}
-                  {hasValidLocation && (
-                    <TrailSenseDeviceMarker
-                      id={selectedDevice?.id || 'device'}
-                      coordinate={[deviceCoordinates.longitude!, deviceCoordinates.latitude!]}
-                      isOnline={selectedDevice?.online}
-                    />
-                  )}
+        <Animated.View
+          testID="replay-content"
+          pointerEvents={mode === 'replay' ? 'auto' : 'none'}
+          style={[StyleSheet.absoluteFillObject, replayStyle, styles.replayContainer]}
+        >
+          <View style={styles.replayContent}>
+            <ReplayRadarDisplay
+              currentMinute={autoPlay.minuteIndex}
+              positions={bucketed}
+              onDotTap={macAddress => {
+                autoPlay.pause();
+                setPeekMac(macAddress);
+              }}
+              onEmptyTap={() => autoPlay.pause()}
+            />
 
-                  {/* Detected Device Position Markers */}
-                  {positions.map((position) => (
-                    <DetectedDeviceMarker
-                      key={position.id}
-                      id={position.id}
-                      coordinate={[position.longitude, position.latitude]}
-                      signalType={position.signalType}
-                      confidence={position.confidence}
-                      onPress={() => setSelectedPosition(position)}
-                    />
-                  ))}
-                </MapView>
-
-                {/* Floating Map Controls */}
-                <View style={styles.floatingControls}>
-                  {/* Satellite Toggle */}
-                  <TouchableOpacity
-                    style={[styles.floatingButton, { backgroundColor: colors.systemBlue }]}
-                    onPress={() => setShowSatellite(!showSatellite)}
-                    activeOpacity={0.8}
-                  >
-                    <Icon name={showSatellite ? 'map-outline' : 'earth'} size={18} color="white" />
-                  </TouchableOpacity>
-                  {/* Reset View Button */}
-                  <TouchableOpacity
-                    style={[styles.floatingButton, { backgroundColor: colors.systemBlue }]}
-                    onPress={resetMapView}
-                    activeOpacity={0.8}
-                  >
-                    <Icon name="locate" size={18} color="white" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Position Info Popup */}
-                {selectedPosition && (
-                  <View style={styles.popupOverlay}>
-                    <PositionInfoPopup
-                      signalType={selectedPosition.signalType}
-                      confidence={selectedPosition.confidence}
-                      accuracyMeters={selectedPosition.accuracyMeters}
-                      onClose={() => setSelectedPosition(null)}
-                    />
-                  </View>
-                )}
-              </>
-            ) : (
-              /* No GPS location available */
-              <View style={styles.noLocationContainer}>
-                <Icon name="location-outline" size={48} color="systemGray" />
-                <Text variant="title3" color="label" style={styles.noLocationTitle}>
-                  No GPS Location
-                </Text>
-                <Text variant="body" color="secondaryLabel" style={styles.noLocationText}>
-                  This device hasn't reported GPS coordinates yet.
-                </Text>
-                <Text variant="caption1" color="tertiaryLabel" style={styles.noLocationHint}>
-                  Device will report location once it has a GPS fix
-                </Text>
-              </View>
-            )}
-          </View>
-        </Card>
-
-        {/* Detected Devices List */}
-        <Card variant="grouped" style={styles.listCard}>
-          <View style={[styles.listHeader, { borderBottomColor: colors.separator }]}>
-            <Text variant="headline" weight="semibold" color="label">
-              Detected Devices
-            </Text>
-            <Text variant="footnote" color="secondaryLabel">
-              {positions.length}
-            </Text>
+            <TimelineScrubber
+              minuteIndex={autoPlay.minuteIndex}
+              buckets={bucketed.buckets}
+              isPlaying={autoPlay.isPlaying}
+              speed={autoPlay.speed}
+              onPlayPause={autoPlay.togglePlayPause}
+              onSpeedChange={autoPlay.cycleSpeed}
+              onSkipForward={autoPlay.skipForward}
+              onSkipBack={autoPlay.skipBack}
+              onScrub={autoPlay.setMinuteIndex}
+            />
           </View>
 
-          {positions.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Icon name="radio-outline" size={32} color="systemGray" />
-              <Text variant="subheadline" color="secondaryLabel" style={styles.emptyText}>
-                No detected devices
-              </Text>
-            </View>
-          ) : (
-            positions.map(position => (
-              <PositionListItem
-                key={position.id}
-                position={position}
-                onPress={() => centerOnPosition(position)}
-              />
-            ))
-          )}
-        </Card>
-      </ScrollView>
+          {peekMac ? (
+            <FingerprintPeek
+              macAddress={peekMac}
+              fingerprintHash=""
+              scrubTimestamp={
+                bucketed.startTime + autoPlay.minuteIndex * 60_000
+              }
+              onViewProfile={macAddress => {
+                setPeekMac(null);
+                navigation.navigate('DeviceFingerprint', { macAddress });
+              }}
+              onDismiss={() => {
+                setPeekMac(null);
+                autoPlay.play();
+              }}
+            />
+          ) : null}
+        </Animated.View>
+      </View>
     </ScreenLayout>
   );
 };
@@ -374,7 +614,35 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
   },
-  // No GPS location container
+  segmentedControl: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 10,
+    backgroundColor: 'rgba(118, 118, 128, 0.12)',
+    padding: 2,
+  },
+  segment: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  segmentActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  modeContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  replayContainer: {
+    backgroundColor: '#0a0a0f',
+  },
+  replayContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: 16,
+  },
   noLocationContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -398,7 +666,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  // Status subtitle row
   statusSubtitle: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -420,61 +687,51 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   mapContainer: {
-    width: MAP_SIZE,
+    width: '100%',
     height: MAP_SIZE,
-    borderRadius: 12,
-    overflow: 'hidden',
-    alignSelf: 'center',
+    position: 'relative',
   },
   map: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    borderRadius: 12,
   },
-  // Floating map controls
   floatingControls: {
     position: 'absolute',
-    bottom: 12,
     right: 12,
-    flexDirection: 'column',
+    top: 12,
     gap: 8,
   },
   floatingButton: {
-    padding: 10,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   popupOverlay: {
     position: 'absolute',
-    top: 16,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 100,
+    left: 12,
+    right: 12,
+    bottom: 12,
   },
-  // Detected Devices List
   listCard: {
     marginHorizontal: 16,
-    marginBottom: 16,
-    paddingBottom: 0,
+    marginBottom: 24,
+    overflow: 'hidden',
   },
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 32,
-    gap: 8,
+    padding: 24,
   },
   emptyText: {
-    marginTop: 4,
+    marginTop: 8,
   },
 });

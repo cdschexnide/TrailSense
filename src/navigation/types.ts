@@ -32,7 +32,7 @@ export type AlertsStackParamList = {
 };
 
 export type RadarStackParamList = {
-  LiveRadar: undefined;
+  LiveRadar: { startHour?: number } | undefined;
   RadarSettings: undefined;
   DeviceFingerprint: { macAddress: string };
 };

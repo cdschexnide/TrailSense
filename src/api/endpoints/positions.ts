@@ -4,7 +4,7 @@
  * Fetches triangulated device positions from backend
  */
 
-import apiClient from '../client';
+import { apiClient } from '../client';
 import { TriangulatedPosition } from '../../types/triangulation';
 
 export interface PositionsResponse {
@@ -20,6 +20,18 @@ export const getPositions = async (deviceId: string, signalType?: string): Promi
     params.append('signalType', signalType);
   }
   const response = await apiClient.get<PositionsResponse>(`/api/positions?${params.toString()}`);
+  return response.data;
+};
+
+export const getReplayPositions = async (
+  deviceId: string,
+  from: string,
+  to: string
+): Promise<PositionsResponse> => {
+  const params = new URLSearchParams({ deviceId, from, to });
+  const response = await apiClient.get<PositionsResponse>(
+    `/api/positions/history?${params.toString()}`
+  );
   return response.data;
 };
 

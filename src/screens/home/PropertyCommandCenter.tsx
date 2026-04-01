@@ -350,9 +350,11 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
 
         <ActivitySparkline
           alerts={status.allAlerts}
-          onHourPress={(_hour) =>
-            // WS2 will update to: navigate('RadarTab', { screen: 'ReplayRadar', params: { startHour: _hour } })
-            navigation.navigate('RadarTab', { screen: 'LiveRadar' })
+          onHourPress={(hour) =>
+            navigation.navigate('RadarTab', {
+              screen: 'LiveRadar',
+              params: { startHour: hour },
+            })
           }
         />
 

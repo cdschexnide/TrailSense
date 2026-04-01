@@ -5,3 +5,5 @@ export * from './Header';
 export * from './HeaderHero';
 export * from './MiniPropertyMap';
 export * from './RadarDisplay';
+export * from './ReplayRadarDisplay';
+export * from './TimelineScrubber';

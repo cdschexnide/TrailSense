@@ -98,6 +98,7 @@ export const ActivitySparkline: React.FC<ActivitySparklineProps> = ({
           return (
             <Pressable
               key={index}
+              testID={`sparkline-bar-${index}`}
               style={styles.barContainer}
               onPress={() => onHourPress?.(index)}
             >

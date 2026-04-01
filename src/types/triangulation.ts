@@ -10,6 +10,7 @@ export interface TriangulatedPosition {
   id: string;
   deviceId: string;
   fingerprintHash: string;
+  macAddress?: string;
   signalType: TriangulationSignalType;
   latitude: number;
   longitude: number;

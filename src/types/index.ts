@@ -12,3 +12,6 @@ export * from './knownDevice';
 
 // Triangulation types
 export * from './triangulation';
+
+// Replay types
+export * from './replay';
