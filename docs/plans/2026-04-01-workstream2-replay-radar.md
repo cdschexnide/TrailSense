@@ -37,10 +37,18 @@
 | v3-4 | Empty macAddress tap pauses with no sheet | `handleTap` skips dots with empty `macAddress` — they are not tappable. Only dots with correlated alerts are interactive. |
 | v3-5 | Task 12 test is a no-op | Test now directly invokes the navigation callback and asserts `navigate` was called with `{ screen: 'LiveRadar', params: { startHour: 14 } }`. |
 
+### v4 follow-up findings addressed
+
+| # | Finding | Fix |
+|---|---------|-----|
+| v4-1 | Real-data path returns `alerts: []` | `useReplayData` now fetches alerts in parallel via `alertsApi.getAlerts` with time-window filter. Both mock and prod paths return `{ positions, alerts }`. |
+| v4-2 | Task 12 test doesn't exercise real wiring | Test now renders the actual component, presses Pressable elements, and asserts `navigate` was called with `RadarTab` + `startHour` — proving the callback is wired through the real component tree. |
+| v4-3 | Re-navigation with new startHour not handled | `useEffect` tracks `startHour` via `prevStartHourRef`. On change: updates `minuteIndex`, switches to replay mode if needed. Deduplicates same-hour no-ops. |
+
 ### Open questions resolved
 
 - **Timezone:** All time computations use the device's local timezone via `Date`. The replay window is "today midnight to now" in the viewer's local time. This matches ActivitySparkline's behavior (uses `Date.setHours(0,0,0,0)`). Property timezone awareness deferred to backend phase.
-- **startHour persistence:** `startHour` is consumed once in a `useEffect` with a `hasConsumedRef` guard, then the param is not re-read. Navigating away and back to the Radar tab defaults to live mode.
+- **startHour persistence:** `startHour` is tracked via `prevStartHourRef`. Initial mount initializes mode/fadeAnim synchronously. Re-navigation with a new startHour updates the scrubber and switches to replay. Navigating away resets to live (React Navigation unmounts/remounts the screen).
 
 ---
 
@@ -1139,6 +1147,7 @@ export const getReplayPositions = async (
 // src/hooks/api/useReplayPositions.ts
 import { useQuery } from '@tanstack/react-query';
 import { getReplayPositions } from '@/api/endpoints/positions';
+import { alertsApi } from '@/api/endpoints/alerts';
 import { TriangulatedPosition } from '@/types/triangulation';
 import { Alert } from '@/types/alert';
 import { isMockMode } from '@/config/mockConfig';
@@ -1155,19 +1164,16 @@ export function useReplayData(deviceId: string | undefined) {
         return generateReplayData();
       }
 
-      // Real API: fetch today's positions
-      // TODO: backend should also return correlated alerts, or we
-      // fetch alerts separately and join client-side.
+      // Real API: fetch today's positions and alerts in parallel
       const now = new Date();
       const midnight = new Date(now);
       midnight.setHours(0, 0, 0, 0);
 
-      const response = await getReplayPositions(
-        deviceId!,
-        midnight.toISOString(),
-        now.toISOString()
-      );
-      return { positions: response.positions, alerts: [] };
+      const [posResponse, alertsResponse] = await Promise.all([
+        getReplayPositions(deviceId!, midnight.toISOString(), now.toISOString()),
+        alertsApi.getAlerts({ deviceId: deviceId!, startDate: midnight.toISOString(), endDate: now.toISOString() }),
+      ]);
+      return { positions: posResponse.positions, alerts: alertsResponse };
     },
     enabled: !!deviceId,
     staleTime: 60_000,
@@ -2366,7 +2372,6 @@ Add replay state after existing state declarations:
 ```typescript
 // --- Replay mode state ---
 const startHour = route?.params?.startHour;
-const hasConsumedStartHour = useRef(false);
 const [mode, setMode] = useState<RadarMode>(
   // Initialize directly to 'replay' if startHour is present, so the
   // first render already has the correct mode before any effects run.
@@ -2426,22 +2431,35 @@ const handleModeChange = useCallback((newMode: RadarMode) => {
   }
 }, [reduceMotion, fadeAnim, autoPlay]);
 
-// Consume startHour once for re-navigation (e.g., tapping a different
-// sparkline hour while already on the Radar tab). The initial mount
-// case is handled by the useState/useSharedValue initializers above.
+// Handle startHour changes — covers both first mount and re-navigation.
+// On first mount: mode/fadeAnim are already initialized from startHour,
+// but we still need to mark it consumed.
+// On re-navigation (already mounted, new startHour arrives): switch to
+// replay mode, update the scrubber position, and flip fadeAnim.
+const prevStartHourRef = useRef<number | undefined>(undefined);
 useEffect(() => {
-  if (startHour !== undefined && !hasConsumedStartHour.current) {
-    hasConsumedStartHour.current = true;
-    // Already in replay mode from initial state — no action needed on first mount.
-    // For subsequent navigations with a new startHour, this guard prevents re-entry.
+  if (startHour === undefined) return;
+  if (startHour === prevStartHourRef.current) return; // same hour, no-op
+  prevStartHourRef.current = startHour;
+
+  // If already in replay mode from initialization, just update the minute
+  if (mode === 'replay') {
+    autoPlay.setMinuteIndex(startHour * 60);
+    return;
   }
-}, [startHour]);
+
+  // Otherwise, switch to replay mode (covers re-navigation while in live mode)
+  handleModeChange('replay');
+  autoPlay.setMinuteIndex(startHour * 60);
+}, [startHour, mode, handleModeChange, autoPlay]);
 ```
 
 > **Implementation note:** `mode` and `fadeAnim` are initialized synchronously
-> from `startHour`, so the first render already shows replay mode. No effect
-> needed to flip `fadeAnim` after mount — the deep-link path never flickers
-> through the live map.
+> from `startHour`, so the first render already shows replay mode. The
+> `useEffect` on `startHour` handles re-navigation (tapping a different
+> sparkline hour while already on the Radar tab) by updating `minuteIndex`
+> and switching to replay mode if needed. `prevStartHourRef` deduplicates
+> so re-renders with the same startHour are no-ops.
 
 In the JSX, add the segmented control after `<ScreenLayout>` and before the content. Then wrap the existing MapBox content and add the replay content. Both are always mounted:
 
@@ -2643,16 +2661,17 @@ const queryClient = new QueryClient({
 });
 
 describe('PropertyCommandCenter sparkline deep link', () => {
-  it('sparkline onHourPress navigates to RadarTab with startHour', () => {
+  it('sparkline bar press navigates to RadarTab with startHour', () => {
     const navigate = jest.fn();
 
     // ActivitySparkline renders 24 Pressable bars (one per hour).
-    // Pressing any bar calls onHourPress(hourIndex).
-    // PropertyCommandCenter wires this to navigate('RadarTab', { screen: 'LiveRadar', params: { startHour: hour } }).
+    // Each bar's onPress calls onHourPress(index), which
+    // PropertyCommandCenter wires to navigate.
+    //
+    // The mock allAlerts has 1 alert at the current hour, so that
+    // bar will have activity and be pressable.
 
-    // The mock allAlerts includes 1 alert at the current hour, so at least
-    // 1 bar will be in the "today" window and be pressable.
-    const { UNSAFE_getAllByType } = render(
+    const { getAllByRole } = render(
       <QueryClientProvider client={queryClient}>
         <NavigationContainer>
           <PropertyCommandCenter navigation={{ navigate }} />
@@ -2660,26 +2679,33 @@ describe('PropertyCommandCenter sparkline deep link', () => {
       </QueryClientProvider>
     );
 
-    // ActivitySparkline's bars are Pressable components. We find them and
-    // press the first one. The hour index corresponds to bar position (0-23).
-    // Since we can't easily target by testID, we verify the navigate call
-    // by pressing the sparkline area. The onHourPress callback receives
-    // the bar's index (0-23) and calls navigate.
+    // ActivitySparkline renders 24 Pressable bars. Each Pressable
+    // has role="button" by default in RNTL. Find them and press
+    // the bar at index 0 (12am hour).
+    const pressables = getAllByRole('button');
+    // The sparkline bars are among the pressable elements.
+    // The sparkline is near the end of the screen. Each bar calls
+    // onHourPress(barIndex). We press the first bar (hour 0).
+    // Since there are many pressables on screen (stat cards, etc.),
+    // we look for the one that triggers our specific navigate call.
     //
-    // Alternative approach: extract the onHourPress callback and test it directly.
-    // This is more reliable and doesn't depend on component internals.
-    const onHourPress = (hour: number) =>
-      navigate('RadarTab', {
-        screen: 'LiveRadar',
-        params: { startHour: hour },
-      });
-
-    // Simulate pressing hour 14
-    onHourPress(14);
+    // Press every pressable until we find one that triggers the
+    // RadarTab navigation — this proves the wiring exists.
+    for (const p of pressables) {
+      fireEvent.press(p);
+      if (navigate.mock.calls.some(
+        (args: any[]) =>
+          args[0] === 'RadarTab' &&
+          args[1]?.screen === 'LiveRadar' &&
+          typeof args[1]?.params?.startHour === 'number'
+      )) {
+        break;
+      }
+    }
 
     expect(navigate).toHaveBeenCalledWith('RadarTab', {
       screen: 'LiveRadar',
-      params: { startHour: 14 },
+      params: expect.objectContaining({ startHour: expect.any(Number) }),
     });
   });
 });
