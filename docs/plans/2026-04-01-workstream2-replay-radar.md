@@ -49,13 +49,20 @@
 
 | # | Finding | Fix |
 |---|---------|-----|
-| v5-1 | Production MAC/threat correlation still heuristic (no stable join key) | Add optional `macAddress` field to `TriangulatedPosition` type. Backend populates it (the triangulation system knows which MAC it's tracking). `findNearestAlert` joins on `macAddress` first, falls back to deviceId+timestamp only when MAC is absent. Mock generator populates `macAddress` on every position. |
+| v5-1 | Production MAC/threat correlation still heuristic (no stable join key) | Add optional `macAddress` field to `TriangulatedPosition` type. Backend populates it (the triangulation system knows which MAC it's tracking). `findMatchingAlert` joins on `macAddress` first, falls back to deviceId+timestamp only when MAC is absent. Mock generator populates `macAddress` on every position. |
 | v5-2 | Tab switch doesn't reset to live mode (unmountOnBlur not set) | Add `useFocusEffect` cleanup that resets mode to live on blur. No navigator config change needed. |
+
+### v6 follow-up findings addressed
+
+| # | Finding | Fix |
+|---|---------|-----|
+| v6-1 | Blur reset doesn't stick — route param re-triggers | Snapshot `startHour` into `useRef` on mount, then immediately clear route param via `navigation.setParams({ startHour: undefined })`. All logic reads the ref, never the route. Param cannot re-trigger. |
+| v6-2 | useFocusEffect tears down on rerender (unstable handleModeChange) | Replaced `handleModeChange` with `switchToLive`/`switchToReplay` — deps are only `reduceMotion` + `fadeAnim` (both stable). `autoPlay` accessed via `autoPlayRef.current` to avoid callback identity churn. |
 
 ### Open questions resolved
 
 - **Timezone:** All time computations use the device's local timezone via `Date`. The replay window is "today midnight to now" in the viewer's local time. This matches ActivitySparkline's behavior (uses `Date.setHours(0,0,0,0)`). Property timezone awareness deferred to backend phase.
-- **startHour persistence:** `startHour` is tracked via `prevStartHourRef`. Initial mount initializes mode/fadeAnim synchronously. Re-navigation with a new startHour updates the scrubber and switches to replay. Navigating away from the Radar tab resets to live mode via `useFocusEffect` cleanup (does not rely on unmount).
+- **startHour persistence:** `startHour` is snapshotted into a ref on mount, then immediately cleared from route params via `navigation.setParams`. `useFocusEffect` resets to live on blur with a stable callback. No dependency on `unmountOnBlur`.
 
 ---
 
@@ -2424,14 +2431,26 @@ Add replay state after existing state declarations:
 
 ```typescript
 // --- Replay mode state ---
-const startHour = route?.params?.startHour;
+//
+// startHour lifecycle:
+// 1. Snapshot route.params.startHour into a ref on mount
+// 2. Clear the route param immediately via navigation.setParams
+// 3. All subsequent logic reads the ref, never the route
+// This avoids fighting React Navigation's param persistence.
+const initialStartHour = useRef(route?.params?.startHour as number | undefined);
 const [mode, setMode] = useState<RadarMode>(
-  // Initialize directly to 'replay' if startHour is present, so the
-  // first render already has the correct mode before any effects run.
-  startHour !== undefined ? 'replay' : 'live'
+  initialStartHour.current !== undefined ? 'replay' : 'live'
 );
 const [peekMac, setPeekMac] = useState<string | null>(null);
 const reduceMotion = useReducedMotion();
+
+// Clear the route param so it doesn't re-trigger on tab switches.
+// navigation.setParams merges, so this nulls out startHour.
+useEffect(() => {
+  if (initialStartHour.current !== undefined) {
+    navigation.setParams({ startHour: undefined });
+  }
+}, [navigation]);
 
 // Replay data via useReplayData (mock fallback in dev)
 // Returns co-generated positions + alerts for authoritative correlation
@@ -2456,12 +2475,16 @@ const bucketed = useTimeBucketing({
 // Auto-play
 const autoPlay = useAutoPlay({
   buckets: bucketed.buckets,
-  initialMinute: startHour !== undefined ? startHour * 60 : 0,
+  initialMinute: initialStartHour.current !== undefined
+    ? initialStartHour.current * 60
+    : 0,
 });
 
 // Crossfade animation (Fix #7: both always mounted, opacity-driven)
 // Initialize fadeAnim to match the initial mode — 0 if startHour deep link
-const fadeAnim = useSharedValue(startHour !== undefined ? 0 : 1);
+const fadeAnim = useSharedValue(
+  initialStartHour.current !== undefined ? 0 : 1
+);
 const liveStyle = useAnimatedStyle(() => ({
   opacity: fadeAnim.value,
   pointerEvents: fadeAnim.value > 0.5 ? 'auto' : 'none',
@@ -2471,62 +2494,49 @@ const replayStyle = useAnimatedStyle(() => ({
   pointerEvents: fadeAnim.value < 0.5 ? 'auto' : 'none',
 }));
 
-const handleModeChange = useCallback((newMode: RadarMode) => {
-  setMode(newMode);
+// Stable refs for cleanup — avoids recreating callbacks when
+// autoPlay object identity changes.
+const autoPlayRef = useRef(autoPlay);
+autoPlayRef.current = autoPlay;
+
+const switchToLive = useCallback(() => {
+  setMode('live');
   if (reduceMotion) {
-    fadeAnim.value = newMode === 'live' ? 1 : 0;
+    fadeAnim.value = 1;
   } else {
-    fadeAnim.value = withTiming(newMode === 'live' ? 1 : 0, { duration: 300 });
+    fadeAnim.value = withTiming(1, { duration: 300 });
   }
-  if (newMode === 'live') {
-    autoPlay.pause();
-    setPeekMac(null);
+  autoPlayRef.current.pause();
+  setPeekMac(null);
+}, [reduceMotion, fadeAnim]);
+
+const switchToReplay = useCallback(() => {
+  setMode('replay');
+  if (reduceMotion) {
+    fadeAnim.value = 0;
+  } else {
+    fadeAnim.value = withTiming(0, { duration: 300 });
   }
-}, [reduceMotion, fadeAnim, autoPlay]);
-
-// Handle startHour changes — covers both first mount and re-navigation.
-// On first mount: mode/fadeAnim are already initialized from startHour,
-// but we still need to mark it consumed.
-// On re-navigation (already mounted, new startHour arrives): switch to
-// replay mode, update the scrubber position, and flip fadeAnim.
-const prevStartHourRef = useRef<number | undefined>(undefined);
-useEffect(() => {
-  if (startHour === undefined) return;
-  if (startHour === prevStartHourRef.current) return; // same hour, no-op
-  prevStartHourRef.current = startHour;
-
-  // If already in replay mode from initialization, just update the minute
-  if (mode === 'replay') {
-    autoPlay.setMinuteIndex(startHour * 60);
-    return;
-  }
-
-  // Otherwise, switch to replay mode (covers re-navigation while in live mode)
-  handleModeChange('replay');
-  autoPlay.setMinuteIndex(startHour * 60);
-}, [startHour, mode, handleModeChange, autoPlay]);
+}, [reduceMotion, fadeAnim]);
 
 // Reset to live mode when navigating away from the Radar tab.
-// Does NOT rely on unmountOnBlur — works with default tab navigator config.
+// switchToLive has a stable identity (deps: reduceMotion, fadeAnim)
+// so this effect won't tear down on ordinary rerenders.
 useFocusEffect(
   useCallback(() => {
-    // Screen gained focus — no action needed
     return () => {
-      // Screen lost focus — reset to live mode
-      handleModeChange('live');
-      prevStartHourRef.current = undefined;
+      switchToLive();
     };
-  }, [handleModeChange])
+  }, [switchToLive])
 );
 ```
 
-> **Implementation note:** `mode` and `fadeAnim` are initialized synchronously
-> from `startHour`, so the first render already shows replay mode. The
-> `useEffect` on `startHour` handles re-navigation (tapping a different
-> sparkline hour while already on the Radar tab) by updating `minuteIndex`
-> and switching to replay mode if needed. `prevStartHourRef` deduplicates
-> so re-renders with the same startHour are no-ops. `useFocusEffect`
-> resets to live mode on blur — no dependency on `unmountOnBlur`.
+> **Implementation note:** `startHour` is consumed once via `useRef` +
+> `navigation.setParams({ startHour: undefined })`. After that, the route
+> param is cleared and cannot re-trigger on tab switches. The blur cleanup
+> uses `switchToLive` which has stable deps (`reduceMotion` + `fadeAnim` —
+> both stable across renders) and accesses `autoPlay` via a ref to avoid
+> callback identity churn. No `handleModeChange` with unstable deps exists.
 
 In the JSX, add the segmented control after `<ScreenLayout>` and before the content. Then wrap the existing MapBox content and add the replay content. Both are always mounted:
 
@@ -2535,7 +2545,7 @@ In the JSX, add the segmented control after `<ScreenLayout>` and before the cont
 <View style={styles.segmentedControl}>
   <Pressable
     style={[styles.segment, mode === 'live' && styles.segmentActive]}
-    onPress={() => handleModeChange('live')}
+    onPress={switchToLive}
   >
     <Text
       variant="subheadline"
@@ -2547,7 +2557,7 @@ In the JSX, add the segmented control after `<ScreenLayout>` and before the cont
   </Pressable>
   <Pressable
     style={[styles.segment, mode === 'replay' && styles.segmentActive]}
-    onPress={() => handleModeChange('replay')}
+    onPress={switchToReplay}
   >
     <Text
       variant="subheadline"
