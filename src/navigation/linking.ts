@@ -14,6 +14,11 @@ export const linking: LinkingOptions<RootStackParamList> = {
       },
       Main: {
         screens: {
+          HomeTab: {
+            screens: {
+              PropertyCommandCenter: 'home',
+            },
+          },
           AlertsTab: {
             screens: {
               AlertList: 'alerts',
@@ -34,19 +39,25 @@ export const linking: LinkingOptions<RootStackParamList> = {
               AddDevice: 'devices/add',
             },
           },
-          AnalyticsTab: {
+          MoreTab: {
             screens: {
+              MoreMenu: 'more',
               Dashboard: 'analytics',
               Heatmap: 'analytics/heatmap',
               Reports: 'analytics/reports',
-            },
-          },
-          SettingsTab: {
-            screens: {
+              TrailSenseAI: 'ai',
               Settings: 'settings',
               Profile: 'settings/profile',
               Whitelist: 'settings/whitelist',
               NotificationSettings: 'settings/notifications',
+              Theme: 'settings/theme',
+              AlertSound: 'settings/alert-sound',
+              Biometric: 'settings/biometric',
+              Security: 'settings/security',
+              Sensitivity: 'settings/sensitivity',
+              QuietHours: 'settings/quiet-hours',
+              VacationMode: 'settings/vacation-mode',
+              AddWhitelist: 'settings/whitelist/add',
             },
           },
         },

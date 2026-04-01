@@ -12,12 +12,15 @@ export type AuthStackParamList = {
 };
 
 export type MainTabParamList = {
+  HomeTab: NavigatorScreenParams<HomeStackParamList>;
   AlertsTab: NavigatorScreenParams<AlertsStackParamList>;
   RadarTab: NavigatorScreenParams<RadarStackParamList>;
-  AnalyticsTab: NavigatorScreenParams<AnalyticsStackParamList>;
   DevicesTab: NavigatorScreenParams<DevicesStackParamList>;
-  AITab: NavigatorScreenParams<AIStackParamList>;
-  SettingsTab: NavigatorScreenParams<SettingsStackParamList>;
+  MoreTab: NavigatorScreenParams<MoreStackParamList>;
+};
+
+export type HomeStackParamList = {
+  PropertyCommandCenter: undefined;
 };
 
 export type AlertsStackParamList = {
@@ -43,6 +46,26 @@ export type AnalyticsStackParamList = {
   Dashboard: undefined;
   Heatmap: undefined;
   Reports: undefined;
+};
+
+export type MoreStackParamList = {
+  MoreMenu: undefined;
+  Dashboard: undefined;
+  Heatmap: undefined;
+  Reports: undefined;
+  TrailSenseAI: undefined;
+  Settings: undefined;
+  Profile: undefined;
+  Whitelist: undefined;
+  NotificationSettings: undefined;
+  Theme: undefined;
+  AlertSound: undefined;
+  Biometric: undefined;
+  Security: undefined;
+  Sensitivity: undefined;
+  QuietHours: undefined;
+  VacationMode: undefined;
+  AddWhitelist: undefined;
 };
 
 export type SettingsStackParamList = {

@@ -3,12 +3,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 import { MainTabParamList } from './types';
+import HomeStack from './stacks/HomeStack';
 import AlertsStack from './stacks/AlertsStack';
 import RadarStack from './stacks/RadarStack';
 import DevicesStack from './stacks/DevicesStack';
-import AIStack from './stacks/AIStack';
-import SettingsStack from './stacks/SettingsStack';
-import { AnalyticsStack } from './stacks/AnalyticsStack';
+import MoreStack from './stacks/MoreStack';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -28,12 +27,32 @@ export const MainNavigator = () => {
       }}
     >
       <Tab.Screen
+        name="HomeTab"
+        component={HomeStack}
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => (
+            <Icon name="home-outline" color={color} size="base" />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="AlertsTab"
         component={AlertsStack}
         options={{
           title: 'Alerts',
           tabBarIcon: ({ color }) => (
             <Icon name="alert-circle" color={color} size="base" />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="RadarTab"
+        component={RadarStack}
+        options={{
+          title: 'Radar',
+          tabBarIcon: ({ color }) => (
+            <Icon name="radio-outline" color={color} size="base" />
           ),
         }}
       />
@@ -48,42 +67,12 @@ export const MainNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="RadarTab"
-        component={RadarStack}
+        name="MoreTab"
+        component={MoreStack}
         options={{
-          title: 'Map',
+          title: 'More',
           tabBarIcon: ({ color }) => (
-            <Icon name="map-outline" color={color} size="base" />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="AnalyticsTab"
-        component={AnalyticsStack}
-        options={{
-          title: 'Analytics',
-          tabBarIcon: ({ color }) => (
-            <Icon name="analytics" color={color} size="base" />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="AITab"
-        component={AIStack}
-        options={{
-          title: 'AI',
-          tabBarIcon: ({ color }) => (
-            <Icon name="sparkles-outline" color={color} size="base" />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="SettingsTab"
-        component={SettingsStack}
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <Icon name="settings" color={color} size="base" />
+            <Icon name="ellipsis-horizontal" color={color} size="base" />
           ),
         }}
       />
