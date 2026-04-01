@@ -56,13 +56,14 @@
 
 | # | Finding | Fix |
 |---|---------|-----|
-| v6-1 | Blur reset doesn't stick — route param re-triggers | Snapshot `startHour` into `useRef` on mount, then immediately clear route param via `navigation.setParams({ startHour: undefined })`. All logic reads the ref, never the route. Param cannot re-trigger. |
+| v6-1 | Blur reset doesn't stick — route param re-triggers | Consume-and-clear pattern: `useEffect` reads `startHour`, applies it, then `navigation.setParams({ startHour: undefined })` in the same effect. Param is gone before any blur/focus cycle can see it. |
 | v6-2 | useFocusEffect tears down on rerender (unstable handleModeChange) | Replaced `handleModeChange` with `switchToLive`/`switchToReplay` — deps are only `reduceMotion` + `fadeAnim` (both stable). `autoPlay` accessed via `autoPlayRef.current` to avoid callback identity churn. |
+| v6-3 | v6 over-consumed startHour (ref snapshot ignored re-navigation) | Consume-and-clear reads the route param directly (not a ref), so new navigations with a different `startHour` fire the effect again. Clearing after consumption prevents stale re-triggers. Both re-navigation and blur safety are preserved. |
 
 ### Open questions resolved
 
 - **Timezone:** All time computations use the device's local timezone via `Date`. The replay window is "today midnight to now" in the viewer's local time. This matches ActivitySparkline's behavior (uses `Date.setHours(0,0,0,0)`). Property timezone awareness deferred to backend phase.
-- **startHour persistence:** `startHour` is snapshotted into a ref on mount, then immediately cleared from route params via `navigation.setParams`. `useFocusEffect` resets to live on blur with a stable callback. No dependency on `unmountOnBlur`.
+- **startHour persistence:** Consume-and-clear pattern. `useEffect` watches `route.params.startHour`, applies it (switch to replay + set minute), then clears via `navigation.setParams({ startHour: undefined })`. Re-navigation with a new hour works (param changes → effect fires). Blur/focus is safe (param already cleared). `useFocusEffect` resets to live on blur with a stable callback.
 
 ---
 
@@ -2432,28 +2433,22 @@ Add replay state after existing state declarations:
 ```typescript
 // --- Replay mode state ---
 //
-// startHour lifecycle:
-// 1. Snapshot route.params.startHour into a ref on mount
-// 2. Clear the route param immediately via navigation.setParams
-// 3. All subsequent logic reads the ref, never the route
-// This avoids fighting React Navigation's param persistence.
-const initialStartHour = useRef(route?.params?.startHour as number | undefined);
+// startHour lifecycle (consume-and-clear pattern):
+//   1. Read route.params.startHour
+//   2. Apply it (switch to replay, set minute index)
+//   3. Clear it via navigation.setParams({ startHour: undefined })
+// This handles three cases:
+//   - First mount with startHour: useState initializer sets mode='replay'
+//   - Re-navigation while mounted (new startHour): useEffect applies + clears
+//   - Tab blur/focus without new navigation: param is already cleared, no-op
+const startHour: number | undefined = route?.params?.startHour;
 const [mode, setMode] = useState<RadarMode>(
-  initialStartHour.current !== undefined ? 'replay' : 'live'
+  startHour !== undefined ? 'replay' : 'live'
 );
 const [peekMac, setPeekMac] = useState<string | null>(null);
 const reduceMotion = useReducedMotion();
 
-// Clear the route param so it doesn't re-trigger on tab switches.
-// navigation.setParams merges, so this nulls out startHour.
-useEffect(() => {
-  if (initialStartHour.current !== undefined) {
-    navigation.setParams({ startHour: undefined });
-  }
-}, [navigation]);
-
 // Replay data via useReplayData (mock fallback in dev)
-// Returns co-generated positions + alerts for authoritative correlation
 const { data: replayData } = useReplayData(selectedDevice?.id);
 const replayPositions = replayData?.positions ?? [];
 const replayAlerts = replayData?.alerts ?? [];
@@ -2462,8 +2457,7 @@ const propertyCenter = {
   longitude: selectedDevice?.longitude ?? -110.287842,
 };
 
-// Time bucketing — correlates with co-generated replay alerts for
-// authoritative threat levels and MAC addresses (not the live alerts)
+// Time bucketing — correlates with co-generated replay alerts
 const bucketed = useTimeBucketing({
   positions: replayPositions,
   alerts: replayAlerts,
@@ -2475,16 +2469,11 @@ const bucketed = useTimeBucketing({
 // Auto-play
 const autoPlay = useAutoPlay({
   buckets: bucketed.buckets,
-  initialMinute: initialStartHour.current !== undefined
-    ? initialStartHour.current * 60
-    : 0,
+  initialMinute: startHour !== undefined ? startHour * 60 : 0,
 });
 
-// Crossfade animation (Fix #7: both always mounted, opacity-driven)
-// Initialize fadeAnim to match the initial mode — 0 if startHour deep link
-const fadeAnim = useSharedValue(
-  initialStartHour.current !== undefined ? 0 : 1
-);
+// Crossfade animation — both views always mounted, opacity-driven
+const fadeAnim = useSharedValue(startHour !== undefined ? 0 : 1);
 const liveStyle = useAnimatedStyle(() => ({
   opacity: fadeAnim.value,
   pointerEvents: fadeAnim.value > 0.5 ? 'auto' : 'none',
@@ -2494,8 +2483,8 @@ const replayStyle = useAnimatedStyle(() => ({
   pointerEvents: fadeAnim.value < 0.5 ? 'auto' : 'none',
 }));
 
-// Stable refs for cleanup — avoids recreating callbacks when
-// autoPlay object identity changes.
+// Stable ref to autoPlay — avoids callback identity churn since
+// useAutoPlay returns a new object literal each render.
 const autoPlayRef = useRef(autoPlay);
 autoPlayRef.current = autoPlay;
 
@@ -2519,9 +2508,21 @@ const switchToReplay = useCallback(() => {
   }
 }, [reduceMotion, fadeAnim]);
 
-// Reset to live mode when navigating away from the Radar tab.
-// switchToLive has a stable identity (deps: reduceMotion, fadeAnim)
-// so this effect won't tear down on ordinary rerenders.
+// Consume-and-clear: when startHour appears on the route, apply it
+// then immediately clear the param so it can't re-fire on blur/focus.
+useEffect(() => {
+  if (startHour === undefined) return;
+
+  // Apply: switch to replay at the requested hour
+  switchToReplay();
+  autoPlayRef.current.setMinuteIndex(startHour * 60);
+
+  // Clear: remove the param so tab blur/focus cycles don't re-trigger
+  navigation.setParams({ startHour: undefined });
+}, [startHour, switchToReplay, navigation]);
+
+// Reset to live mode on tab blur.
+// switchToLive deps are (reduceMotion, fadeAnim) — both stable.
 useFocusEffect(
   useCallback(() => {
     return () => {
@@ -2531,12 +2532,13 @@ useFocusEffect(
 );
 ```
 
-> **Implementation note:** `startHour` is consumed once via `useRef` +
-> `navigation.setParams({ startHour: undefined })`. After that, the route
-> param is cleared and cannot re-trigger on tab switches. The blur cleanup
-> uses `switchToLive` which has stable deps (`reduceMotion` + `fadeAnim` —
-> both stable across renders) and accesses `autoPlay` via a ref to avoid
-> callback identity churn. No `handleModeChange` with unstable deps exists.
+> **Implementation note:** The consume-and-clear pattern reads `startHour`,
+> applies it, then nulls the route param in the same effect. This gives us
+> both properties: (1) new startHour works while the screen stays mounted
+> (the effect fires because the param changed), and (2) blur/focus cycles
+> don't re-trigger (the param is already undefined). `switchToLive` and
+> `switchToReplay` have stable identities (deps: `reduceMotion` + `fadeAnim`)
+> and access `autoPlay` via `autoPlayRef.current`.
 
 In the JSX, add the segmented control after `<ScreenLayout>` and before the content. Then wrap the existing MapBox content and add the replay content. Both are always mounted:
 
