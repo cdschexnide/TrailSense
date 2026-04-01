@@ -1,9 +1,9 @@
-import type { WhitelistEntry } from '@/types/whitelist';
+import type { KnownDevice } from '@types';
 
-export const mockWhitelist: WhitelistEntry[] = [
+export const mockKnownDevices: KnownDevice[] = [
   // Family members
   {
-    id: 'whitelist-001',
+    id: 'known-001',
     name: "John's iPhone",
     macAddress: 'A8:5E:45:2B:1F:9C',
     category: 'family',
@@ -12,7 +12,7 @@ export const mockWhitelist: WhitelistEntry[] = [
     updatedAt: '2025-01-15T10:00:00Z',
   },
   {
-    id: 'whitelist-002',
+    id: 'known-002',
     name: "Sarah's iPhone",
     macAddress: 'B2:7F:34:8A:6D:1E',
     category: 'family',
@@ -21,7 +21,7 @@ export const mockWhitelist: WhitelistEntry[] = [
     updatedAt: '2025-01-15T10:05:00Z',
   },
   {
-    id: 'whitelist-003',
+    id: 'known-003',
     name: 'Family iPad',
     macAddress: 'C4:9A:02:5B:3F:7D',
     category: 'family',
@@ -31,7 +31,7 @@ export const mockWhitelist: WhitelistEntry[] = [
 
   // Guests (some with expiration)
   {
-    id: 'whitelist-004',
+    id: 'known-004',
     name: 'Mike Thompson',
     macAddress: 'D8:3A:DD:12:45:6F',
     category: 'guests',
@@ -41,7 +41,7 @@ export const mockWhitelist: WhitelistEntry[] = [
     updatedAt: '2025-11-14T16:00:00Z',
   },
   {
-    id: 'whitelist-005',
+    id: 'known-005',
     name: 'Emily Davis',
     macAddress: 'E1:2B:45:AA:8C:3D',
     category: 'guests',
@@ -51,7 +51,7 @@ export const mockWhitelist: WhitelistEntry[] = [
     updatedAt: '2025-11-10T12:00:00Z',
   },
   {
-    id: 'whitelist-006',
+    id: 'known-006',
     name: 'Robert Chen - Expired',
     macAddress: 'F3:8D:12:BB:4E:9A',
     category: 'guests',
@@ -63,7 +63,7 @@ export const mockWhitelist: WhitelistEntry[] = [
 
   // Service personnel
   {
-    id: 'whitelist-007',
+    id: 'known-007',
     name: 'Property Manager - Tom Wilson',
     macAddress: 'A0:B1:C2:D3:E4:F5',
     category: 'service',
@@ -72,7 +72,7 @@ export const mockWhitelist: WhitelistEntry[] = [
     updatedAt: '2025-02-01T09:00:00Z',
   },
   {
-    id: 'whitelist-008',
+    id: 'known-008',
     name: 'Landscaping Crew',
     macAddress: 'B3:C4:D5:E6:F7:08',
     category: 'service',
@@ -83,7 +83,7 @@ export const mockWhitelist: WhitelistEntry[] = [
 
   // Other
   {
-    id: 'whitelist-009',
+    id: 'known-009',
     name: 'Wildlife Camera',
     macAddress: '10:20:30:40:50:60',
     category: 'other',
@@ -92,7 +92,7 @@ export const mockWhitelist: WhitelistEntry[] = [
     updatedAt: '2025-04-10T08:00:00Z',
   },
   {
-    id: 'whitelist-010',
+    id: 'known-010',
     name: 'Weather Station',
     macAddress: '11:22:33:44:55:66',
     category: 'other',
@@ -103,27 +103,25 @@ export const mockWhitelist: WhitelistEntry[] = [
 ];
 
 // Filtered collections
-export const mockFamilyWhitelist = mockWhitelist.filter(
+export const mockFamilyKnownDevices = mockKnownDevices.filter(
   w => w.category === 'family'
 );
-export const mockGuestsWhitelist = mockWhitelist.filter(
+export const mockGuestsKnownDevices = mockKnownDevices.filter(
   w => w.category === 'guests'
 );
-export const mockServiceWhitelist = mockWhitelist.filter(
+export const mockServiceKnownDevices = mockKnownDevices.filter(
   w => w.category === 'service'
 );
-export const mockOtherWhitelist = mockWhitelist.filter(
+export const mockOtherKnownDevices = mockKnownDevices.filter(
   w => w.category === 'other'
 );
 
-// Active (non-expired) whitelist entries
-export const mockActiveWhitelist = mockWhitelist.filter(w => {
+export const mockActiveKnownDevices = mockKnownDevices.filter(w => {
   if (!w.expiresAt) return true;
   return new Date(w.expiresAt) > new Date();
 });
 
-// Expired whitelist entries
-export const mockExpiredWhitelist = mockWhitelist.filter(w => {
+export const mockExpiredKnownDevices = mockKnownDevices.filter(w => {
   if (!w.expiresAt) return false;
   return new Date(w.expiresAt) <= new Date();
 });

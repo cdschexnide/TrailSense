@@ -190,7 +190,7 @@ export class InferenceEngine {
       combinedContent.includes('pattern') ||
       combinedContent.includes('device')
     ) {
-      return 'This is a mock pattern analysis. Based on the detection history, this appears to be a routine visitor, likely a delivery driver. The device is detected on weekdays during typical delivery hours (10am-4pm) and stays in the FAR zone (street level). Confidence: High. Recommendation: Consider whitelisting this device as "Delivery Driver" to reduce false alerts.';
+      return 'This is a mock pattern analysis. Based on the detection history, this appears to be a routine visitor, likely a delivery driver. The device is detected on weekdays during typical delivery hours (10am-4pm) and stays in the FAR zone (street level). Confidence: High. Recommendation: Consider adding this device to Known Devices as "Delivery Driver" to reduce false alerts.';
     }
 
     if (

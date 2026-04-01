@@ -7,8 +7,8 @@ export * from './alert';
 // Device types
 export * from './device';
 
-// Whitelist types
-export * from './whitelist';
+// Known device types
+export * from './knownDevice';
 
 // Triangulation types
 export * from './triangulation';

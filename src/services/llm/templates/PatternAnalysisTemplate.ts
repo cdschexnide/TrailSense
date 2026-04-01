@@ -41,8 +41,8 @@ Detection zones:
 Your analysis should:
 - Identify the most likely pattern type for a rural property context
 - Explain the reasoning clearly
-- Suggest if device should be whitelisted to reduce alerts
-- Recommend a friendly name if whitelisting (e.g., "UPS Delivery", "Neighbor's Truck")`;
+- Suggest if device should be added to Known Devices to reduce alerts
+- Recommend a friendly name if adding it to Known Devices (e.g., "UPS Delivery", "Neighbor's Truck")`;
 
     super(systemPrompt);
   }
@@ -85,7 +85,7 @@ ${similarDevices && similarDevices.length > 0 ? this.formatSimilarDevices(simila
 Based on this pattern:
 1. What type of visitor is this likely to be? (delivery, neighbor, routine, suspicious, or unknown)
 2. Why do you think this?
-3. Should this device be whitelisted? If yes, suggest a name and category.
+3. Should this device be added to Known Devices? If yes, suggest a name and category.
 4. Provide confidence level (low/medium/high)`;
 
     return this.buildFullPrompt(userPrompt);

@@ -1,7 +1,7 @@
 /**
- * WhitelistScreen - REDESIGNED
+ * KnownDevicesScreen - REDESIGNED
  *
- * Beautiful whitelist management with:
+ * Beautiful known device management with:
  * - Clean item cards
  * - Category icons
  * - Better empty state
@@ -11,7 +11,10 @@ import React from 'react';
 import { View, FlatList, StyleSheet, Pressable, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { useWhitelist } from '@hooks/useWhitelist';
+import {
+  useDeleteKnownDevice,
+  useKnownDevices,
+} from '@hooks/api/useKnownDevices';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { Button } from '@components/atoms/Button';
@@ -30,8 +33,7 @@ const CATEGORY_CONFIG: Record<string, { icon: string; color: string }> = {
   default: { icon: 'shield-checkmark', color: '#8E8E93' },
 };
 
-// Whitelist item component
-const WhitelistItemCard = ({
+const KnownDeviceItemCard = ({
   name,
   macAddress,
   category,
@@ -49,8 +51,8 @@ const WhitelistItemCard = ({
   const handleDelete = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
-      'Remove from Whitelist',
-      `Are you sure you want to remove "${name}" from the whitelist?`,
+      'Remove Known Device',
+      `Are you sure you want to remove "${name}" from Known Devices?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -95,8 +97,7 @@ const WhitelistItemCard = ({
   );
 };
 
-// Empty state component
-const EmptyWhitelist = ({ onAdd }: { onAdd: () => void }) => {
+const EmptyKnownDevices = ({ onAdd }: { onAdd: () => void }) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -106,10 +107,14 @@ const EmptyWhitelist = ({ onAdd }: { onAdd: () => void }) => {
         <Icon name="shield-checkmark" size={48} color={colors.systemTeal} />
       </View>
       <Text variant="title2" weight="bold" color="label" style={{ marginTop: 20 }}>
-        No Trusted Devices
+        No Known Devices
       </Text>
-      <Text variant="body" style={[styles.emptyText, { color: colors.secondaryLabel }]}>
-        Add devices to your whitelist to prevent them from triggering alerts
+      <Text
+        variant="body"
+        color="secondaryLabel"
+        style={styles.emptyText}
+      >
+        Add devices you recognize so they are easier to identify later
       </Text>
       <Pressable
         onPress={onAdd}
@@ -131,30 +136,31 @@ const EmptyWhitelist = ({ onAdd }: { onAdd: () => void }) => {
   );
 };
 
-export const WhitelistScreen = ({ navigation }: any) => {
+export const KnownDevicesScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const { data: whitelist, isLoading, error } = useWhitelist();
+  const { data: knownDevices, isLoading, error } = useKnownDevices();
+  const deleteKnownDevice = useDeleteKnownDevice();
 
   if (isLoading) return <LoadingState />;
-  if (error) return <ErrorState message="Failed to load whitelist" />;
+  if (error) return <ErrorState message="Failed to load known devices" />;
 
   const handleDelete = async (id: string) => {
-    console.log('Deleting whitelist item:', id);
+    deleteKnownDevice.mutate(id);
   };
 
   const handleAdd = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate('AddWhitelist');
+    navigation.navigate('AddKnownDevice');
   };
 
   return (
     <ScreenLayout
       header={{
-        title: 'Whitelist',
+        title: 'Known Devices',
         showBack: true,
         onBackPress: () => navigation.goBack(),
-        rightActions: whitelist && whitelist.length > 0 && (
+        rightActions: knownDevices && knownDevices.length > 0 && (
           <Button buttonStyle="plain" onPress={handleAdd}>
             <Icon name="add" size={24} color={colors.systemBlue} />
           </Button>
@@ -163,19 +169,19 @@ export const WhitelistScreen = ({ navigation }: any) => {
       scrollable={false}
     >
       {/* Info Card */}
-      {whitelist && whitelist.length > 0 && (
+      {knownDevices && knownDevices.length > 0 && (
         <View style={[styles.infoCard, { backgroundColor: colors.secondarySystemBackground }]}>
           <Icon name="information-circle" size={20} color={colors.systemBlue} />
           <Text variant="caption1" style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}>
-            Whitelisted devices won't trigger security alerts
+            Known devices help you label familiar visitors and equipment
           </Text>
         </View>
       )}
 
       <FlatList
-        data={whitelist}
+        data={knownDevices}
         renderItem={({ item }) => (
-          <WhitelistItemCard
+          <KnownDeviceItemCard
             name={item.name}
             macAddress={item.macAddress}
             category={item.category}
@@ -185,9 +191,9 @@ export const WhitelistScreen = ({ navigation }: any) => {
         keyExtractor={item => item.id}
         contentContainerStyle={[
           styles.listContent,
-          (!whitelist || whitelist.length === 0) && styles.emptyListContent,
+          (!knownDevices || knownDevices.length === 0) && styles.emptyListContent,
         ]}
-        ListEmptyComponent={<EmptyWhitelist onAdd={handleAdd} />}
+        ListEmptyComponent={<EmptyKnownDevices onAdd={handleAdd} />}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
       />
     </ScreenLayout>

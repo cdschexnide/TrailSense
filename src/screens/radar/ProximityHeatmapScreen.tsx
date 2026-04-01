@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Text, Card, Icon } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
+import { useAlerts } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
 import Mapbox, { Camera, MapView } from '@rnmapbox/maps';
 import { usePositions, POSITIONS_QUERY_KEY } from '@hooks/api/usePositions';
@@ -33,7 +34,7 @@ Mapbox.setAccessToken(MAPBOX_TOKEN || '');
 const { width } = Dimensions.get('window');
 const MAP_SIZE = width - 40;
 
-export const ProximityHeatmapScreen = () => {
+export const ProximityHeatmapScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
   const colors = theme.colors;
   const [selectedDeviceIndex] = useState(0);
@@ -52,6 +53,7 @@ export const ProximityHeatmapScreen = () => {
 
   // Fetch devices - uses shared hook with 30s auto-refresh
   const { data: devices = [], isLoading: devicesLoading } = useDevices();
+  const { data: alerts = [] } = useAlerts();
   const selectedDevice = devices[selectedDeviceIndex];
 
   // Fetch triangulated positions for selected device
@@ -189,6 +191,19 @@ export const ProximityHeatmapScreen = () => {
         title: selectedDevice?.name || 'Map',
         largeTitle: false,
         showBack: true,
+        rightActions:
+          alerts[0]?.macAddress ? (
+            <Button
+              buttonStyle="plain"
+              onPress={() =>
+                navigation.navigate('DeviceFingerprint', {
+                  macAddress: alerts[0].macAddress,
+                })
+              }
+            >
+              Visitor
+            </Button>
+          ) : undefined,
       }}
     >
       <ScrollView>

@@ -28,9 +28,6 @@ import { useAlert } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
 import { formatTime } from '@utils/dateUtils';
 import { getThreatColor } from '@utils/visualEffects';
-import { useAlertSummary } from '@/hooks/useAlertSummary';
-import { AlertSummaryCard } from '@/components/organisms/AlertSummaryCard';
-import { FEATURE_FLAGS } from '@/config/featureFlags';
 import { useTheme } from '@hooks/useTheme';
 import { ThreatLevel } from '@types';
 
@@ -94,38 +91,12 @@ export const AlertDetailScreen = () => {
   // Get device name from deviceId
   const deviceName = devices?.find((d: any) => d.id === alert?.deviceId)?.name;
 
-  // LLM Alert Summary Hook
-  const {
-    summary,
-    isLoading: isGeneratingSummary,
-    error: summaryError,
-    generate: generateSummary,
-    regenerate: regenerateSummary,
-  } = useAlertSummary(alert);
-
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState message="Failed to load alert" />;
   if (!alert) return <ErrorState message="Alert not found" />;
 
   const handleMarkReviewed = async () => {
     console.log('Marking alert as reviewed:', alertId);
-  };
-
-  const handleMarkFalsePositive = async () => {
-    console.log('Marking alert as false positive:', alertId);
-  };
-
-  const handleFeedback = (positive: boolean) => {
-    console.log('LLM feedback:', {
-      alertId: alert.id,
-      feedback: positive ? 'positive' : 'negative',
-      threatLevel: alert.threatLevel,
-    });
-  };
-
-  const handleMorePress = () => {
-    // TODO: Show action sheet with Whitelist, Delete options
-    console.log('More options pressed');
   };
 
   const priorityLabel = getPriorityLabel(alert.threatLevel);
@@ -174,6 +145,20 @@ export const AlertDetailScreen = () => {
           title="Detection Type"
           value={capitalizeDetectionType(alert.detectionType)}
         />
+        {alert.macAddress && (
+          <GroupedListRow
+            icon="analytics-outline"
+            iconColor={colors.systemBlue}
+            title="Open fingerprint"
+            subtitle="View visits, patterns, and actions"
+            showChevron
+            onPress={() =>
+              (navigation as any).navigate('DeviceFingerprint', {
+                macAddress: alert.macAddress,
+              })
+            }
+          />
+        )}
       </GroupedListSection>
 
       {/* Summary Details Section (if from summary source) */}

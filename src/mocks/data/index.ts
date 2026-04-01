@@ -28,16 +28,16 @@ export {
   mockRecentAlerts,
 } from './mockAlerts';
 
-// Whitelist
+// Known devices
 export {
-  mockWhitelist,
-  mockFamilyWhitelist,
-  mockGuestsWhitelist,
-  mockServiceWhitelist,
-  mockOtherWhitelist,
-  mockActiveWhitelist,
-  mockExpiredWhitelist,
-} from './mockWhitelist';
+  mockKnownDevices,
+  mockFamilyKnownDevices,
+  mockGuestsKnownDevices,
+  mockServiceKnownDevices,
+  mockOtherKnownDevices,
+  mockActiveKnownDevices,
+  mockExpiredKnownDevices,
+} from './mockKnownDevices';
 
 // Analytics
 export {

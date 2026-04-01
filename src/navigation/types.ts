@@ -21,23 +21,26 @@ export type MainTabParamList = {
 
 export type HomeStackParamList = {
   PropertyCommandCenter: undefined;
+  DeviceFingerprint: { macAddress: string };
 };
 
 export type AlertsStackParamList = {
   AlertList: undefined;
   AlertDetail: { alertId: string };
   AlertFilter: undefined;
+  DeviceFingerprint: { macAddress: string };
 };
 
 export type RadarStackParamList = {
   LiveRadar: undefined;
   RadarSettings: undefined;
+  DeviceFingerprint: { macAddress: string };
 };
 
 export type DevicesStackParamList = {
   DeviceList: undefined;
   DeviceDetail: { deviceId: string };
-  DeviceHistory: { id: string };
+  DeviceFingerprint: { macAddress: string };
   DeviceSettings: { id: string };
   AddDevice: undefined;
 };
@@ -56,7 +59,7 @@ export type MoreStackParamList = {
   TrailSenseAI: undefined;
   Settings: undefined;
   Profile: undefined;
-  Whitelist: undefined;
+  KnownDevices: undefined;
   NotificationSettings: undefined;
   Theme: undefined;
   AlertSound: undefined;
@@ -65,13 +68,14 @@ export type MoreStackParamList = {
   Sensitivity: undefined;
   QuietHours: undefined;
   VacationMode: undefined;
-  AddWhitelist: undefined;
+  AddKnownDevice: { macAddress?: string; deviceId?: string } | undefined;
+  DeviceFingerprint: { macAddress: string };
 };
 
 export type SettingsStackParamList = {
   Settings: undefined;
   Profile: undefined;
-  Whitelist: undefined;
+  KnownDevices: undefined;
   NotificationSettings: undefined;
   Theme: undefined;
   AlertSound: undefined;
@@ -80,7 +84,7 @@ export type SettingsStackParamList = {
   Sensitivity: undefined;
   QuietHours: undefined;
   VacationMode: undefined;
-  AddWhitelist: undefined;
+  AddKnownDevice: { macAddress?: string; deviceId?: string } | undefined;
 };
 
 export type AIStackParamList = {

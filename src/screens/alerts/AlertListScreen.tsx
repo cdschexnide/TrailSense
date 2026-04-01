@@ -20,6 +20,7 @@ import { SearchBar } from '@components/molecules/SearchBar';
 import { Button, Icon, SkeletonCard } from '@components/atoms';
 import { Alert, ThreatLevel } from '@types';
 import { useTheme } from '@hooks/useTheme';
+import { useBlockedDevices } from '@hooks/useBlockedDevices';
 
 // Threat level configuration
 const THREAT_LABELS: Record<ThreatLevel, string> = {
@@ -34,6 +35,7 @@ export const AlertListScreen = ({ navigation }: any) => {
   const colors = theme.colors;
   const { data: alerts, isLoading, error, refetch } = useAlerts();
   const { data: devices } = useDevices();
+  const { isBlocked } = useBlockedDevices();
   const [search, setSearch] = useState('');
 
   // Create device name lookup map
@@ -96,8 +98,10 @@ export const AlertListScreen = ({ navigation }: any) => {
       );
     }
 
+    result = result.filter((alert: Alert) => !isBlocked(alert.macAddress));
+
     return result;
-  }, [alerts, search, selectedThreatFilter]);
+  }, [alerts, search, selectedThreatFilter, isBlocked]);
 
   if (isLoading) {
     return (
@@ -128,8 +132,11 @@ export const AlertListScreen = ({ navigation }: any) => {
     console.log('Dismissing alert:', alertId);
   };
 
-  const handleWhitelist = (macAddress: string) => {
-    console.log('Whitelisting MAC address:', macAddress);
+  const handleAddToKnown = (macAddress: string) => {
+    navigation.navigate('MoreTab', {
+      screen: 'AddKnownDevice',
+      params: { macAddress },
+    });
   };
 
   const handleRefresh = async () => {
@@ -193,7 +200,7 @@ export const AlertListScreen = ({ navigation }: any) => {
               navigation.navigate('AlertDetail', { alertId: item.id })
             }
             onDismiss={handleDismiss}
-            onWhitelist={handleWhitelist}
+            onAddToKnown={handleAddToKnown}
             index={index}
             animateEntrance={true}
           />

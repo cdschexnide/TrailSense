@@ -109,7 +109,7 @@ class LLMService {
   }
 
   /**
-   * Analyze device pattern and suggest whitelist action
+   * Analyze device pattern and suggest Known Devices action
    */
   async analyzeDevicePattern(context: DeviceContext): Promise<PatternAnalysis> {
     try {
@@ -319,10 +319,14 @@ class LLMService {
       confidence = 0.5;
     }
 
-    // Try to extract whitelist suggestion
+    // Try to extract Known Devices suggestion
     let whitelistSuggestion: PatternAnalysis['whitelistSuggestion'];
 
-    if (textLower.includes('whitelist') && textLower.includes('suggest')) {
+    if (
+      (textLower.includes('whitelist') ||
+        textLower.includes('known device')) &&
+      textLower.includes('suggest')
+    ) {
       whitelistSuggestion = {
         name:
           patternType === 'delivery'

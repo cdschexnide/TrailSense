@@ -17,6 +17,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
           HomeTab: {
             screens: {
               PropertyCommandCenter: 'home',
+              DeviceFingerprint: 'home/fingerprint/:macAddress',
             },
           },
           AlertsTab: {
@@ -24,12 +25,14 @@ export const linking: LinkingOptions<RootStackParamList> = {
               AlertList: 'alerts',
               AlertDetail: 'alerts/:alertId',
               AlertFilter: 'alerts/filter',
+              DeviceFingerprint: 'alerts/fingerprint/:macAddress',
             },
           },
           RadarTab: {
             screens: {
               LiveRadar: 'radar',
               RadarSettings: 'radar/settings',
+              DeviceFingerprint: 'radar/fingerprint/:macAddress',
             },
           },
           DevicesTab: {
@@ -37,6 +40,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               DeviceList: 'devices',
               DeviceDetail: 'devices/:deviceId',
               AddDevice: 'devices/add',
+              DeviceFingerprint: 'devices/fingerprint/:macAddress',
             },
           },
           MoreTab: {
@@ -48,7 +52,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               TrailSenseAI: 'ai',
               Settings: 'settings',
               Profile: 'settings/profile',
-              Whitelist: 'settings/whitelist',
+              KnownDevices: 'settings/known-devices',
               NotificationSettings: 'settings/notifications',
               Theme: 'settings/theme',
               AlertSound: 'settings/alert-sound',
@@ -57,7 +61,8 @@ export const linking: LinkingOptions<RootStackParamList> = {
               Sensitivity: 'settings/sensitivity',
               QuietHours: 'settings/quiet-hours',
               VacationMode: 'settings/vacation-mode',
-              AddWhitelist: 'settings/whitelist/add',
+              AddKnownDevice: 'settings/known-devices/add',
+              DeviceFingerprint: 'more/fingerprint/:macAddress',
             },
           },
         },

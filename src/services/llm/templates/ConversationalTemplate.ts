@@ -39,7 +39,7 @@ You help property owners understand their detection data through natural convers
 You have access to:
 - Recent detection alerts (WiFi, Bluetooth, cellular signals detected)
 - Detection device status (ESP32 sensors) and battery levels
-- Whitelist of known/trusted devices
+- Known Devices list of trusted devices
 - Detection history and patterns
 
 Guidelines:
@@ -152,7 +152,8 @@ Current Security Status:
 
     if (
       questionLower.includes('device') ||
-      questionLower.includes('whitelist')
+      questionLower.includes('whitelist') ||
+      questionLower.includes('known device')
     ) {
       return this.buildDeviceQuestionPrompt(question, context);
     }
@@ -245,7 +246,7 @@ Provide a clear summary addressing the user's question.`;
         const name =
           device.friendly_name || device.metadata?.device_name || 'Unknown';
         const status = device.online ? 'Active' : 'Inactive';
-        const whitelisted = device.whitelisted ? '(Whitelisted)' : '';
+        const whitelisted = device.whitelisted ? '(Known Device)' : '';
         return `- ${name}: ${status} ${whitelisted}`;
       })
       .join('\n');

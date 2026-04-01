@@ -1,9 +1,9 @@
 export { VacationModeScreen } from './VacationModeScreen';
 export { SettingsScreen } from './SettingsScreen';
 export { ProfileScreen } from './ProfileScreen';
-export { WhitelistScreen } from './WhitelistScreen';
+export { KnownDevicesScreen } from './KnownDevicesScreen';
 export { NotificationSettingsScreen } from './NotificationSettingsScreen';
-export { AddWhitelistScreen } from './AddWhitelistScreen';
+export { AddKnownDeviceScreen } from './AddKnownDeviceScreen';
 export { SensitivityScreen } from './SensitivityScreen';
 export { QuietHoursScreen } from './QuietHoursScreen';
 export { ThemeScreen } from './ThemeScreen';

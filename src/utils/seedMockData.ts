@@ -12,7 +12,7 @@ import {
   mockAuthTokens,
   mockAlerts,
   mockDevices,
-  mockWhitelist,
+  mockKnownDevices,
   mockAnalyticsData,
   mockHeatmapPoints,
   mockDeviceFingerprints,
@@ -22,7 +22,7 @@ import {
 // React Query keys
 const ALERTS_QUERY_KEY = 'alerts';
 const DEVICES_QUERY_KEY = 'devices';
-const WHITELIST_QUERY_KEY = 'whitelist';
+const KNOWN_DEVICES_QUERY_KEY = 'knownDevices';
 const ANALYTICS_QUERY_KEY = 'analytics';
 const HEATMAP_QUERY_KEY = 'heatmap';
 const DEVICE_HISTORY_QUERY_KEY = 'device-history';
@@ -90,12 +90,12 @@ export const seedMockData = async ({
       queryClient.setQueryData([DEVICES_QUERY_KEY, device.id], device);
     });
 
-    // Whitelist
-    queryClient.setQueryData([WHITELIST_QUERY_KEY], mockWhitelist);
+    // Known devices
+    queryClient.setQueryData([KNOWN_DEVICES_QUERY_KEY], mockKnownDevices);
 
-    // Individual whitelist entries
-    mockWhitelist.forEach(entry => {
-      queryClient.setQueryData([WHITELIST_QUERY_KEY, entry.id], entry);
+    // Individual known devices
+    mockKnownDevices.forEach(entry => {
+      queryClient.setQueryData([KNOWN_DEVICES_QUERY_KEY, entry.id], entry);
     });
 
     // Analytics - seed multiple time periods
@@ -128,7 +128,7 @@ export const seedMockData = async ({
     console.log('[MockData] Seeded:');
     console.log(`  - ${mockAlerts.length} alerts`);
     console.log(`  - ${mockDevices.length} devices`);
-    console.log(`  - ${mockWhitelist.length} whitelist entries`);
+    console.log(`  - ${mockKnownDevices.length} known devices`);
     console.log(`  - Analytics data`);
     console.log(`  - Heatmap data (${mockHeatmapPoints.length} points)`);
     console.log(`  - ${mockDeviceFingerprints.length} device fingerprints`);

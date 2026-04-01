@@ -2,21 +2,28 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert, Switch } from 'react-native';
 import { Text, Button, Input, Card } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
+import { useAddKnownDevice } from '@hooks/api/useKnownDevices';
+import { AnalyticsEvents, logEvent } from '@services/analyticsEvents';
+import { KnownDeviceCategory } from '@types';
 
 const CATEGORIES = [
   { value: 'family', label: 'Family' },
   { value: 'guests', label: 'Guests' },
   { value: 'service', label: 'Service' },
   { value: 'other', label: 'Other' },
-];
+] as const satisfies ReadonlyArray<{
+  value: KnownDeviceCategory;
+  label: string;
+}>;
 
-export const AddWhitelistScreen = ({ navigation, route }: any) => {
+export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
   const { macAddress: initialMac, deviceId: initialDeviceId } =
     route.params || {};
+  const addKnownDevice = useAddKnownDevice();
 
   const [name, setName] = useState('');
   const [macAddress, setMacAddress] = useState(initialMac || '');
-  const [category, setCategory] = useState('family');
+  const [category, setCategory] = useState<KnownDeviceCategory>('family');
   const [isTemporary, setIsTemporary] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState('7');
 
@@ -47,33 +54,39 @@ export const AddWhitelistScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    const whitelistItem = {
+    const knownDevice = {
       name,
       macAddress,
       category,
-      isTemporary,
       expiresAt: isTemporary
         ? new Date(
             Date.now() + parseInt(expiresInDays) * 24 * 60 * 60 * 1000
           ).toISOString()
-        : null,
+        : undefined,
     };
 
     try {
-      // TODO: Implement API call to add whitelist item
-      Alert.alert('Success', 'Device added to whitelist', [
+      await addKnownDevice.mutateAsync(knownDevice);
+      logEvent(AnalyticsEvents.DEVICE_ADDED_TO_KNOWN, {
+        macAddress,
+        deviceId: initialDeviceId,
+      });
+      Alert.alert('Success', 'Device added to Known Devices', [
         {
           text: 'OK',
           onPress: () => navigation.goBack(),
         },
       ]);
     } catch (error) {
-      Alert.alert('Error', 'Failed to add device to whitelist');
+      Alert.alert('Error', 'Failed to add known device');
     }
   };
 
   return (
-    <ScreenLayout title="Add to Whitelist">
+    <ScreenLayout
+      header={{ title: 'Add Known Device', showBack: true }}
+      scrollable={false}
+    >
       <ScrollView style={styles.container}>
         <Card style={styles.card}>
           <Input
@@ -94,29 +107,30 @@ export const AddWhitelistScreen = ({ navigation, route }: any) => {
           />
 
           <View style={styles.section}>
-            <Text variant="h3" style={styles.sectionTitle}>
+            <Text variant="title3" style={styles.sectionTitle}>
               Category
             </Text>
             <View style={styles.categoryGrid}>
               {CATEGORIES.map(cat => (
                 <Button
                   key={cat.value}
-                  title={cat.label}
-                  variant={category === cat.value ? 'primary' : 'outline'}
-                  size="sm"
+                  buttonStyle={category === cat.value ? 'filled' : 'gray'}
+                  size="small"
                   onPress={() => setCategory(cat.value)}
                   style={styles.categoryButton}
-                />
+                >
+                  {cat.label}
+                </Button>
               ))}
             </View>
           </View>
 
           <View style={styles.section}>
             <View style={styles.switchRow}>
-              <Text variant="h3">Temporary Whitelist</Text>
+              <Text variant="title3">Temporary Access</Text>
               <Switch value={isTemporary} onValueChange={setIsTemporary} />
             </View>
-            <Text variant="caption" style={styles.description}>
+            <Text variant="caption1" style={styles.description}>
               Automatically remove this device after a specified time
             </Text>
           </View>
@@ -134,29 +148,23 @@ export const AddWhitelistScreen = ({ navigation, route }: any) => {
         </Card>
 
         <Card style={styles.helpCard}>
-          <Text variant="h3" style={styles.sectionTitle}>
+          <Text variant="title3" style={styles.sectionTitle}>
             MAC Address Format
           </Text>
-          <Text variant="caption">- Use format: XX:XX:XX:XX:XX:XX</Text>
-          <Text variant="caption">- Example: A1:B2:C3:D4:E5:F6</Text>
-          <Text variant="caption">
+          <Text variant="caption1">- Use format: XX:XX:XX:XX:XX:XX</Text>
+          <Text variant="caption1">- Example: A1:B2:C3:D4:E5:F6</Text>
+          <Text variant="caption1">
             - Each X represents a hexadecimal digit (0-9, A-F)
           </Text>
         </Card>
 
         <View style={styles.actions}>
-          <Button
-            title="Cancel"
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={styles.button}
-          />
-          <Button
-            title="Add to Whitelist"
-            variant="primary"
-            onPress={handleAdd}
-            style={styles.button}
-          />
+          <Button buttonStyle="gray" onPress={() => navigation.goBack()} style={styles.button}>
+            Cancel
+          </Button>
+          <Button onPress={handleAdd} style={styles.button}>
+            Add Known Device
+          </Button>
         </View>
       </ScrollView>
     </ScreenLayout>

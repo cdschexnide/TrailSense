@@ -219,10 +219,10 @@ export const SettingsScreen = ({ navigation }: any) => {
         <GroupedListRow
           icon="shield-checkmark-outline"
           iconColor={colors.systemTeal}
-          title="Whitelist"
-          subtitle="Trusted devices and networks"
+          title="Known Devices"
+          subtitle="Recognized visitors and equipment"
           showChevron
-          onPress={() => navigation.navigate('Whitelist')}
+          onPress={() => navigation.navigate('KnownDevices')}
         />
         <GroupedListRow
           icon="lock-closed-outline"

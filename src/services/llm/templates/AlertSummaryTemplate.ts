@@ -38,7 +38,7 @@ DO NOT recommend:
 DO recommend:
 - Checking the detection area if safe to do so
 - Reviewing the device's detection history for patterns
-- Adding recognized devices to the whitelist
+- Adding recognized devices to Known Devices
 - Monitoring for recurring detections
 - Contacting expected visitors to confirm arrival
 - Being aware of the detection zone (immediate, near, far, extreme)`;
@@ -175,7 +175,7 @@ Provide:
     const isWhitelisted = deviceHistory.whitelisted || false;
 
     if (isWhitelisted) {
-      return `Note: This device is whitelisted as "${deviceHistory.friendly_name || 'trusted device'}".`;
+      return `Note: This device is in Known Devices as "${deviceHistory.friendly_name || 'trusted device'}".`;
     }
 
     if (firstSeen && totalDetections > 1) {

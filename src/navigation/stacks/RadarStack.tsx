@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RadarStackParamList } from '@navigation/types';
+import { DeviceFingerprintScreen } from '@screens/fingerprint';
 import { ProximityHeatmapScreen, RadarSettingsScreen } from '@screens/radar';
 
 const Stack = createNativeStackNavigator<RadarStackParamList>();
@@ -14,6 +15,10 @@ export const RadarStack = () => {
     >
       <Stack.Screen name="LiveRadar" component={ProximityHeatmapScreen} />
       <Stack.Screen name="RadarSettings" component={RadarSettingsScreen} />
+      <Stack.Screen
+        name="DeviceFingerprint"
+        component={DeviceFingerprintScreen}
+      />
     </Stack.Navigator>
   );
 };

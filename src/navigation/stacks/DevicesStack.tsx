@@ -1,10 +1,10 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DevicesStackParamList } from '@navigation/types';
+import { DeviceFingerprintScreen } from '@screens/fingerprint';
 import {
   DeviceListScreen,
   DeviceDetailScreen,
-  DeviceHistoryScreen,
   AddDeviceScreen,
 } from '@screens/devices';
 
@@ -28,9 +28,9 @@ export const DevicesStack = () => {
         options={{ title: 'Device Detail' }}
       />
       <Stack.Screen
-        name="DeviceHistory"
-        component={DeviceHistoryScreen}
-        options={{ title: 'Device History' }}
+        name="DeviceFingerprint"
+        component={DeviceFingerprintScreen}
+        options={{ title: 'Device Fingerprint' }}
       />
       <Stack.Screen
         name="AddDevice"

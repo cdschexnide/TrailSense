@@ -4,7 +4,7 @@ import { SettingsStackParamList } from '@navigation/types';
 import {
   SettingsScreen,
   ProfileScreen,
-  WhitelistScreen,
+  KnownDevicesScreen,
   NotificationSettingsScreen,
   ThemeScreen,
   AlertSoundScreen,
@@ -13,7 +13,7 @@ import {
   SensitivityScreen,
   QuietHoursScreen,
   VacationModeScreen,
-  AddWhitelistScreen,
+  AddKnownDeviceScreen,
 } from '@screens/settings';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -27,7 +27,7 @@ export const SettingsStack = () => {
     >
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="Whitelist" component={WhitelistScreen} />
+      <Stack.Screen name="KnownDevices" component={KnownDevicesScreen} />
       <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
       <Stack.Screen name="Theme" component={ThemeScreen} />
       <Stack.Screen name="AlertSound" component={AlertSoundScreen} />
@@ -36,7 +36,7 @@ export const SettingsStack = () => {
       <Stack.Screen name="Sensitivity" component={SensitivityScreen} />
       <Stack.Screen name="QuietHours" component={QuietHoursScreen} />
       <Stack.Screen name="VacationMode" component={VacationModeScreen} />
-      <Stack.Screen name="AddWhitelist" component={AddWhitelistScreen} />
+      <Stack.Screen name="AddKnownDevice" component={AddKnownDeviceScreen} />
     </Stack.Navigator>
   );
 };

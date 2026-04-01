@@ -8,10 +8,11 @@ import {
   ReportsScreen,
 } from '@screens/analytics';
 import { AIAssistantScreen } from '@screens/ai';
+import { DeviceFingerprintScreen } from '@screens/fingerprint';
 import {
   SettingsScreen,
   ProfileScreen,
-  WhitelistScreen,
+  KnownDevicesScreen,
   NotificationSettingsScreen,
   ThemeScreen,
   AlertSoundScreen,
@@ -20,7 +21,7 @@ import {
   SensitivityScreen,
   QuietHoursScreen,
   VacationModeScreen,
-  AddWhitelistScreen,
+  AddKnownDeviceScreen,
 } from '@screens/settings';
 
 const Stack = createNativeStackNavigator<MoreStackParamList>();
@@ -39,7 +40,7 @@ export const MoreStack = () => {
       <Stack.Screen name="TrailSenseAI" component={AIAssistantScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="Whitelist" component={WhitelistScreen} />
+      <Stack.Screen name="KnownDevices" component={KnownDevicesScreen} />
       <Stack.Screen
         name="NotificationSettings"
         component={NotificationSettingsScreen}
@@ -51,7 +52,8 @@ export const MoreStack = () => {
       <Stack.Screen name="Sensitivity" component={SensitivityScreen} />
       <Stack.Screen name="QuietHours" component={QuietHoursScreen} />
       <Stack.Screen name="VacationMode" component={VacationModeScreen} />
-      <Stack.Screen name="AddWhitelist" component={AddWhitelistScreen} />
+      <Stack.Screen name="AddKnownDevice" component={AddKnownDeviceScreen} />
+      <Stack.Screen name="DeviceFingerprint" component={DeviceFingerprintScreen} />
     </Stack.Navigator>
   );
 };

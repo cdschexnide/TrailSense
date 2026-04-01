@@ -174,7 +174,14 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
               styles.statCard,
               { backgroundColor: colors.secondarySystemBackground },
             ]}
-            onPress={() => undefined}
+            onPress={() => {
+              const recentVisitor = status.recentAlerts[0]?.macAddress;
+              if (recentVisitor) {
+                navigation.navigate('DeviceFingerprint', {
+                  macAddress: recentVisitor,
+                });
+              }
+            }}
           >
             <View
               style={[
@@ -266,6 +273,47 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
                 Retry
               </Text>
             </Pressable>
+          </View>
+        )}
+
+        {/* Recent Visitors */}
+        {status.recentVisitorMacs.length > 0 && (
+          <View>
+            <View style={styles.sectionHeader}>
+              <Text variant="title3" weight="bold">
+                Recent Visitors
+              </Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.visitorsScroll}
+            >
+              {status.recentVisitorMacs.map(mac => (
+                <Pressable
+                  key={mac}
+                  style={[
+                    styles.visitorChip,
+                    { backgroundColor: colors.secondarySystemBackground },
+                  ]}
+                  onPress={() =>
+                    navigation.navigate('DeviceFingerprint', {
+                      macAddress: mac,
+                    })
+                  }
+                >
+                  <View
+                    style={[
+                      styles.visitorDot,
+                      { backgroundColor: colors.systemRed },
+                    ]}
+                  />
+                  <Text variant="caption1" weight="semibold" numberOfLines={1}>
+                    {mac.substring(0, 8)}...
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
         )}
 
@@ -488,5 +536,23 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 40,
+  },
+  visitorsScroll: {
+    paddingHorizontal: 20,
+    gap: 10,
+    paddingBottom: 4,
+  },
+  visitorChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    gap: 8,
+  },
+  visitorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
 });

@@ -1,5 +1,10 @@
 import { database } from '@database';
 import { Alert, DeviceFingerprint } from '@types';
+import {
+  computeVisitPattern,
+  generateInsightText,
+  VisitPattern,
+} from './patternDetection';
 
 export class DeviceFingerprintingService {
   static async trackDevice(macAddress: string, alert: Alert): Promise<void> {
@@ -129,19 +134,21 @@ export class DeviceFingerprintingService {
     newDevices: DeviceFingerprint[];
     suspiciousDevices: DeviceFingerprint[];
   }> {
-    const allFingerprints = await database.fingerprints.find();
+    const allFingerprints: DeviceFingerprint[] = await database.fingerprints.find();
 
-    const frequentVisitors = allFingerprints.filter(fp => fp.totalVisits >= 5);
+    const frequentVisitors = allFingerprints.filter(
+      (fp: DeviceFingerprint) => fp.totalVisits >= 5
+    );
 
     const newDevices = allFingerprints.filter(
-      fp =>
+      (fp: DeviceFingerprint) =>
         new Date().getTime() - new Date(fp.firstSeen).getTime() <
         7 * 24 * 60 * 60 * 1000 // Last 7 days
     );
 
     const suspiciousDevices = allFingerprints.filter(
-      fp =>
-        fp.commonHours.some(hour => hour >= 22 || hour <= 6) && // Night activity
+      (fp: DeviceFingerprint) =>
+        fp.commonHours.some((hour: number) => hour >= 22 || hour <= 6) && // Night activity
         fp.averageDuration < 300 // Short visits
     );
 
@@ -150,5 +157,13 @@ export class DeviceFingerprintingService {
       newDevices,
       suspiciousDevices,
     };
+  }
+
+  static computeVisitPattern(alerts: Alert[], macAddress: string): VisitPattern {
+    return computeVisitPattern(alerts, macAddress);
+  }
+
+  static generateInsightText(pattern: VisitPattern): string {
+    return generateInsightText(pattern);
   }
 }

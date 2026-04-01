@@ -6,14 +6,14 @@ import {
 import { ListRow } from '@components/molecules/ListRow';
 import { useTheme } from '@hooks/useTheme';
 
-interface WhitelistItemProps {
+interface KnownDeviceItemProps {
   name: string;
   macAddress: string;
   category: string;
   onDelete: () => void;
 }
 
-export const WhitelistItem: React.FC<WhitelistItemProps> = ({
+export const KnownDeviceItem: React.FC<KnownDeviceItemProps> = ({
   name,
   macAddress,
   category,

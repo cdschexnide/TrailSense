@@ -5,6 +5,7 @@ import authReducer from './slices/authSlice';
 import userReducer from './slices/userSlice';
 import settingsReducer from './slices/settingsSlice';
 import uiReducer from './slices/uiSlice';
+import blockedDevicesReducer from './slices/blockedDevicesSlice';
 
 const persistConfig = {
   key: 'root',
@@ -13,6 +14,14 @@ const persistConfig = {
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const blockedDevicesPersistConfig = {
+  key: 'blockedDevices',
+  storage: AsyncStorage,
+};
+const persistedBlockedDevicesReducer = persistReducer(
+  blockedDevicesPersistConfig,
+  blockedDevicesReducer
+);
 
 export const store = configureStore({
   reducer: {
@@ -20,11 +29,12 @@ export const store = configureStore({
     user: userReducer,
     settings: settingsReducer,
     ui: uiReducer,
+    blockedDevices: persistedBlockedDevicesReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST'],
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }),
 });

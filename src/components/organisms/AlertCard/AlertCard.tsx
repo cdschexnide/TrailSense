@@ -35,8 +35,8 @@ interface AlertCardProps {
   onPress?: (alertId: string) => void;
   /** Used by parent swipeable wrapper for swipe-to-dismiss action */
   onDismiss?: (alertId: string) => void;
-  /** Used by parent swipeable wrapper for swipe-to-whitelist action */
-  onWhitelist?: (macAddress: string) => void;
+  /** Used by parent wrapper for add-to-known-device actions */
+  onAddToKnown?: (macAddress: string) => void;
   style?: ViewStyle;
   /** Index for staggered entrance animation */
   index?: number;
@@ -81,7 +81,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   deviceName,
   onPress,
   onDismiss: _onDismiss,
-  onWhitelist: _onWhitelist,
+  onAddToKnown: _onAddToKnown,
   style,
   index = 0,
   animateEntrance = true,
