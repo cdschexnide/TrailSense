@@ -8,6 +8,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, ViewStyle } from 'react-native';
+import { useReducedMotion } from '@hooks/useReducedMotion';
 
 interface GlowContainerProps {
   children: React.ReactNode;
@@ -33,9 +34,10 @@ export const GlowContainer: React.FC<GlowContainerProps> = ({
   style,
 }) => {
   const animatedOpacity = useRef(new Animated.Value(1)).current;
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (pulse) {
+    if (pulse && !reduceMotion) {
       const animation = Animated.loop(
         Animated.sequence([
           Animated.timing(animatedOpacity, {
@@ -59,7 +61,7 @@ export const GlowContainer: React.FC<GlowContainerProps> = ({
       animatedOpacity.setValue(1);
       return undefined;
     }
-  }, [pulse, animatedOpacity]);
+  }, [pulse, reduceMotion, animatedOpacity]);
 
   const baseOpacity = INTENSITY_OPACITY[intensity];
 

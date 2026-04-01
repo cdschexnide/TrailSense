@@ -16,11 +16,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Icon } from '@components/atoms/Icon';
 import { Text } from '@components/atoms/Text';
-import { useAppSelector } from '@store';
-import { ScreenLayout } from '@components/templates';
+import { useAppSelector } from '@store/index';
+import { ScreenLayout, useToast } from '@components/templates';
 import { GroupedListSection } from '@components/molecules/GroupedListSection';
 import { GroupedListRow } from '@components/molecules/GroupedListRow';
 import { useTheme } from '@hooks/useTheme';
+import { isDemoMode, setDemoMode } from '@/config/demoMode';
+import { featureFlagsManager } from '@/config/featureFlags';
+import { AnalyticsEvents, logEvent } from '@services/analyticsEvents';
 
 export const SettingsScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -28,6 +31,8 @@ export const SettingsScreen = ({ navigation }: any) => {
   const settings = useAppSelector(state => state.settings);
   const user = useAppSelector(state => state.auth.user);
   const [themePreference, setThemePreference] = useState<string>('System');
+  const [isDemoEnabled, setIsDemoEnabled] = useState<boolean>(isDemoMode());
+  const { showToast } = useToast();
 
   // Load theme preference when screen comes into focus
   useFocusEffect(
@@ -36,32 +41,48 @@ export const SettingsScreen = ({ navigation }: any) => {
         const saved = await AsyncStorage.getItem('@trailsense:theme');
         if (saved) {
           // Capitalize first letter for display
-          const displayName = saved === 'auto' ? 'System' : saved.charAt(0).toUpperCase() + saved.slice(1);
+          const displayName =
+            saved === 'auto'
+              ? 'System'
+              : saved.charAt(0).toUpperCase() + saved.slice(1);
           setThemePreference(displayName);
         } else {
           setThemePreference('System');
         }
+
+        setIsDemoEnabled(isDemoMode());
       };
       loadThemePreference();
     }, [])
   );
 
+  const handleToggleDemo = async () => {
+    const newValue = !isDemoEnabled;
+
+    await setDemoMode(newValue);
+    featureFlagsManager.updateFlags({ DEMO_MODE: newValue });
+    setIsDemoEnabled(newValue);
+    logEvent(AnalyticsEvents.DEMO_MODE_TOGGLED, { enabled: newValue });
+    showToast(
+      newValue
+        ? 'Demo mode enabled. Restart app to load sample data.'
+        : 'Demo mode disabled. Restart app to return to live data.',
+      'info'
+    );
+  };
+
   const handleLogout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: () => {
-            console.log('Logging out...');
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => {
+          console.log('Logging out...');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -80,7 +101,12 @@ export const SettingsScreen = ({ navigation }: any) => {
         }}
         style={({ pressed }) => [pressed && { opacity: 0.8 }]}
       >
-        <View style={[styles.profileCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.profileCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           <LinearGradient
             colors={['#667EEA', '#764BA2']}
             start={{ x: 0, y: 0 }}
@@ -95,7 +121,10 @@ export const SettingsScreen = ({ navigation }: any) => {
             <Text variant="headline" weight="semibold" color="label">
               {user?.name || 'User'}
             </Text>
-            <Text variant="subheadline" style={{ color: colors.secondaryLabel }}>
+            <Text
+              variant="subheadline"
+              style={{ color: colors.secondaryLabel }}
+            >
               {user?.email || 'user@example.com'}
             </Text>
           </View>
@@ -164,6 +193,16 @@ export const SettingsScreen = ({ navigation }: any) => {
           value={themePreference}
           showChevron
           onPress={() => navigation.navigate('Theme')}
+        />
+        <GroupedListRow
+          icon="flask-outline"
+          iconColor={colors.systemOrange}
+          title="Demo Mode"
+          subtitle="Show sample data for demonstrations"
+          value={isDemoEnabled ? 'On' : 'Off'}
+          onPress={() => {
+            void handleToggleDemo();
+          }}
         />
       </GroupedListSection>
 
@@ -234,7 +273,11 @@ export const SettingsScreen = ({ navigation }: any) => {
           ]}
         >
           <Icon name="log-out-outline" size={20} color={colors.systemRed} />
-          <Text variant="body" weight="semibold" style={{ color: colors.systemRed, marginLeft: 8 }}>
+          <Text
+            variant="body"
+            weight="semibold"
+            style={{ color: colors.systemRed, marginLeft: 8 }}
+          >
             Logout
           </Text>
         </Pressable>
@@ -247,10 +290,16 @@ export const SettingsScreen = ({ navigation }: any) => {
           style={styles.footerLogo}
           resizeMode="contain"
         />
-        <Text variant="caption1" style={{ color: colors.tertiaryLabel, marginTop: 12 }}>
+        <Text
+          variant="caption1"
+          style={{ color: colors.tertiaryLabel, marginTop: 12 }}
+        >
           TrailSense v1.0.0
         </Text>
-        <Text variant="caption2" style={{ color: colors.tertiaryLabel, marginTop: 4 }}>
+        <Text
+          variant="caption2"
+          style={{ color: colors.tertiaryLabel, marginTop: 4 }}
+        >
           Made with care for your security
         </Text>
       </View>

@@ -11,12 +11,20 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ViewStyle,
+  Pressable,
+  Animated,
+  Easing,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Alert } from '@types';
 import { Icon, Text } from '@components/atoms';
 import { GlowContainer } from '@components/molecules/GlowContainer';
 import { useTheme } from '@hooks/useTheme';
+import { useReducedMotion } from '@hooks/useReducedMotion';
 import { formatTimestamp } from '@utils/dateUtils';
 import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
 
@@ -72,25 +80,30 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   alert,
   deviceName,
   onPress,
-  onDismiss,
-  onWhitelist,
+  onDismiss: _onDismiss,
+  onWhitelist: _onWhitelist,
   style,
   index = 0,
   animateEntrance = true,
 }) => {
   const { theme } = useTheme();
+  const reduceMotion = useReducedMotion();
 
   // Animation values using React Native's built-in Animated API
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const opacityAnim = useRef(new Animated.Value(animateEntrance ? 0 : 1)).current;
-  const translateXAnim = useRef(new Animated.Value(animateEntrance ? 30 : 0)).current;
+  const opacityAnim = useRef(
+    new Animated.Value(animateEntrance ? 0 : 1)
+  ).current;
+  const translateXAnim = useRef(
+    new Animated.Value(animateEntrance ? 30 : 0)
+  ).current;
 
   // Entrance animation
   useEffect(() => {
-    if (animateEntrance) {
+    if (animateEntrance && !reduceMotion) {
       const delay = index * 60; // 60ms stagger for alerts
 
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         Animated.parallel([
           Animated.timing(opacityAnim, {
             toValue: 1,
@@ -106,8 +119,14 @@ export const AlertCard: React.FC<AlertCardProps> = ({
           }),
         ]).start();
       }, delay);
+
+      return () => clearTimeout(timeout);
     }
-  }, [animateEntrance, index]);
+
+    opacityAnim.setValue(1);
+    translateXAnim.setValue(0);
+    return undefined;
+  }, [animateEntrance, index, opacityAnim, reduceMotion, translateXAnim]);
 
   // Press handlers
   const handlePressIn = () => {
@@ -152,22 +171,14 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         {
           backgroundColor: theme.colors.secondarySystemBackground,
           opacity: opacityAnim,
-          transform: [
-            { translateX: translateXAnim },
-            { scale: scaleAnim },
-          ],
+          transform: [{ translateX: translateXAnim }, { scale: scaleAnim }],
         },
         // Only apply custom style when not wrapped by GlowContainer
         !isCritical && style,
       ]}
     >
       {/* Left accent line for all alerts including critical */}
-      <View
-        style={[
-          styles.leftAccent,
-          { backgroundColor: threatColor },
-        ]}
-      />
+      <View style={[styles.leftAccent, { backgroundColor: threatColor }]} />
 
       <Pressable
         onPress={handlePress}
@@ -177,7 +188,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         accessibilityRole="button"
         accessibilityLabel={`${alert.threatLevel} ${alert.detectionType} alert`}
       >
-
         {/* Title row with inline icon */}
         <View style={styles.titleRow}>
           <Icon
@@ -188,7 +198,11 @@ export const AlertCard: React.FC<AlertCardProps> = ({
           <Text variant="headline" color="label" style={styles.detectionTitle}>
             {detectionConfig.label}
           </Text>
-          <Text variant="caption1" color="secondaryLabel" style={styles.timestamp}>
+          <Text
+            variant="caption1"
+            color="secondaryLabel"
+            style={styles.timestamp}
+          >
             {formatTimestamp(alert.timestamp)}
           </Text>
         </View>
@@ -199,7 +213,11 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             <Text variant="caption1" color="secondaryLabel">
               {alert.rssi} dBm
             </Text>
-            <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+            <Text
+              variant="caption1"
+              color="secondaryLabel"
+              style={styles.dotSeparator}
+            >
               {' · '}
             </Text>
             <View
@@ -215,7 +233,11 @@ export const AlertCard: React.FC<AlertCardProps> = ({
                 {rssiInfo.label}
               </Text>
             </View>
-            <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+            <Text
+              variant="caption1"
+              color="secondaryLabel"
+              style={styles.dotSeparator}
+            >
               {' · '}
             </Text>
             <Text variant="caption1" color="secondaryLabel">
@@ -223,17 +245,29 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             </Text>
             {alert.macAddress && (
               <>
-                <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                <Text
+                  variant="caption1"
+                  color="secondaryLabel"
+                  style={styles.dotSeparator}
+                >
                   {' · '}
                 </Text>
-                <Text variant="caption1" color="secondaryLabel" style={styles.macSuffix}>
+                <Text
+                  variant="caption1"
+                  color="secondaryLabel"
+                  style={styles.macSuffix}
+                >
                   {alert.macAddress.slice(-5).replace(':', '').toLowerCase()}
                 </Text>
               </>
             )}
             {alert.metadata?.signalCount && (
               <>
-                <Text variant="caption1" color="secondaryLabel" style={styles.dotSeparator}>
+                <Text
+                  variant="caption1"
+                  color="secondaryLabel"
+                  style={styles.dotSeparator}
+                >
                   {' · '}
                 </Text>
                 <Text variant="caption1" color="secondaryLabel">
@@ -249,7 +283,6 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             color={theme.colors.tertiaryLabel}
           />
         </View>
-
       </Pressable>
     </Animated.View>
   );

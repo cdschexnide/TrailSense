@@ -10,13 +10,14 @@ import { store, persistor } from '@store/index';
 import { queryClient } from '@api/queryClient';
 import { StyleSheet, ActivityIndicator, View, Platform } from 'react-native';
 import RootNavigator from '@navigation/RootNavigator';
-import { isMockMode, logMockStatus } from '@/config/mockConfig';
+import { getIsMockMode, logMockStatus } from '@/config/mockConfig';
 import { seedMockData } from '@/utils/seedMockData';
 import { websocketService } from '@api/websocket';
 import { featureFlagsManager } from '@/config/featureFlags';
-import { AuthService } from '@services/authService';
-import { login as loginAction } from '@store/slices/authSlice';
 import { AIProvider } from '@/services/llm';
+import { OfflineBanner } from '@components/molecules';
+import { ToastProvider } from '@components/templates';
+import { initDemoMode } from '@/config/demoMode';
 
 // Initialize react-native-executorch early (Android and iOS)
 if (Platform.OS === 'android' || Platform.OS === 'ios') {
@@ -29,44 +30,54 @@ if (Platform.OS === 'android' || Platform.OS === 'ios') {
 }
 
 export default function App() {
-  const [isMockDataReady, setIsMockDataReady] = useState(!isMockMode);
+  const [isMockDataReady, setIsMockDataReady] = useState(false);
 
   useEffect(() => {
-    // Log mock mode status
-    logMockStatus();
+    let mounted = true;
 
-    // LLM mock mode disabled - using real Llama 3.2 1B model
-    // if (__DEV__) {
-    //   console.log('[App] Enabling LLM mock mode for development');
-    //   featureFlagsManager.enableMockMode();
-    // }
-    console.log('[App] LLM using real Llama 3.2 1B model (mock mode disabled)');
+    const initializeApp = async () => {
+      await initDemoMode();
+      await featureFlagsManager.loadFromStorage();
+      featureFlagsManager.updateFlags({
+        DEMO_MODE: getIsMockMode(),
+      });
 
-    // Seed mock data if enabled
-    if (isMockMode) {
-      seedMockData({ queryClient, store })
-        .then(() => {
-          setIsMockDataReady(true);
+      logMockStatus();
+      console.log(
+        '[App] LLM using real Llama 3.2 1B model (mock mode disabled)'
+      );
 
-          // Initialize WebSocket after mock data is ready
-          // Use a mock token for testing
+      if (getIsMockMode()) {
+        try {
+          await seedMockData({ queryClient, store });
+          if (!mounted) {
+            return;
+          }
           console.log('[App] Initializing mock WebSocket...');
           websocketService.connect('mock-token-for-testing');
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('[App] Failed to seed mock data:', error);
-          setIsMockDataReady(true); // Continue anyway
-        });
-    } else {
-      // Real API mode - WebSocket will be initialized after user logs in
-      // The WebSocket requires a real JWT token from the backend
+        } finally {
+          if (mounted) {
+            setIsMockDataReady(true);
+          }
+        }
+        return;
+      }
+
       console.log(
         '[App] Real API mode - WebSocket will connect after authentication'
       );
-    }
+      if (mounted) {
+        setIsMockDataReady(true);
+      }
+    };
+
+    void initializeApp();
 
     // Cleanup on unmount
     return () => {
+      mounted = false;
       websocketService.disconnect();
     };
   }, []);
@@ -96,7 +107,10 @@ export default function App() {
               <QueryClientProvider client={queryClient}>
                 <AIProvider>
                   <StatusBar style="auto" />
-                  <RootNavigator />
+                  <OfflineBanner />
+                  <ToastProvider>
+                    <RootNavigator />
+                  </ToastProvider>
                 </AIProvider>
               </QueryClientProvider>
             </PersistGate>

@@ -1,3 +1,5 @@
+import { StyleSheet, ViewStyle } from 'react-native';
+
 /**
  * iOS Shadow System
  *
@@ -179,6 +181,8 @@ export type ShadowStyle = {
   elevation: number;
 };
 
+export type AdaptiveShadowStyle = ViewStyle;
+
 /**
  * Shadow size type
  */
@@ -197,7 +201,22 @@ export type ShadowVariant = ShadowSize | ShadowPreset;
 /**
  * Helper function to get shadow style
  */
-export const getShadow = (variant: ShadowVariant): ShadowStyle => {
+export const darkModeBorder = {
+  borderWidth: StyleSheet.hairlineWidth,
+  borderColor: 'rgba(255, 255, 255, 0.1)',
+};
+
+export const getShadow = (
+  variant: ShadowVariant,
+  colorScheme: 'light' | 'dark' = 'light'
+): AdaptiveShadowStyle => {
+  if (colorScheme === 'dark' && variant !== 'none') {
+    return {
+      ...shadowNone,
+      ...darkModeBorder,
+    };
+  }
+
   return Shadows[variant];
 };
 

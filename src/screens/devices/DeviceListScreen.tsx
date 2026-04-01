@@ -19,14 +19,8 @@ import {
 import * as Haptics from 'expo-haptics';
 import { useDevices } from '@hooks/api/useDevices';
 import { DeviceCard, DevicesHeaderHero } from '@components/organisms';
-import {
-  ScreenLayout,
-  LoadingState,
-  ErrorState,
-  EmptyState,
-} from '@components/templates';
-import { Button } from '@components/atoms/Button';
-import { Icon } from '@components/atoms/Icon';
+import { ScreenLayout, ErrorState, EmptyState } from '@components/templates';
+import { Button, Icon, SkeletonCard } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 import { Device } from '@types';
 import { isDeviceOnline } from '@utils/dateUtils';
@@ -59,7 +53,9 @@ export const DeviceListScreen = ({ navigation }: any) => {
   const stats = useMemo(() => {
     if (!devices) return { total: 0, online: 0, offline: 0 };
 
-    const onlineCount = devices.filter((d: Device) => isDeviceOnline(d.lastSeen)).length;
+    const onlineCount = devices.filter((d: Device) =>
+      isDeviceOnline(d.lastSeen)
+    ).length;
     return {
       total: devices.length,
       online: onlineCount,
@@ -67,7 +63,29 @@ export const DeviceListScreen = ({ navigation }: any) => {
     };
   }, [devices]);
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading) {
+    return (
+      <ScreenLayout
+        header={{
+          title: 'Devices',
+          largeTitle: true,
+        }}
+        scrollable={true}
+      >
+        <View style={styles.skeletonContainer}>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonCard
+              key={index}
+              height={112}
+              borderRadius={16}
+              style={styles.deviceSkeleton}
+            />
+          ))}
+        </View>
+      </ScreenLayout>
+    );
+  }
+
   if (error) return <ErrorState message="Failed to load devices" />;
 
   const handleDevicePress = (deviceId: string) => {
@@ -86,9 +104,7 @@ export const DeviceListScreen = ({ navigation }: any) => {
   };
 
   const renderListHeader = () => (
-    <View>
-      {stats.total > 0 && <DevicesHeaderHero deviceCounts={stats} />}
-    </View>
+    <View>{stats.total > 0 && <DevicesHeaderHero deviceCounts={stats} />}</View>
   );
 
   return (
@@ -118,8 +134,9 @@ export const DeviceListScreen = ({ navigation }: any) => {
             animateEntrance={true}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={renderListHeader}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -139,10 +156,8 @@ export const DeviceListScreen = ({ navigation }: any) => {
             icon="hardware-chip-outline"
             title="No Devices"
             message="Add your first TrailSense detector to start monitoring."
-            action={{
-              label: 'Add Device',
-              onPress: handleAddDevice,
-            }}
+            actionLabel="Add Device"
+            onActionPress={handleAddDevice}
           />
         }
         removeClippedSubviews={true}
@@ -154,6 +169,14 @@ export const DeviceListScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
+  skeletonContainer: {
+    paddingHorizontal: 4,
+    paddingTop: 16,
+  },
+  deviceSkeleton: {
+    marginHorizontal: 12,
+    marginBottom: 12,
+  },
   listContent: {
     paddingHorizontal: 4,
     paddingBottom: 20,

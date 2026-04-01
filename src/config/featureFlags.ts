@@ -25,6 +25,13 @@ export interface FeatureFlags {
   LLM_MOCK_MODE: boolean; // Use mock responses instead of real inference
   LLM_DEBUG_MODE: boolean; // Show debug info in UI
   LLM_PERFORMANCE_OVERLAY: boolean; // Show performance metrics overlay
+
+  // Workstream Feature Flags
+  PROPERTY_COMMAND_CENTER: boolean;
+  REPLAY_RADAR: boolean;
+  BEHAVIORAL_PATTERNS: boolean;
+  KNOWN_DEVICE_SUGGESTIONS: boolean;
+  DEMO_MODE: boolean;
 }
 
 /**
@@ -54,6 +61,13 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   LLM_MOCK_MODE: true, // Mock mode enabled - ExecuTorch requires Expo 54+
   LLM_DEBUG_MODE: __DEV__,
   LLM_PERFORMANCE_OVERLAY: __DEV__,
+
+  // Workstream Feature Flags - all enabled by default, can be disabled for rollback
+  PROPERTY_COMMAND_CENTER: true,
+  REPLAY_RADAR: true,
+  BEHAVIORAL_PATTERNS: true,
+  KNOWN_DEVICE_SUGGESTIONS: true,
+  DEMO_MODE: false,
 };
 
 /**
@@ -238,7 +252,7 @@ export const featureFlagsManager = new FeatureFlagsManager();
 
 // Export convenience object that reads from manager
 export const FEATURE_FLAGS = new Proxy({} as FeatureFlags, {
-  get(target, prop: string) {
+  get(_target, prop: string) {
     return featureFlagsManager.getFlags()[prop as keyof FeatureFlags];
   },
 });

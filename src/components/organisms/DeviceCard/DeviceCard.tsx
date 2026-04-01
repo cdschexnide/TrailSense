@@ -9,13 +9,21 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, ViewStyle, Pressable, Animated, Easing } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ViewStyle,
+  Pressable,
+  Animated,
+  Easing,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Device } from '@types';
 import { Text } from '@components/atoms';
 import { MetricsBar } from '@components/molecules/MetricsBar';
 import { GlowContainer } from '@components/molecules/GlowContainer';
 import { useTheme } from '@hooks/useTheme';
+import { useReducedMotion } from '@hooks/useReducedMotion';
 import { isDeviceOnline } from '@utils/dateUtils';
 
 interface DeviceCardProps {
@@ -56,17 +64,22 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   animateEntrance = true,
 }) => {
   const { theme } = useTheme();
+  const reduceMotion = useReducedMotion();
   const colors = theme.colors;
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const opacityAnim = useRef(new Animated.Value(animateEntrance ? 0 : 1)).current;
-  const translateYAnim = useRef(new Animated.Value(animateEntrance ? 20 : 0)).current;
+  const opacityAnim = useRef(
+    new Animated.Value(animateEntrance ? 0 : 1)
+  ).current;
+  const translateYAnim = useRef(
+    new Animated.Value(animateEntrance ? 20 : 0)
+  ).current;
 
   useEffect(() => {
-    if (animateEntrance) {
+    if (animateEntrance && !reduceMotion) {
       const delay = index * 50;
 
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         Animated.parallel([
           Animated.timing(opacityAnim, {
             toValue: 1,
@@ -82,8 +95,14 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
           }),
         ]).start();
       }, delay);
+
+      return () => clearTimeout(timeout);
     }
-  }, [animateEntrance, index]);
+
+    opacityAnim.setValue(1);
+    translateYAnim.setValue(0);
+    return undefined;
+  }, [animateEntrance, index, opacityAnim, reduceMotion, translateYAnim]);
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -122,8 +141,14 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   // Note: Battery removed - not measurable with 5V regulator hardware
   const metrics = [
     { value: capitalizeSignal(signalStrength), label: 'Signal' },
-    { value: (device.detectionCount || 0).toLocaleString(), label: 'Detections' },
-    { value: formatCoordinate(device.latitude, device.longitude), label: 'Loc' },
+    {
+      value: (device.detectionCount || 0).toLocaleString(),
+      label: 'Detections',
+    },
+    {
+      value: formatCoordinate(device.latitude, device.longitude),
+      label: 'Loc',
+    },
   ];
 
   const cardContent = (
@@ -146,19 +171,32 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
       >
         {/* Header: Name + Status Dot */}
         <View style={styles.header}>
-          <Text variant="headline" weight="semibold" color="label" style={styles.name}>
+          <Text
+            variant="headline"
+            weight="semibold"
+            color="label"
+            style={styles.name}
+          >
             {device.name}
           </Text>
           <View
             style={[
               styles.statusDot,
-              { backgroundColor: isOnline ? colors.systemGreen : colors.systemRed },
+              {
+                backgroundColor: isOnline
+                  ? colors.systemGreen
+                  : colors.systemRed,
+              },
             ]}
           />
         </View>
 
         {/* Status + Last Seen */}
-        <Text variant="subheadline" color="secondaryLabel" style={styles.statusLine}>
+        <Text
+          variant="subheadline"
+          color="secondaryLabel"
+          style={styles.statusLine}
+        >
           {isOnline ? 'Online' : 'Offline'} · {formatLastSeen(device.lastSeen)}
         </Text>
 

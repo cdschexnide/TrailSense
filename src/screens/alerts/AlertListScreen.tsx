@@ -10,32 +10,18 @@
  */
 
 import React, { useState, useMemo, useRef } from 'react';
-import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
-  Animated,
-} from 'react-native';
+import { RefreshControl, StyleSheet, View, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useAlerts } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
 import { AlertCard, AlertsHeaderHero } from '@components/organisms';
-import {
-  ScreenLayout,
-  EmptyState,
-  LoadingState,
-  ErrorState,
-} from '@components/templates';
+import { ScreenLayout, EmptyState, ErrorState } from '@components/templates';
 import { SearchBar } from '@components/molecules/SearchBar';
-import { Button } from '@components/atoms/Button';
-import { Icon } from '@components/atoms/Icon';
+import { Button, Icon, SkeletonCard } from '@components/atoms';
 import { Alert, ThreatLevel } from '@types';
 import { useTheme } from '@hooks/useTheme';
 
 // Threat level configuration
-const THREAT_LEVELS: ThreatLevel[] = ['critical', 'high', 'medium', 'low'];
-
 const THREAT_LABELS: Record<ThreatLevel, string> = {
   critical: 'Critical',
   high: 'High',
@@ -44,8 +30,7 @@ const THREAT_LABELS: Record<ThreatLevel, string> = {
 };
 
 export const AlertListScreen = ({ navigation }: any) => {
-  const { theme, colorScheme } = useTheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useTheme();
   const colors = theme.colors;
   const { data: alerts, isLoading, error, refetch } = useAlerts();
   const { data: devices } = useDevices();
@@ -114,7 +99,29 @@ export const AlertListScreen = ({ navigation }: any) => {
     return result;
   }, [alerts, search, selectedThreatFilter]);
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading) {
+    return (
+      <ScreenLayout
+        header={{
+          title: 'Alerts',
+          largeTitle: true,
+        }}
+        scrollable={true}
+      >
+        <View style={styles.skeletonContainer}>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonCard
+              key={index}
+              height={76}
+              borderRadius={12}
+              style={styles.alertSkeleton}
+            />
+          ))}
+        </View>
+      </ScreenLayout>
+    );
+  }
+
   if (error) return <ErrorState message="Failed to load alerts" />;
 
   const handleDismiss = (alertId: string) => {
@@ -193,6 +200,7 @@ export const AlertListScreen = ({ navigation }: any) => {
         )}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={renderListHeader}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -209,16 +217,20 @@ export const AlertListScreen = ({ navigation }: any) => {
         }
         ListEmptyComponent={
           <EmptyState
-            icon="notifications-off-outline"
+            icon={search ? 'search-outline' : 'notifications-off-outline'}
             title={
-              selectedThreatFilter
-                ? `No ${THREAT_LABELS[selectedThreatFilter]} Alerts`
-                : 'No Alerts'
+              search
+                ? 'No Results'
+                : selectedThreatFilter
+                  ? `No ${THREAT_LABELS[selectedThreatFilter]} Alerts`
+                  : 'No Alerts'
             }
             message={
-              selectedThreatFilter
-                ? 'Try selecting a different filter'
-                : 'You have no security alerts'
+              search
+                ? `No alerts matching "${search}"`
+                : selectedThreatFilter
+                  ? 'Try selecting a different filter'
+                  : 'You have no security alerts'
             }
           />
         }
@@ -234,6 +246,14 @@ export const AlertListScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
+  skeletonContainer: {
+    paddingHorizontal: 4,
+    paddingTop: 16,
+  },
+  alertSkeleton: {
+    marginBottom: 8,
+    marginHorizontal: 4,
+  },
   listContent: {
     paddingHorizontal: 4,
     paddingBottom: 20,

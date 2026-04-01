@@ -12,7 +12,6 @@
 import React, { useRef, useCallback } from 'react';
 import {
   View,
-  ScrollView,
   StyleSheet,
   ViewStyle,
   KeyboardAvoidingView,
@@ -102,13 +101,10 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
 
   // Handle scroll events
   const handleScroll = useCallback(
-    Animated.event(
-      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-      {
-        useNativeDriver: false,
-        listener: onScroll,
-      }
-    ),
+    Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+      useNativeDriver: false,
+      listener: onScroll,
+    }),
     [scrollY, onScroll]
   );
 
@@ -134,6 +130,7 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       style={styles.scrollView}
       contentContainerStyle={styles.scrollViewContent}
       showsVerticalScrollIndicator={false}
+      keyboardDismissMode="on-drag"
       scrollEventThrottle={16}
       onScroll={hasLargeTitle && animatedHeader ? handleScroll : onScroll}
       // Pull-to-refresh needs content inset adjustment on iOS
@@ -176,22 +173,21 @@ export const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       />
 
       {/* Custom header or default header */}
-      {customHeader || (headerConfig && (
-        <Header
-          title={headerConfig.title}
-          subtitle={headerConfig.subtitle}
-          showBack={headerConfig.showBack}
-          onBackPress={headerConfig.onBackPress}
-          rightActions={headerConfig.rightActions}
-          largeTitle={hasLargeTitle}
-          scrollY={hasLargeTitle && animatedHeader ? scrollY : undefined}
-        />
-      ))}
+      {customHeader ||
+        (headerConfig && (
+          <Header
+            title={headerConfig.title}
+            subtitle={headerConfig.subtitle}
+            showBack={headerConfig.showBack}
+            onBackPress={headerConfig.onBackPress}
+            rightActions={headerConfig.rightActions}
+            largeTitle={hasLargeTitle}
+            scrollY={hasLargeTitle && animatedHeader ? scrollY : undefined}
+          />
+        ))}
 
       {/* Sticky header content (e.g., search bars, filters) */}
-      {stickyHeader && (
-        <View style={styles.stickyHeader}>{stickyHeader}</View>
-      )}
+      {stickyHeader && <View style={styles.stickyHeader}>{stickyHeader}</View>}
 
       {/* Main content */}
       {keyboardAvoidingContent}
