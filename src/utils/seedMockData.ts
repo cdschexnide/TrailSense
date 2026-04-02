@@ -17,15 +17,54 @@ import {
   mockHeatmapPoints,
   mockDeviceFingerprints,
   mockAppSettings,
+  PERSONA_MACS,
 } from '@/mocks/data';
+import { TriangulatedPosition } from '@/types/triangulation';
 
 // React Query keys
 const ALERTS_QUERY_KEY = 'alerts';
 const DEVICES_QUERY_KEY = 'devices';
+const POSITIONS_QUERY_KEY = 'positions';
 const KNOWN_DEVICES_QUERY_KEY = 'knownDevices';
 const ANALYTICS_QUERY_KEY = 'analytics';
 const HEATMAP_QUERY_KEY = 'heatmap';
 const DEVICE_HISTORY_QUERY_KEY = 'device-history';
+
+/**
+ * Generate mock triangulated positions for a device
+ */
+function generateMockPositions(
+  deviceId: string,
+  centerLat: number,
+  centerLng: number
+): { positions: TriangulatedPosition[] } {
+  const positions: TriangulatedPosition[] = [];
+  // Use persona MACs for the first 6, then fill remaining with generated ones
+  for (let i = 0; i < 8; i++) {
+    const persona = PERSONA_MACS[i];
+    const mac = persona
+      ? persona.macAddress
+      : `AA:BB:CC:DD:${i.toString(16).padStart(2, '0').toUpperCase()}:${deviceId.slice(-2)}`;
+    const signalType = persona
+      ? persona.signalType
+      : (['wifi', 'bluetooth', 'cellular'] as const)[i % 3];
+
+    positions.push({
+      id: `pos-${deviceId}-${i}`,
+      deviceId,
+      fingerprintHash: `fp-${mac.replace(/:/g, '').slice(-6)}`,
+      macAddress: mac,
+      signalType,
+      latitude: centerLat + (Math.random() - 0.5) * 0.002,
+      longitude: centerLng + (Math.random() - 0.5) * 0.002,
+      accuracyMeters: 5 + Math.random() * 20,
+      confidence: 0.7 + Math.random() * 0.3,
+      measurementCount: 3 + Math.floor(Math.random() * 5),
+      updatedAt: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+    });
+  }
+  return { positions };
+}
 
 interface SeedOptions {
   queryClient: QueryClient;
@@ -88,6 +127,24 @@ export const seedMockData = async ({
     // Individual devices
     mockDevices.forEach(device => {
       queryClient.setQueryData([DEVICES_QUERY_KEY, device.id], device);
+    });
+
+    // Positions for each device with coordinates
+    mockDevices.forEach(device => {
+      if (
+        typeof device.latitude === 'number' &&
+        typeof device.longitude === 'number'
+      ) {
+        const posData = generateMockPositions(
+          device.id,
+          device.latitude,
+          device.longitude
+        );
+        queryClient.setQueryData(
+          [POSITIONS_QUERY_KEY, device.id],
+          posData
+        );
+      }
     });
 
     // Known devices

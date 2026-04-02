@@ -26,6 +26,7 @@ export {
   mockLowAlerts,
   mockMultibandAlerts,
   mockRecentAlerts,
+  PERSONA_MACS,
 } from './mockAlerts';
 
 // Known devices
