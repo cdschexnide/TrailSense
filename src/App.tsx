@@ -21,16 +21,7 @@ import { initDemoMode, isDemoMode } from '@/config/demoMode';
 import { applyDemoModeConfig } from '@/config/demoModeRuntime';
 import { setMockAdapterQueryClient } from '@api/client';
 import { useAuth } from '@hooks/useAuth';
-
-// Initialize react-native-executorch early (Android and iOS)
-if (Platform.OS === 'android' || Platform.OS === 'ios') {
-  try {
-    require('react-native-executorch');
-    console.log('[App] react-native-executorch initialized for', Platform.OS);
-  } catch (error) {
-    console.warn('[App] Failed to initialize react-native-executorch:', error);
-  }
-}
+import { llmLogger } from '@/utils/llmLogger';
 
 export default function App() {
   const [isMockDataReady, setIsMockDataReady] = useState(false);
@@ -39,6 +30,17 @@ export default function App() {
     let mounted = true;
 
     const initializeApp = async () => {
+      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+        try {
+          await import('react-native-executorch');
+          llmLogger.info('react-native-executorch initialized', {
+            platform: Platform.OS,
+          });
+        } catch (error) {
+          llmLogger.warn('Failed to initialize react-native-executorch', error);
+        }
+      }
+
       await initDemoMode();
       await featureFlagsManager.loadFromStorage();
       featureFlagsManager.updateFlags({
@@ -46,14 +48,10 @@ export default function App() {
       });
 
       logMockStatus();
-      console.log(
-        '[App] LLM using real Llama 3.2 1B model (mock mode disabled)'
-      );
+      llmLogger.info('LLM using configured on-device model runtime');
 
       if (isDemoMode()) {
-        console.log(
-          '[App] Persisted demo session - applying runtime mock config'
-        );
+        llmLogger.info('Persisted demo session detected');
         applyDemoModeConfig(queryClient);
         websocketService.connect('mock-token-for-testing');
         if (mounted) {
@@ -69,7 +67,7 @@ export default function App() {
           if (!mounted) {
             return;
           }
-          console.log('[App] Initializing mock WebSocket...');
+          llmLogger.info('Initializing mock WebSocket');
           websocketService.connect('mock-token-for-testing');
         } catch (error) {
           console.error('[App] Failed to seed mock data:', error);
@@ -81,8 +79,8 @@ export default function App() {
         return;
       }
 
-      console.log(
-        '[App] Real API mode - WebSocket will connect after authentication'
+      llmLogger.info(
+        'Real API mode enabled; WebSocket connects after authentication'
       );
       if (mounted) {
         setIsMockDataReady(true);

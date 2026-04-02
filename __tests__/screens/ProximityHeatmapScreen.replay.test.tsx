@@ -1,8 +1,10 @@
 import React from 'react';
+import { PropsWithChildren } from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ProximityHeatmapScreen } from '@screens/radar/ProximityHeatmapScreen';
+import { View, ViewProps } from 'react-native';
 
 jest.mock('@theme/provider', () => ({
   useTheme: () => ({
@@ -48,18 +50,18 @@ jest.mock('@expo/vector-icons', () => ({
 }));
 
 jest.mock('@components/templates', () => ({
-  ScreenLayout: ({ children }: any) => children,
+  ScreenLayout: ({ children }: PropsWithChildren) => children,
 }));
 
 jest.mock('react-native-reanimated', () => {
-  const React = require('react');
-  const { View } = require('react-native');
   const actual = jest.requireActual('__mocks__/react-native-reanimated.js');
   return {
     __esModule: true,
     ...actual,
     default: {
-      View: ({ children, ...props }: any) => <View {...props}>{children}</View>,
+      View: ({ children, ...props }: PropsWithChildren<ViewProps>) => (
+        <View {...props}>{children}</View>
+      ),
     },
     useSharedValue: jest.fn(initial => ({ value: initial })),
     useAnimatedStyle: jest.fn(callback => callback()),
@@ -74,19 +76,19 @@ jest.mock('@rnmapbox/maps', () => ({
     StyleURL: { SatelliteStreet: 'sat', Dark: 'dark' },
   },
   Camera: () => null,
-  MapView: ({ children }: any) => children ?? null,
+  MapView: ({ children }: PropsWithChildren) => children ?? null,
 }));
 
 jest.mock('@shopify/react-native-skia', () => ({
-  Canvas: ({ children }: any) => children,
+  Canvas: ({ children }: PropsWithChildren) => children,
   Circle: () => null,
   Line: () => null,
-  Group: ({ children }: any) => children,
+  Group: ({ children }: PropsWithChildren) => children,
   vec: (x: number, y: number) => ({ x, y }),
 }));
 
 jest.mock('react-native-gesture-handler', () => ({
-  GestureDetector: ({ children }: any) => children,
+  GestureDetector: ({ children }: PropsWithChildren) => children,
   Gesture: {
     Tap: () => ({ onEnd: () => ({}) }),
     Pan: () => ({

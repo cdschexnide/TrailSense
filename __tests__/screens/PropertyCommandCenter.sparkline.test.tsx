@@ -1,4 +1,5 @@
 import React from 'react';
+import { PropsWithChildren } from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -104,7 +105,7 @@ jest.mock('@components/organisms', () => ({
 }));
 
 jest.mock('@components/templates', () => ({
-  ScreenLayout: ({ children }: any) => children,
+  ScreenLayout: ({ children }: PropsWithChildren) => children,
 }));
 
 describe('PropertyCommandCenter sparkline deep link', () => {

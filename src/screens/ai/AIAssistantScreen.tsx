@@ -35,6 +35,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useAI } from '@/services/llm';
 import { FEATURE_FLAGS, shouldShowLLMFeatures } from '@/config/featureFlags';
+import { getStorageRequirements } from '@/config/llmConfig';
 import { ChatMessage as ChatMessageType } from '@/types/llm';
 import { useSecurityContext } from '@/hooks/useSecurityContext';
 import { useTheme } from '@hooks/useTheme';
@@ -60,6 +61,7 @@ export const AIAssistantScreen: React.FC = () => {
 
   // AI context
   const {
+    isAvailable,
     isReady,
     isEnabling,
     isGenerating,
@@ -83,7 +85,10 @@ export const AIAssistantScreen: React.FC = () => {
 
   // Feature check
   const isFeatureEnabled =
-    shouldShowLLMFeatures() && FEATURE_FLAGS.LLM_CONVERSATIONAL_ASSISTANT;
+    isAvailable &&
+    shouldShowLLMFeatures() &&
+    FEATURE_FLAGS.LLM_CONVERSATIONAL_ASSISTANT;
+  const modelDownloadSize = getStorageRequirements().formattedTotal;
 
   // Contextual suggestions
   const contextualSuggestions = useMemo(() => {
@@ -183,10 +188,14 @@ export const AIAssistantScreen: React.FC = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await enableAI();
-    } catch {
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Could not load the on-device AI model.';
       Alert.alert(
         'Failed to Enable AI',
-        'Could not load the AI model. Please check your connection and try again.',
+        message,
         [{ text: 'OK' }]
       );
     }
@@ -371,7 +380,7 @@ export const AIAssistantScreen: React.FC = () => {
             color={colors.systemBlue}
           />
           <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
-            ~400MB one-time download
+            {`~${modelDownloadSize} one-time download`}
           </Text>
         </View>
         <View style={styles.featureRow}>
@@ -473,8 +482,8 @@ export const AIAssistantScreen: React.FC = () => {
         variant="body"
         style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}
       >
-        The AI assistant feature is not available on your device or has been
-        disabled.
+        TrailSense AI requires a custom development build with ExecuTorch and
+        iOS 17+ or Android 13+.
       </Text>
     </View>
   );

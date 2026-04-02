@@ -8,13 +8,26 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Switch, Pressable, Platform, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Switch,
+  Pressable,
+  Platform,
+  Alert,
+} from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
-import { Icon } from '@components/atoms/Icon';
+import { Icon, IconName } from '@components/atoms/Icon';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
 import { useTheme } from '@hooks/useTheme';
+import { MoreStackParamList, SettingsStackParamList } from '@navigation/types';
+
+type BiometricScreenProps =
+  | NativeStackScreenProps<MoreStackParamList, 'Biometric'>
+  | NativeStackScreenProps<SettingsStackParamList, 'Biometric'>;
 
 const TIMEOUT_OPTIONS = [
   { value: 0, label: 'Immediately' },
@@ -24,7 +37,7 @@ const TIMEOUT_OPTIONS = [
   { value: 1800, label: '30 minutes' },
 ];
 
-export const BiometricScreen = ({ navigation }: any) => {
+export const BiometricScreen = ({ navigation }: BiometricScreenProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -36,7 +49,8 @@ export const BiometricScreen = ({ navigation }: any) => {
 
   // Determine biometric type based on platform
   const biometricType = Platform.OS === 'ios' ? 'Face ID' : 'Fingerprint';
-  const biometricIcon = Platform.OS === 'ios' ? 'scan-outline' : 'finger-print-outline';
+  const biometricIcon: IconName =
+    Platform.OS === 'ios' ? 'scan-outline' : 'finger-print-outline';
 
   const handleEnableBiometric = async (value: boolean) => {
     if (value) {
@@ -74,28 +88,58 @@ export const BiometricScreen = ({ navigation }: any) => {
     >
       {/* Hero */}
       <View style={styles.hero}>
-        <View style={[styles.heroIconContainer, { backgroundColor: colors.systemGreen + '20' }]}>
-          <Icon name={biometricIcon as any} size={32} color={colors.systemGreen} />
+        <View
+          style={[
+            styles.heroIconContainer,
+            { backgroundColor: colors.systemGreen + '20' },
+          ]}
+        >
+          <Icon name={biometricIcon} size={32} color={colors.systemGreen} />
         </View>
-        <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={{ marginTop: 16 }}
+        >
           {biometricType}
         </Text>
-        <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 4, textAlign: 'center' }}>
+        <Text
+          variant="subheadline"
+          style={{
+            color: colors.secondaryLabel,
+            marginTop: 4,
+            textAlign: 'center',
+          }}
+        >
           Secure your app with biometric authentication
         </Text>
       </View>
 
       {/* Main Toggle */}
-      <View style={[styles.mainToggleCard, { backgroundColor: colors.secondarySystemBackground }]}>
+      <View
+        style={[
+          styles.mainToggleCard,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
         <View style={styles.mainToggleContent}>
-          <View style={[styles.toggleIcon, { backgroundColor: colors.systemGreen + '20' }]}>
-            <Icon name={biometricIcon as any} size={24} color={colors.systemGreen} />
+          <View
+            style={[
+              styles.toggleIcon,
+              { backgroundColor: colors.systemGreen + '20' },
+            ]}
+          >
+            <Icon name={biometricIcon} size={24} color={colors.systemGreen} />
           </View>
           <View style={styles.toggleText}>
             <Text variant="headline" weight="semibold" color="label">
               Enable {biometricType}
             </Text>
-            <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 4 }}>
+            <Text
+              variant="caption1"
+              style={{ color: colors.secondaryLabel, marginTop: 4 }}
+            >
               Use {biometricType.toLowerCase()} to unlock TrailSense
             </Text>
           </View>
@@ -111,22 +155,42 @@ export const BiometricScreen = ({ navigation }: any) => {
       {biometricEnabled && (
         <>
           {/* Require Biometric For */}
-          <ListSection header="REQUIRE AUTHENTICATION FOR" style={styles.section}>
-            <View style={[styles.optionCard, { backgroundColor: colors.secondarySystemBackground }]}>
-              <View style={[styles.optionIcon, { backgroundColor: colors.systemBlue + '20' }]}>
-                <Icon name="enter-outline" size={20} color={colors.systemBlue} />
+          <ListSection
+            header="REQUIRE AUTHENTICATION FOR"
+            style={styles.section}
+          >
+            <View
+              style={[
+                styles.optionCard,
+                { backgroundColor: colors.secondarySystemBackground },
+              ]}
+            >
+              <View
+                style={[
+                  styles.optionIcon,
+                  { backgroundColor: colors.systemBlue + '20' },
+                ]}
+              >
+                <Icon
+                  name="enter-outline"
+                  size={20}
+                  color={colors.systemBlue}
+                />
               </View>
               <View style={styles.optionContent}>
                 <Text variant="body" weight="semibold" color="label">
                   Opening App
                 </Text>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel, marginTop: 2 }}
+                >
                   Require authentication when opening
                 </Text>
               </View>
               <Switch
                 value={requireOnOpen}
-                onValueChange={(val) => {
+                onValueChange={val => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setRequireOnOpen(val);
                 }}
@@ -134,21 +198,38 @@ export const BiometricScreen = ({ navigation }: any) => {
               />
             </View>
 
-            <View style={[styles.optionCard, { backgroundColor: colors.secondarySystemBackground }]}>
-              <View style={[styles.optionIcon, { backgroundColor: colors.systemOrange + '20' }]}>
-                <Icon name="alert-circle-outline" size={20} color={colors.systemOrange} />
+            <View
+              style={[
+                styles.optionCard,
+                { backgroundColor: colors.secondarySystemBackground },
+              ]}
+            >
+              <View
+                style={[
+                  styles.optionIcon,
+                  { backgroundColor: colors.systemOrange + '20' },
+                ]}
+              >
+                <Icon
+                  name="alert-circle-outline"
+                  size={20}
+                  color={colors.systemOrange}
+                />
               </View>
               <View style={styles.optionContent}>
                 <Text variant="body" weight="semibold" color="label">
                   Viewing Alerts
                 </Text>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel, marginTop: 2 }}
+                >
                   Require authentication to view alert details
                 </Text>
               </View>
               <Switch
                 value={requireForAlerts}
-                onValueChange={(val) => {
+                onValueChange={val => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setRequireForAlerts(val);
                 }}
@@ -156,21 +237,38 @@ export const BiometricScreen = ({ navigation }: any) => {
               />
             </View>
 
-            <View style={[styles.optionCard, { backgroundColor: colors.secondarySystemBackground }]}>
-              <View style={[styles.optionIcon, { backgroundColor: colors.systemPurple + '20' }]}>
-                <Icon name="settings-outline" size={20} color={colors.systemPurple} />
+            <View
+              style={[
+                styles.optionCard,
+                { backgroundColor: colors.secondarySystemBackground },
+              ]}
+            >
+              <View
+                style={[
+                  styles.optionIcon,
+                  { backgroundColor: colors.systemPurple + '20' },
+                ]}
+              >
+                <Icon
+                  name="settings-outline"
+                  size={20}
+                  color={colors.systemPurple}
+                />
               </View>
               <View style={styles.optionContent}>
                 <Text variant="body" weight="semibold" color="label">
                   Changing Settings
                 </Text>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel, marginTop: 2 }}
+                >
                   Require authentication for sensitive settings
                 </Text>
               </View>
               <Switch
                 value={requireForSettings}
-                onValueChange={(val) => {
+                onValueChange={val => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                   setRequireForSettings(val);
                 }}
@@ -181,10 +279,13 @@ export const BiometricScreen = ({ navigation }: any) => {
 
           {/* Lock Timeout */}
           <ListSection header="AUTO-LOCK TIMEOUT" style={styles.section}>
-            <Text variant="caption1" style={[styles.sectionNote, { color: colors.secondaryLabel }]}>
+            <Text
+              variant="caption1"
+              style={[styles.sectionNote, { color: colors.secondaryLabel }]}
+            >
               Lock app after this period of inactivity
             </Text>
-            {TIMEOUT_OPTIONS.map((option) => (
+            {TIMEOUT_OPTIONS.map(option => (
               <Pressable
                 key={option.value}
                 onPress={() => {
@@ -201,7 +302,12 @@ export const BiometricScreen = ({ navigation }: any) => {
                   {option.label}
                 </Text>
                 {lockTimeout === option.value && (
-                  <View style={[styles.checkmark, { backgroundColor: colors.systemGreen }]}>
+                  <View
+                    style={[
+                      styles.checkmark,
+                      { backgroundColor: colors.systemGreen },
+                    ]}
+                  >
                     <Icon name="checkmark" size={14} color="#FFFFFF" />
                   </View>
                 )}
@@ -212,10 +318,23 @@ export const BiometricScreen = ({ navigation }: any) => {
       )}
 
       {/* Info Card */}
-      <View style={[styles.infoCard, { backgroundColor: colors.secondarySystemBackground }]}>
-        <Icon name="shield-checkmark-outline" size={20} color={colors.secondaryLabel} />
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}>
-          {biometricType} data never leaves your device. Authentication is handled securely by your device's secure enclave.
+      <View
+        style={[
+          styles.infoCard,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
+        <Icon
+          name="shield-checkmark-outline"
+          size={20}
+          color={colors.secondaryLabel}
+        />
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}
+        >
+          {biometricType} data never leaves your device. Authentication is
+          handled securely by your device&apos;s secure enclave.
         </Text>
       </View>
 

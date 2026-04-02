@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { View, FlatList, StyleSheet, Pressable, Alert } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import {
@@ -16,37 +17,49 @@ import {
   useKnownDevices,
 } from '@hooks/api/useKnownDevices';
 import { Text } from '@components/atoms/Text';
-import { Icon } from '@components/atoms/Icon';
+import { Icon, IconName } from '@components/atoms/Icon';
 import { Button } from '@components/atoms/Button';
-import {
-  ScreenLayout,
-  LoadingState,
-  ErrorState,
-} from '@components/templates';
+import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { useTheme } from '@hooks/useTheme';
+import { KnownDevice } from '@types';
+import { MoreStackParamList, SettingsStackParamList } from '@navigation/types';
 
-const CATEGORY_CONFIG: Record<string, { icon: string; color: string }> = {
-  wifi: { icon: 'wifi', color: '#007AFF' },
-  bluetooth: { icon: 'bluetooth', color: '#5856D6' },
-  device: { icon: 'hardware-chip', color: '#34C759' },
-  network: { icon: 'globe-outline', color: '#FF9500' },
+type KnownDevicesScreenProps =
+  | NativeStackScreenProps<MoreStackParamList, 'KnownDevices'>
+  | NativeStackScreenProps<SettingsStackParamList, 'KnownDevices'>;
+
+type KnownDeviceCategoryDisplay = KnownDevice['category'] | 'default';
+
+type CategoryConfig = {
+  icon: IconName;
+  color: string;
+};
+
+const CATEGORY_CONFIG: Record<KnownDeviceCategoryDisplay, CategoryConfig> = {
+  family: { icon: 'people', color: '#007AFF' },
+  guests: { icon: 'person-add', color: '#5856D6' },
+  service: { icon: 'construct', color: '#34C759' },
+  other: { icon: 'shield-checkmark', color: '#FF9500' },
   default: { icon: 'shield-checkmark', color: '#8E8E93' },
 };
+
+interface KnownDeviceItemCardProps {
+  name: string;
+  macAddress: string;
+  category?: KnownDevice['category'];
+  onDelete: () => void;
+}
 
 const KnownDeviceItemCard = ({
   name,
   macAddress,
   category,
   onDelete,
-}: {
-  name: string;
-  macAddress: string;
-  category?: string;
-  onDelete: () => void;
-}) => {
+}: KnownDeviceItemCardProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const config = CATEGORY_CONFIG[category || 'default'] || CATEGORY_CONFIG.default;
+  const config =
+    CATEGORY_CONFIG[category ?? 'default'] ?? CATEGORY_CONFIG.default;
 
   const handleDelete = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -65,20 +78,37 @@ const KnownDeviceItemCard = ({
   };
 
   return (
-    <View style={[styles.itemCard, { backgroundColor: colors.secondarySystemBackground }]}>
+    <View
+      style={[
+        styles.itemCard,
+        { backgroundColor: colors.secondarySystemBackground },
+      ]}
+    >
       <View style={[styles.itemIcon, { backgroundColor: config.color + '20' }]}>
-        <Icon name={config.icon as any} size={22} color={config.color} />
+        <Icon name={config.icon} size={22} color={config.color} />
       </View>
       <View style={styles.itemContent}>
         <Text variant="body" weight="semibold" color="label">
           {name}
         </Text>
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginTop: 2 }}
+        >
           {macAddress}
         </Text>
-        <View style={[styles.categoryBadge, { backgroundColor: config.color + '15' }]}>
-          <Text variant="caption2" weight="semibold" style={{ color: config.color }}>
-            {(category || 'Device').toUpperCase()}
+        <View
+          style={[
+            styles.categoryBadge,
+            { backgroundColor: config.color + '15' },
+          ]}
+        >
+          <Text
+            variant="caption2"
+            weight="semibold"
+            style={{ color: config.color }}
+          >
+            {(category ?? 'Device').toUpperCase()}
           </Text>
         </View>
       </View>
@@ -103,17 +133,23 @@ const EmptyKnownDevices = ({ onAdd }: { onAdd: () => void }) => {
 
   return (
     <View style={styles.emptyContainer}>
-      <View style={[styles.emptyIconContainer, { backgroundColor: colors.systemTeal + '20' }]}>
+      <View
+        style={[
+          styles.emptyIconContainer,
+          { backgroundColor: colors.systemTeal + '20' },
+        ]}
+      >
         <Icon name="shield-checkmark" size={48} color={colors.systemTeal} />
       </View>
-      <Text variant="title2" weight="bold" color="label" style={{ marginTop: 20 }}>
+      <Text
+        variant="title2"
+        weight="bold"
+        color="label"
+        style={{ marginTop: 20 }}
+      >
         No Known Devices
       </Text>
-      <Text
-        variant="body"
-        color="secondaryLabel"
-        style={styles.emptyText}
-      >
+      <Text variant="body" color="secondaryLabel" style={styles.emptyText}>
         Add devices you recognize so they are easier to identify later
       </Text>
       <Pressable
@@ -127,7 +163,11 @@ const EmptyKnownDevices = ({ onAdd }: { onAdd: () => void }) => {
           style={styles.addButton}
         >
           <Icon name="add-circle" size={20} color="#FFFFFF" />
-          <Text variant="headline" weight="semibold" style={{ color: '#FFFFFF', marginLeft: 8 }}>
+          <Text
+            variant="headline"
+            weight="semibold"
+            style={{ color: '#FFFFFF', marginLeft: 8 }}
+          >
             Add Device
           </Text>
         </LinearGradient>
@@ -136,7 +176,7 @@ const EmptyKnownDevices = ({ onAdd }: { onAdd: () => void }) => {
   );
 };
 
-export const KnownDevicesScreen = ({ navigation }: any) => {
+export const KnownDevicesScreen = ({ navigation }: KnownDevicesScreenProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
   const { data: knownDevices, isLoading, error } = useKnownDevices();
@@ -160,19 +200,27 @@ export const KnownDevicesScreen = ({ navigation }: any) => {
         title: 'Known Devices',
         showBack: true,
         onBackPress: () => navigation.goBack(),
-        rightActions: knownDevices && knownDevices.length > 0 && (
-          <Button buttonStyle="plain" onPress={handleAdd}>
-            <Icon name="add" size={24} color={colors.systemBlue} />
-          </Button>
-        ),
+        rightActions:
+          knownDevices && knownDevices.length > 0 ? (
+            <Button buttonStyle="plain" onPress={handleAdd}>
+              <Icon name="add" size={24} color={colors.systemBlue} />
+            </Button>
+          ) : undefined,
       }}
       scrollable={false}
     >
-      {/* Info Card */}
       {knownDevices && knownDevices.length > 0 && (
-        <View style={[styles.infoCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.infoCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           <Icon name="information-circle" size={20} color={colors.systemBlue} />
-          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}>
+          <Text
+            variant="caption1"
+            style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}
+          >
             Known devices help you label familiar visitors and equipment
           </Text>
         </View>
@@ -185,13 +233,14 @@ export const KnownDevicesScreen = ({ navigation }: any) => {
             name={item.name}
             macAddress={item.macAddress}
             category={item.category}
-            onDelete={() => handleDelete(item.id)}
+            onDelete={() => void handleDelete(item.id)}
           />
         )}
         keyExtractor={item => item.id}
         contentContainerStyle={[
           styles.listContent,
-          (!knownDevices || knownDevices.length === 0) && styles.emptyListContent,
+          (!knownDevices || knownDevices.length === 0) &&
+            styles.emptyListContent,
         ]}
         ListEmptyComponent={<EmptyKnownDevices onAdd={handleAdd} />}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}

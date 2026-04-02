@@ -128,7 +128,10 @@ export interface DeviceFingerprint {
   detections: Array<{
     timestamp: string;
     rssi: number;
-    location?: any;
+    location?: {
+      latitude: number;
+      longitude: number;
+    };
     type: string;
   }>;
   averageDuration: number;

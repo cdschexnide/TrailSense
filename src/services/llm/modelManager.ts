@@ -4,28 +4,18 @@ import { performanceTracker } from '@/utils/llmPerformance';
 import { LLMError, LLMErrorCode, Message } from '@/types/llm';
 import { LLM_CONFIG } from '@/config/llmConfig';
 
-// Conditionally import react-native-executorch to avoid crashes in Expo managed workflow
+// Conditionally import react-native-executorch to avoid crashes in Expo Go / managed workflow
 let LLMModule: any = null;
-let LLAMA3_2_1B: any = null;
 let LLAMA3_2_1B_SPINQUANT: any = null;
-let HAMMER2_1_1_5B_QUANTIZED: any = null;
 
 try {
   const executorch = require('react-native-executorch');
-
-  // Import LLMModule class and model constants directly
   LLMModule = executorch.LLMModule;
-  LLAMA3_2_1B = executorch.LLAMA3_2_1B;
   LLAMA3_2_1B_SPINQUANT = executorch.LLAMA3_2_1B_SPINQUANT;
-  HAMMER2_1_1_5B_QUANTIZED = executorch.HAMMER2_1_1_5B_QUANTIZED;
 
   console.log('[ModelManager] react-native-executorch loaded successfully');
   console.log('[ModelManager] LLMModule:', typeof LLMModule);
-  console.log('[ModelManager] Available models:', {
-    LLAMA3_2_1B: !!LLAMA3_2_1B,
-    LLAMA3_2_1B_SPINQUANT: !!LLAMA3_2_1B_SPINQUANT,
-    HAMMER2_1_1_5B_QUANTIZED: !!HAMMER2_1_1_5B_QUANTIZED,
-  });
+  console.log('[ModelManager] LLAMA3_2_1B_SPINQUANT:', !!LLAMA3_2_1B_SPINQUANT);
 } catch (error) {
   console.warn(
     '[ModelManager] react-native-executorch not available. LLM features disabled.'
@@ -59,20 +49,48 @@ export class ModelManager {
   public onGeneratingChanged?: (isGenerating: boolean) => void;
 
   /**
+   * Whether the JS package imported successfully.
+   */
+  hasNativeModule(): boolean {
+    return Boolean(LLMModule);
+  }
+
+  /**
+   * Whether the current OS version meets ExecuTorch minimums.
+   */
+  isPlatformVersionSupported(): boolean {
+    if (Platform.OS === 'ios') {
+      return this.getPlatformVersionNumber() >= 17;
+    }
+
+    if (Platform.OS === 'android') {
+      return this.getPlatformVersionNumber() >= 33;
+    }
+
+    return false;
+  }
+
+  /**
+   * Coarse runtime support check for gating the UI before model load.
+   */
+  isRuntimeSupported(): boolean {
+    return this.hasNativeModule() && this.isPlatformVersionSupported();
+  }
+
+  /**
    * Check if ExecuTorch module is available
    */
   async isModuleAvailable(): Promise<boolean> {
     // Check if module was loaded
-    if (!LLMModule) {
+    if (!this.hasNativeModule()) {
       llmLogger.warn(
-        'react-native-executorch LLMModule not available (not installed or Expo managed workflow)'
+        'react-native-executorch LLMModule not available (dependency missing, native build not regenerated, or New Architecture disabled)'
       );
       return false;
     }
 
-    // Check platform - now supporting both Android and iOS
-    if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
-      llmLogger.warn('ExecuTorch only supported on Android and iOS');
+    if (!this.isPlatformVersionSupported()) {
+      llmLogger.warn('ExecuTorch requires iOS 17+ or Android 13+');
       return false;
     }
 
@@ -87,7 +105,7 @@ export class ModelManager {
 
   /**
    * Load the LLM model into memory
-   * Uses the correct LLMModule API from react-native-executorch
+   * Uses LLMModule.fromModelName() static factory from react-native-executorch 0.8.x
    */
   async loadModel(): Promise<void> {
     // Check if already loaded
@@ -99,7 +117,6 @@ export class ModelManager {
     // Check if already loading
     if (this.isLoading) {
       llmLogger.warn('Model load already in progress');
-      // Wait for current load to complete
       return this.waitForLoad();
     }
 
@@ -122,13 +139,24 @@ export class ModelManager {
         platform: Platform.OS,
       });
 
-      // Create LLMModule instance with callback handlers (mobile-llm pattern)
-      this.llmModule = new LLMModule({
-        tokenCallback: (newToken: string) => {
+      if (!LLAMA3_2_1B_SPINQUANT) {
+        throw new Error('LLAMA3_2_1B_SPINQUANT model constant not available');
+      }
+
+      llmLogger.info('Using model: Llama 3.2 1B SpinQuant');
+
+      // 0.8.x API: static factory that loads and returns a ready instance
+      this.llmModule = await LLMModule.fromModelName(
+        LLAMA3_2_1B_SPINQUANT,
+        (progress: number) => {
+          this.downloadProgress = progress;
+          const percentage = (progress * 100).toFixed(1);
+          llmLogger.info(`Model download/load progress: ${percentage}%`);
+        },
+        (newToken: string) => {
           this._token = newToken;
           this._response += newToken;
 
-          // Notify external listeners
           if (this.onTokenReceived) {
             this.onTokenReceived(newToken);
           }
@@ -138,39 +166,13 @@ export class ModelManager {
 
           llmLogger.debug('Token received:', newToken.substring(0, 20) + '...');
         },
-        messageHistoryCallback: (messageHistory: Message[]) => {
+        (messageHistory: Message[]) => {
           this._messageHistory = messageHistory;
           llmLogger.debug(
             `Message history updated: ${messageHistory.length} messages`
           );
-        },
-        responseCallback: (response: string) => {
-          this._response = response;
-          if (this.onResponseUpdated) {
-            this.onResponseUpdated(response);
-          }
-        },
-      });
-
-      // Select the best model based on availability
-      // LLAMA3_2_1B_SPINQUANT is smaller/faster, LLAMA3_2_1B is standard
-      const modelToUse = LLAMA3_2_1B_SPINQUANT || LLAMA3_2_1B;
-
-      if (!modelToUse) {
-        throw new Error('No LLM model configuration available');
-      }
-
-      llmLogger.info(
-        'Using model:',
-        modelToUse ? 'LLAMA3_2_1B variant' : 'Unknown'
+        }
       );
-
-      // Load model using the correct API: load(MODEL_CONSTANT, progressCallback)
-      await this.llmModule.load(modelToUse, (progress: number) => {
-        this.downloadProgress = progress;
-        const percentage = (progress * 100).toFixed(1);
-        llmLogger.info(`Model download/load progress: ${percentage}%`);
-      });
 
       const loadTime = endTimer();
       performanceTracker.recordModelLoad(loadTime);
@@ -189,11 +191,10 @@ export class ModelManager {
           `Retrying model load (attempt ${this.loadAttempts + 1}/${this.MAX_LOAD_ATTEMPTS})`
         );
 
-        // Wait before retry
         await this.sleep(LLM_CONFIG.RETRY_DELAY_MS);
 
         this.isLoading = false;
-        return this.loadModel(); // Recursive retry
+        return this.loadModel();
       }
 
       throw new LLMError(
@@ -319,8 +320,19 @@ export class ModelManager {
     try {
       llmLogger.info('Sending message...');
 
-      // Use LLMModule.sendMessage() for single message conversation
-      await this.llmModule.sendMessage(message);
+      // sendMessage returns Message[] (full history).
+      // Response text is accumulated via tokenCallback, but use
+      // the returned history as a fallback.
+      const history = await this.llmModule.sendMessage(message);
+
+      if (!this._response && history.length > 0) {
+        const lastAssistant = [...history]
+          .reverse()
+          .find((m: Message) => m.role === 'assistant');
+        if (lastAssistant) {
+          this._response = lastAssistant.content;
+        }
+      }
 
       llmLogger.info('Message sent, response received', {
         responseLength: this._response.length,
@@ -482,6 +494,15 @@ export class ModelManager {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private getPlatformVersionNumber(): number {
+    if (typeof Platform.Version === 'number') {
+      return Platform.Version;
+    }
+
+    const parsed = parseInt(String(Platform.Version).split('.')[0], 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   /**

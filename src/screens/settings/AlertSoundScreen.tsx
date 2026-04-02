@@ -9,12 +9,18 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, Pressable, Switch } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
 import { useTheme } from '@hooks/useTheme';
+import { MoreStackParamList, SettingsStackParamList } from '@navigation/types';
+
+type AlertSoundScreenProps =
+  | NativeStackScreenProps<MoreStackParamList, 'AlertSound'>
+  | NativeStackScreenProps<SettingsStackParamList, 'AlertSound'>;
 
 interface SoundOption {
   id: string;
@@ -38,7 +44,12 @@ interface SoundRowProps {
   onPreview: () => void;
 }
 
-const SoundRow = ({ sound, isSelected, onSelect, onPreview }: SoundRowProps) => {
+const SoundRow = ({
+  sound,
+  isSelected,
+  onSelect,
+  onPreview,
+}: SoundRowProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -58,26 +69,34 @@ const SoundRow = ({ sound, isSelected, onSelect, onPreview }: SoundRowProps) => 
         <Text variant="body" weight="semibold" color="label">
           {sound.name}
         </Text>
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginTop: 2 }}
+        >
           {sound.description}
         </Text>
       </View>
 
       {sound.id !== 'none' && (
         <Pressable
-          onPress={(e) => {
+          onPress={e => {
             e.stopPropagation();
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             onPreview();
           }}
-          style={[styles.playButton, { backgroundColor: colors.systemBlue + '20' }]}
+          style={[
+            styles.playButton,
+            { backgroundColor: colors.systemBlue + '20' },
+          ]}
         >
           <Icon name="play" size={16} color={colors.systemBlue} />
         </Pressable>
       )}
 
       {isSelected && (
-        <View style={[styles.checkmark, { backgroundColor: colors.systemBlue }]}>
+        <View
+          style={[styles.checkmark, { backgroundColor: colors.systemBlue }]}
+        >
           <Icon name="checkmark" size={14} color="#FFFFFF" />
         </View>
       )}
@@ -85,7 +104,7 @@ const SoundRow = ({ sound, isSelected, onSelect, onPreview }: SoundRowProps) => 
   );
 };
 
-export const AlertSoundScreen = ({ navigation }: any) => {
+export const AlertSoundScreen = ({ navigation }: AlertSoundScreenProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -96,9 +115,8 @@ export const AlertSoundScreen = ({ navigation }: any) => {
   const [customSoundsEnabled, setCustomSoundsEnabled] = useState(true);
 
   const handlePreview = (soundId: string) => {
-    // In production, this would play the actual sound
+    void soundId;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    console.log('Preview sound:', soundId);
   };
 
   return (
@@ -112,33 +130,63 @@ export const AlertSoundScreen = ({ navigation }: any) => {
     >
       {/* Hero */}
       <View style={styles.hero}>
-        <View style={[styles.heroIconContainer, { backgroundColor: colors.systemPink + '20' }]}>
+        <View
+          style={[
+            styles.heroIconContainer,
+            { backgroundColor: colors.systemPink + '20' },
+          ]}
+        >
           <Icon name="musical-notes" size={32} color={colors.systemPink} />
         </View>
-        <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={{ marginTop: 16 }}
+        >
           Alert Sounds
         </Text>
-        <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 4, textAlign: 'center' }}>
+        <Text
+          variant="subheadline"
+          style={{
+            color: colors.secondaryLabel,
+            marginTop: 4,
+            textAlign: 'center',
+          }}
+        >
           Customize sounds for different threat levels
         </Text>
       </View>
 
       {/* Custom Sounds Toggle */}
-      <View style={[styles.toggleCard, { backgroundColor: colors.secondarySystemBackground }]}>
-        <View style={[styles.toggleIcon, { backgroundColor: colors.systemPink + '20' }]}>
+      <View
+        style={[
+          styles.toggleCard,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
+        <View
+          style={[
+            styles.toggleIcon,
+            { backgroundColor: colors.systemPink + '20' },
+          ]}
+        >
           <Icon name="options-outline" size={20} color={colors.systemPink} />
         </View>
         <View style={styles.toggleContent}>
           <Text variant="body" weight="semibold" color="label">
             Custom Sounds per Level
           </Text>
-          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+          <Text
+            variant="caption1"
+            style={{ color: colors.secondaryLabel, marginTop: 2 }}
+          >
             Different sounds for each threat level
           </Text>
         </View>
         <Switch
           value={customSoundsEnabled}
-          onValueChange={(val) => {
+          onValueChange={val => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setCustomSoundsEnabled(val);
           }}
@@ -150,13 +198,22 @@ export const AlertSoundScreen = ({ navigation }: any) => {
         <>
           {/* Critical Alerts */}
           <ListSection header="CRITICAL ALERTS" style={styles.section}>
-            <View style={[styles.levelIndicator, { backgroundColor: '#FF3B30' + '20' }]}>
+            <View
+              style={[
+                styles.levelIndicator,
+                { backgroundColor: '#FF3B30' + '20' },
+              ]}
+            >
               <View style={[styles.levelDot, { backgroundColor: '#FF3B30' }]} />
-              <Text variant="caption1" weight="semibold" style={{ color: '#FF3B30', marginLeft: 8 }}>
+              <Text
+                variant="caption1"
+                weight="semibold"
+                style={{ color: '#FF3B30', marginLeft: 8 }}
+              >
                 Immediate security risks
               </Text>
             </View>
-            {SOUND_OPTIONS.map((sound) => (
+            {SOUND_OPTIONS.map(sound => (
               <SoundRow
                 key={sound.id}
                 sound={sound}
@@ -169,13 +226,22 @@ export const AlertSoundScreen = ({ navigation }: any) => {
 
           {/* High Alerts */}
           <ListSection header="HIGH ALERTS" style={styles.section}>
-            <View style={[styles.levelIndicator, { backgroundColor: '#FF9500' + '20' }]}>
+            <View
+              style={[
+                styles.levelIndicator,
+                { backgroundColor: '#FF9500' + '20' },
+              ]}
+            >
               <View style={[styles.levelDot, { backgroundColor: '#FF9500' }]} />
-              <Text variant="caption1" weight="semibold" style={{ color: '#FF9500', marginLeft: 8 }}>
+              <Text
+                variant="caption1"
+                weight="semibold"
+                style={{ color: '#FF9500', marginLeft: 8 }}
+              >
                 Significant concerns
               </Text>
             </View>
-            {SOUND_OPTIONS.map((sound) => (
+            {SOUND_OPTIONS.map(sound => (
               <SoundRow
                 key={sound.id}
                 sound={sound}
@@ -188,13 +254,22 @@ export const AlertSoundScreen = ({ navigation }: any) => {
 
           {/* Medium Alerts */}
           <ListSection header="MEDIUM ALERTS" style={styles.section}>
-            <View style={[styles.levelIndicator, { backgroundColor: '#FFCC00' + '20' }]}>
+            <View
+              style={[
+                styles.levelIndicator,
+                { backgroundColor: '#FFCC00' + '20' },
+              ]}
+            >
               <View style={[styles.levelDot, { backgroundColor: '#FFCC00' }]} />
-              <Text variant="caption1" weight="semibold" style={{ color: '#FFCC00', marginLeft: 8 }}>
+              <Text
+                variant="caption1"
+                weight="semibold"
+                style={{ color: '#FFCC00', marginLeft: 8 }}
+              >
                 Moderate events
               </Text>
             </View>
-            {SOUND_OPTIONS.map((sound) => (
+            {SOUND_OPTIONS.map(sound => (
               <SoundRow
                 key={sound.id}
                 sound={sound}
@@ -207,13 +282,22 @@ export const AlertSoundScreen = ({ navigation }: any) => {
 
           {/* Low Alerts */}
           <ListSection header="LOW ALERTS" style={styles.section}>
-            <View style={[styles.levelIndicator, { backgroundColor: '#34C759' + '20' }]}>
+            <View
+              style={[
+                styles.levelIndicator,
+                { backgroundColor: '#34C759' + '20' },
+              ]}
+            >
               <View style={[styles.levelDot, { backgroundColor: '#34C759' }]} />
-              <Text variant="caption1" weight="semibold" style={{ color: '#34C759', marginLeft: 8 }}>
+              <Text
+                variant="caption1"
+                weight="semibold"
+                style={{ color: '#34C759', marginLeft: 8 }}
+              >
                 Minor events
               </Text>
             </View>
-            {SOUND_OPTIONS.map((sound) => (
+            {SOUND_OPTIONS.map(sound => (
               <SoundRow
                 key={sound.id}
                 sound={sound}
@@ -226,10 +310,13 @@ export const AlertSoundScreen = ({ navigation }: any) => {
         </>
       ) : (
         <ListSection header="ALL ALERTS" style={styles.section}>
-          <Text variant="caption1" style={[styles.sectionNote, { color: colors.secondaryLabel }]}>
+          <Text
+            variant="caption1"
+            style={[styles.sectionNote, { color: colors.secondaryLabel }]}
+          >
             This sound will be used for all alert levels
           </Text>
-          {SOUND_OPTIONS.map((sound) => (
+          {SOUND_OPTIONS.map(sound => (
             <SoundRow
               key={sound.id}
               sound={sound}

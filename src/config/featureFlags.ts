@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { isLLMAvailable } from './llmConfig';
 
 /**
  * Feature Flags Configuration
@@ -58,7 +59,8 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   LLM_ENABLE_STREAMING: false, // Not yet implemented
 
   // Developer Features
-  LLM_MOCK_MODE: true, // Mock mode enabled - ExecuTorch requires Expo 54+
+  // Opt-in for UI-only development; real on-device inference is the default path.
+  LLM_MOCK_MODE: process.env.EXPO_PUBLIC_LLM_MOCK_MODE === 'true',
   LLM_DEBUG_MODE: __DEV__,
   LLM_PERFORMANCE_OVERLAY: __DEV__,
 
@@ -151,6 +153,9 @@ class FeatureFlagsManager {
       this.updateFlags({
         LLM_ENABLED: true,
         LLM_ALERT_SUMMARIES: true,
+        LLM_PATTERN_ANALYSIS: true,
+        LLM_CONVERSATIONAL_ASSISTANT: true,
+        LLM_MOCK_MODE: false,
         LLM_DEBUG_MODE: true,
         LLM_PERFORMANCE_OVERLAY: true,
       });
@@ -177,6 +182,8 @@ class FeatureFlagsManager {
       LLM_MOCK_MODE: true,
       LLM_ENABLED: true,
       LLM_ALERT_SUMMARIES: true,
+      LLM_PATTERN_ANALYSIS: true,
+      LLM_CONVERSATIONAL_ASSISTANT: true,
     });
   }
 
@@ -275,8 +282,7 @@ export function shouldShowLLMFeatures(userId?: string): boolean {
     return false;
   }
 
-  // Now supporting both Android and iOS
-  if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
+  if (!isLLMAvailable()) {
     return false;
   }
 

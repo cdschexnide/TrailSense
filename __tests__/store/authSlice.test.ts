@@ -1,5 +1,14 @@
 import { AuthService } from '@services/authService';
 import { configureStore } from '@reduxjs/toolkit';
+import authReducer, {
+  login,
+  register,
+  logout,
+  checkAuth,
+  setBiometricEnabled,
+  clearAuth,
+  setCredentials,
+} from '@store/slices/authSlice';
 
 jest.mock('@services/authService', () => ({
   AuthService: {
@@ -19,18 +28,22 @@ jest.mock('@api/websocket', () => ({
   },
 }));
 
-const {
-  default: authReducer,
-  login,
-  register,
-  logout,
-  checkAuth,
-  setBiometricEnabled,
-  clearAuth,
-  setCredentials,
-} = require('@store/slices/authSlice');
-
 const mockedAuthService = AuthService as jest.Mocked<typeof AuthService>;
+
+type AuthSuccessPayload = {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: 'user';
+    createdAt: string;
+  };
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  };
+};
 
 describe('authSlice', () => {
   let store: ReturnType<typeof configureStore>;
@@ -136,9 +149,19 @@ describe('authSlice', () => {
             setTimeout(
               () =>
                 resolve({
-                  user: {} as any,
-                  tokens: {} as any,
-                }),
+                  user: {
+                    id: 'pending-user',
+                    email: 'pending@example.com',
+                    name: 'Pending User',
+                    role: 'user',
+                    createdAt: '2025-01-01',
+                  },
+                  tokens: {
+                    accessToken: 'pending-access-token',
+                    refreshToken: 'pending-refresh-token',
+                    expiresIn: 900,
+                  },
+                } satisfies AuthSuccessPayload),
               100
             )
           )

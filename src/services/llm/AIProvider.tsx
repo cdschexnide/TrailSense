@@ -6,7 +6,7 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Modal, View, StyleSheet, Platform } from 'react-native';
+import { Modal, View, StyleSheet } from 'react-native';
 import { modelManager } from './modelManager';
 import { llmService } from './LLMService';
 import { inferenceEngine } from './inferenceEngine';
@@ -28,6 +28,7 @@ import {
  */
 export interface AIContextType {
   // State
+  isAvailable: boolean;
   isReady: boolean;
   isEnabling: boolean;
   isGenerating: boolean;
@@ -54,6 +55,7 @@ export interface AIContextType {
 
   // Status
   getStatus: () => {
+    isAvailable: boolean;
     isReady: boolean;
     isEnabling: boolean;
     isGenerating: boolean;
@@ -83,7 +85,13 @@ export const AIProvider: React.FC<AIProviderProps> = ({
   children,
   showDownloadModal = true,
 }) => {
+  const getAvailability = useCallback(
+    () => FEATURE_FLAGS.LLM_MOCK_MODE || modelManager.isRuntimeSupported(),
+    []
+  );
+
   // State
+  const [isAvailable, setIsAvailable] = useState(getAvailability());
   const [isReady, setIsReady] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -98,6 +106,8 @@ export const AIProvider: React.FC<AIProviderProps> = ({
    * Setup callbacks when component mounts
    */
   useEffect(() => {
+    setIsAvailable(getAvailability());
+
     // Setup model manager callbacks for real-time updates
     modelManager.onTokenReceived = (newToken: string) => {
       setToken(newToken);
@@ -117,7 +127,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       modelManager.onResponseUpdated = undefined;
       modelManager.onGeneratingChanged = undefined;
     };
-  }, []);
+  }, [getAvailability]);
 
   /**
    * Enable AI - loads the model
@@ -134,6 +144,14 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       return;
     }
 
+    if (!getAvailability()) {
+      const availabilityError = new Error(
+        'TrailSense AI requires a custom dev build with ExecuTorch and iOS 17+ or Android 13+.'
+      );
+      setError(availabilityError);
+      throw availabilityError;
+    }
+
     setIsEnabling(true);
     setDownloadProgress(0);
     setError(null);
@@ -148,7 +166,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({
         progressInterval = setInterval(() => {
           const progress = modelManager.getDownloadProgress();
           setDownloadProgress(progress);
-          setIsDownloading(progress > 0 && progress < 100);
+          setIsDownloading(progress > 0 && progress < 1);
         }, 100);
       }
 
@@ -156,7 +174,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({
 
       if (!FEATURE_FLAGS.LLM_MOCK_MODE) {
         setIsDownloading(false);
-        setDownloadProgress(100);
+        setDownloadProgress(1);
       }
 
       setIsReady(true);
@@ -173,7 +191,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       setIsEnabling(false);
       setIsDownloading(false);
     }
-  }, [isReady, isEnabling]);
+  }, [getAvailability, isReady, isEnabling]);
 
   /**
    * Disable AI - unloads the model
@@ -306,18 +324,21 @@ export const AIProvider: React.FC<AIProviderProps> = ({
    */
   const getStatus = useCallback(
     () => ({
+      isAvailable,
       isReady,
       isEnabling,
       isGenerating,
       downloadProgress,
-      platformSupported: Platform.OS === 'android' || Platform.OS === 'ios',
+      platformSupported:
+        FEATURE_FLAGS.LLM_MOCK_MODE || modelManager.isPlatformVersionSupported(),
     }),
-    [isReady, isEnabling, isGenerating, downloadProgress]
+    [isAvailable, isReady, isEnabling, isGenerating, downloadProgress]
   );
 
   // Context value
   const contextValue: AIContextType = {
     // State
+    isAvailable,
     isReady,
     isEnabling,
     isGenerating,
@@ -366,7 +387,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({
                     <View
                       style={[
                         styles.progressFill,
-                        { width: `${downloadProgress}%` },
+                        { width: `${downloadProgress * 100}%` },
                       ]}
                     />
                   </View>

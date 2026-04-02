@@ -7,7 +7,6 @@ export type { AIContextType } from './AIProvider';
 
 // Core Services
 export { modelManager } from './modelManager';
-export { modelDownloader } from './modelDownloader';
 export { inferenceEngine } from './inferenceEngine';
 
 // Cache

@@ -1,4 +1,5 @@
 import React from 'react';
+import { PropsWithChildren } from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import { TimelineScrubber } from '@components/organisms/TimelineScrubber';
 import { BucketEntry } from '@/types/replay';
@@ -43,7 +44,7 @@ jest.mock('@expo/vector-icons', () => ({
 }));
 
 jest.mock('react-native-gesture-handler', () => ({
-  GestureDetector: ({ children }: any) => children,
+  GestureDetector: ({ children }: PropsWithChildren) => children,
   Gesture: {
     Pan: () => ({
       onStart() {

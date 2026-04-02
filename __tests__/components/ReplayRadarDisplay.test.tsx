@@ -1,4 +1,5 @@
 import React from 'react';
+import { PropsWithChildren } from 'react';
 import { render } from '@testing-library/react-native';
 import { ReplayRadarDisplay } from '@components/organisms/ReplayRadarDisplay';
 import { BucketEntry } from '@/types/replay';
@@ -33,15 +34,15 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 jest.mock('@shopify/react-native-skia', () => ({
-  Canvas: ({ children }: any) => children,
+  Canvas: ({ children }: PropsWithChildren) => children,
   Circle: () => null,
   Line: () => null,
-  Group: ({ children }: any) => children,
+  Group: ({ children }: PropsWithChildren) => children,
   vec: (x: number, y: number) => ({ x, y }),
 }));
 
 jest.mock('react-native-gesture-handler', () => ({
-  GestureDetector: ({ children }: any) => children,
+  GestureDetector: ({ children }: PropsWithChildren) => children,
   Gesture: {
     Tap: () => ({ onEnd: () => ({}) }),
   },

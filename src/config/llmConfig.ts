@@ -7,12 +7,10 @@ import { Platform } from 'react-native';
 
 export const LLM_CONFIG = {
   // Model Configuration
-  MODEL_NAME: 'llama-3.2-1b',
+  MODEL_NAME: 'llama-3.2-1b-spinquant',
   MODEL_VERSION: '3.2',
   MODEL_FILE_NAME: 'llama-3.2-1b.pte',
   TOKENIZER_FILE_NAME: 'llama-3.2-1b-tokenizer.json',
-  MODEL_DOWNLOAD_URL: '',
-  TOKENIZER_DOWNLOAD_URL: '',
 
   // Using built-in models from react-native-executorch
   // These will be downloaded on-demand, not bundled in the app
@@ -23,12 +21,8 @@ export const LLM_CONFIG = {
   // Set to 'download' to download on first use
   MODEL_STRATEGY: 'download' as 'bundled' | 'download',
 
-  // Model URLs (provided by react-native-executorch package)
-  // Import these from: 'react-native-executorch'
-  // LLAMA3_2_1B, LLAMA3_2_TOKENIZER, LLAMA3_2_TOKENIZER_CONFIG
-
-  // Model Size (in bytes) - Llama 3.2 1B
-  MODEL_SIZE_BYTES: 1500000000, // ~1.5GB (approximate)
+  // Model Size (in bytes) - Llama 3.2 1B SpinQuant
+  MODEL_SIZE_BYTES: 1224065679, // ~1.14GB based on official ExecuTorch benchmarks
   TOKENIZER_SIZE_BYTES: 524288, // ~512KB
 
   // Model Parameters
@@ -79,7 +73,7 @@ export const LLM_CONFIG = {
 
   // Storage Paths
   get MODEL_STORAGE_PATH(): string {
-    // Will be set by ModelDownloader based on platform
+    // Model storage is managed by react-native-executorch internally
     return '';
   },
 
@@ -117,11 +111,17 @@ export function isLLMAvailable(): boolean {
     return false;
   }
 
-  // Add additional checks here (e.g., RAM requirements, Android version)
+  if (Platform.OS === 'ios') {
+    const iosMajorVersion = parseInt(String(Platform.Version).split('.')[0], 10);
+    return iosMajorVersion >= 17;
+  }
+
   if (Platform.OS === 'android') {
-    // Minimum Android requirements could be checked here
-    // For now, assume all Android devices are supported
-    return true;
+    const androidApiLevel =
+      typeof Platform.Version === 'string'
+        ? parseInt(Platform.Version, 10)
+        : Platform.Version;
+    return androidApiLevel >= 33;
   }
 
   return false;
@@ -132,7 +132,8 @@ export function isLLMAvailable(): boolean {
  */
 export function getLLMErrorMessage(code: string): string {
   const errorMessages: Record<string, string> = {
-    MODULE_NOT_AVAILABLE: 'AI features are not available on this device.',
+    MODULE_NOT_AVAILABLE:
+      'AI features are not available in this build. Use a custom dev build with ExecuTorch enabled.',
     MODEL_NOT_LOADED: 'AI model is not loaded. Please try again.',
     MODEL_NOT_DOWNLOADED:
       'AI model needs to be downloaded. Go to Settings > AI Features to download.',
@@ -146,7 +147,7 @@ export function getLLMErrorMessage(code: string): string {
       'Not enough memory available for AI features. Try closing other apps.',
     INVALID_INPUT: 'Invalid input provided to AI.',
     PLATFORM_NOT_SUPPORTED:
-      'AI features are not available on this platform yet.',
+      'TrailSense AI requires iOS 17+ or Android 13+.',
   };
 
   return errorMessages[code] || 'An unknown error occurred with AI features.';

@@ -1,10 +1,14 @@
-import { AppState, AppStateStatus } from 'react-native';
+import {
+  AppState,
+  AppStateStatus,
+  NativeEventSubscription,
+} from 'react-native';
 import { store } from '@store/index';
 import { logout } from '@store/slices/authSlice';
 
 class InactivityService {
   private inactivityTimeout: NodeJS.Timeout | null = null;
-  private appStateSubscription: any = null;
+  private appStateSubscription: NativeEventSubscription | null = null;
   private lastActivityTime: number = Date.now();
   private readonly INACTIVITY_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 
