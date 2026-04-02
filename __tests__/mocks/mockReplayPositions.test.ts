@@ -9,20 +9,24 @@ describe('generateReplayPositions', () => {
   });
 
   it('generates positions for all 4 scenarios', () => {
-    expect(new Set(positions.map(position => position.fingerprintHash)).size).toBe(4);
+    expect(
+      new Set(positions.map(position => position.fingerprintHash)).size
+    ).toBe(4);
   });
 
   it('distributes positions across 24h', () => {
-    const hours = new Set(positions.map(position => new Date(position.updatedAt).getHours()));
+    const hours = new Set(
+      positions.map(position => new Date(position.updatedAt).getHours())
+    );
     expect(hours.size).toBeGreaterThanOrEqual(6);
   });
 
   it('all positions have valid lat/lng near property center', () => {
     for (const position of positions) {
-      expect(position.latitude).toBeGreaterThan(31.52);
-      expect(position.latitude).toBeLessThan(31.54);
-      expect(position.longitude).toBeGreaterThan(-110.30);
-      expect(position.longitude).toBeLessThan(-110.28);
+      expect(position.latitude).toBeGreaterThan(30.394);
+      expect(position.latitude).toBeLessThan(30.398);
+      expect(position.longitude).toBeGreaterThan(-94.321);
+      expect(position.longitude).toBeLessThan(-94.313);
     }
   });
 
@@ -39,7 +43,9 @@ describe('generateReplayPositions', () => {
   });
 
   it('loiterer scenario has ~90 positions over 45 min', () => {
-    const loiterer = positions.filter(position => position.fingerprintHash === 'fp-loiterer-g7h8i9');
+    const loiterer = positions.filter(
+      position => position.fingerprintHash === 'fp-loiterer-g7h8i9'
+    );
     expect(loiterer.length).toBeGreaterThanOrEqual(70);
     expect(loiterer.length).toBeLessThanOrEqual(110);
   });

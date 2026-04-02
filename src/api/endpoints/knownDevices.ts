@@ -12,9 +12,7 @@ export const knownDevicesApi = {
     return data;
   },
 
-  addKnownDevice: async (
-    entry: CreateKnownDeviceDTO
-  ): Promise<KnownDevice> => {
+  addKnownDevice: async (entry: CreateKnownDeviceDTO): Promise<KnownDevice> => {
     const { data } = await apiClient.post('/whitelist', entry);
     return data;
   },

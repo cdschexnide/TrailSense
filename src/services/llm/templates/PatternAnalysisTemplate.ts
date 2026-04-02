@@ -1,13 +1,8 @@
 import { PromptTemplate } from './PromptTemplate';
+import type { DeviceContext } from '@/types/llm';
 
-/**
- * Device Context for pattern analysis
- */
-export interface DeviceContext {
-  device: any;
-  detectionHistory: any[];
-  similarDevices?: any[];
-}
+type DetectionHistoryItem = DeviceContext['detectionHistory'][number];
+type SimilarDevice = NonNullable<DeviceContext['similarDevices']>[number];
 
 /**
  * Pattern Analysis Template
@@ -94,7 +89,7 @@ Based on this pattern:
   /**
    * Get device name from metadata
    */
-  private getDeviceName(device: any): string {
+  private getDeviceName(device: DeviceContext['device']): string {
     const metadata = device.metadata || {};
     return (
       metadata.ssid ||
@@ -107,7 +102,7 @@ Based on this pattern:
   /**
    * Format detection history
    */
-  private formatDetections(detectionHistory: any[]): string {
+  private formatDetections(detectionHistory: DetectionHistoryItem[]): string {
     // Show last 10 detections
     const recent = detectionHistory.slice(0, 10);
 
@@ -126,38 +121,40 @@ Based on this pattern:
   /**
    * Analyze detection times
    */
-  private analyzeDetectionTimes(detectionHistory: any[]): string {
+  private analyzeDetectionTimes(
+    detectionHistory: DetectionHistoryItem[]
+  ): string {
     if (detectionHistory.length === 0) return 'No detections to analyze';
 
     // Group by time of day
-    const morningCount = detectionHistory.filter(a => {
-      const hour = new Date(a.timestamp).getHours();
+    const morningCount = detectionHistory.filter(alert => {
+      const hour = new Date(alert.timestamp).getHours();
       return hour >= 6 && hour < 12;
     }).length;
 
-    const afternoonCount = detectionHistory.filter(a => {
-      const hour = new Date(a.timestamp).getHours();
+    const afternoonCount = detectionHistory.filter(alert => {
+      const hour = new Date(alert.timestamp).getHours();
       return hour >= 12 && hour < 18;
     }).length;
 
-    const eveningCount = detectionHistory.filter(a => {
-      const hour = new Date(a.timestamp).getHours();
+    const eveningCount = detectionHistory.filter(alert => {
+      const hour = new Date(alert.timestamp).getHours();
       return hour >= 18 && hour < 22;
     }).length;
 
-    const nightCount = detectionHistory.filter(a => {
-      const hour = new Date(a.timestamp).getHours();
+    const nightCount = detectionHistory.filter(alert => {
+      const hour = new Date(alert.timestamp).getHours();
       return hour >= 22 || hour < 6;
     }).length;
 
     // Group by day of week
-    const weekdayCount = detectionHistory.filter(a => {
-      const day = new Date(a.timestamp).getDay();
+    const weekdayCount = detectionHistory.filter(alert => {
+      const day = new Date(alert.timestamp).getDay();
       return day >= 1 && day <= 5;
     }).length;
 
-    const weekendCount = detectionHistory.filter(a => {
-      const day = new Date(a.timestamp).getDay();
+    const weekendCount = detectionHistory.filter(alert => {
+      const day = new Date(alert.timestamp).getDay();
       return day === 0 || day === 6;
     }).length;
 
@@ -167,7 +164,9 @@ Based on this pattern:
   /**
    * Analyze detection zones
    */
-  private analyzeDetectionZones(detectionHistory: any[]): string {
+  private analyzeDetectionZones(
+    detectionHistory: DetectionHistoryItem[]
+  ): string {
     if (detectionHistory.length === 0) return 'No detections to analyze';
 
     const zoneCounts: Record<string, number> = {};
@@ -188,7 +187,7 @@ Based on this pattern:
   /**
    * Format similar devices
    */
-  private formatSimilarDevices(similarDevices: any[]): string {
+  private formatSimilarDevices(similarDevices: SimilarDevice[]): string {
     if (similarDevices.length === 0) return '';
 
     const deviceList = similarDevices

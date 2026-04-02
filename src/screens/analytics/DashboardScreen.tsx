@@ -10,24 +10,23 @@
  */
 
 import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Dimensions,
-  Pressable,
-  RefreshControl,
-} from 'react-native';
+import { View, StyleSheet, Dimensions, Pressable } from 'react-native';
 import { LineChart, PieChart, BarChart } from 'react-native-chart-kit';
 import * as Haptics from 'expo-haptics';
 import { format, parseISO } from 'date-fns';
 import { useAnalytics } from '@hooks/useAnalytics';
-import { ChartCard, GroupedListSection, GroupedListRow } from '@components/molecules';
+import { GroupedListSection, GroupedListRow } from '@components/molecules';
 import { useTheme } from '@hooks/useTheme';
 import { Colors } from '@constants/colors';
 import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { Button } from '@components/atoms/Button';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type {
+  AnalyticsStackParamList,
+  MoreStackParamList,
+} from '@navigation/types';
 
 type Period = 'day' | 'week' | 'month' | 'year';
 
@@ -86,9 +85,12 @@ const THREAT_COLORS: Record<string, string> = {
   low: '#34C759',
 };
 
-export const DashboardScreen = ({ navigation }: any) => {
+type DashboardScreenProps =
+  | NativeStackScreenProps<AnalyticsStackParamList, 'Dashboard'>
+  | NativeStackScreenProps<MoreStackParamList, 'Dashboard'>;
+
+export const DashboardScreen = ({ navigation }: DashboardScreenProps) => {
   const [period, setPeriod] = useState<Period>('week');
-  const [refreshing, setRefreshing] = useState(false);
   const {
     data: analytics,
     isLoading,
@@ -98,14 +100,6 @@ export const DashboardScreen = ({ navigation }: any) => {
   const { theme, colorScheme } = useTheme();
   const colors = theme.colors;
   const isDark = colorScheme === 'dark';
-
-  // Pull to refresh
-  const handleRefresh = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
 
   // Chart configuration
   const chartConfig = {
@@ -204,7 +198,13 @@ export const DashboardScreen = ({ navigation }: any) => {
           <Button
             buttonStyle="plain"
             onPress={() => navigation?.navigate?.('Reports')}
-            leftIcon={<Icon name="document-text-outline" size={20} color={colors.systemBlue} />}
+            leftIcon={
+              <Icon
+                name="document-text-outline"
+                size={20}
+                color={colors.systemBlue}
+              />
+            }
           >
             Reports
           </Button>
@@ -213,8 +213,13 @@ export const DashboardScreen = ({ navigation }: any) => {
       scrollable
     >
       {/* Period Selector */}
-      <View style={[styles.periodContainer, { backgroundColor: colors.secondarySystemBackground }]}>
-        {(['day', 'week', 'month', 'year'] as Period[]).map((p) => {
+      <View
+        style={[
+          styles.periodContainer,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
+        {(['day', 'week', 'month', 'year'] as Period[]).map(p => {
           const isSelected = period === p;
           return (
             <Pressable
@@ -225,7 +230,9 @@ export const DashboardScreen = ({ navigation }: any) => {
               }}
               style={[
                 styles.periodButton,
-                isSelected && { backgroundColor: colors.brandAccent || colors.primary },
+                isSelected && {
+                  backgroundColor: colors.brandAccent || colors.primary,
+                },
               ]}
             >
               <Text
@@ -263,13 +270,26 @@ export const DashboardScreen = ({ navigation }: any) => {
       {/* Threat Level Summary */}
       {threatSummary.length > 0 && (
         <View style={styles.sectionContainer}>
-          <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+          <Text
+            variant="headline"
+            weight="semibold"
+            color="label"
+            style={styles.sectionTitle}
+          >
             Threat Distribution
           </Text>
-          <View style={[styles.threatCard, { backgroundColor: colors.secondarySystemBackground }]}>
+          <View
+            style={[
+              styles.threatCard,
+              { backgroundColor: colors.secondarySystemBackground },
+            ]}
+          >
             <View style={styles.threatBars}>
-              {threatSummary.map((item) => {
-                const total = threatSummary.reduce((sum, i) => sum + i.count, 0);
+              {threatSummary.map(item => {
+                const total = threatSummary.reduce(
+                  (sum, i) => sum + i.count,
+                  0
+                );
                 const percentage = total > 0 ? (item.count / total) * 100 : 0;
                 return (
                   <View key={item.level} style={styles.threatBarItem}>
@@ -277,22 +297,39 @@ export const DashboardScreen = ({ navigation }: any) => {
                       <View
                         style={[
                           styles.threatDot,
-                          { backgroundColor: THREAT_COLORS[item.level] || colors.systemGray },
+                          {
+                            backgroundColor:
+                              THREAT_COLORS[item.level] || colors.systemGray,
+                          },
                         ]}
                       />
-                      <Text variant="subheadline" style={{ color: colors.label, flex: 1 }}>
-                        {item.level.charAt(0).toUpperCase() + item.level.slice(1)}
+                      <Text
+                        variant="subheadline"
+                        style={{ color: colors.label, flex: 1 }}
+                      >
+                        {item.level.charAt(0).toUpperCase() +
+                          item.level.slice(1)}
                       </Text>
-                      <Text variant="subheadline" weight="semibold" style={{ color: colors.label }}>
+                      <Text
+                        variant="subheadline"
+                        weight="semibold"
+                        style={{ color: colors.label }}
+                      >
                         {item.count}
                       </Text>
                     </View>
-                    <View style={[styles.threatBarBg, { backgroundColor: colors.systemGray5 }]}>
+                    <View
+                      style={[
+                        styles.threatBarBg,
+                        { backgroundColor: colors.systemGray5 },
+                      ]}
+                    >
                       <View
                         style={[
                           styles.threatBarFill,
                           {
-                            backgroundColor: THREAT_COLORS[item.level] || colors.systemGray,
+                            backgroundColor:
+                              THREAT_COLORS[item.level] || colors.systemGray,
                             width: `${percentage}%`,
                           },
                         ]}
@@ -308,10 +345,20 @@ export const DashboardScreen = ({ navigation }: any) => {
 
       {/* Detections Over Time Chart */}
       <View style={styles.sectionContainer}>
-        <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={styles.sectionTitle}
+        >
           Detection Trend
         </Text>
-        <View style={[styles.chartCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.chartCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           {dailyTrendData ? (
             <LineChart
               data={dailyTrendData}
@@ -330,8 +377,15 @@ export const DashboardScreen = ({ navigation }: any) => {
             />
           ) : (
             <View style={styles.emptyChart}>
-              <Icon name="analytics-outline" size={48} color={colors.tertiaryLabel} />
-              <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+              <Icon
+                name="analytics-outline"
+                size={48}
+                color={colors.tertiaryLabel}
+              />
+              <Text
+                variant="subheadline"
+                style={{ color: colors.secondaryLabel, marginTop: 12 }}
+              >
                 No data for this period
               </Text>
             </View>
@@ -341,10 +395,20 @@ export const DashboardScreen = ({ navigation }: any) => {
 
       {/* Detection Types */}
       <View style={styles.sectionContainer}>
-        <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={styles.sectionTitle}
+        >
           Detection Types
         </Text>
-        <View style={[styles.chartCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.chartCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           {detectionTypesData ? (
             <PieChart
               data={detectionTypesData}
@@ -360,8 +424,15 @@ export const DashboardScreen = ({ navigation }: any) => {
             />
           ) : (
             <View style={styles.emptyChart}>
-              <Icon name="pie-chart-outline" size={48} color={colors.tertiaryLabel} />
-              <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+              <Icon
+                name="pie-chart-outline"
+                size={48}
+                color={colors.tertiaryLabel}
+              />
+              <Text
+                variant="subheadline"
+                style={{ color: colors.secondaryLabel, marginTop: 12 }}
+              >
                 No detection data
               </Text>
             </View>
@@ -371,10 +442,20 @@ export const DashboardScreen = ({ navigation }: any) => {
 
       {/* Top Devices */}
       <View style={styles.sectionContainer}>
-        <Text variant="headline" weight="semibold" color="label" style={styles.sectionTitle}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={styles.sectionTitle}
+        >
           Top Devices
         </Text>
-        <View style={[styles.chartCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.chartCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           {deviceDistributionData ? (
             <BarChart
               data={deviceDistributionData}
@@ -393,8 +474,15 @@ export const DashboardScreen = ({ navigation }: any) => {
             />
           ) : (
             <View style={styles.emptyChart}>
-              <Icon name="hardware-chip-outline" size={48} color={colors.tertiaryLabel} />
-              <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 12 }}>
+              <Icon
+                name="hardware-chip-outline"
+                size={48}
+                color={colors.tertiaryLabel}
+              />
+              <Text
+                variant="subheadline"
+                style={{ color: colors.secondaryLabel, marginTop: 12 }}
+              >
                 No device data
               </Text>
             </View>
@@ -412,7 +500,12 @@ export const DashboardScreen = ({ navigation }: any) => {
           ]}
           onPress={() => navigation?.navigate?.('Heatmap')}
         >
-          <View style={[styles.actionIcon, { backgroundColor: colors.systemOrange + '20' }]}>
+          <View
+            style={[
+              styles.actionIcon,
+              { backgroundColor: colors.systemOrange + '20' },
+            ]}
+          >
             <Icon name="map" size={24} color={colors.systemOrange} />
           </View>
           <Text variant="subheadline" weight="semibold" color="label">
@@ -429,8 +522,17 @@ export const DashboardScreen = ({ navigation }: any) => {
           ]}
           onPress={() => navigation?.navigate?.('Reports')}
         >
-          <View style={[styles.actionIcon, { backgroundColor: colors.systemPurple + '20' }]}>
-            <Icon name="download-outline" size={24} color={colors.systemPurple} />
+          <View
+            style={[
+              styles.actionIcon,
+              { backgroundColor: colors.systemPurple + '20' },
+            ]}
+          >
+            <Icon
+              name="download-outline"
+              size={24}
+              color={colors.systemPurple}
+            />
           </View>
           <Text variant="subheadline" weight="semibold" color="label">
             Export Report

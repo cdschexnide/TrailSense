@@ -1,24 +1,24 @@
 import { PromptTemplate } from './PromptTemplate';
+import type {
+  AlertContext,
+  ChatMessage,
+  ConversationContext,
+  Message as PromptMessage,
+} from '@/types/llm';
 
-/**
- * Chat Message interface
- */
-export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: number;
-}
+type SecurityContext = NonNullable<ConversationContext['securityContext']>;
 
-/**
- * Conversation Context for chat
- */
-export interface ConversationContext {
-  messages: ChatMessage[];
-  securityContext?: {
-    recentAlerts: any[];
-    deviceStatus: any[];
+type SecurityDevice = SecurityContext['deviceStatus'][number] & {
+  friendly_name?: string;
+  metadata?: {
+    device_name?: string;
   };
-}
+  whitelisted?: boolean;
+};
+
+type SecurityContextWithHealth = SecurityContext & {
+  systemHealth?: string;
+};
 
 /**
  * Conversational Template
@@ -54,21 +54,11 @@ Guidelines:
     super(systemPrompt);
   }
 
-  /**
-   * Build chat messages for conversational interaction
-   */
-  buildPrompt(
-    context: ConversationContext
-  ): Array<{ role: 'system' | 'user' | 'assistant'; content: string }> {
+  buildPrompt(context: ConversationContext): PromptMessage[] {
     const { messages, securityContext } = context;
-
-    // Build conversation history (keep last 5 messages for context)
     const conversationHistory = this.formatConversationHistory(messages);
-
-    // Add security context if available
     const contextInfo = this.formatSecurityContext(securityContext);
 
-    // Build the user prompt
     const userPrompt = `${conversationHistory}${contextInfo}
 
 Respond to the user's latest message helpfully and concisely.`;
@@ -76,46 +66,36 @@ Respond to the user's latest message helpfully and concisely.`;
     return this.buildFullPrompt(userPrompt);
   }
 
-  /**
-   * Format conversation history
-   */
   private formatConversationHistory(messages: ChatMessage[]): string {
-    // Keep last 5 messages for context
     const recentMessages = messages.slice(-5);
 
     if (recentMessages.length === 0) {
       return 'No conversation history.';
     }
 
-    const formattedMessages = recentMessages.map(msg => {
-      const role = msg.role === 'user' ? 'User' : 'Assistant';
-      return `${role}: ${msg.content}`;
-    });
-
-    return formattedMessages.join('\n');
+    return recentMessages
+      .map(message => {
+        const role = message.role === 'user' ? 'User' : 'Assistant';
+        return `${role}: ${message.content}`;
+      })
+      .join('\n');
   }
 
-  /**
-   * Format security context
-   */
-  private formatSecurityContext(securityContext?: {
-    recentAlerts: any[];
-    deviceStatus: any[];
-  }): string {
+  private formatSecurityContext(
+    securityContext?: ConversationContext['securityContext']
+  ): string {
     if (!securityContext) {
       return '';
     }
 
     const { recentAlerts, deviceStatus } = securityContext;
-
-    const recentAlertsCount = recentAlerts ? recentAlerts.length : 0;
-    const activeDevicesCount = deviceStatus
-      ? deviceStatus.filter(d => d.online).length
-      : 0;
-    const criticalAlertsCount = recentAlerts
-      ? recentAlerts.filter(a => ['high', 'critical'].includes(a.threat_level))
-          .length
-      : 0;
+    const recentAlertsCount = recentAlerts?.length ?? 0;
+    const activeDevicesCount =
+      deviceStatus?.filter(device => device.online).length ?? 0;
+    const criticalAlertsCount =
+      recentAlerts?.filter(alert =>
+        ['high', 'critical'].includes(alert.threat_level ?? '')
+      ).length ?? 0;
 
     return `
 
@@ -125,22 +105,21 @@ Current Security Status:
 - High/Critical Alerts: ${criticalAlertsCount}`;
   }
 
-  /**
-   * Format alert summary for context
-   */
-  private formatAlertSummary(alert: any): string {
-    const timestamp = this.formatDate(alert.timestamp);
+  private formatAlertSummary(alert: AlertContext['alert']): string {
+    const timestamp = this.formatDate(alert.timestamp ?? Date.now());
     const type = alert.detection_type || 'unknown';
     const level = alert.threat_level || 'low';
 
     return `${timestamp}: ${type} detection, ${level} threat`;
   }
 
-  /**
-   * Build prompt for specific question types
-   */
-  buildQuestionPrompt(question: string, context: any): string {
-    // Detect question type and customize prompt
+  buildQuestionPrompt(
+    question: string,
+    context: ConversationContext['securityContext'] = {
+      recentAlerts: [],
+      deviceStatus: [],
+    }
+  ): PromptMessage[] {
     const questionLower = question.toLowerCase();
 
     if (
@@ -162,15 +141,17 @@ Current Security Status:
       return this.buildStatusQuestionPrompt(question, context);
     }
 
-    // Default conversational prompt
-    return this.buildPrompt(context);
+    return this.buildPrompt({
+      messages: [{ role: 'user', content: question, timestamp: Date.now() }],
+      securityContext: context,
+    });
   }
 
-  /**
-   * Build prompt for alert-related questions
-   */
-  private buildAlertQuestionPrompt(question: string, context: any): string {
-    const alertInfo = context.recentAlerts
+  private buildAlertQuestionPrompt(
+    question: string,
+    context: ConversationContext['securityContext']
+  ): PromptMessage[] {
+    const alertInfo = context?.recentAlerts?.length
       ? this.formatAlertsList(context.recentAlerts)
       : 'No recent alerts';
 
@@ -184,11 +165,11 @@ Answer the user's question based on the alert data provided.`;
     return this.buildFullPrompt(userPrompt);
   }
 
-  /**
-   * Build prompt for device-related questions
-   */
-  private buildDeviceQuestionPrompt(question: string, context: any): string {
-    const deviceInfo = context.deviceStatus
+  private buildDeviceQuestionPrompt(
+    question: string,
+    context: ConversationContext['securityContext']
+  ): PromptMessage[] {
+    const deviceInfo = context?.deviceStatus?.length
       ? this.formatDeviceList(context.deviceStatus)
       : 'No device information available';
 
@@ -202,10 +183,10 @@ Answer the user's question based on the device data provided.`;
     return this.buildFullPrompt(userPrompt);
   }
 
-  /**
-   * Build prompt for status-related questions
-   */
-  private buildStatusQuestionPrompt(question: string, context: any): string {
+  private buildStatusQuestionPrompt(
+    question: string,
+    context: SecurityContextWithHealth
+  ): PromptMessage[] {
     const statusSummary = this.formatSystemStatus(context);
 
     const userPrompt = `User Question: ${question}
@@ -218,44 +199,39 @@ Provide a clear summary addressing the user's question.`;
     return this.buildFullPrompt(userPrompt);
   }
 
-  /**
-   * Format alerts list
-   */
-  private formatAlertsList(alerts: any[]): string {
-    if (!alerts || alerts.length === 0) {
+  private formatAlertsList(alerts: SecurityContext['recentAlerts']): string {
+    if (alerts.length === 0) {
       return 'No alerts';
     }
 
     return alerts
-      .slice(0, 5) // Show last 5 alerts
+      .slice(0, 5)
       .map(alert => this.formatAlertSummary(alert))
       .join('\n');
   }
 
-  /**
-   * Format device list
-   */
-  private formatDeviceList(devices: any[]): string {
-    if (!devices || devices.length === 0) {
+  private formatDeviceList(devices: SecurityContext['deviceStatus']): string {
+    if (devices.length === 0) {
       return 'No devices';
     }
 
     return devices
-      .slice(0, 10) // Show up to 10 devices
+      .slice(0, 10)
       .map(device => {
+        const typedDevice = device as SecurityDevice;
         const name =
-          device.friendly_name || device.metadata?.device_name || 'Unknown';
+          typedDevice.friendly_name ||
+          typedDevice.metadata?.device_name ||
+          typedDevice.name ||
+          'Unknown';
         const status = device.online ? 'Active' : 'Inactive';
-        const whitelisted = device.whitelisted ? '(Known Device)' : '';
-        return `- ${name}: ${status} ${whitelisted}`;
+        const whitelisted = typedDevice.whitelisted ? '(Known Device)' : '';
+        return `- ${name}: ${status} ${whitelisted}`.trim();
       })
       .join('\n');
   }
 
-  /**
-   * Format system status
-   */
-  private formatSystemStatus(context: any): string {
+  private formatSystemStatus(context: SecurityContextWithHealth): string {
     const parts: string[] = [];
 
     if (context.recentAlerts) {
@@ -263,7 +239,9 @@ Provide a clear summary addressing the user's question.`;
     }
 
     if (context.deviceStatus) {
-      const active = context.deviceStatus.filter((d: any) => d.online).length;
+      const active = context.deviceStatus.filter(
+        device => device.online
+      ).length;
       parts.push(`Active devices: ${active}/${context.deviceStatus.length}`);
     }
 

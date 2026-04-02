@@ -1,16 +1,27 @@
 import { AuthService } from '@services/authService';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
-import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { publicApiClient } from '@api/client';
 
 jest.mock('expo-secure-store');
 jest.mock('expo-local-authentication');
-jest.mock('axios');
+jest.mock('@api/client', () => ({
+  publicApiClient: {
+    post: jest.fn(),
+  },
+}));
 
-const mockedAxios = axios as jest.Mocked<typeof axios>;
 const mockedSecureStore = SecureStore as jest.Mocked<typeof SecureStore>;
 const mockedLocalAuth = LocalAuthentication as jest.Mocked<
   typeof LocalAuthentication
+>;
+const mockedAsyncStorage = AsyncStorage as jest.Mocked<typeof AsyncStorage>;
+const mockedPublicApiClient = publicApiClient as jest.Mocked<
+  typeof publicApiClient
+>;
+type AuthenticateResult = Awaited<
+  ReturnType<typeof LocalAuthentication.authenticateAsync>
 >;
 
 describe('AuthService', () => {
@@ -37,24 +48,23 @@ describe('AuthService', () => {
         },
       };
 
-      mockedAxios.post.mockResolvedValueOnce(mockResponse);
+      mockedPublicApiClient.post.mockResolvedValueOnce(mockResponse);
       mockedSecureStore.setItemAsync.mockResolvedValueOnce(undefined);
 
       const result = await AuthService.login('test@example.com', 'password');
 
-      expect(mockedAxios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/login'),
-        {
-          email: 'test@example.com',
-          password: 'password',
-        }
-      );
+      expect(mockedPublicApiClient.post).toHaveBeenCalledWith('/auth/login', {
+        email: 'test@example.com',
+        password: 'password',
+      });
       expect(mockedSecureStore.setItemAsync).toHaveBeenCalled();
       expect(result).toEqual(mockResponse.data);
     });
 
     it('should throw error on login failure', async () => {
-      mockedAxios.post.mockRejectedValueOnce(new Error('Invalid credentials'));
+      mockedPublicApiClient.post.mockRejectedValueOnce(
+        new Error('Invalid credentials')
+      );
 
       await expect(
         AuthService.login('test@example.com', 'wrong_password')
@@ -81,7 +91,7 @@ describe('AuthService', () => {
         },
       };
 
-      mockedAxios.post.mockResolvedValueOnce(mockResponse);
+      mockedPublicApiClient.post.mockResolvedValueOnce(mockResponse);
       mockedSecureStore.setItemAsync.mockResolvedValueOnce(undefined);
 
       const result = await AuthService.register({
@@ -90,8 +100,8 @@ describe('AuthService', () => {
         name: 'New User',
       });
 
-      expect(mockedAxios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/auth/register'),
+      expect(mockedPublicApiClient.post).toHaveBeenCalledWith(
+        '/auth/register',
         {
           email: 'new@example.com',
           password: 'password123',
@@ -105,14 +115,18 @@ describe('AuthService', () => {
   describe('logout', () => {
     it('should delete stored tokens', async () => {
       mockedSecureStore.deleteItemAsync.mockResolvedValue(undefined);
+      mockedAsyncStorage.removeItem.mockResolvedValue(undefined);
 
       await AuthService.logout();
 
       expect(mockedSecureStore.deleteItemAsync).toHaveBeenCalledWith(
-        '@trailsense:tokens'
+        'trailsense.tokens'
       );
       expect(mockedSecureStore.deleteItemAsync).toHaveBeenCalledWith(
-        '@trailsense:biometric'
+        'trailsense.biometric'
+      );
+      expect(mockedAsyncStorage.removeItem).toHaveBeenCalledWith(
+        '@trailsense:navigation_state'
       );
     });
   });
@@ -132,7 +146,7 @@ describe('AuthService', () => {
       const result = await AuthService.getTokens();
 
       expect(mockedSecureStore.getItemAsync).toHaveBeenCalledWith(
-        '@trailsense:tokens'
+        'trailsense.tokens'
       );
       expect(result).toEqual(mockTokens);
     });
@@ -179,7 +193,7 @@ describe('AuthService', () => {
     it('should return true on successful authentication', async () => {
       mockedLocalAuth.authenticateAsync.mockResolvedValueOnce({
         success: true,
-      } as any);
+      } as AuthenticateResult);
 
       const result = await AuthService.authenticateWithBiometric();
 
@@ -193,7 +207,7 @@ describe('AuthService', () => {
     it('should return false on failed authentication', async () => {
       mockedLocalAuth.authenticateAsync.mockResolvedValueOnce({
         success: false,
-      } as any);
+      } as AuthenticateResult);
 
       const result = await AuthService.authenticateWithBiometric();
 

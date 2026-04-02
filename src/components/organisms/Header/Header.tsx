@@ -9,13 +9,12 @@
  */
 
 import React from 'react';
+import { View, StyleSheet, Pressable, ViewStyle, Animated } from 'react-native';
 import {
-  View,
-  StyleSheet,
-  Pressable,
-  ViewStyle,
-  Animated,
-} from 'react-native';
+  ParamListBase,
+  useNavigation,
+  NavigationProp,
+} from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, Icon } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
@@ -59,8 +58,20 @@ export const Header: React.FC<HeaderProps> = ({
   testID,
 }) => {
   const { theme, colorScheme } = useTheme();
+  const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const isDark = colorScheme === 'dark';
   const colors = theme.colors;
+
+  const handleBackPress = () => {
+    if (onBackPress) {
+      onBackPress();
+      return;
+    }
+
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  };
 
   // Animated values derived from scrollY
   const scrollAnimations = scrollY
@@ -110,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Back button */}
       {showBack && (
         <Pressable
-          onPress={onBackPress}
+          onPress={handleBackPress}
           style={({ pressed }) => [
             styles.backButton,
             pressed && styles.pressed,
@@ -119,11 +130,7 @@ export const Header: React.FC<HeaderProps> = ({
           accessibilityLabel="Go back"
         >
           <View style={styles.backButtonContent}>
-            <Icon
-              name="chevron-back"
-              size={24}
-              color={colors.systemBlue}
-            />
+            <Icon name="chevron-back" size={24} color={colors.systemBlue} />
             <Text
               variant="body"
               style={{
@@ -187,9 +194,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right actions - plain, no pill background */}
       {rightActions && (
-        <View style={styles.rightActionsContainer}>
-          {rightActions}
-        </View>
+        <View style={styles.rightActionsContainer}>{rightActions}</View>
       )}
     </View>
   );
@@ -203,11 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Title row */}
         <View style={styles.largeTitleRow}>
           <View style={styles.largeTitleTextContainer}>
-            <Text
-              variant="largeTitle"
-              color="label"
-              style={styles.largeTitle}
-            >
+            <Text variant="largeTitle" color="label" style={styles.largeTitle}>
               {title}
             </Text>
             {subtitle && (
@@ -309,12 +310,7 @@ export const Header: React.FC<HeaderProps> = ({
           ]}
         />
       ) : (
-        <View
-          style={[
-            styles.border,
-            { backgroundColor: colors.separator },
-          ]}
-        />
+        <View style={[styles.border, { backgroundColor: colors.separator }]} />
       )}
     </View>
   );

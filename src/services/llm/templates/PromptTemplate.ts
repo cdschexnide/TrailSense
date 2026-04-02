@@ -1,8 +1,4 @@
-// Message type for chat format
-type Message = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-};
+import type { Message } from '@/types/llm';
 
 /**
  * Base Prompt Template Class
@@ -19,15 +15,15 @@ export abstract class PromptTemplate {
    * Build a complete set of chat messages from context
    * Must be implemented by subclasses
    */
-  abstract buildPrompt(context: any): Message[];
+  abstract buildPrompt(context: unknown): Message[];
 
   /**
    * Format context as JSON string
    */
-  protected formatContext(context: any): string {
+  protected formatContext(context: unknown): string {
     try {
       return JSON.stringify(context, null, 2);
-    } catch (error) {
+    } catch {
       return String(context);
     }
   }
@@ -102,7 +98,7 @@ export abstract class PromptTemplate {
         hour: '2-digit',
         minute: '2-digit',
       });
-    } catch (error) {
+    } catch {
       return String(dateOrTimestamp);
     }
   }
@@ -122,7 +118,7 @@ export abstract class PromptTemplate {
         hour: '2-digit',
         minute: '2-digit',
       });
-    } catch (error) {
+    } catch {
       return String(dateOrTimestamp);
     }
   }
@@ -141,7 +137,7 @@ export abstract class PromptTemplate {
       return date.toLocaleDateString('en-US', {
         weekday: 'short',
       });
-    } catch (error) {
+    } catch {
       return String(dateOrTimestamp);
     }
   }

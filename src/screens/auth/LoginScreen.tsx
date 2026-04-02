@@ -19,18 +19,28 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import { useDispatch, useSelector } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
+import { useStore } from 'react-redux';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { login } from '@store/slices/authSlice';
-import { AppDispatch, RootState } from '@store/index';
+import { useAppDispatch, useAppSelector } from '@store/index';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { useTheme } from '@hooks/useTheme';
+import { setDemoMode } from '@/config/demoMode';
+import { featureFlagsManager } from '@/config/featureFlags';
+import { seedMockData } from '@/utils/seedMockData';
+import { websocketService } from '@api/websocket';
+import {
+  applyDemoModeConfig,
+  revertDemoModeConfig,
+} from '@/config/demoModeRuntime';
+import { AuthStackParamList } from '@navigation/types';
+import logoImage from '@assets/images/TrailSenseCompanyLogo.png';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-interface LoginScreenProps {
-  navigation: any;
-}
+type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const { theme, colorScheme } = useTheme();
@@ -43,8 +53,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   const passwordRef = useRef<TextInput>(null);
 
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLoading } = useSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const { isLoading } = useAppSelector(state => state.auth);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const reduxStore = useStore();
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -61,15 +74,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await dispatch(login({ email: email.trim(), password })).unwrap();
-    } catch (error: any) {
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Invalid credentials';
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Login Failed', error.message || 'Invalid credentials');
+      Alert.alert('Login Failed', message);
     }
   };
 
   const handleForgotPassword = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert('Reset Password', 'Password reset functionality coming soon.');
+    navigation.navigate('ForgotPassword');
   };
 
   const handleSignUp = () => {
@@ -77,18 +92,51 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     navigation.navigate('Register');
   };
 
+  const handleExploreDemo = async () => {
+    setIsDemoLoading(true);
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await setDemoMode(true);
+      featureFlagsManager.updateFlags({ DEMO_MODE: true });
+      applyDemoModeConfig(queryClient);
+      await seedMockData({ queryClient, store: reduxStore });
+      websocketService.connect('mock-token-for-testing');
+    } catch {
+      websocketService.disconnect();
+      revertDemoModeConfig(queryClient);
+      featureFlagsManager.updateFlags({ DEMO_MODE: false });
+      let resetFailed = false;
+      try {
+        await setDemoMode(false);
+      } catch {
+        resetFailed = true;
+      }
+      setIsDemoLoading(false);
+      Alert.alert(
+        'Error',
+        resetFailed
+          ? 'Failed to load demo mode and fully reset demo state. Restart the app and try again.'
+          : 'Failed to load demo mode. Please try again.'
+      );
+    }
+  };
+
   const brandOlive = '#4A5240';
   const brandTan = '#B8A67C';
 
   const inputBg = isDark ? 'rgba(44, 44, 46, 0.8)' : 'rgba(242, 242, 247, 0.9)';
-  const inputBorder = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)';
+  const inputBorder = isDark
+    ? 'rgba(255, 255, 255, 0.15)'
+    : 'rgba(0, 0, 0, 0.1)';
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={isDark
-          ? ['#0A0A0A', '#1A1A1A', '#0D1210', '#0A0A0A']
-          : ['#F5F5F7', '#FFFFFF', '#F0F2F0', '#F5F5F7']
+        colors={
+          isDark
+            ? ['#0A0A0A', '#1A1A1A', '#0D1210', '#0A0A0A']
+            : ['#F5F5F7', '#FFFFFF', '#F0F2F0', '#F5F5F7']
         }
         locations={[0, 0.3, 0.7, 1]}
         style={StyleSheet.absoluteFill}
@@ -117,15 +165,24 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           >
             {/* Logo with glow effect */}
             <View style={styles.logoSection}>
-              <View style={[styles.logoOuterRing, { borderColor: `${brandOlive}40` }]}>
+              <View
+                style={[
+                  styles.logoOuterRing,
+                  { borderColor: `${brandOlive}40` },
+                ]}
+              >
                 <LinearGradient
-                  colors={[`${brandOlive}20`, `${brandTan}15`, `${brandOlive}20`]}
+                  colors={[
+                    `${brandOlive}20`,
+                    `${brandTan}15`,
+                    `${brandOlive}20`,
+                  ]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.logoInnerGlow}
                 >
                   <Image
-                    source={require('@assets/images/TrailSenseCompanyLogo.png')}
+                    source={logoImage}
                     style={styles.logo}
                     resizeMode="contain"
                   />
@@ -135,24 +192,58 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
             {/* Title */}
             <View style={styles.headerSection}>
-              <Text variant="largeTitle" weight="bold" color="label" numberOfLines={1} adjustsFontSizeToFit style={styles.title}>
+              <Text
+                variant="largeTitle"
+                weight="bold"
+                color="label"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                style={styles.title}
+              >
                 Welcome Back
               </Text>
-              <Text variant="body" color="secondaryLabel" style={styles.subtitle}>
+              <Text
+                variant="body"
+                color="secondaryLabel"
+                style={styles.subtitle}
+              >
                 Sign in to access your security dashboard
               </Text>
             </View>
 
             {/* Form */}
-            <View style={[styles.formCard, { backgroundColor: isDark ? 'rgba(28, 28, 30, 0.8)' : 'rgba(255, 255, 255, 0.9)', borderColor: inputBorder }]}>
-
+            <View
+              style={[
+                styles.formCard,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(28, 28, 30, 0.8)'
+                    : 'rgba(255, 255, 255, 0.9)',
+                  borderColor: inputBorder,
+                },
+              ]}
+            >
               {/* Email */}
               <View style={styles.inputGroup}>
-                <Text variant="subheadline" weight="medium" color="secondaryLabel" style={styles.inputLabel}>
+                <Text
+                  variant="subheadline"
+                  weight="medium"
+                  color="secondaryLabel"
+                  style={styles.inputLabel}
+                >
                   Email Address
                 </Text>
-                <View style={[styles.inputContainer, { backgroundColor: inputBg, borderColor: inputBorder }]}>
-                  <Icon name="mail-outline" size={20} color={colors.secondaryLabel} />
+                <View
+                  style={[
+                    styles.inputContainer,
+                    { backgroundColor: inputBg, borderColor: inputBorder },
+                  ]}
+                >
+                  <Icon
+                    name="mail-outline"
+                    size={20}
+                    color={colors.secondaryLabel}
+                  />
                   <TextInput
                     style={[styles.input, { color: colors.label }]}
                     value={email}
@@ -173,17 +264,33 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               {/* Password */}
               <View style={styles.inputGroup}>
                 <View style={styles.labelRow}>
-                  <Text variant="subheadline" weight="medium" color="secondaryLabel">
+                  <Text
+                    variant="subheadline"
+                    weight="medium"
+                    color="secondaryLabel"
+                  >
                     Password
                   </Text>
                   <Pressable onPress={handleForgotPassword} hitSlop={8}>
-                    <Text variant="subheadline" style={{ color: colors.systemBlue }}>
+                    <Text
+                      variant="subheadline"
+                      style={{ color: colors.systemBlue }}
+                    >
                       Forgot?
                     </Text>
                   </Pressable>
                 </View>
-                <View style={[styles.inputContainer, { backgroundColor: inputBg, borderColor: inputBorder }]}>
-                  <Icon name="lock-closed-outline" size={20} color={colors.secondaryLabel} />
+                <View
+                  style={[
+                    styles.inputContainer,
+                    { backgroundColor: inputBg, borderColor: inputBorder },
+                  ]}
+                >
+                  <Icon
+                    name="lock-closed-outline"
+                    size={20}
+                    color={colors.secondaryLabel}
+                  />
                   <TextInput
                     ref={passwordRef}
                     style={[styles.input, { color: colors.label }]}
@@ -203,7 +310,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     hitSlop={8}
                   >
                     <Icon
-                      name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                      name={
+                        isPasswordVisible ? 'eye-off-outline' : 'eye-outline'
+                      }
                       size={20}
                       color={colors.secondaryLabel}
                     />
@@ -221,7 +330,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 ]}
               >
                 <LinearGradient
-                  colors={isLoading ? [colors.systemGray3, colors.systemGray4] : [brandOlive, '#3D4536']}
+                  colors={
+                    isLoading
+                      ? [colors.systemGray3, colors.systemGray4]
+                      : [brandOlive, '#3D4536']
+                  }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.signInButton}
@@ -230,7 +343,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
                     <>
-                      <Text variant="headline" weight="semibold" style={{ color: '#FFFFFF' }}>
+                      <Text
+                        variant="headline"
+                        weight="semibold"
+                        style={{ color: '#FFFFFF' }}
+                      >
                         Sign In
                       </Text>
                       <Icon name="arrow-forward" size={20} color="#FFFFFF" />
@@ -240,13 +357,71 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               </Pressable>
             </View>
 
+            <View style={styles.dividerSection}>
+              <View
+                style={[
+                  styles.dividerLine,
+                  { backgroundColor: isDark ? '#333333' : '#DDDDDD' },
+                ]}
+              />
+              <Text
+                variant="caption1"
+                color="tertiaryLabel"
+                style={styles.dividerText}
+              >
+                or
+              </Text>
+              <View
+                style={[
+                  styles.dividerLine,
+                  { backgroundColor: isDark ? '#333333' : '#DDDDDD' },
+                ]}
+              />
+            </View>
+
+            <Pressable
+              onPress={handleExploreDemo}
+              disabled={isDemoLoading || isLoading}
+              style={({ pressed }) => [
+                styles.demoButton,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(184, 166, 124, 0.15)'
+                    : 'rgba(74, 82, 64, 0.08)',
+                  borderColor: isDark
+                    ? 'rgba(184, 166, 124, 0.4)'
+                    : 'rgba(74, 82, 64, 0.25)',
+                },
+                pressed && { opacity: 0.7 },
+              ]}
+            >
+              {isDemoLoading ? (
+                <ActivityIndicator size="small" color={brandTan} />
+              ) : (
+                <>
+                  <Icon name="eye-outline" size={18} color={brandTan} />
+                  <Text
+                    variant="body"
+                    weight="semibold"
+                    style={{ color: brandTan }}
+                  >
+                    Explore Demo
+                  </Text>
+                </>
+              )}
+            </Pressable>
+
             {/* Sign Up Link */}
             <View style={styles.signUpSection}>
               <Text variant="body" color="secondaryLabel">
-                Don't have an account?
+                Don&apos;t have an account?
               </Text>
               <Pressable onPress={handleSignUp}>
-                <Text variant="body" weight="semibold" style={{ color: colors.systemBlue, marginLeft: 6 }}>
+                <Text
+                  variant="body"
+                  weight="semibold"
+                  style={{ color: colors.systemBlue, marginLeft: 6 }}
+                >
                   Sign Up
                 </Text>
               </Pressable>
@@ -370,6 +545,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 14,
     paddingVertical: 16,
+    gap: 8,
+  },
+  dividerSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: 12,
+  },
+  demoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 14,
+    marginBottom: 4,
     gap: 8,
   },
   signUpSection: {

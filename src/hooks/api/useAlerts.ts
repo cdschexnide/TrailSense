@@ -1,30 +1,42 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { alertsApi } from '@api/endpoints';
 import { Alert, AlertFilters } from '@types';
+import { isDemoOrMockMode } from '@/config/demoModeRuntime';
 
 export const ALERTS_QUERY_KEY = 'alerts';
 
 // Auto-refresh interval for alerts (30 seconds)
 const ALERTS_REFETCH_INTERVAL = 30 * 1000;
 
+// Normalize empty/undefined filters to a consistent undefined key
+function normalizeFilters(filters?: AlertFilters): AlertFilters | undefined {
+  if (!filters || Object.keys(filters).length === 0) return undefined;
+  return filters;
+}
+
 export const useAlerts = (filters?: AlertFilters) => {
+  const normalized = normalizeFilters(filters);
+  const mockMode = isDemoOrMockMode();
   return useQuery({
-    queryKey: [ALERTS_QUERY_KEY, filters],
-    queryFn: () => alertsApi.getAlerts(filters),
-    // Auto-refresh every 30 seconds for real-time updates
-    refetchInterval: ALERTS_REFETCH_INTERVAL,
-    // Pause polling when app is in background (saves battery)
+    queryKey:
+      normalized === undefined
+        ? [ALERTS_QUERY_KEY]
+        : [ALERTS_QUERY_KEY, normalized],
+    queryFn: () => alertsApi.getAlerts(normalized),
+    staleTime: mockMode ? Infinity : undefined,
+    refetchInterval: mockMode ? false : ALERTS_REFETCH_INTERVAL,
     refetchIntervalInBackground: false,
   });
 };
 
 export const useAlert = (id: string) => {
+  const mockMode = isDemoOrMockMode();
   return useQuery({
     queryKey: [ALERTS_QUERY_KEY, id],
     queryFn: () => alertsApi.getAlertById(id),
     enabled: !!id,
-    // Auto-refresh individual alert details too
-    refetchInterval: ALERTS_REFETCH_INTERVAL,
+    staleTime: mockMode ? Infinity : undefined,
+    refetchInterval: mockMode ? false : ALERTS_REFETCH_INTERVAL,
     refetchIntervalInBackground: false,
   });
 };

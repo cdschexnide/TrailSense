@@ -1,7 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
-import axios from 'axios';
-import { API_BASE_URL } from '@constants/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { publicApiClient } from '@api/client';
+import { NAVIGATION_STATE_KEY } from '@navigation/persistence';
 import type { AuthTokens, RegisterData } from '../types/auth';
 
 const TOKEN_KEY = 'trailsense.tokens';
@@ -9,7 +10,7 @@ const BIOMETRIC_KEY = 'trailsense.biometric';
 
 export class AuthService {
   static async login(email: string, password: string) {
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+    const response = await publicApiClient.post('/auth/login', {
       email,
       password,
     });
@@ -18,7 +19,7 @@ export class AuthService {
   }
 
   static async register(data: RegisterData) {
-    const response = await axios.post(`${API_BASE_URL}/auth/register`, data);
+    const response = await publicApiClient.post('/auth/register', data);
     await this.storeTokens(response.data.tokens);
     return response.data;
   }
@@ -26,10 +27,11 @@ export class AuthService {
   static async logout() {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
     await SecureStore.deleteItemAsync(BIOMETRIC_KEY);
+    await AsyncStorage.removeItem(NAVIGATION_STATE_KEY);
   }
 
   static async refreshToken(refreshToken: string) {
-    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+    const response = await publicApiClient.post('/auth/refresh', {
       refreshToken,
     });
     await this.storeTokens(response.data.tokens);

@@ -7,7 +7,7 @@ import { useTheme } from '@hooks/useTheme';
 // Type Definitions
 // ======================
 
-type IconName = keyof typeof Ionicons.glyphMap;
+export type IconName = keyof typeof Ionicons.glyphMap;
 
 /**
  * iOS Standard Icon Sizes

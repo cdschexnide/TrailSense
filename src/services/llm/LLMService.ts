@@ -3,6 +3,7 @@ import { inferenceEngine } from './inferenceEngine';
 import { responseCache } from './cache/ResponseCache';
 import { llmLogger } from '@/utils/llmLogger';
 import { LLM_CONFIG } from '@/config/llmConfig';
+import { FEATURE_FLAGS } from '@/config/featureFlags';
 import {
   LLMRequest,
   LLMResponse,
@@ -39,6 +40,11 @@ class LLMService {
     llmLogger.info('Initializing LLM service...');
 
     try {
+      if (FEATURE_FLAGS.LLM_MOCK_MODE) {
+        llmLogger.info('LLM service initialized in mock mode');
+        return;
+      }
+
       await modelManager.loadModel();
       this.resetIdleTimer();
       llmLogger.info('LLM service initialized successfully');
@@ -59,6 +65,11 @@ class LLMService {
       if (this.idleTimeoutId) {
         clearTimeout(this.idleTimeoutId);
         this.idleTimeoutId = null;
+      }
+
+      if (FEATURE_FLAGS.LLM_MOCK_MODE) {
+        llmLogger.info('LLM service shutdown complete (mock mode)');
+        return;
       }
 
       // Unload model
@@ -184,7 +195,7 @@ class LLMService {
    * This is the core method that all feature-specific methods use
    */
   private async generate(request: LLMRequest): Promise<LLMResponse> {
-    const { messages, context, options, cacheKey } = request;
+    const { messages, options, cacheKey } = request;
 
     // Check cache if key provided
     if (cacheKey && LLM_CONFIG.ENABLE_CACHING) {
@@ -201,8 +212,10 @@ class LLMService {
       }
     }
 
+    const isMockMode = FEATURE_FLAGS.LLM_MOCK_MODE;
+
     // Ensure model is loaded
-    if (!modelManager.isModelLoaded()) {
+    if (!isMockMode && !modelManager.isModelLoaded()) {
       llmLogger.info('Model not loaded, loading now...');
       await modelManager.loadModel();
     }
@@ -221,7 +234,9 @@ class LLMService {
     }
 
     // Reset idle timer after successful generation
-    this.resetIdleTimer();
+    if (!isMockMode) {
+      this.resetIdleTimer();
+    }
 
     return {
       text,
@@ -372,7 +387,7 @@ class LLMService {
    * Check if service is ready
    */
   isReady(): boolean {
-    return modelManager.isModelLoaded();
+    return FEATURE_FLAGS.LLM_MOCK_MODE || modelManager.isModelLoaded();
   }
 
   /**

@@ -3,6 +3,7 @@ import { Alert, ThreatLevel } from '@types';
 export class ThreatClassifier {
   static classifyAlert(alert: Alert): ThreatLevel {
     let score = 0;
+    const seenCount = alert.seenCount ?? 0;
 
     // Cellular-only detection (WiFi/BT disabled)
     if (
@@ -37,7 +38,7 @@ export class ThreatClassifier {
     }
 
     // Repeat visitor
-    if (alert.seenCount > 3) {
+    if (seenCount > 3) {
       score -= 30; // Likely familiar
     }
 
@@ -57,9 +58,11 @@ export class ThreatClassifier {
   }
 
   private static isDeliveryDriver(alert: Alert): boolean {
+    const duration = alert.duration ?? 0;
+
     // Check for quick visit pattern
     return (
-      alert.duration < 300 && // Less than 5 minutes
+      duration < 300 && // Less than 5 minutes
       this.detectedBetween(alert, 9, 20)
     ); // Business hours
   }
@@ -67,12 +70,12 @@ export class ThreatClassifier {
   private static isMailCarrier(alert: Alert): boolean {
     // Check for regular daily pattern around mail delivery time
     const hour = new Date(alert.timestamp).getHours();
-    return hour >= 10 && hour <= 14 && alert.seenCount > 5;
+    return hour >= 10 && hour <= 14 && (alert.seenCount ?? 0) > 5;
   }
 
   private static isNeighbor(alert: Alert): boolean {
     // Frequent visitor with longer duration
-    return alert.seenCount > 10 && alert.duration > 600;
+    return (alert.seenCount ?? 0) > 10 && (alert.duration ?? 0) > 600;
   }
 
   private static detectedBetween(
@@ -102,7 +105,7 @@ export class ThreatClassifier {
 
     // Calculate average duration
     const totalDuration = alerts.reduce(
-      (sum, alert) => sum + alert.duration,
+      (sum, alert) => sum + (alert.duration ?? 0),
       0
     );
     const averageDuration = totalDuration / alerts.length;
@@ -115,7 +118,7 @@ export class ThreatClassifier {
     });
 
     const commonTimes = Object.entries(hourCounts)
-      .filter(([_, count]) => count >= 2)
+      .filter(([, count]) => count >= 2)
       .map(([hour]) => parseInt(hour))
       .sort((a, b) => hourCounts[b] - hourCounts[a]);
 

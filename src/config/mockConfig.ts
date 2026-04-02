@@ -9,8 +9,8 @@ import { isDemoMode } from './demoMode';
 const USE_MOCK_API = process.env.USE_MOCK_API === 'true';
 
 // Mock mode can also be forced for development
-// DISABLED: Now using real backend API
-const FORCE_MOCK_MODE = false; // Set to true to always use mock data in dev
+// Set to true to use mock data without a backend
+const FORCE_MOCK_MODE = false;
 
 export const getIsMockMode = (): boolean =>
   USE_MOCK_API || FORCE_MOCK_MODE || isDemoMode();

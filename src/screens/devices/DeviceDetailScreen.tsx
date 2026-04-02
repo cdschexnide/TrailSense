@@ -93,7 +93,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
 
   // Handlers
   const handleViewOnMap = () => {
-    navigation.navigate('Map', {
+    navigation.navigate('RadarTab', {
       screen: 'LiveRadar',
       params: {
         focusLat: device.latitude,
@@ -103,7 +103,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   };
 
   const handleEdit = () => {
-    navigation.navigate('DeviceSettings', { id: deviceId });
+    Alert.alert('Edit Device', 'Device editing is not implemented yet.');
   };
 
   const handleConfig = () => {

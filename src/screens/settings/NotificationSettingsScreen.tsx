@@ -8,14 +8,19 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Switch, Pressable } from 'react-native';
+import { View, StyleSheet, Switch } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
-import { Icon } from '@components/atoms/Icon';
+import { Icon, type IconProps } from '@components/atoms/Icon';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
-import { useAppSelector, useAppDispatch } from '@store';
+import { useAppSelector, useAppDispatch } from '@store/index';
 import { useTheme } from '@hooks/useTheme';
+import { updateSettings } from '@store/slices/settingsSlice';
+import { MoreStackParamList } from '@navigation/types';
+
+type Props = NativeStackScreenProps<MoreStackParamList, 'NotificationSettings'>;
 
 // Toggle row component
 const ToggleRow = ({
@@ -26,7 +31,7 @@ const ToggleRow = ({
   value,
   onValueChange,
 }: {
-  icon: string;
+  icon: IconProps['name'];
   iconColor: string;
   title: string;
   subtitle: string;
@@ -37,21 +42,29 @@ const ToggleRow = ({
   const colors = theme.colors;
 
   return (
-    <View style={[styles.toggleCard, { backgroundColor: colors.secondarySystemBackground }]}>
+    <View
+      style={[
+        styles.toggleCard,
+        { backgroundColor: colors.secondarySystemBackground },
+      ]}
+    >
       <View style={[styles.toggleIcon, { backgroundColor: iconColor + '20' }]}>
-        <Icon name={icon as any} size={20} color={iconColor} />
+        <Icon name={icon} size={20} color={iconColor} />
       </View>
       <View style={styles.toggleContent}>
         <Text variant="body" weight="semibold" color="label">
           {title}
         </Text>
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginTop: 2 }}
+        >
           {subtitle}
         </Text>
       </View>
       <Switch
         value={value}
-        onValueChange={(val) => {
+        onValueChange={val => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onValueChange(val);
         }}
@@ -61,22 +74,38 @@ const ToggleRow = ({
   );
 };
 
-export const NotificationSettingsScreen = ({ navigation }: any) => {
+export const NotificationSettingsScreen = ({ navigation }: Props) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const settings = useAppSelector(state => state.settings);
+  const settings = useAppSelector(state => state.settings.settings);
   const dispatch = useAppDispatch();
 
   // Local state for toggles
   const [pushEnabled, setPushEnabled] = useState(settings?.pushEnabled ?? true);
-  const [soundEnabled, setSoundEnabled] = useState(settings?.soundEnabled ?? true);
-  const [vibrationEnabled, setVibrationEnabled] = useState(settings?.vibrationEnabled ?? true);
-  const [notifyCritical, setNotifyCritical] = useState(settings?.notifyCritical ?? true);
+  const [soundEnabled, setSoundEnabled] = useState(
+    settings?.soundEnabled ?? true
+  );
+  const [vibrationEnabled, setVibrationEnabled] = useState(
+    settings?.vibrationEnabled ?? true
+  );
+  const [notifyCritical, setNotifyCritical] = useState(
+    settings?.notifyCritical ?? true
+  );
   const [notifyHigh, setNotifyHigh] = useState(settings?.notifyHigh ?? true);
-  const [notifyMedium, setNotifyMedium] = useState(settings?.notifyMedium ?? true);
+  const [notifyMedium, setNotifyMedium] = useState(
+    settings?.notifyMedium ?? true
+  );
   const [notifyLow, setNotifyLow] = useState(settings?.notifyLow ?? false);
-  const [notifyOffline, setNotifyOffline] = useState(settings?.notifyDeviceOffline ?? true);
-  const [notifyBattery, setNotifyBattery] = useState(settings?.notifyLowBattery ?? true);
+  const [notifyOffline, setNotifyOffline] = useState(
+    settings?.notifyDeviceOffline ?? true
+  );
+  const [notifyBattery, setNotifyBattery] = useState(
+    settings?.notifyLowBattery ?? true
+  );
+
+  const persistNotificationSettings = (updates: Partial<typeof settings>) => {
+    dispatch(updateSettings(updates));
+  };
 
   return (
     <ScreenLayout
@@ -89,22 +118,48 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
     >
       {/* Master Controls */}
       <View style={styles.heroCard}>
-        <View style={[styles.heroBg, { backgroundColor: colors.secondarySystemBackground }]}>
-          <View style={[styles.heroIconContainer, { backgroundColor: colors.systemRed + '20' }]}>
+        <View
+          style={[
+            styles.heroBg,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
+          <View
+            style={[
+              styles.heroIconContainer,
+              { backgroundColor: colors.systemRed + '20' },
+            ]}
+          >
             <Icon name="notifications" size={32} color={colors.systemRed} />
           </View>
-          <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+          <Text
+            variant="headline"
+            weight="semibold"
+            color="label"
+            style={{ marginTop: 16 }}
+          >
             Push Notifications
           </Text>
-          <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 4, textAlign: 'center' }}>
+          <Text
+            variant="subheadline"
+            style={{
+              color: colors.secondaryLabel,
+              marginTop: 4,
+              textAlign: 'center',
+            }}
+          >
             Receive alerts about security events
           </Text>
           <View style={styles.masterToggle}>
             <Switch
               value={pushEnabled}
-              onValueChange={(val) => {
+              onValueChange={val => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setPushEnabled(val);
+                persistNotificationSettings({
+                  pushEnabled: val,
+                  notificationsEnabled: val,
+                });
               }}
               trackColor={{ true: colors.systemRed }}
               style={{ transform: [{ scale: 1.1 }] }}
@@ -121,7 +176,10 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Alert Sound"
           subtitle="Play sound for new alerts"
           value={soundEnabled}
-          onValueChange={setSoundEnabled}
+          onValueChange={value => {
+            setSoundEnabled(value);
+            persistNotificationSettings({ soundEnabled: value });
+          }}
         />
         <ToggleRow
           icon="phone-portrait-outline"
@@ -129,13 +187,19 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Vibration"
           subtitle="Vibrate on new alerts"
           value={vibrationEnabled}
-          onValueChange={setVibrationEnabled}
+          onValueChange={value => {
+            setVibrationEnabled(value);
+            persistNotificationSettings({ vibrationEnabled: value });
+          }}
         />
       </ListSection>
 
       {/* Threat Levels */}
       <ListSection header="THREAT LEVEL FILTERS" style={styles.section}>
-        <Text variant="caption1" style={[styles.sectionNote, { color: colors.secondaryLabel }]}>
+        <Text
+          variant="caption1"
+          style={[styles.sectionNote, { color: colors.secondaryLabel }]}
+        >
           Choose which threat levels trigger notifications
         </Text>
 
@@ -145,7 +209,10 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Critical Threats"
           subtitle="Immediate security risks"
           value={notifyCritical}
-          onValueChange={setNotifyCritical}
+          onValueChange={value => {
+            setNotifyCritical(value);
+            persistNotificationSettings({ notifyCritical: value });
+          }}
         />
         <ToggleRow
           icon="warning"
@@ -153,7 +220,10 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="High Threats"
           subtitle="Significant security concerns"
           value={notifyHigh}
-          onValueChange={setNotifyHigh}
+          onValueChange={value => {
+            setNotifyHigh(value);
+            persistNotificationSettings({ notifyHigh: value });
+          }}
         />
         <ToggleRow
           icon="information-circle"
@@ -161,7 +231,10 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Medium Threats"
           subtitle="Moderate security events"
           value={notifyMedium}
-          onValueChange={setNotifyMedium}
+          onValueChange={value => {
+            setNotifyMedium(value);
+            persistNotificationSettings({ notifyMedium: value });
+          }}
         />
         <ToggleRow
           icon="checkmark-circle"
@@ -169,13 +242,19 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Low Threats"
           subtitle="Minor security events"
           value={notifyLow}
-          onValueChange={setNotifyLow}
+          onValueChange={value => {
+            setNotifyLow(value);
+            persistNotificationSettings({ notifyLow: value });
+          }}
         />
       </ListSection>
 
       {/* Device Status */}
       <ListSection header="DEVICE STATUS" style={styles.section}>
-        <Text variant="caption1" style={[styles.sectionNote, { color: colors.secondaryLabel }]}>
+        <Text
+          variant="caption1"
+          style={[styles.sectionNote, { color: colors.secondaryLabel }]}
+        >
           Get notified about sensor health
         </Text>
 
@@ -185,7 +264,10 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Device Offline"
           subtitle="When a sensor loses connection"
           value={notifyOffline}
-          onValueChange={setNotifyOffline}
+          onValueChange={value => {
+            setNotifyOffline(value);
+            persistNotificationSettings({ notifyDeviceOffline: value });
+          }}
         />
         <ToggleRow
           icon="battery-half"
@@ -193,7 +275,10 @@ export const NotificationSettingsScreen = ({ navigation }: any) => {
           title="Low Battery"
           subtitle="When sensor battery is low"
           value={notifyBattery}
-          onValueChange={setNotifyBattery}
+          onValueChange={value => {
+            setNotifyBattery(value);
+            persistNotificationSettings({ notifyLowBattery: value });
+          }}
         />
       </ListSection>
 

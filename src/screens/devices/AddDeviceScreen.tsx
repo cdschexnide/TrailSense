@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text, Button, Input, Card } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
 import { useTheme } from '@hooks/useTheme';
+import { DevicesStackParamList } from '@navigation/types';
 
-export const AddDeviceScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
+type Props = NativeStackScreenProps<DevicesStackParamList, 'AddDevice'>;
+
+export const AddDeviceScreen = ({ navigation }: Props) => {
   const [deviceName, setDeviceName] = useState('');
   const [deviceId, setDeviceId] = useState('');
-  const [showScanner, setShowScanner] = useState(false);
+  useTheme();
 
   const handleScanQR = () => {
-    setShowScanner(true);
     // TODO: Implement QR code scanner
     // This would typically use react-native-camera or expo-barcode-scanner
     Alert.alert('QR Scanner', 'QR code scanning coming soon');
@@ -31,44 +33,51 @@ export const AddDeviceScreen = ({ navigation }: any) => {
           onPress: () => navigation.goBack(),
         },
       ]);
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to add device');
     }
   };
 
   return (
-    <ScreenLayout title="Add Device">
+    <ScreenLayout
+      header={{
+        title: 'Add Device',
+        showBack: true,
+        onBackPress: () => navigation.goBack(),
+      }}
+    >
       <ScrollView style={styles.container}>
         <Card style={styles.card}>
-          <Text variant="h3" style={styles.sectionTitle}>
+          <Text variant="title3" style={styles.sectionTitle}>
             Scan QR Code
           </Text>
-          <Text variant="caption" style={styles.description}>
+          <Text variant="caption1" style={styles.description}>
             Scan the QR code on your TrailSense device to automatically
             configure it.
           </Text>
           <Button
-            title="Open QR Scanner"
-            variant="primary"
+            buttonStyle="filled"
             onPress={handleScanQR}
             style={styles.button}
-          />
+          >
+            Open QR Scanner
+          </Button>
         </Card>
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text variant="caption" style={styles.dividerText}>
+          <Text variant="caption1" style={styles.dividerText}>
             OR
           </Text>
           <View style={styles.dividerLine} />
         </View>
 
         <Card style={styles.card}>
-          <Text variant="h3" style={styles.sectionTitle}>
+          <Text variant="title3" style={styles.sectionTitle}>
             Manual Entry
           </Text>
-          <Text variant="caption" style={styles.description}>
-            Enter device details manually if you can't scan the QR code.
+          <Text variant="caption1" style={styles.description}>
+            Enter device details manually if you can&apos;t scan the QR code.
           </Text>
 
           <Input
@@ -88,24 +97,25 @@ export const AddDeviceScreen = ({ navigation }: any) => {
           />
 
           <Button
-            title="Add Device"
-            variant="primary"
+            buttonStyle="filled"
             onPress={handleManualAdd}
             style={styles.button}
-          />
+          >
+            Add Device
+          </Button>
         </Card>
 
         <Card style={styles.helpCard}>
-          <Text variant="h3" style={styles.sectionTitle}>
+          <Text variant="title3" style={styles.sectionTitle}>
             Need Help?
           </Text>
-          <Text variant="caption">
+          <Text variant="caption1">
             - The QR code can be found on the back of your device
           </Text>
-          <Text variant="caption">
+          <Text variant="caption1">
             - The Device ID is printed below the QR code
           </Text>
-          <Text variant="caption">
+          <Text variant="caption1">
             - Make sure your device is powered on before adding
           </Text>
         </Card>

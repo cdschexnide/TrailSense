@@ -9,15 +9,21 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, Switch, Pressable, Alert } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
-import { Icon } from '@components/atoms/Icon';
+import { Icon, IconName } from '@components/atoms/Icon';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
 import { useTheme } from '@hooks/useTheme';
+import { MoreStackParamList, SettingsStackParamList } from '@navigation/types';
+
+type SecurityScreenProps =
+  | NativeStackScreenProps<MoreStackParamList, 'Security'>
+  | NativeStackScreenProps<SettingsStackParamList, 'Security'>;
 
 interface ActionRowProps {
-  icon: string;
+  icon: IconName;
   iconColor: string;
   title: string;
   subtitle: string;
@@ -25,7 +31,14 @@ interface ActionRowProps {
   danger?: boolean;
 }
 
-const ActionRow = ({ icon, iconColor, title, subtitle, onPress, danger }: ActionRowProps) => {
+const ActionRow = ({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  onPress,
+  danger,
+}: ActionRowProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -43,13 +56,23 @@ const ActionRow = ({ icon, iconColor, title, subtitle, onPress, danger }: Action
       ]}
     >
       <View style={[styles.actionIcon, { backgroundColor: iconColor + '20' }]}>
-        <Icon name={icon as any} size={20} color={iconColor} />
+        <Icon name={icon} size={20} color={iconColor} />
       </View>
       <View style={styles.actionContent}>
-        <Text variant="body" weight="semibold" style={danger ? { color: colors.systemRed } : { color: colors.label }}>
+        <Text
+          variant="body"
+          weight="semibold"
+          style={danger ? { color: colors.systemRed } : { color: colors.label }}
+        >
           {title}
         </Text>
-        <Text variant="caption1" style={{ color: danger ? colors.systemRed + 'CC' : colors.secondaryLabel, marginTop: 2 }}>
+        <Text
+          variant="caption1"
+          style={{
+            color: danger ? colors.systemRed + 'CC' : colors.secondaryLabel,
+            marginTop: 2,
+          }}
+        >
           {subtitle}
         </Text>
       </View>
@@ -59,7 +82,7 @@ const ActionRow = ({ icon, iconColor, title, subtitle, onPress, danger }: Action
 };
 
 interface ToggleRowProps {
-  icon: string;
+  icon: IconName;
   iconColor: string;
   title: string;
   subtitle: string;
@@ -67,26 +90,41 @@ interface ToggleRowProps {
   onValueChange: (value: boolean) => void;
 }
 
-const ToggleRow = ({ icon, iconColor, title, subtitle, value, onValueChange }: ToggleRowProps) => {
+const ToggleRow = ({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  value,
+  onValueChange,
+}: ToggleRowProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
   return (
-    <View style={[styles.toggleRow, { backgroundColor: colors.secondarySystemBackground }]}>
+    <View
+      style={[
+        styles.toggleRow,
+        { backgroundColor: colors.secondarySystemBackground },
+      ]}
+    >
       <View style={[styles.toggleIcon, { backgroundColor: iconColor + '20' }]}>
-        <Icon name={icon as any} size={20} color={iconColor} />
+        <Icon name={icon} size={20} color={iconColor} />
       </View>
       <View style={styles.toggleContent}>
         <Text variant="body" weight="semibold" color="label">
           {title}
         </Text>
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginTop: 2 }}
+        >
           {subtitle}
         </Text>
       </View>
       <Switch
         value={value}
-        onValueChange={(val) => {
+        onValueChange={val => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onValueChange(val);
         }}
@@ -96,7 +134,7 @@ const ToggleRow = ({ icon, iconColor, title, subtitle, value, onValueChange }: T
   );
 };
 
-export const SecurityScreen = ({ navigation }: any) => {
+export const SecurityScreen = ({ navigation }: SecurityScreenProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -115,11 +153,18 @@ export const SecurityScreen = ({ navigation }: any) => {
           text: 'Export',
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            Alert.alert('Export Started', 'You will receive an email with your data within 24 hours.');
+            Alert.alert(
+              'Export Started',
+              'You will receive an email with your data within 24 hours.'
+            );
           },
         },
       ]
     );
+  };
+
+  const showNotImplementedAlert = (title: string, message: string) => {
+    Alert.alert(title, message, [{ text: 'OK' }]);
   };
 
   const handleClearAlertHistory = () => {
@@ -133,7 +178,10 @@ export const SecurityScreen = ({ navigation }: any) => {
           style: 'destructive',
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            console.log('Clearing alert history...');
+            showNotImplementedAlert(
+              'Unavailable',
+              'Clearing alert history is not implemented yet.'
+            );
           },
         },
       ]
@@ -151,7 +199,10 @@ export const SecurityScreen = ({ navigation }: any) => {
           style: 'destructive',
           onPress: () => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            console.log('Revoking all sessions...');
+            showNotImplementedAlert(
+              'Unavailable',
+              'Session revocation is not implemented yet.'
+            );
           },
         },
       ]
@@ -170,28 +221,34 @@ export const SecurityScreen = ({ navigation }: any) => {
             onPress: () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               setTwoFactorEnabled(true);
-              // In production, navigate to 2FA setup flow
             },
           },
         ]
       );
-    } else {
-      Alert.alert(
-        'Disable Two-Factor Authentication',
-        'This will make your account less secure. Are you sure?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Disable',
-            style: 'destructive',
-            onPress: () => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setTwoFactorEnabled(false);
-            },
-          },
-        ]
-      );
+      return;
     }
+
+    Alert.alert(
+      'Disable Two-Factor Authentication',
+      'This will make your account less secure. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Disable',
+          style: 'destructive',
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            setTwoFactorEnabled(false);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleOpenPlaceholderLegalScreen = (documentName: string) => {
+    Alert.alert(documentName, `${documentName} content is not available yet.`, [
+      { text: 'OK' },
+    ]);
   };
 
   return (
@@ -203,20 +260,35 @@ export const SecurityScreen = ({ navigation }: any) => {
       }}
       scrollable
     >
-      {/* Hero */}
       <View style={styles.hero}>
-        <View style={[styles.heroIconContainer, { backgroundColor: colors.systemOrange + '20' }]}>
+        <View
+          style={[
+            styles.heroIconContainer,
+            { backgroundColor: colors.systemOrange + '20' },
+          ]}
+        >
           <Icon name="shield-checkmark" size={32} color={colors.systemOrange} />
         </View>
-        <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={{ marginTop: 16 }}
+        >
           Privacy & Security
         </Text>
-        <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 4, textAlign: 'center' }}>
+        <Text
+          variant="subheadline"
+          style={{
+            color: colors.secondaryLabel,
+            marginTop: 4,
+            textAlign: 'center',
+          }}
+        >
           Control your data and account security
         </Text>
       </View>
 
-      {/* Account Security */}
       <ListSection header="ACCOUNT SECURITY" style={styles.section}>
         <ToggleRow
           icon="key-outline"
@@ -235,7 +307,6 @@ export const SecurityScreen = ({ navigation }: any) => {
         />
       </ListSection>
 
-      {/* Privacy Controls */}
       <ListSection header="PRIVACY CONTROLS" style={styles.section}>
         <ToggleRow
           icon="analytics-outline"
@@ -263,7 +334,6 @@ export const SecurityScreen = ({ navigation }: any) => {
         />
       </ListSection>
 
-      {/* Data Management */}
       <ListSection header="DATA MANAGEMENT" style={styles.section}>
         <ActionRow
           icon="download-outline"
@@ -282,29 +352,40 @@ export const SecurityScreen = ({ navigation }: any) => {
         />
       </ListSection>
 
-      {/* Info Card */}
-      <View style={[styles.infoCard, { backgroundColor: colors.secondarySystemBackground }]}>
-        <Icon name="lock-closed-outline" size={20} color={colors.secondaryLabel} />
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}>
-          Your security data is encrypted end-to-end. We cannot access your detection data or personal information.
+      <View
+        style={[
+          styles.infoCard,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
+        <Icon
+          name="lock-closed-outline"
+          size={20}
+          color={colors.secondaryLabel}
+        />
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}
+        >
+          Your security data is encrypted end-to-end. We cannot access your
+          detection data or personal information.
         </Text>
       </View>
 
-      {/* Legal Links */}
       <ListSection header="LEGAL" style={styles.section}>
         <ActionRow
           icon="document-text-outline"
           iconColor={colors.systemGray}
           title="Privacy Policy"
           subtitle="How we handle your data"
-          onPress={() => console.log('Open privacy policy')}
+          onPress={() => handleOpenPlaceholderLegalScreen('Privacy Policy')}
         />
         <ActionRow
           icon="document-outline"
           iconColor={colors.systemGray}
           title="Terms of Service"
           subtitle="Our terms and conditions"
-          onPress={() => console.log('Open terms')}
+          onPress={() => handleOpenPlaceholderLegalScreen('Terms of Service')}
         />
       </ListSection>
 
@@ -369,10 +450,10 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginHorizontal: 16,
     marginBottom: 24,
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 14,
   },
 });

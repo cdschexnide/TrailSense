@@ -7,13 +7,17 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { AxiosError } from 'axios';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button, Input, Text } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
-import axiosInstance from '@api/axiosInstance';
+import { publicApiClient } from '@api/client';
+import { AuthStackParamList } from '@navigation/types';
 
-interface ForgotPasswordScreenProps {
-  navigation: any;
-}
+type ForgotPasswordScreenProps = NativeStackScreenProps<
+  AuthStackParamList,
+  'ForgotPassword'
+>;
 
 export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
   navigation,
@@ -47,7 +51,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
     setIsLoading(true);
 
     try {
-      await axiosInstance.post('/auth/forgot-password', {
+      await publicApiClient.post('/auth/forgot-password', {
         email: email.trim(),
       });
 
@@ -62,10 +66,11 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
           },
         ]
       );
-    } catch (error: any) {
+    } catch (error) {
+      const apiError = error as AxiosError<{ message?: string }>;
       Alert.alert(
         'Error',
-        error.response?.data?.message ||
+        apiError.response?.data?.message ||
           'Unable to send password reset email. Please try again.'
       );
     } finally {
@@ -97,8 +102,8 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
               align="center"
               style={styles.subtitle}
             >
-              Enter your email address and we'll send you instructions to reset
-              your password
+              Enter your email address and we&apos;ll send you instructions to
+              reset your password
             </Text>
           </View>
 
@@ -158,7 +163,7 @@ export const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({
                 align="center"
                 style={styles.successText}
               >
-                We've sent password reset instructions to {email}
+                We&apos;ve sent password reset instructions to {email}
               </Text>
               <Button
                 buttonStyle="filled"

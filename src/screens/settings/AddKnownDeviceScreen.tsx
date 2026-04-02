@@ -84,7 +84,14 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
 
   return (
     <ScreenLayout
-      header={{ title: 'Add Known Device', showBack: true }}
+      header={{
+        title: 'Add Known Device',
+        showBack:
+          typeof navigation.canGoBack === 'function'
+            ? navigation.canGoBack()
+            : true,
+        onBackPress: () => navigation.goBack(),
+      }}
       scrollable={false}
     >
       <ScrollView style={styles.container}>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { alertsApi } from '@/api/endpoints/alerts';
 import { getReplayPositions } from '@/api/endpoints/positions';
-import { isMockMode } from '@/config/mockConfig';
+import { isDemoOrMockMode } from '@/config/demoModeRuntime';
 import {
   generateReplayData,
   ReplayData,
@@ -11,7 +11,7 @@ export function useReplayData(deviceId: string | undefined) {
   return useQuery<ReplayData>({
     queryKey: ['replayData', deviceId],
     queryFn: async () => {
-      if (isMockMode) {
+      if (isDemoOrMockMode()) {
         return generateReplayData();
       }
 

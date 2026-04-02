@@ -3,8 +3,15 @@ import type { AppSettings } from '@store/slices/settingsSlice';
 export const mockAppSettings: AppSettings = {
   theme: 'auto',
   notificationsEnabled: true,
+  pushEnabled: true,
   soundEnabled: true,
   vibrationEnabled: true,
+  notifyCritical: true,
+  notifyHigh: true,
+  notifyMedium: true,
+  notifyLow: false,
+  notifyDeviceOffline: true,
+  notifyLowBattery: true,
   radarUpdateInterval: 30, // 30 seconds for more frequent updates in demo
   alertSeverityFilter: [], // Show all alerts
   mapStyle: 'satellite',
@@ -12,6 +19,11 @@ export const mockAppSettings: AppSettings = {
   temperatureUnit: 'fahrenheit',
   autoRefresh: true,
   refreshInterval: 180, // 3 minutes
+  sensitivity: 'medium',
+  quietHoursEnabled: false,
+  quietHoursStart: '22:00',
+  quietHoursEnd: '07:00',
+  vacationMode: false,
 };
 
 // Notification settings for the notification settings screen

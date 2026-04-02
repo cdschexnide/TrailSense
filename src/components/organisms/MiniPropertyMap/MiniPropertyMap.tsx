@@ -16,7 +16,7 @@ function buildStaticMapUrl(devices: Device[]): string | null {
       typeof device.latitude === 'number' && typeof device.longitude === 'number'
   );
 
-  const token = process.env.EXPO_PUBLIC_MAPBOX_TOKEN || '';
+  const token = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.EXPO_PUBLIC_MAPBOX_TOKEN || '';
   if (devicesWithCoords.length === 0 || !token) {
     return null;
   }

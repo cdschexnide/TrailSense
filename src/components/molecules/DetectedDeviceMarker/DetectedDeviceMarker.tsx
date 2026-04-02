@@ -8,6 +8,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { PointAnnotation } from '@rnmapbox/maps';
 import { Icon } from '@components/atoms/Icon';
+import type { IconName } from '@components/atoms/Icon/Icon';
 import { TriangulationSignalType } from '@/types/triangulation';
 
 interface DetectedDeviceMarkerProps {
@@ -19,12 +20,12 @@ interface DetectedDeviceMarkerProps {
 }
 
 const SIGNAL_TYPE_COLORS: Record<TriangulationSignalType, string> = {
-  wifi: '#007AFF',      // systemBlue
+  wifi: '#007AFF', // systemBlue
   bluetooth: '#5856D6', // systemIndigo
-  cellular: '#FF9500',  // systemOrange
+  cellular: '#FF9500', // systemOrange
 };
 
-const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, string> = {
+const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, IconName> = {
   wifi: 'wifi',
   bluetooth: 'bluetooth',
   cellular: 'cellular',
@@ -38,7 +39,7 @@ export const DetectedDeviceMarker: React.FC<DetectedDeviceMarkerProps> = ({
   onPress,
 }) => {
   const color = SIGNAL_TYPE_COLORS[signalType] || '#8E8E93';
-  const iconName = SIGNAL_TYPE_ICONS[signalType] || 'ellipse';
+  const iconName = SIGNAL_TYPE_ICONS[signalType] ?? 'ellipse';
 
   // Opacity based on confidence (50% conf = 0.6 opacity, 100% conf = 1.0)
   const opacity = 0.6 + (confidence / 100) * 0.4;

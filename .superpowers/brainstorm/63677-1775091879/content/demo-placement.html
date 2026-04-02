@@ -1,0 +1,62 @@
+<h2>Where should the Demo Mode entry point go?</h2>
+<p class="subtitle">Looking at the current login screen layout, pick a placement that feels right</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Below Sign Up — Subtle text link</h3>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="background: #1a1a1a; color: #fff; padding: 24px; text-align: center; border-radius: 12px;">
+          <div style="background: #6b7a3d; color: white; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 20px;">Sign In →</div>
+          <p style="color: #aaa; margin-bottom: 16px;">Don't have an account? <span style="color: #4a9eff;">Sign Up</span></p>
+          <p style="color: #777; font-size: 13px;">or <span style="color: #888; text-decoration: underline;">explore in demo mode</span></p>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Unobtrusive — doesn't compete with primary login flow</li><li>Clean visual hierarchy</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Easy to miss</li><li>May not invite exploration</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Divider section — "or explore demo"</h3>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="background: #1a1a1a; color: #fff; padding: 24px; text-align: center; border-radius: 12px;">
+          <div style="background: #6b7a3d; color: white; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 20px;">Sign In →</div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div style="flex: 1; height: 1px; background: #333;"></div>
+            <span style="color: #777; font-size: 13px;">or</span>
+            <div style="flex: 1; height: 1px; background: #333;"></div>
+          </div>
+          <div style="border: 1px solid #444; color: #ccc; padding: 12px; border-radius: 10px; font-weight: 500; margin-bottom: 20px; cursor: pointer;">🔍 Explore Demo</div>
+          <p style="color: #aaa;">Don't have an account? <span style="color: #4a9eff;">Sign Up</span></p>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Prominent but secondary to login</li><li>Clear visual separation</li><li>Common mobile pattern (like "Sign in with Google")</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Takes more vertical space</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Inline with Sign Up — side by side</h3>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="background: #1a1a1a; color: #fff; padding: 24px; text-align: center; border-radius: 12px;">
+          <div style="background: #6b7a3d; color: white; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 20px;">Sign In →</div>
+          <p style="color: #aaa;">Don't have an account? <span style="color: #4a9eff;">Sign Up</span> · <span style="color: #4a9eff;">Try Demo</span></p>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Compact — no extra vertical space</li><li>Discoverable alongside Sign Up</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Could feel crowded</li><li>Demo mode treated same weight as Sign Up</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -13,7 +13,8 @@ type EventCallback = (data: any) => void;
 
 class MockWebSocketService {
   private listeners: Map<string, Set<EventCallback>> = new Map();
-  private intervalId: NodeJS.Timeout | null = null;
+  private alertIntervalId: NodeJS.Timeout | null = null;
+  private deviceStatusIntervalId: NodeJS.Timeout | null = null;
   private isConnected: boolean = false;
   private eventCounter: number = 0;
 
@@ -96,12 +97,12 @@ class MockWebSocketService {
    */
   private startEventGeneration() {
     // Generate alert events
-    this.intervalId = setInterval(() => {
+    this.alertIntervalId = setInterval(() => {
       this.generateMockAlert();
     }, this.EVENT_INTERVAL);
 
     // Generate device status updates
-    setInterval(() => {
+    this.deviceStatusIntervalId = setInterval(() => {
       this.generateMockDeviceStatus();
     }, this.DEVICE_STATUS_INTERVAL);
   }
@@ -110,9 +111,14 @@ class MockWebSocketService {
    * Stop generating mock events
    */
   private stopEventGeneration() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.alertIntervalId) {
+      clearInterval(this.alertIntervalId);
+      this.alertIntervalId = null;
+    }
+
+    if (this.deviceStatusIntervalId) {
+      clearInterval(this.deviceStatusIntervalId);
+      this.deviceStatusIntervalId = null;
     }
   }
 

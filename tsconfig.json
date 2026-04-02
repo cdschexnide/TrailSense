@@ -46,6 +46,9 @@
       "@store/*": [
         "src/store/*"
       ],
+      "@store": [
+        "src/store/index"
+      ],
       "@api/*": [
         "src/api/*"
       ],

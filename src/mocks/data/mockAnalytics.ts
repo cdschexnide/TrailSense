@@ -55,7 +55,37 @@ const calculateAnalytics = (): AnalyticsData => {
     .map(([hour, count]) => ({ hour, count }))
     .sort((a, b) => a.hour - b.hour);
 
+  const timestamps = mockAlerts.map(alert => alert.timestamp).sort();
+  const deviceDistribution = mockDevices.map(device => ({
+    deviceId: device.id,
+    count: mockAlerts.filter(alert => alert.deviceId === device.id).length,
+  }));
+  const detectionTypeDistribution = [
+    { type: 'cellular', count: cellularCount },
+    { type: 'wifi', count: wifiCount },
+    { type: 'bluetooth', count: bluetoothCount },
+  ];
+  const threatLevelDistribution = [
+    { level: 'critical', count: criticalCount },
+    { level: 'high', count: highCount },
+    { level: 'medium', count: mediumCount },
+    { level: 'low', count: lowCount },
+  ];
+  const topDetectedDevices = uniqueMacAddresses.slice(0, 10).map(macAddress => ({
+    macAddress,
+    count: mockAlerts.filter(alert => alert.macAddress === macAddress).length,
+  }));
+
   return {
+    period: '30d',
+    startDate: timestamps[0] ?? new Date().toISOString(),
+    endDate: timestamps[timestamps.length - 1] ?? new Date().toISOString(),
+    totalAlerts: mockAlerts.length,
+    threatLevelDistribution,
+    detectionTypeDistribution,
+    deviceDistribution,
+    dailyTrend: dailyDetections,
+    topDetectedDevices,
     totalDetections,
     unknownDevices,
     dailyDetections,
@@ -69,6 +99,8 @@ const calculateAnalytics = (): AnalyticsData => {
     lowCount,
   };
 };
+
+const uniqueMacAddresses = [...new Set(mockAlerts.map(a => a.macAddress))];
 
 export const mockAnalyticsData: AnalyticsData = calculateAnalytics();
 
@@ -151,7 +183,6 @@ const generateDeviceFingerprint = (macAddress: string): DeviceFingerprint => {
 };
 
 // Generate fingerprints for the most frequently seen devices
-const uniqueMacAddresses = [...new Set(mockAlerts.map(a => a.macAddress))];
 export const mockDeviceFingerprints: DeviceFingerprint[] = uniqueMacAddresses
   .slice(0, 10) // Top 10 devices
   .map(generateDeviceFingerprint);

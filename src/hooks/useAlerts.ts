@@ -1,51 +1,31 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { alertsApi, AlertFilters } from '@api/endpoints/alerts';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { alertsApi } from '@api/endpoints/alerts';
+import {
+  useAlerts as useApiAlerts,
+  useAlert as useApiAlert,
+  useMarkAlertReviewed as useApiMarkAlertReviewed,
+  useDeleteAlert as useApiDeleteAlert,
+} from '@hooks/api/useAlerts';
+import { AlertFilters } from '@types';
 
-export const useAlerts = (filters?: AlertFilters) => {
-  return useQuery({
-    queryKey: ['alerts', filters],
-    queryFn: () => alertsApi.getAlerts(filters),
-  });
-};
-
-export const useAlertById = (id: string) => {
-  return useQuery({
-    queryKey: ['alerts', id],
-    queryFn: () => alertsApi.getAlertById(id),
-    enabled: !!id,
-  });
-};
-
-export const useMarkAlertReviewed = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (alertId: string) => alertsApi.markReviewed(alertId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alerts'] });
-    },
-  });
-};
+export const useAlerts = useApiAlerts;
+export const useAlertById = useApiAlert;
+export const useMarkAlertReviewed = useApiMarkAlertReviewed;
+export const useDeleteAlert = useApiDeleteAlert;
 
 export const useMarkMultipleAlertsReviewed = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (alertIds: string[]) =>
-      alertsApi.markMultipleReviewed(alertIds),
+    mutationFn: async (alertIds: string[]) => {
+      await Promise.all(
+        alertIds.map(alertId => alertsApi.markReviewed(alertId))
+      );
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
     },
   });
 };
 
-export const useDeleteAlert = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (alertId: string) => alertsApi.deleteAlert(alertId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['alerts'] });
-    },
-  });
-};
+export type { AlertFilters };

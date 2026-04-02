@@ -1,3 +1,16 @@
+import type { Alert } from '@/types/alert';
+import type { Device } from '@/types/device';
+
+export interface LLMStructuredValue {
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | LLMStructuredValue
+    | LLMStructuredValue[];
+}
+
 // LLM Error Types
 export enum LLMErrorCode {
   MODULE_NOT_AVAILABLE = 'MODULE_NOT_AVAILABLE',
@@ -14,9 +27,9 @@ export enum LLMErrorCode {
 
 export class LLMError extends Error {
   code: LLMErrorCode;
-  originalError?: any;
+  originalError?: unknown;
 
-  constructor(code: LLMErrorCode, message: string, originalError?: any) {
+  constructor(code: LLMErrorCode, message: string, originalError?: unknown) {
     super(message);
     this.name = 'LLMError';
     this.code = code;
@@ -42,7 +55,7 @@ export interface Message {
 // LLM Request/Response Types
 export interface LLMRequest {
   messages: Message[];
-  context?: any;
+  context?: LLMStructuredValue;
   options?: GenerationOptions;
   cacheKey?: string;
 }
@@ -64,9 +77,25 @@ export interface AlertSummary {
 }
 
 export interface AlertContext {
-  alert: any; // Will be the Alert type from @/types/alert
-  relatedAlerts?: any[];
-  deviceHistory?: any;
+  alert: Partial<Alert> & {
+    detection_type?: string;
+    threat_level?: string;
+    mac_address?: string;
+    metadata?: Record<string, unknown>;
+    trend?: string;
+    zone?: string;
+  };
+  relatedAlerts?: Array<
+    Partial<Alert> & {
+      timestamp?: string | number | Date;
+    }
+  >;
+  deviceHistory?: {
+    first_seen?: string;
+    detection_count?: number;
+    whitelisted?: boolean;
+    friendly_name?: string;
+  };
 }
 
 // Model Download Types
@@ -99,9 +128,30 @@ export interface PatternAnalysis {
 }
 
 export interface DeviceContext {
-  device: any;
-  detectionHistory: any[];
-  similarDevices?: any[];
+  device: Partial<Device> & {
+    mac_address?: string;
+    first_seen?: string;
+    metadata?: {
+      ssid?: string;
+      device_name?: string;
+      manufacturer?: string;
+    };
+  };
+  detectionHistory: Array<{
+    timestamp: string | number | Date;
+    zone?: string;
+    metadata?: {
+      duration?: string | number;
+      device_name?: string;
+    };
+  }>;
+  similarDevices?: Array<{
+    friendly_name?: string;
+    similarity_score?: number;
+    metadata?: {
+      device_name?: string;
+    };
+  }>;
 }
 
 // Chat Types
@@ -120,7 +170,15 @@ export interface ChatResponse {
 export interface ConversationContext {
   messages: ChatMessage[];
   securityContext?: {
-    recentAlerts: any[];
-    deviceStatus: any[];
+    recentAlerts: Array<
+      Partial<Alert> & {
+        threat_level?: string;
+      }
+    >;
+    deviceStatus: Array<
+      Partial<Device> & {
+        online?: boolean;
+      }
+    >;
   };
 }

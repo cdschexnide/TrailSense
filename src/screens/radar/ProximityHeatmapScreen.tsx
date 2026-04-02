@@ -1,6 +1,7 @@
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -22,11 +23,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Button, Card, Icon, Text } from '@components/atoms';
 import { FingerprintPeek } from '@components/molecules/FingerprintPeek';
-import { PositionInfoPopup } from '@components/molecules/PositionInfoPopup';
 import { PositionListItem } from '@components/molecules/PositionListItem';
 import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
 import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
-import { ReplayRadarDisplay } from '@components/organisms/ReplayRadarDisplay';
 import { TimelineScrubber } from '@components/organisms/TimelineScrubber';
 import { ScreenLayout } from '@components/templates';
 import { websocketService } from '@api/websocket';
@@ -35,10 +34,12 @@ import { useDevices } from '@hooks/api/useDevices';
 import { POSITIONS_QUERY_KEY, usePositions } from '@hooks/api/usePositions';
 import { useReplayData } from '@hooks/api/useReplayPositions';
 import { useAutoPlay } from '@hooks/useAutoPlay';
+import { THREAT_COLORS, useReplayPath } from '@hooks/useReplayPath';
 import { useReducedMotion } from '@hooks/useReducedMotion';
 import { useTimeBucketing } from '@hooks/useTimeBucketing';
-import { RadarMode } from '@/types/replay';
+import { BucketEntry, RadarMode } from '@/types/replay';
 import { TriangulatedPosition } from '@/types/triangulation';
+import { isDemoOrMockMode } from '@/config/demoModeRuntime';
 import { useTheme } from '@theme/provider';
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -65,6 +66,7 @@ function formatCoordinates(coords: {
 
 function LiveMapContent({
   colors,
+  navigation,
   selectedDevice,
   devices,
   hasValidLocation,
@@ -80,6 +82,7 @@ function LiveMapContent({
   centerOnPosition,
 }: {
   colors: any;
+  navigation: any;
   selectedDevice: any;
   devices: any[];
   hasValidLocation: boolean;
@@ -97,6 +100,7 @@ function LiveMapContent({
   centerOnPosition: (position: TriangulatedPosition) => void;
 }) {
   return (
+    <>
     <ScrollView>
       <View style={styles.statusSubtitle}>
         <View
@@ -204,16 +208,6 @@ function LiveMapContent({
                 </TouchableOpacity>
               </View>
 
-              {selectedPosition ? (
-                <View style={styles.popupOverlay}>
-                  <PositionInfoPopup
-                    signalType={selectedPosition.signalType}
-                    confidence={selectedPosition.confidence}
-                    accuracyMeters={selectedPosition.accuracyMeters}
-                    onClose={() => setSelectedPosition(null)}
-                  />
-                </View>
-              ) : null}
             </>
           ) : (
             <View style={styles.noLocationContainer}>
@@ -274,6 +268,20 @@ function LiveMapContent({
         )}
       </Card>
     </ScrollView>
+
+    {selectedPosition ? (
+      <FingerprintPeek
+        macAddress={selectedPosition.macAddress || ''}
+        fingerprintHash={selectedPosition.fingerprintHash}
+        scrubTimestamp={Date.now()}
+        onViewProfile={macAddress => {
+          setSelectedPosition(null);
+          navigation.navigate('DeviceFingerprint', { macAddress });
+        }}
+        onDismiss={() => setSelectedPosition(null)}
+      />
+    ) : null}
+  </>
   );
 }
 
@@ -295,6 +303,8 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   const cameraRef = useRef<Camera>(null);
   const mapViewRef = useRef<MapView>(null);
+  const replayCameraRef = useRef<Camera>(null);
+  const [replayShowSatellite, setReplayShowSatellite] = useState(true);
   const prevCoordsRef = useRef<{ lat: number | null; lon: number | null }>({
     lat: null,
     lon: null,
@@ -331,6 +341,30 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   const autoPlayRef = useRef(autoPlay);
   autoPlayRef.current = autoPlay;
+
+  const TRAIL_WINDOW = 15;
+  const currentReplayEntries = useMemo(() => {
+    const entries: BucketEntry[] = [];
+    for (let offset = 0; offset < TRAIL_WINDOW; offset++) {
+      const minute = autoPlay.minuteIndex - offset;
+      if (minute < 0) continue;
+      const bucket = bucketed.buckets.get(minute);
+      if (bucket) entries.push(...bucket);
+    }
+    // Deduplicate by macAddress, keeping latest
+    const seen = new Map<string, BucketEntry>();
+    for (const e of entries) {
+      if (!seen.has(e.macAddress)) seen.set(e.macAddress, e);
+    }
+    return Array.from(seen.values());
+  }, [autoPlay.minuteIndex, bucketed.buckets]);
+
+  const smoothMode = isDemoOrMockMode();
+  const { interpolatedDevices, trailLines } = useReplayPath(
+    bucketed.buckets,
+    autoPlay.minuteIndex,
+    autoPlay.progress
+  );
 
   const fadeAnim = useSharedValue(startHour !== undefined ? 0 : 1);
   const liveStyle = useAnimatedStyle(() => ({
@@ -480,7 +514,11 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
       header={{
         title: selectedDevice?.name || 'Map',
         largeTitle: false,
-        showBack: true,
+        showBack:
+          typeof navigation.canGoBack === 'function'
+            ? navigation.canGoBack()
+            : false,
+        onBackPress: () => navigation.goBack(),
         rightActions: alerts[0]?.macAddress ? (
           <Button
             buttonStyle="plain"
@@ -531,6 +569,7 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
         >
           <LiveMapContent
             colors={colors}
+            navigation={navigation}
             selectedDevice={selectedDevice}
             devices={devices}
             hasValidLocation={hasValidLocation}
@@ -550,31 +589,158 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
         <Animated.View
           testID="replay-content"
           pointerEvents={mode === 'replay' ? 'auto' : 'none'}
-          style={[StyleSheet.absoluteFillObject, replayStyle, styles.replayContainer]}
+          style={[StyleSheet.absoluteFillObject, replayStyle]}
         >
-          <View style={styles.replayContent}>
-            <ReplayRadarDisplay
-              currentMinute={autoPlay.minuteIndex}
-              positions={bucketed}
-              onDotTap={macAddress => {
-                autoPlay.pause();
-                setPeekMac(macAddress);
-              }}
-              onEmptyTap={() => autoPlay.pause()}
-            />
+          <View style={styles.replayMapContainer}>
+            {hasValidLocation ? (
+              <>
+                <MapView
+                  style={StyleSheet.absoluteFillObject}
+                  styleURL={
+                    replayShowSatellite
+                      ? Mapbox.StyleURL.SatelliteStreet
+                      : Mapbox.StyleURL.Dark
+                  }
+                  logoEnabled={false}
+                  attributionEnabled={false}
+                  scaleBarEnabled={false}
+                  compassEnabled={false}
+                  scrollEnabled={true}
+                  pitchEnabled={false}
+                  rotateEnabled={false}
+                  zoomEnabled={true}
+                >
+                  <Camera
+                    ref={replayCameraRef}
+                    centerCoordinate={[
+                      deviceCoordinates.longitude!,
+                      deviceCoordinates.latitude!,
+                    ]}
+                    zoomLevel={16}
+                    animationMode="flyTo"
+                    animationDuration={500}
+                  />
 
-            <TimelineScrubber
-              minuteIndex={autoPlay.minuteIndex}
-              buckets={bucketed.buckets}
-              isPlaying={autoPlay.isPlaying}
-              speed={autoPlay.speed}
-              onPlayPause={autoPlay.togglePlayPause}
-              onSpeedChange={autoPlay.cycleSpeed}
-              onSkipForward={autoPlay.skipForward}
-              onSkipBack={autoPlay.skipBack}
-              onScrub={autoPlay.setMinuteIndex}
-            />
+                  <TrailSenseDeviceMarker
+                    id={`replay-${selectedDevice?.id || 'device'}`}
+                    coordinate={[
+                      deviceCoordinates.longitude!,
+                      deviceCoordinates.latitude!,
+                    ]}
+                    isOnline={selectedDevice?.online}
+                  />
+
+                  {smoothMode
+                    ? trailLines.map(trail => (
+                        <Mapbox.ShapeSource
+                          key={`trail-${trail.macAddress}`}
+                          id={`trail-${trail.macAddress}`}
+                          lineMetrics
+                          shape={{
+                            type: 'Feature',
+                            properties: {},
+                            geometry: {
+                              type: 'LineString',
+                              coordinates: trail.coordinates,
+                            },
+                          }}
+                        >
+                          <Mapbox.LineLayer
+                            id={`trail-line-${trail.macAddress}`}
+                            style={{
+                              lineColor: THREAT_COLORS[trail.threatLevel],
+                              lineWidth: 2.5,
+                              lineGradient: [
+                                'interpolate',
+                                ['linear'],
+                                ['line-progress'],
+                                0,
+                                'rgba(0, 0, 0, 0)',
+                                0.4,
+                                THREAT_COLORS[trail.threatLevel],
+                                1,
+                                THREAT_COLORS[trail.threatLevel],
+                              ],
+                              lineCap: 'round',
+                              lineJoin: 'round',
+                            }}
+                          />
+                        </Mapbox.ShapeSource>
+                      ))
+                    : null}
+
+                  {(smoothMode ? interpolatedDevices : currentReplayEntries).map((entry, i) => (
+                    <DetectedDeviceMarker
+                      key={`${entry.macAddress}-${i}`}
+                      id={`replay-${entry.macAddress}-${i}`}
+                      coordinate={[entry.longitude, entry.latitude]}
+                      signalType={entry.signalType}
+                      confidence={entry.confidence}
+                      onPress={() => {
+                        autoPlay.pause();
+                        setPeekMac(entry.macAddress);
+                      }}
+                    />
+                  ))}
+                </MapView>
+
+                <View style={styles.floatingControls}>
+                  <TouchableOpacity
+                    style={[
+                      styles.floatingButton,
+                      { backgroundColor: colors.systemBlue },
+                    ]}
+                    onPress={() => setReplayShowSatellite(c => !c)}
+                    activeOpacity={0.8}
+                  >
+                    <Icon
+                      name={replayShowSatellite ? 'map-outline' : 'earth'}
+                      size={18}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.floatingButton,
+                      { backgroundColor: colors.systemBlue },
+                    ]}
+                    onPress={() => {
+                      replayCameraRef.current?.setCamera({
+                        centerCoordinate: [
+                          deviceCoordinates.longitude!,
+                          deviceCoordinates.latitude!,
+                        ],
+                        zoomLevel: 16,
+                        animationDuration: 500,
+                      });
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Icon name="locate" size={18} color="white" />
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <View style={styles.noLocationContainer}>
+                <Icon name="location-outline" size={48} color="systemGray" />
+                <Text variant="title3" color="label" style={styles.noLocationTitle}>
+                  No GPS Location
+                </Text>
+              </View>
+            )}
           </View>
+
+          <TimelineScrubber
+            minuteIndex={autoPlay.minuteIndex}
+            buckets={bucketed.buckets}
+            isPlaying={autoPlay.isPlaying}
+            speed={autoPlay.speed}
+            onPlayPause={autoPlay.togglePlayPause}
+            onSpeedChange={autoPlay.cycleSpeed}
+            onSkipForward={autoPlay.skipForward}
+            onSkipBack={autoPlay.skipBack}
+            onScrub={autoPlay.setMinuteIndex}
+          />
 
           {peekMac ? (
             <FingerprintPeek
@@ -635,13 +801,9 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
-  replayContainer: {
-    backgroundColor: '#0a0a0f',
-  },
-  replayContent: {
+  replayMapContainer: {
     flex: 1,
-    justifyContent: 'space-between',
-    paddingTop: 16,
+    position: 'relative',
   },
   noLocationContainer: {
     flex: 1,

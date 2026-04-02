@@ -8,14 +8,21 @@
  */
 
 import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, StyleSheet, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
+import type { IconName } from '@components/atoms/Icon/Icon';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
 import { useTheme } from '@hooks/useTheme';
 import { ColorScheme } from '@theme/types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type {
+  MoreStackParamList,
+  SettingsStackParamList,
+} from '@navigation/types';
 
 type ThemeOption = ColorScheme | 'auto';
 
@@ -23,12 +30,23 @@ interface ThemeCardProps {
   option: ThemeOption;
   title: string;
   subtitle: string;
-  icon: string;
+  icon: IconName;
   isSelected: boolean;
   onSelect: () => void;
 }
 
-const ThemeCard = ({ option, title, subtitle, icon, isSelected, onSelect }: ThemeCardProps) => {
+type ThemeScreenProps =
+  | NativeStackScreenProps<MoreStackParamList, 'Theme'>
+  | NativeStackScreenProps<SettingsStackParamList, 'Theme'>;
+
+const ThemeCard = ({
+  option,
+  title,
+  subtitle,
+  icon,
+  isSelected,
+  onSelect,
+}: ThemeCardProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
 
@@ -39,7 +57,11 @@ const ThemeCard = ({ option, title, subtitle, icon, isSelected, onSelect }: Them
       case 'dark':
         return { bg: '#000000', card: '#1C1C1E', text: '#FFFFFF' };
       case 'auto':
-        return { bg: 'linear', card: colors.tertiarySystemBackground, text: colors.label };
+        return {
+          bg: 'linear',
+          card: colors.tertiarySystemBackground,
+          text: colors.label,
+        };
     }
   };
 
@@ -62,39 +84,91 @@ const ThemeCard = ({ option, title, subtitle, icon, isSelected, onSelect }: Them
       <View style={styles.previewContainer}>
         {option === 'auto' ? (
           <View style={styles.splitPreview}>
-            <View style={[styles.previewHalf, { backgroundColor: '#FFFFFF', borderTopLeftRadius: 10, borderBottomLeftRadius: 10 }]}>
-              <View style={[styles.previewCard, { backgroundColor: '#F2F2F7' }]} />
-              <View style={[styles.previewLine, { backgroundColor: '#000000' }]} />
+            <View
+              style={[
+                styles.previewHalf,
+                {
+                  backgroundColor: '#FFFFFF',
+                  borderTopLeftRadius: 10,
+                  borderBottomLeftRadius: 10,
+                },
+              ]}
+            >
+              <View
+                style={[styles.previewCard, { backgroundColor: '#F2F2F7' }]}
+              />
+              <View
+                style={[styles.previewLine, { backgroundColor: '#000000' }]}
+              />
             </View>
-            <View style={[styles.previewHalf, { backgroundColor: '#000000', borderTopRightRadius: 10, borderBottomRightRadius: 10 }]}>
-              <View style={[styles.previewCard, { backgroundColor: '#1C1C1E' }]} />
-              <View style={[styles.previewLine, { backgroundColor: '#FFFFFF' }]} />
+            <View
+              style={[
+                styles.previewHalf,
+                {
+                  backgroundColor: '#000000',
+                  borderTopRightRadius: 10,
+                  borderBottomRightRadius: 10,
+                },
+              ]}
+            >
+              <View
+                style={[styles.previewCard, { backgroundColor: '#1C1C1E' }]}
+              />
+              <View
+                style={[styles.previewLine, { backgroundColor: '#FFFFFF' }]}
+              />
             </View>
           </View>
         ) : (
           <View style={[styles.preview, { backgroundColor: previewColors.bg }]}>
-            <View style={[styles.previewCard, { backgroundColor: previewColors.card }]} />
-            <View style={[styles.previewLine, { backgroundColor: previewColors.text }]} />
-            <View style={[styles.previewLine, styles.previewLineShort, { backgroundColor: previewColors.text }]} />
+            <View
+              style={[
+                styles.previewCard,
+                { backgroundColor: previewColors.card },
+              ]}
+            />
+            <View
+              style={[
+                styles.previewLine,
+                { backgroundColor: previewColors.text },
+              ]}
+            />
+            <View
+              style={[
+                styles.previewLine,
+                styles.previewLineShort,
+                { backgroundColor: previewColors.text },
+              ]}
+            />
           </View>
         )}
       </View>
 
       {/* Info */}
       <View style={styles.cardInfo}>
-        <View style={[styles.iconBox, { backgroundColor: colors.systemBlue + '20' }]}>
-          <Icon name={icon as any} size={20} color={colors.systemBlue} />
+        <View
+          style={[
+            styles.iconBox,
+            { backgroundColor: colors.systemBlue + '20' },
+          ]}
+        >
+          <Icon name={icon} size={20} color={colors.systemBlue} />
         </View>
         <View style={styles.cardText}>
           <Text variant="body" weight="semibold" color="label">
             {title}
           </Text>
-          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+          <Text
+            variant="caption1"
+            style={{ color: colors.secondaryLabel, marginTop: 2 }}
+          >
             {subtitle}
           </Text>
         </View>
         {isSelected && (
-          <View style={[styles.checkmark, { backgroundColor: colors.systemBlue }]}>
+          <View
+            style={[styles.checkmark, { backgroundColor: colors.systemBlue }]}
+          >
             <Icon name="checkmark" size={14} color="#FFFFFF" />
           </View>
         )}
@@ -103,18 +177,18 @@ const ThemeCard = ({ option, title, subtitle, icon, isSelected, onSelect }: Them
   );
 };
 
-export const ThemeScreen = ({ navigation }: any) => {
-  const { theme, colorScheme, setColorScheme } = useTheme();
+export const ThemeScreen = ({ navigation }: ThemeScreenProps) => {
+  const { theme, setColorScheme } = useTheme();
   const colors = theme.colors;
 
   // Determine current selection - if colorScheme matches system, it's likely 'auto'
   // We need to track the actual user preference
-  const [currentSelection, setCurrentSelection] = React.useState<ThemeOption>('auto');
+  const [currentSelection, setCurrentSelection] =
+    React.useState<ThemeOption>('auto');
 
   // Load current preference on mount
   React.useEffect(() => {
     const loadPreference = async () => {
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
       const saved = await AsyncStorage.getItem('@trailsense:theme');
       if (saved) {
         setCurrentSelection(saved as ThemeOption);
@@ -139,13 +213,30 @@ export const ThemeScreen = ({ navigation }: any) => {
     >
       {/* Hero */}
       <View style={styles.hero}>
-        <View style={[styles.heroIconContainer, { backgroundColor: colors.systemPurple + '20' }]}>
+        <View
+          style={[
+            styles.heroIconContainer,
+            { backgroundColor: colors.systemPurple + '20' },
+          ]}
+        >
           <Icon name="color-palette" size={32} color={colors.systemPurple} />
         </View>
-        <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={{ marginTop: 16 }}
+        >
           Appearance
         </Text>
-        <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 4, textAlign: 'center' }}>
+        <Text
+          variant="subheadline"
+          style={{
+            color: colors.secondaryLabel,
+            marginTop: 4,
+            textAlign: 'center',
+          }}
+        >
           Choose how TrailSense looks to you
         </Text>
       </View>
@@ -179,10 +270,23 @@ export const ThemeScreen = ({ navigation }: any) => {
       </ListSection>
 
       {/* Info Note */}
-      <View style={[styles.infoCard, { backgroundColor: colors.secondarySystemBackground }]}>
-        <Icon name="information-circle-outline" size={20} color={colors.secondaryLabel} />
-        <Text variant="caption1" style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}>
-          When set to System, the app will automatically switch between light and dark mode based on your device settings.
+      <View
+        style={[
+          styles.infoCard,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
+        <Icon
+          name="information-circle-outline"
+          size={20}
+          color={colors.secondaryLabel}
+        />
+        <Text
+          variant="caption1"
+          style={{ color: colors.secondaryLabel, marginLeft: 10, flex: 1 }}
+        >
+          When set to System, the app will automatically switch between light
+          and dark mode based on your device settings.
         </Text>
       </View>
 

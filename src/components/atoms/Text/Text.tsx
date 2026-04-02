@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Text as RNText,
   TextProps as RNTextProps,
+  StyleProp,
   TextStyle,
 } from 'react-native';
 import { useTheme } from '@hooks/useTheme';
@@ -60,7 +61,7 @@ export interface TextProps extends RNTextProps {
   weight?: TextWeight;
   align?: TextAlign;
   numberOfLines?: number;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   onPress?: () => void;
 }
 

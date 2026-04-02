@@ -1,6 +1,10 @@
 import { PromptTemplate } from './PromptTemplate';
 import { AlertContext } from '@/types/llm';
 
+type AlertSummaryAlert = AlertContext['alert'];
+type RelatedAlert = NonNullable<AlertContext['relatedAlerts']>[number];
+type DeviceHistory = NonNullable<AlertContext['deviceHistory']>;
+
 /**
  * Alert Summary Template
  * Generates prompts for creating natural language explanations of security alerts
@@ -120,7 +124,7 @@ Provide:
   /**
    * Get device information from alert metadata
    */
-  private getDeviceInfo(alert: any): string {
+  private getDeviceInfo(alert: AlertSummaryAlert): string {
     const metadata = alert.metadata || {};
 
     // Try to get meaningful device identifier
@@ -155,7 +159,7 @@ Provide:
   /**
    * Format related alerts context
    */
-  private formatRelatedAlerts(relatedAlerts: any[]): string {
+  private formatRelatedAlerts(relatedAlerts: RelatedAlert[]): string {
     if (relatedAlerts.length === 0) return '';
 
     const recentCount = relatedAlerts.length;
@@ -167,7 +171,7 @@ Provide:
   /**
    * Format device history context
    */
-  private formatDeviceHistory(deviceHistory: any): string {
+  private formatDeviceHistory(deviceHistory: DeviceHistory): string {
     if (!deviceHistory) return '';
 
     const firstSeen = deviceHistory.first_seen;
@@ -192,10 +196,12 @@ Provide:
   /**
    * Get time window for related alerts
    */
-  private getTimeWindow(alerts: any[]): string {
+  private getTimeWindow(alerts: RelatedAlert[]): string {
     if (alerts.length === 0) return 'unknown time';
 
-    const timestamps = alerts.map(a => new Date(a.timestamp).getTime());
+    const timestamps = alerts.map(alert =>
+      new Date(alert.timestamp ?? Date.now()).getTime()
+    );
     const oldest = Math.min(...timestamps);
     const newest = Math.max(...timestamps);
 

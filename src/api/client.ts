@@ -1,4 +1,9 @@
-import axios from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from 'axios';
+import { QueryClient } from '@tanstack/react-query';
 import { AuthService } from '@services/authService';
 import { API_BASE_URL } from '@constants/config';
 import { isMockMode } from '@/config/mockConfig';
@@ -7,28 +12,82 @@ import { isMockMode } from '@/config/mockConfig';
 // Since we inject data directly into React Query cache, API calls should not occur
 const baseURL = isMockMode ? 'http://localhost:9999/mock-api' : API_BASE_URL;
 
-export const apiClient = axios.create({
-  baseURL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Mock mode interceptor - prevent actual API calls
-if (isMockMode) {
-  apiClient.interceptors.request.use(
-    config => {
-      console.warn(
-        `[Mock Mode] API call attempted: ${config.method?.toUpperCase()} ${config.url}`,
-        '\nThis should not happen as data is pre-seeded in React Query cache.',
-        '\nIf you see this, a component may be making an unnecessary API call.'
-      );
-      // Return config to allow request (it will fail to connect, which is fine)
-      return config;
+function createBaseClient(): AxiosInstance {
+  return axios.create({
+    baseURL,
+    timeout: 30000,
+    headers: {
+      'Content-Type': 'application/json',
     },
-    error => Promise.reject(error)
-  );
+  });
+}
+
+export const publicApiClient = createBaseClient();
+export const apiClient = createBaseClient();
+
+// Lazy reference to queryClient — set by demoModeRuntime or App.tsx to avoid
+// circular imports. When set, the adapter can return seeded cache data instead
+// of destructive empty fallbacks.
+let _queryClientRef: QueryClient | null = null;
+export function setMockAdapterQueryClient(qc: QueryClient | null) {
+  _queryClientRef = qc;
+}
+
+// URL-to-query-key mapping for cache lookups
+function urlToQueryKeys(url: string): (string | undefined)[][] {
+  if (url.includes('/positions')) return [['positions']];
+  if (url.includes('/alerts')) return [['alerts', undefined], ['alerts']];
+  if (url.includes('/devices')) return [['devices']];
+  if (url.includes('/known-devices')) return [['knownDevices']];
+  return [];
+}
+
+// Default empty responses when no cache data is available
+function emptyFallback(url: string): unknown {
+  if (url.includes('/positions')) return { positions: [] };
+  if (url.includes('/alerts')) return [];
+  if (url.includes('/devices')) return [];
+  if (url.includes('/known-devices')) return [];
+  return {};
+}
+
+// Mock adapter — returns seeded cache data if available, otherwise empty
+// fallbacks. Data is pre-seeded into React Query cache; this adapter prevents
+// network calls while preserving seeded state.
+// Also used by demoModeRuntime.ts for runtime demo-mode entry.
+export const mockApiAdapter = (config: InternalAxiosRequestConfig) => {
+  const url = config.url || '';
+
+  // Try to return seeded data from the query cache
+  let data: unknown = undefined;
+  if (_queryClientRef) {
+    const keys = urlToQueryKeys(url);
+    for (const key of keys) {
+      const cached = _queryClientRef.getQueryData(key);
+      if (cached !== undefined) {
+        data = cached;
+        break;
+      }
+    }
+  }
+
+  // Fall back to empty response only if nothing was cached
+  if (data === undefined) {
+    data = emptyFallback(url);
+  }
+
+  return Promise.resolve({
+    data,
+    status: 200,
+    statusText: 'OK',
+    headers: {},
+    config,
+  });
+};
+
+// Install mock adapter at boot when static isMockMode is true
+if (isMockMode) {
+  apiClient.defaults.adapter = mockApiAdapter;
 }
 
 // Development logging interceptor
@@ -36,16 +95,15 @@ if (__DEV__) {
   apiClient.interceptors.request.use(
     config => {
       console.log(
-        `[API Request] ${config.method?.toUpperCase()} ${config.url}`,
-        {
-          params: config.params,
-          data: config.data,
-        }
+        `[API Request] ${config.method?.toUpperCase()} ${config.url}`
       );
       return config;
     },
-    error => {
-      console.error('[API Request Error]', error);
+    (error: AxiosError) => {
+      console.error('[API Request Error]', {
+        message: error.message,
+        code: error.code,
+      });
       return Promise.reject(error);
     }
   );
@@ -56,20 +114,17 @@ if (__DEV__) {
         `[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`,
         {
           status: response.status,
-          data: response.data,
         }
       );
       return response;
     },
-    error => {
+    (error: AxiosError) => {
       console.error(
         `[API Response Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
         {
           message: error.message,
           status: error.response?.status,
-          data: error.response?.data,
           code: error.code,
-          fullURL: error.config?.baseURL + error.config?.url,
         }
       );
       return Promise.reject(error);
@@ -79,7 +134,7 @@ if (__DEV__) {
 
 // Request interceptor - add auth token
 apiClient.interceptors.request.use(
-  async config => {
+  async (config: InternalAxiosRequestConfig) => {
     const tokens = await AuthService.getTokens();
     if (tokens?.accessToken) {
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
@@ -92,10 +147,16 @@ apiClient.interceptors.request.use(
 // Response interceptor - handle token refresh
 apiClient.interceptors.response.use(
   response => response,
-  async error => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalRequest = error.config as
+      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {

@@ -9,6 +9,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
+import type { IconName } from '@components/atoms/Icon/Icon';
 import { TriangulationSignalType } from '@/types/triangulation';
 
 interface PositionInfoPopupProps {
@@ -30,7 +31,7 @@ const SIGNAL_TYPE_COLORS: Record<TriangulationSignalType, string> = {
   cellular: '#FF9500',
 };
 
-const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, string> = {
+const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, IconName> = {
   wifi: 'wifi',
   bluetooth: 'bluetooth',
   cellular: 'cellular',
@@ -43,7 +44,7 @@ export const PositionInfoPopup: React.FC<PositionInfoPopupProps> = ({
   onClose,
 }) => {
   const color = SIGNAL_TYPE_COLORS[signalType] || '#8E8E93';
-  const iconName = SIGNAL_TYPE_ICONS[signalType] || 'ellipse';
+  const iconName = SIGNAL_TYPE_ICONS[signalType] ?? 'ellipse';
   const label = SIGNAL_TYPE_LABELS[signalType] || 'Unknown';
 
   return (
@@ -57,7 +58,12 @@ export const PositionInfoPopup: React.FC<PositionInfoPopupProps> = ({
         {/* Signal type row */}
         <View style={styles.row}>
           <Icon name={iconName} size={18} color={color} />
-          <Text variant="subheadline" weight="semibold" color="label" style={styles.label}>
+          <Text
+            variant="subheadline"
+            weight="semibold"
+            color="label"
+            style={styles.label}
+          >
             {label}
           </Text>
         </View>

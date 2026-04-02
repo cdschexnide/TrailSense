@@ -1,7 +1,7 @@
 import type { Device } from '@/types/device';
 
-// Mock devices located in Sierra Vista, Arizona area (where real device is deployed)
-// Real device coordinates: 31.530757, -110.287842
+// Mock devices located in Southeast Texas area
+// Center coordinates: 30.396526, -94.317806
 export const mockDevices: Device[] = [
   {
     id: 'device-001',
@@ -10,8 +10,8 @@ export const mockDevices: Device[] = [
     batteryPercent: 87,
     signalStrength: 'excellent',
     detectionCount: 142,
-    latitude: 31.530757,   // Sierra Vista, AZ - primary device location
-    longitude: -110.287842,
+    latitude: 30.396526,
+    longitude: -94.317806,
     lastSeen: '2025-12-16T09:45:00Z',
     firmwareVersion: 'v2.1.3',
     createdAt: '2025-01-10T08:00:00Z',
@@ -24,8 +24,8 @@ export const mockDevices: Device[] = [
     batteryPercent: 92,
     signalStrength: 'good',
     detectionCount: 87,
-    latitude: 31.528500,   // ~0.15 miles south
-    longitude: -110.289100,
+    latitude: 30.394300,
+    longitude: -94.319100,
     lastSeen: '2025-12-16T09:47:00Z',
     firmwareVersion: 'v2.1.3',
     createdAt: '2025-01-10T08:15:00Z',
@@ -38,8 +38,8 @@ export const mockDevices: Device[] = [
     batteryPercent: 65,
     signalStrength: 'fair',
     detectionCount: 213,
-    latitude: 31.531200,   // ~0.1 miles east
-    longitude: -110.285500,
+    latitude: 30.397000,
+    longitude: -94.315500,
     lastSeen: '2025-12-16T09:44:00Z',
     firmwareVersion: 'v2.1.2',
     createdAt: '2025-01-15T10:30:00Z',
@@ -52,8 +52,8 @@ export const mockDevices: Device[] = [
     batteryPercent: 12,
     signalStrength: 'poor',
     detectionCount: 45,
-    latitude: 31.529800,   // Offline device with last known location
-    longitude: -110.290500,
+    latitude: 30.395800,
+    longitude: -94.320500,
     lastSeen: '2025-12-14T16:22:00Z',
     firmwareVersion: 'v2.0.9',
     createdAt: '2025-02-01T12:00:00Z',

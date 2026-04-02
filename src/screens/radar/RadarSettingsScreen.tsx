@@ -10,7 +10,7 @@ export const RadarSettingsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Text variant="h1">Radar Settings</Text>
+      <Text variant="title1">Radar Settings</Text>
       <Text variant="body">Placeholder for radar settings</Text>
     </View>
   );

@@ -48,8 +48,6 @@ export class InferenceEngine {
     }
 
     // Set defaults
-    const { timeout = LLM_CONFIG.INFERENCE_TIMEOUT_MS } = options;
-
     this.inferenceInProgress = true;
     const endTimer = performanceTracker.startTimer('Inference');
 
@@ -162,7 +160,7 @@ export class InferenceEngine {
    */
   private async generateMockResponse(
     messages: Message[],
-    options: GenerationOptions
+    _options: GenerationOptions
   ): Promise<string> {
     llmLogger.info('Generating mock response (LLM_MOCK_MODE enabled)');
 
@@ -172,7 +170,6 @@ export class InferenceEngine {
     );
 
     // Extract the user message content
-    const userMessage = messages.find(m => m.role === 'user')?.content || '';
     const combinedContent = messages
       .map(m => m.content)
       .join(' ')

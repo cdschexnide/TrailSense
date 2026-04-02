@@ -83,7 +83,7 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
         <Text
           style={[
             styles.headerText,
-            typography.headline,
+            typography.textStyles.headline,
             { color: colors.label },
           ]}
         >
@@ -92,7 +92,13 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
       </View>
 
       {/* Main Summary */}
-      <Text style={[styles.summary, typography.body, { color: colors.label }]}>
+      <Text
+        style={[
+          styles.summary,
+          typography.textStyles.body,
+          { color: colors.label },
+        ]}
+      >
         {summary.summary}
       </Text>
 
@@ -107,7 +113,7 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
           <Text
             style={[
               styles.actionsTitle,
-              typography.subheadline,
+              typography.textStyles.subheadline,
               { color: colors.label },
             ]}
           >
@@ -121,7 +127,7 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
               <Text
                 style={[
                   styles.actionText,
-                  typography.callout,
+                  typography.textStyles.callout,
                   { color: colors.secondaryLabel },
                 ]}
               >
@@ -140,7 +146,7 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
             <Text
               style={[
                 styles.feedbackLabel,
-                typography.caption1,
+                typography.textStyles.caption1,
                 { color: colors.tertiaryLabel },
               ]}
             >
@@ -177,11 +183,11 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
             accessibilityLabel="Regenerate summary"
             accessibilityRole="button"
           >
-            <Icon name="refresh-cw" size={16} color={colors.systemBlue} />
+            <Icon name="refresh" size={16} color={colors.systemBlue} />
             <Text
               style={[
                 styles.regenerateText,
-                typography.footnote,
+                typography.textStyles.footnote,
                 { color: colors.systemBlue },
               ]}
             >
@@ -199,11 +205,11 @@ export const AlertSummaryCard: React.FC<AlertSummaryCardProps> = ({
             { backgroundColor: colors.systemYellow + '20' },
           ]}
         >
-          <Icon name="alert-triangle" size={14} color={colors.systemYellow} />
+          <Icon name="warning-outline" size={14} color={colors.systemYellow} />
           <Text
             style={[
               styles.confidenceText,
-              typography.caption2,
+              typography.textStyles.caption2,
               { color: colors.secondaryLabel },
             ]}
           >

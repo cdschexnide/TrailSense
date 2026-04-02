@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { setDemoMode } from '@/config/demoMode';
+import { websocketService } from '@api/websocket';
 import { AuthService } from '@services/authService';
 import type {
   AuthState,
@@ -35,6 +37,8 @@ export const register = createAsyncThunk(
 
 export const logout = createAsyncThunk('auth/logout', async () => {
   await AuthService.logout();
+  websocketService.disconnect();
+  await setDemoMode(false);
 });
 
 export const checkAuth = createAsyncThunk('auth/checkAuth', async () => {
@@ -59,6 +63,11 @@ const authSlice = createSlice({
       state.tokens = null;
       state.isAuthenticated = false;
     },
+    setCredentials(state, action) {
+      state.user = action.payload.user;
+      state.tokens = action.payload.tokens;
+      state.isAuthenticated = true;
+    },
   },
   extraReducers: builder => {
     builder
@@ -75,6 +84,19 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = false;
       })
+      .addCase(register.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.tokens = action.payload.tokens;
+        state.isAuthenticated = true;
+      })
+      .addCase(register.rejected, state => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+      })
       .addCase(logout.fulfilled, state => {
         state.user = null;
         state.tokens = null;
@@ -84,5 +106,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setBiometricEnabled, clearAuth } = authSlice.actions;
+export const { setBiometricEnabled, clearAuth, setCredentials } =
+  authSlice.actions;
 export default authSlice.reducer;

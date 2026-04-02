@@ -1,9 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { llmService } from '@/services/llm';
 import { AlertSummary } from '@/types/llm';
+import type { Alert } from '@types';
 import { llmLogger } from '@/utils/llmLogger';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
 import { LLM_CONFIG } from '@/config/llmConfig';
+
+type SummaryAlert = Partial<Alert> & {
+  id?: string;
+  threat_level?: string;
+};
+
+const getThreatLevel = (alert: SummaryAlert | null | undefined): string =>
+  alert?.threat_level ?? alert?.threatLevel ?? '';
 
 /**
  * Hook return type
@@ -31,7 +40,9 @@ interface UseAlertSummaryReturn {
  * // Or manually trigger with generate()
  * ```
  */
-export const useAlertSummary = (alert: any): UseAlertSummaryReturn => {
+export const useAlertSummary = (
+  alert: SummaryAlert | null | undefined
+): UseAlertSummaryReturn => {
   const [summary, setSummary] = useState<AlertSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -64,7 +75,7 @@ export const useAlertSummary = (alert: any): UseAlertSummaryReturn => {
     try {
       llmLogger.info('Generating alert summary', {
         alertId: alert.id,
-        threatLevel: alert.threat_level,
+        threatLevel: getThreatLevel(alert),
       });
 
       const result = await llmService.generateAlertSummary({
@@ -125,13 +136,13 @@ export const useAlertSummary = (alert: any): UseAlertSummaryReturn => {
     // Check if this threat level should auto-generate
     const shouldAutoGenerate =
       LLM_CONFIG.ALERT_SUMMARIES.AUTO_GENERATE_FOR_THREATS.includes(
-        alert.threat_level?.toLowerCase() || ''
+        getThreatLevel(alert).toLowerCase()
       );
 
     if (shouldAutoGenerate) {
       llmLogger.debug('Auto-generating summary for alert', {
         alertId: alert.id,
-        threatLevel: alert.threat_level,
+        threatLevel: getThreatLevel(alert),
       });
 
       // Small delay to avoid blocking UI
@@ -141,7 +152,9 @@ export const useAlertSummary = (alert: any): UseAlertSummaryReturn => {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [alert?.id, alert?.threat_level]); // Only re-run if alert ID or threat level changes
+
+    return undefined;
+  }, [alert, generate]); // Only re-run if alert or generator changes
 
   return {
     summary,
@@ -168,7 +181,7 @@ export const useAlertSummary = (alert: any): UseAlertSummaryReturn => {
 export const useAlertSummaryPreload = () => {
   const [isPreloading, setIsPreloading] = useState(false);
 
-  const preload = useCallback(async (alerts: any[]) => {
+  const preload = useCallback(async (alerts: SummaryAlert[]) => {
     if (
       !FEATURE_FLAGS.LLM_ALERT_SUMMARIES ||
       !LLM_CONFIG.ALERT_SUMMARIES.ENABLE_PRELOADING

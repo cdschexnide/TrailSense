@@ -17,7 +17,10 @@ import { featureFlagsManager } from '@/config/featureFlags';
 import { AIProvider } from '@/services/llm';
 import { OfflineBanner } from '@components/molecules';
 import { ToastProvider } from '@components/templates';
-import { initDemoMode } from '@/config/demoMode';
+import { initDemoMode, isDemoMode } from '@/config/demoMode';
+import { applyDemoModeConfig } from '@/config/demoModeRuntime';
+import { setMockAdapterQueryClient } from '@api/client';
+import { useAuth } from '@hooks/useAuth';
 
 // Initialize react-native-executorch early (Android and iOS)
 if (Platform.OS === 'android' || Platform.OS === 'ios') {
@@ -47,8 +50,21 @@ export default function App() {
         '[App] LLM using real Llama 3.2 1B model (mock mode disabled)'
       );
 
+      if (isDemoMode()) {
+        console.log(
+          '[App] Persisted demo session - applying runtime mock config'
+        );
+        applyDemoModeConfig(queryClient);
+        websocketService.connect('mock-token-for-testing');
+        if (mounted) {
+          setIsMockDataReady(true);
+        }
+        return;
+      }
+
       if (getIsMockMode()) {
         try {
+          setMockAdapterQueryClient(queryClient);
           await seedMockData({ queryClient, store });
           if (!mounted) {
             return;
@@ -105,6 +121,7 @@ export default function App() {
               persistor={persistor}
             >
               <QueryClientProvider client={queryClient}>
+                <AuthLifecycle />
                 <AIProvider>
                   <StatusBar style="auto" />
                   <OfflineBanner />
@@ -119,6 +136,11 @@ export default function App() {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+function AuthLifecycle() {
+  useAuth();
+  return null;
 }
 
 const styles = StyleSheet.create({

@@ -1,8 +1,11 @@
 module.exports = {
   preset: 'jest-expo',
-  setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
+  setupFilesAfterEnv: [
+    '@testing-library/jest-native/extend-expect',
+    '<rootDir>/jest.setup.js',
+  ],
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|@react-native-async-storage)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@reduxjs/toolkit|react-redux|redux-persist|redux|immer)',
   ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -12,6 +15,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     'react-native-reanimated': '<rootDir>/__mocks__/react-native-reanimated.js',
+    '\\.(png|jpg|jpeg|gif|webp|svg)$': '<rootDir>/__mocks__/fileMock.js',
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@components/(.*)$': '<rootDir>/src/components/$1',
     '^@screens/(.*)$': '<rootDir>/src/screens/$1',
@@ -19,6 +23,7 @@ module.exports = {
     '^@hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@services/(.*)$': '<rootDir>/src/services/$1',
+    '^@store$': '<rootDir>/src/store/index',
     '^@store/(.*)$': '<rootDir>/src/store/$1',
     '^@api/(.*)$': '<rootDir>/src/api/$1',
     '^@types/(.*)$': '<rootDir>/src/types/$1',

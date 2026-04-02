@@ -4,18 +4,19 @@ import { Button } from '@components/atoms/Button';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
 import { ListRow } from '@components/molecules/ListRow';
+import { ThreatLevel } from '@types';
 
 interface FilterOptions {
-  threatLevels: string[];
+  threatLevels: ThreatLevel[];
   detectionTypes: string[];
 }
 
 export const AlertFilterScreen = ({ navigation, route }: any) => {
-  const { onApplyFilters } = route.params || {};
+  const initialFilters = route.params?.filters as FilterOptions | undefined;
 
   const [filters, setFilters] = useState<FilterOptions>({
-    threatLevels: [],
-    detectionTypes: [],
+    threatLevels: initialFilters?.threatLevels || [],
+    detectionTypes: initialFilters?.detectionTypes || [],
   });
 
   const threatLevels = [
@@ -32,7 +33,7 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
     { id: 'gps', label: 'GPS' },
   ];
 
-  const toggleThreatLevel = (level: string) => {
+  const toggleThreatLevel = (level: ThreatLevel) => {
     setFilters(prev => ({
       ...prev,
       threatLevels: prev.threatLevels.includes(level)
@@ -51,10 +52,7 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
   };
 
   const handleApply = () => {
-    if (onApplyFilters) {
-      onApplyFilters(filters);
-    }
-    navigation.goBack();
+    navigation.navigate('AlertList', { filters });
   };
 
   const handleReset = () => {
@@ -68,7 +66,11 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
     <ScreenLayout
       header={{
         title: 'Filter Alerts',
-        showBack: true,
+        showBack:
+          typeof navigation.canGoBack === 'function'
+            ? navigation.canGoBack()
+            : true,
+        onBackPress: () => navigation.goBack(),
         rightActions: (
           <Button buttonStyle="plain" onPress={handleReset}>
             Reset
@@ -83,9 +85,11 @@ export const AlertFilterScreen = ({ navigation, route }: any) => {
             key={level.id}
             title={level.label}
             accessoryType={
-              filters.threatLevels.includes(level.id) ? 'checkmark' : 'none'
+              filters.threatLevels.includes(level.id as ThreatLevel)
+                ? 'checkmark'
+                : 'none'
             }
-            onPress={() => toggleThreatLevel(level.id)}
+            onPress={() => toggleThreatLevel(level.id as ThreatLevel)}
           />
         ))}
       </ListSection>

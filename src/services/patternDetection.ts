@@ -53,8 +53,11 @@ export function computeVisitPattern(
   );
 
   const sortedHours = [...hours].sort((a, b) => a - b);
-  const timeOfDayClusters: Array<{ start: number; end: number; count: number }> =
-    [];
+  const timeOfDayClusters: Array<{
+    start: number;
+    end: number;
+    count: number;
+  }> = [];
   let clusterStart = sortedHours[0];
   let clusterEnd = sortedHours[0];
   let clusterCount = 1;
@@ -132,7 +135,10 @@ export function generateInsightText(pattern: VisitPattern): string {
     );
   }
 
-  return lines.join(' ') || `Detected ${pattern.totalVisits} times since ${formatDate(pattern.firstSeen)}.`;
+  return (
+    lines.join(' ') ||
+    `Detected ${pattern.totalVisits} times since ${formatDate(pattern.firstSeen)}.`
+  );
 }
 
 function formatHour(hour: number): string {

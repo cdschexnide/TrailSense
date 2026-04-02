@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   Switch,
   TouchableOpacity,
   ScrollView,
   Platform,
 } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { VacationModeService } from '@services/vacationModeService';
+import { ScreenLayout } from '@components/templates';
+import { Text, Button } from '@components/atoms';
+import { useAppDispatch, useAppSelector } from '@store/index';
+import { updateSettings } from '@store/slices/settingsSlice';
+import { MoreStackParamList } from '@navigation/types';
 
-export const VacationModeScreen = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
+type Props = NativeStackScreenProps<MoreStackParamList, 'VacationMode'>;
+
+export const VacationModeScreen = ({ navigation }: Props) => {
+  const dispatch = useAppDispatch();
+  const persistedVacationMode = useAppSelector(
+    state => state.settings.settings.vacationMode
+  );
+  const [isEnabled, setIsEnabled] = useState(persistedVacationMode);
+  const [startDate, setStartDate] = useState(() => new Date());
   const [endDate, setEndDate] = useState(
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [sensitivity, setSensitivity] = useState<'low' | 'medium' | 'high'>(
     'high'
   );
-
-  useEffect(() => {
-    loadVacationModeStatus();
-  }, []);
 
   const loadVacationModeStatus = async () => {
     const status = await VacationModeService.getVacationModeStatus();
@@ -35,8 +42,14 @@ export const VacationModeScreen = () => {
     setSensitivity(status.sensitivity);
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadVacationModeStatus();
+  }, []);
+
   const handleToggle = async (value: boolean) => {
     setIsEnabled(value);
+    dispatch(updateSettings({ vacationMode: value }));
 
     if (value) {
       await VacationModeService.enableVacationMode(startDate, endDate);
@@ -45,14 +58,14 @@ export const VacationModeScreen = () => {
     }
   };
 
-  const handleStartDateChange = (event: any, selectedDate?: Date) => {
+  const handleStartDateChange = (_event: unknown, selectedDate?: Date) => {
     setShowStartPicker(Platform.OS === 'ios');
     if (selectedDate) {
       setStartDate(selectedDate);
     }
   };
 
-  const handleEndDateChange = (event: any, selectedDate?: Date) => {
+  const handleEndDateChange = (_event: unknown, selectedDate?: Date) => {
     setShowEndPicker(Platform.OS === 'ios');
     if (selectedDate) {
       setEndDate(selectedDate);
@@ -68,126 +81,139 @@ export const VacationModeScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Vacation Mode</Text>
-        <Text style={styles.subtitle}>
-          Enhanced monitoring when you're away from home
-        </Text>
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.row}>
-          <View style={styles.labelContainer}>
-            <Text style={styles.label}>Enable Vacation Mode</Text>
-            <Text style={styles.description}>
-              Increases sensitivity and treats all detections as critical
-            </Text>
-          </View>
-          <Switch
-            value={isEnabled}
-            onValueChange={handleToggle}
-            trackColor={{ false: '#767577', true: '#4CAF50' }}
-            thumbColor={isEnabled ? '#FFFFFF' : '#f4f3f4'}
-          />
+    <ScreenLayout
+      header={{
+        title: 'Vacation Mode',
+        showBack: true,
+        onBackPress: () => navigation.goBack(),
+        rightActions: (
+          <Button buttonStyle="plain" onPress={() => navigation.goBack()}>
+            Done
+          </Button>
+        ),
+      }}
+    >
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Vacation Mode</Text>
+          <Text style={styles.subtitle}>
+            Enhanced monitoring when you&apos;re away from home
+          </Text>
         </View>
-      </View>
 
-      {isEnabled && (
-        <>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Dates</Text>
-
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowStartPicker(true)}
-            >
-              <Text style={styles.dateLabel}>Start Date</Text>
-              <Text style={styles.dateValue}>{formatDate(startDate)}</Text>
-            </TouchableOpacity>
-
-            {showStartPicker && (
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display="default"
-                onChange={handleStartDateChange}
-              />
-            )}
-
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowEndPicker(true)}
-            >
-              <Text style={styles.dateLabel}>End Date</Text>
-              <Text style={styles.dateValue}>{formatDate(endDate)}</Text>
-            </TouchableOpacity>
-
-            {showEndPicker && (
-              <DateTimePicker
-                value={endDate}
-                mode="date"
-                display="default"
-                onChange={handleEndDateChange}
-              />
-            )}
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <View style={styles.labelContainer}>
+              <Text style={styles.label}>Enable Vacation Mode</Text>
+              <Text style={styles.description}>
+                Increases sensitivity and treats all detections as critical
+              </Text>
+            </View>
+            <Switch
+              value={isEnabled}
+              onValueChange={handleToggle}
+              trackColor={{ false: '#767577', true: '#4CAF50' }}
+              thumbColor={isEnabled ? '#FFFFFF' : '#f4f3f4'}
+            />
           </View>
+        </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Sensitivity</Text>
-            <View style={styles.sensitivityContainer}>
-              {(['low', 'medium', 'high'] as const).map(level => (
-                <TouchableOpacity
-                  key={level}
-                  style={[
-                    styles.sensitivityButton,
-                    sensitivity === level && styles.sensitivityButtonActive,
-                  ]}
-                  onPress={() => setSensitivity(level)}
-                >
-                  <Text
+        {isEnabled && (
+          <>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Dates</Text>
+
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowStartPicker(true)}
+              >
+                <Text style={styles.dateLabel}>Start Date</Text>
+                <Text style={styles.dateValue}>{formatDate(startDate)}</Text>
+              </TouchableOpacity>
+
+              {showStartPicker && (
+                <DateTimePicker
+                  value={startDate}
+                  mode="date"
+                  display="default"
+                  onChange={handleStartDateChange}
+                />
+              )}
+
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowEndPicker(true)}
+              >
+                <Text style={styles.dateLabel}>End Date</Text>
+                <Text style={styles.dateValue}>{formatDate(endDate)}</Text>
+              </TouchableOpacity>
+
+              {showEndPicker && (
+                <DateTimePicker
+                  value={endDate}
+                  mode="date"
+                  display="default"
+                  onChange={handleEndDateChange}
+                />
+              )}
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Sensitivity</Text>
+              <View style={styles.sensitivityContainer}>
+                {(['low', 'medium', 'high'] as const).map(level => (
+                  <TouchableOpacity
+                    key={level}
                     style={[
-                      styles.sensitivityText,
-                      sensitivity === level && styles.sensitivityTextActive,
+                      styles.sensitivityButton,
+                      sensitivity === level && styles.sensitivityButtonActive,
                     ]}
+                    onPress={() => setSensitivity(level)}
                   >
-                    {level.charAt(0).toUpperCase() + level.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      style={[
+                        styles.sensitivityText,
+                        sensitivity === level && styles.sensitivityTextActive,
+                      ]}
+                    >
+                      {level.charAt(0).toUpperCase() + level.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Features</Text>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>🔔</Text>
-              <Text style={styles.featureText}>
-                Maximum alert volume for all notifications
-              </Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Features</Text>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>🔔</Text>
+                <Text style={styles.featureText}>
+                  Maximum alert volume for all notifications
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>🎯</Text>
+                <Text style={styles.featureText}>
+                  All detections treated as critical threats
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>📊</Text>
+                <Text style={styles.featureText}>
+                  Detailed activity reports sent daily
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>🔍</Text>
+                <Text style={styles.featureText}>
+                  Increased detection sensitivity
+                </Text>
+              </View>
             </View>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>🎯</Text>
-              <Text style={styles.featureText}>
-                All detections treated as critical threats
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>📊</Text>
-              <Text style={styles.featureText}>
-                Detailed activity reports sent daily
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Text style={styles.featureIcon}>🔍</Text>
-              <Text style={styles.featureText}>
-                Increased detection sensitivity
-              </Text>
-            </View>
-          </View>
-        </>
-      )}
-    </ScrollView>
+          </>
+        )}
+      </ScrollView>
+    </ScreenLayout>
   );
 };
 

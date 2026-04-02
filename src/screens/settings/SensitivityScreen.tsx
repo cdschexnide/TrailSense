@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text, Button } from '@components/atoms';
 import { ScreenLayout } from '@components/templates';
-import { useAppSelector, useAppDispatch } from '@store';
-import { Slider } from '@react-native-community/slider';
+import { useAppSelector, useAppDispatch } from '@store/index';
+import { updateSettings } from '@store/slices/settingsSlice';
+import { MoreStackParamList } from '@navigation/types';
+import { AppSettings } from '@store/slices/settingsSlice';
+
+type Props = NativeStackScreenProps<MoreStackParamList, 'Sensitivity'>;
+type SensitivityLevel = (typeof SENSITIVITY_LEVELS)[number]['value'];
 
 const SENSITIVITY_LEVELS = [
   {
@@ -29,23 +35,34 @@ const SENSITIVITY_LEVELS = [
     description:
       'Detect all signals. Maximum protection but highest false positive rate.',
   },
-];
+] as const;
 
-export const SensitivityScreen = ({ navigation }: any) => {
-  const currentSensitivity =
-    useAppSelector(state => state.settings?.sensitivity) || 'medium';
+export const SensitivityScreen = ({ navigation }: Props) => {
+  const currentSensitivity = useAppSelector(
+    state => state.settings.settings.sensitivity
+  ) as AppSettings['sensitivity'];
   const dispatch = useAppDispatch();
 
-  const [selectedLevel, setSelectedLevel] = useState(currentSensitivity);
+  const [selectedLevel, setSelectedLevel] =
+    useState<SensitivityLevel>(currentSensitivity);
 
   const handleSave = () => {
-    // TODO: Dispatch action to update settings
-    console.log('Saving sensitivity:', selectedLevel);
+    dispatch(
+      updateSettings({
+        sensitivity: selectedLevel,
+      })
+    );
     navigation.goBack();
   };
 
   return (
-    <ScreenLayout title="Detection Sensitivity">
+    <ScreenLayout
+      header={{
+        title: 'Detection Sensitivity',
+        showBack: true,
+        onBackPress: () => navigation.goBack(),
+      }}
+    >
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <Text variant="body" style={styles.description}>
@@ -57,19 +74,20 @@ export const SensitivityScreen = ({ navigation }: any) => {
         {SENSITIVITY_LEVELS.map(level => (
           <View key={level.value} style={styles.levelCard}>
             <Button
-              title={level.label}
-              variant={selectedLevel === level.value ? 'primary' : 'outline'}
+              buttonStyle={selectedLevel === level.value ? 'filled' : 'gray'}
               onPress={() => setSelectedLevel(level.value)}
               style={styles.levelButton}
-            />
-            <Text variant="caption" style={styles.levelDescription}>
+            >
+              {level.label}
+            </Button>
+            <Text variant="caption1" style={styles.levelDescription}>
               {level.description}
             </Text>
           </View>
         ))}
 
         <View style={styles.footer}>
-          <Button title="Save Changes" variant="primary" onPress={handleSave} />
+          <Button onPress={handleSave}>Save Changes</Button>
         </View>
       </ScrollView>
     </ScreenLayout>

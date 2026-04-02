@@ -1,4 +1,10 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { ThreatLevel } from '@types';
+
+export interface AlertFilterParams {
+  threatLevels: ThreatLevel[];
+  detectionTypes: string[];
+}
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
@@ -25,9 +31,9 @@ export type HomeStackParamList = {
 };
 
 export type AlertsStackParamList = {
-  AlertList: undefined;
+  AlertList: { filters?: AlertFilterParams } | undefined;
   AlertDetail: { alertId: string };
-  AlertFilter: undefined;
+  AlertFilter: { filters?: AlertFilterParams } | undefined;
   DeviceFingerprint: { macAddress: string };
 };
 

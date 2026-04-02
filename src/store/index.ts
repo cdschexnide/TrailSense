@@ -7,13 +7,21 @@ import settingsReducer from './slices/settingsSlice';
 import uiReducer from './slices/uiSlice';
 import blockedDevicesReducer from './slices/blockedDevicesSlice';
 
-const persistConfig = {
-  key: 'root',
+const authPersistConfig = {
+  key: 'auth',
   storage: AsyncStorage,
-  whitelist: ['auth', 'settings'],
 };
 
-const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const settingsPersistConfig = {
+  key: 'settings',
+  storage: AsyncStorage,
+};
+
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
+const persistedSettingsReducer = persistReducer(
+  settingsPersistConfig,
+  settingsReducer
+);
 const blockedDevicesPersistConfig = {
   key: 'blockedDevices',
   storage: AsyncStorage,
@@ -27,7 +35,7 @@ export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     user: userReducer,
-    settings: settingsReducer,
+    settings: persistedSettingsReducer,
     ui: uiReducer,
     blockedDevices: persistedBlockedDevicesReducer,
   },

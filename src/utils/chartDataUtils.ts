@@ -1,17 +1,29 @@
 import { AnalyticsData } from '@types';
 import { format, parseISO } from 'date-fns';
+import type { Theme } from '@theme/types';
+
+type ChartColors = Pick<
+  Theme['colors'],
+  | 'systemPurple'
+  | 'systemBlue'
+  | 'systemTeal'
+  | 'systemRed'
+  | 'systemOrange'
+  | 'systemYellow'
+  | 'systemGreen'
+>;
 
 /**
  * Transform analytics data for line chart (detections over time)
  */
 export const prepareDetectionsOverTimeData = (analytics: AnalyticsData) => {
+  const dailyDetections = analytics.dailyDetections ?? [];
+
   return {
-    labels: analytics.dailyDetections.map(d =>
-      format(parseISO(d.date), 'MM/dd')
-    ),
+    labels: dailyDetections.map(d => format(parseISO(d.date), 'MM/dd')),
     datasets: [
       {
-        data: analytics.dailyDetections.map(d => d.count),
+        data: dailyDetections.map(d => d.count),
       },
     ],
   };
@@ -22,7 +34,7 @@ export const prepareDetectionsOverTimeData = (analytics: AnalyticsData) => {
  */
 export const prepareDetectionTypesData = (
   analytics: AnalyticsData,
-  colors: any
+  colors: ChartColors
 ) => {
   return [
     {
@@ -48,7 +60,7 @@ export const prepareDetectionTypesData = (
  */
 export const prepareHourlyDistributionData = (analytics: AnalyticsData) => {
   // Show only peak hours for better readability
-  const peakHours = analytics.hourlyDistribution.slice(6, 22); // 6am to 10pm
+  const peakHours = (analytics.hourlyDistribution ?? []).slice(6, 22); // 6am to 10pm
 
   return {
     labels: peakHours.map(h => `${h.hour}h`),
@@ -65,7 +77,7 @@ export const prepareHourlyDistributionData = (analytics: AnalyticsData) => {
  */
 export const prepareThreatLevelsData = (
   analytics: AnalyticsData,
-  colors: any
+  colors: ChartColors
 ) => {
   return [
     {

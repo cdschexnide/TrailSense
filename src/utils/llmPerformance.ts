@@ -38,7 +38,7 @@ class LLMPerformanceTracker {
     }
 
     llmLogger.info(
-      `Inference: ${durationMs}ms, ${metric.tokensPerSecond.toFixed(1)} tokens/sec`
+      `Inference: ${durationMs}ms, ${(metric.tokensPerSecond ?? 0).toFixed(1)} tokens/sec`
     );
   }
 

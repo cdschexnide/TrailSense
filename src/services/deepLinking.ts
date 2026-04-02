@@ -1,5 +1,5 @@
-import messaging from '@react-native-firebase/messaging';
 import { Linking } from 'react-native';
+import { getMessagingModule, RemoteMessage } from './firebaseMessaging';
 
 export interface NotificationData {
   type: 'alert' | 'device' | 'general';
@@ -12,7 +12,12 @@ export class DeepLinkingService {
    * Handle initial notification when app is opened from quit state
    */
   static async getInitialNotification() {
-    const remoteMessage = await messaging().getInitialNotification();
+    const messaging = getMessagingModule();
+    if (!messaging) {
+      return null;
+    }
+
+    const remoteMessage = await messaging.getInitialNotification();
     if (remoteMessage) {
       return this.parseNotificationData(remoteMessage.data);
     }
@@ -23,7 +28,12 @@ export class DeepLinkingService {
    * Handle notification tap when app is in background/foreground
    */
   static onNotificationOpenedApp(callback: (data: NotificationData) => void) {
-    return messaging().onNotificationOpenedApp(remoteMessage => {
+    const messaging = getMessagingModule();
+    if (!messaging) {
+      return () => undefined;
+    }
+
+    return messaging.onNotificationOpenedApp((remoteMessage: RemoteMessage) => {
       const data = this.parseNotificationData(remoteMessage.data);
       if (data) {
         callback(data);
@@ -48,11 +58,14 @@ export class DeepLinkingService {
   /**
    * Parse notification data
    */
-  private static parseNotificationData(data: any): NotificationData | null {
+  private static parseNotificationData(
+    data?: RemoteMessage['data']
+  ): NotificationData | null {
     if (!data) return null;
 
     return {
-      type: data.type || 'general',
+      type:
+        data.type === 'alert' || data.type === 'device' ? data.type : 'general',
       id: data.id,
       screen: data.screen,
     };
@@ -63,7 +76,7 @@ export class DeepLinkingService {
    */
   static getNavigationRoute(
     data: NotificationData
-  ): { screen: string; params?: any } | null {
+  ): { screen: string; params?: Record<string, string | undefined> } | null {
     switch (data.type) {
       case 'alert':
         return {

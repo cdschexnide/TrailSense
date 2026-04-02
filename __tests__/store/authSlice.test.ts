@@ -1,15 +1,34 @@
-import authReducer, {
+import { AuthService } from '@services/authService';
+import { configureStore } from '@reduxjs/toolkit';
+
+jest.mock('@services/authService', () => ({
+  AuthService: {
+    login: jest.fn(),
+    register: jest.fn(),
+    logout: jest.fn(),
+    getTokens: jest.fn(),
+  },
+}));
+jest.mock('@/config/demoMode', () => ({
+  setDemoMode: jest.fn().mockResolvedValue(undefined),
+  isDemoMode: jest.fn().mockReturnValue(false),
+}));
+jest.mock('@api/websocket', () => ({
+  websocketService: {
+    disconnect: jest.fn(),
+  },
+}));
+
+const {
+  default: authReducer,
   login,
   register,
   logout,
   checkAuth,
   setBiometricEnabled,
   clearAuth,
-} from '@store/slices/authSlice';
-import { AuthService } from '@services/authService';
-import { configureStore } from '@reduxjs/toolkit';
-
-jest.mock('@services/authService');
+  setCredentials,
+} = require('@store/slices/authSlice');
 
 const mockedAuthService = AuthService as jest.Mocked<typeof AuthService>;
 
@@ -39,6 +58,30 @@ describe('authSlice', () => {
       expect(state.user).toBeNull();
       expect(state.tokens).toBeNull();
       expect(state.isAuthenticated).toBe(false);
+    });
+
+    it('should handle setCredentials', () => {
+      const payload = {
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'user',
+          createdAt: '2025-01-01',
+        },
+        tokens: {
+          accessToken: 'access_token',
+          refreshToken: 'refresh_token',
+          expiresIn: 900,
+        },
+      };
+
+      store.dispatch(setCredentials(payload));
+
+      const state = store.getState().auth;
+      expect(state.user).toEqual(payload.user);
+      expect(state.tokens).toEqual(payload.tokens);
+      expect(state.isAuthenticated).toBe(true);
     });
   });
 

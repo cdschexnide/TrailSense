@@ -11,7 +11,11 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
-import { TriangulatedPosition, TriangulationSignalType } from '@/types/triangulation';
+import type { IconName } from '@components/atoms/Icon/Icon';
+import {
+  TriangulatedPosition,
+  TriangulationSignalType,
+} from '@/types/triangulation';
 import { useTheme } from '@hooks/useTheme';
 
 interface PositionListItemProps {
@@ -19,7 +23,7 @@ interface PositionListItemProps {
   onPress: () => void;
 }
 
-const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, string> = {
+const SIGNAL_TYPE_ICONS: Record<TriangulationSignalType, IconName> = {
   wifi: 'wifi',
   bluetooth: 'bluetooth',
   cellular: 'cellular',
@@ -46,7 +50,7 @@ export const PositionListItem: React.FC<PositionListItemProps> = ({
   };
 
   const color = signalTypeColors[position.signalType] || colors.tertiaryLabel;
-  const iconName = SIGNAL_TYPE_ICONS[position.signalType] || 'ellipse';
+  const iconName = SIGNAL_TYPE_ICONS[position.signalType] ?? 'ellipse';
 
   return (
     <TouchableOpacity
@@ -62,7 +66,8 @@ export const PositionListItem: React.FC<PositionListItemProps> = ({
           {SIGNAL_TYPE_LABELS[position.signalType]} Device
         </Text>
         <Text variant="footnote" color="secondaryLabel">
-          {position.fingerprintHash} · {position.confidence}% · ±{position.accuracyMeters?.toFixed(1) || '?'}m
+          {position.fingerprintHash} · {position.confidence}% · ±
+          {position.accuracyMeters?.toFixed(1) || '?'}m
         </Text>
       </View>
       <Icon name="chevron-forward" size={16} color={colors.tertiaryLabel} />

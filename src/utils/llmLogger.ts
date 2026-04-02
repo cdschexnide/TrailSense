@@ -10,7 +10,7 @@ export enum LogLevel {
 class LLMLogger {
   private enabled: boolean = __DEV__;
 
-  private log(level: LogLevel, message: string, data?: any) {
+  private log(level: LogLevel, message: string, data?: unknown) {
     if (!this.enabled) return;
 
     const timestamp = new Date().toISOString();
@@ -25,23 +25,23 @@ class LLMLogger {
         console.warn(prefix, message, data);
         break;
       default:
-        console.log(prefix, message, data);
+        console.warn(prefix, message, data);
     }
   }
 
-  debug(message: string, data?: any) {
+  debug(message: string, data?: unknown) {
     this.log(LogLevel.DEBUG, message, data);
   }
 
-  info(message: string, data?: any) {
+  info(message: string, data?: unknown) {
     this.log(LogLevel.INFO, message, data);
   }
 
-  warn(message: string, data?: any) {
+  warn(message: string, data?: unknown) {
     this.log(LogLevel.WARN, message, data);
   }
 
-  error(message: string, error?: any) {
+  error(message: string, error?: unknown) {
     this.log(LogLevel.ERROR, message, error);
   }
 

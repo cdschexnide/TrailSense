@@ -13,7 +13,10 @@ describe('useRadarProjection', () => {
       })
     );
 
-    const point = result.current.project(PROPERTY_CENTER.latitude, PROPERTY_CENTER.longitude);
+    const point = result.current.project(
+      PROPERTY_CENTER.latitude,
+      PROPERTY_CENTER.longitude
+    );
     expect(point.x).toBeCloseTo(175, 0);
     expect(point.y).toBeCloseTo(175, 0);
   });
@@ -27,7 +30,10 @@ describe('useRadarProjection', () => {
       })
     );
 
-    const point = result.current.project(PROPERTY_CENTER.latitude + 0.0022, PROPERTY_CENTER.longitude);
+    const point = result.current.project(
+      PROPERTY_CENTER.latitude + 0.0022,
+      PROPERTY_CENTER.longitude
+    );
     expect(point.x).toBeCloseTo(175, 0);
     expect(point.y).toBeLessThan(175);
   });
@@ -41,7 +47,10 @@ describe('useRadarProjection', () => {
       })
     );
 
-    const point = result.current.project(PROPERTY_CENTER.latitude + 0.01, PROPERTY_CENTER.longitude);
+    const point = result.current.project(
+      PROPERTY_CENTER.latitude + 0.01,
+      PROPERTY_CENTER.longitude
+    );
     const distance = Math.sqrt((point.x - 175) ** 2 + (point.y - 175) ** 2);
     expect(distance).toBeCloseTo(165, -1);
   });

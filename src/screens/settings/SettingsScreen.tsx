@@ -10,29 +10,38 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, Pressable, Alert, Image } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { Icon } from '@components/atoms/Icon';
 import { Text } from '@components/atoms/Text';
-import { useAppSelector } from '@store/index';
-import { ScreenLayout, useToast } from '@components/templates';
+import { useAppSelector, useAppDispatch } from '@store/index';
+import { ScreenLayout } from '@components/templates';
 import { GroupedListSection } from '@components/molecules/GroupedListSection';
 import { GroupedListRow } from '@components/molecules/GroupedListRow';
 import { useTheme } from '@hooks/useTheme';
-import { isDemoMode, setDemoMode } from '@/config/demoMode';
+import { isDemoMode } from '@/config/demoMode';
 import { featureFlagsManager } from '@/config/featureFlags';
-import { AnalyticsEvents, logEvent } from '@services/analyticsEvents';
+import { logout } from '@store/slices/authSlice';
+import { clearUser } from '@store/slices/userSlice';
+import { resetSettings } from '@store/slices/settingsSlice';
+import { revertDemoModeConfig } from '@/config/demoModeRuntime';
+import { MoreStackParamList } from '@navigation/types';
+import footerLogo from '@assets/images/SmallTrailSenseCompanyLogo.png';
 
-export const SettingsScreen = ({ navigation }: any) => {
+type Props = NativeStackScreenProps<MoreStackParamList, 'Settings'>;
+
+export const SettingsScreen = ({ navigation }: Props) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const settings = useAppSelector(state => state.settings);
+  const settings = useAppSelector(state => state.settings.settings);
   const user = useAppSelector(state => state.auth.user);
   const [themePreference, setThemePreference] = useState<string>('System');
-  const [isDemoEnabled, setIsDemoEnabled] = useState<boolean>(isDemoMode());
-  const { showToast } = useToast();
+  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
 
   // Load theme preference when screen comes into focus
   useFocusEffect(
@@ -49,27 +58,10 @@ export const SettingsScreen = ({ navigation }: any) => {
         } else {
           setThemePreference('System');
         }
-
-        setIsDemoEnabled(isDemoMode());
       };
       loadThemePreference();
     }, [])
   );
-
-  const handleToggleDemo = async () => {
-    const newValue = !isDemoEnabled;
-
-    await setDemoMode(newValue);
-    featureFlagsManager.updateFlags({ DEMO_MODE: newValue });
-    setIsDemoEnabled(newValue);
-    logEvent(AnalyticsEvents.DEMO_MODE_TOGGLED, { enabled: newValue });
-    showToast(
-      newValue
-        ? 'Demo mode enabled. Restart app to load sample data.'
-        : 'Demo mode disabled. Restart app to return to live data.',
-      'info'
-    );
-  };
 
   const handleLogout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -78,8 +70,16 @@ export const SettingsScreen = ({ navigation }: any) => {
       {
         text: 'Logout',
         style: 'destructive',
-        onPress: () => {
-          console.log('Logging out...');
+        onPress: async () => {
+          if (isDemoMode()) {
+            featureFlagsManager.updateFlags({ DEMO_MODE: false });
+            revertDemoModeConfig(queryClient);
+            queryClient.clear();
+            dispatch(clearUser());
+            dispatch(resetSettings());
+          }
+
+          await dispatch(logout());
         },
       },
     ]);
@@ -194,16 +194,6 @@ export const SettingsScreen = ({ navigation }: any) => {
           showChevron
           onPress={() => navigation.navigate('Theme')}
         />
-        <GroupedListRow
-          icon="flask-outline"
-          iconColor={colors.systemOrange}
-          title="Demo Mode"
-          subtitle="Show sample data for demonstrations"
-          value={isDemoEnabled ? 'On' : 'Off'}
-          onPress={() => {
-            void handleToggleDemo();
-          }}
-        />
       </GroupedListSection>
 
       {/* Security */}
@@ -286,7 +276,7 @@ export const SettingsScreen = ({ navigation }: any) => {
       {/* App Info Footer */}
       <View style={styles.footer}>
         <Image
-          source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+          source={footerLogo}
           style={styles.footerLogo}
           resizeMode="contain"
         />

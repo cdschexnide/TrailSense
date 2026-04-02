@@ -76,7 +76,11 @@ export const DeviceFingerprintScreen = ({ navigation, route }: any) => {
       header={{
         title: knownDevice?.name || 'Device Fingerprint',
         subtitle: macAddress,
-        showBack: true,
+        showBack:
+          typeof navigation.canGoBack === 'function'
+            ? navigation.canGoBack()
+            : true,
+        onBackPress: () => navigation.goBack(),
       }}
     >
       <View style={styles.content}>

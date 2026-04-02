@@ -4,7 +4,7 @@
  * Blue pulsing marker showing the TrailSense device's GPS location
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { PointAnnotation } from '@rnmapbox/maps';
 
@@ -19,7 +19,7 @@ export const TrailSenseDeviceMarker: React.FC<TrailSenseDeviceMarkerProps> = ({
   coordinate,
   isOnline = true,
 }) => {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const [pulseAnim] = useState(() => new Animated.Value(1));
 
   // Pulsing animation when online
   useEffect(() => {
@@ -41,18 +41,21 @@ export const TrailSenseDeviceMarker: React.FC<TrailSenseDeviceMarkerProps> = ({
       pulse.start();
       return () => pulse.stop();
     }
+
+    return undefined;
   }, [isOnline, pulseAnim]);
 
-  const pulseOpacity = pulseAnim.interpolate({
-    inputRange: [1, 1.3],
-    outputRange: [0.4, 0],
-  });
+  const pulseOpacity = useMemo(
+    () =>
+      pulseAnim.interpolate({
+        inputRange: [1, 1.3],
+        outputRange: [0.4, 0],
+      }),
+    [pulseAnim]
+  );
 
   return (
-    <PointAnnotation
-      id={`trailsense-device-${id}`}
-      coordinate={coordinate}
-    >
+    <PointAnnotation id={`trailsense-device-${id}`} coordinate={coordinate}>
       <View style={styles.container}>
         {/* Pulse ring (only when online) */}
         {isOnline && (

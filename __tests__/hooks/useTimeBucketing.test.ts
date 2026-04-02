@@ -5,7 +5,11 @@ import { useTimeBucketing } from '@hooks/useTimeBucketing';
 
 const PROPERTY_CENTER = { latitude: 31.530757, longitude: -110.287842 };
 
-function makePosition(hour: number, minute: number, hash = 'fp-test'): TriangulatedPosition {
+function makePosition(
+  hour: number,
+  minute: number,
+  hash = 'fp-test'
+): TriangulatedPosition {
   const timestamp = new Date();
   timestamp.setHours(hour, minute, 0, 0);
 
@@ -23,7 +27,11 @@ function makePosition(hour: number, minute: number, hash = 'fp-test'): Triangula
   };
 }
 
-function makeAlert(hour: number, minute: number, macAddress = 'AA:BB:CC:DD:EE:01'): Alert {
+function makeAlert(
+  hour: number,
+  minute: number,
+  macAddress = 'AA:BB:CC:DD:EE:01'
+): Alert {
   const timestamp = new Date();
   timestamp.setHours(hour, minute, 0, 0);
 
@@ -44,7 +52,11 @@ describe('useTimeBucketing', () => {
   it('sorts positions into minute buckets', () => {
     const { result } = renderHook(() =>
       useTimeBucketing({
-        positions: [makePosition(10, 15), makePosition(10, 15), makePosition(10, 16)],
+        positions: [
+          makePosition(10, 15),
+          makePosition(10, 15),
+          makePosition(10, 16),
+        ],
         alerts: [makeAlert(10, 15), makeAlert(10, 16)],
         propertyCenter: PROPERTY_CENTER,
         canvasSize: 350,

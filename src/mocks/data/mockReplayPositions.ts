@@ -4,7 +4,7 @@ import {
   TriangulationSignalType,
 } from '@/types/triangulation';
 
-const PROPERTY_CENTER = { latitude: 31.530757, longitude: -110.287842 };
+const PROPERTY_CENTER = { latitude: 30.396526, longitude: -94.317806 };
 const METERS_PER_DEG_LAT = 111_320;
 const METERS_PER_DEG_LNG =
   111_320 * Math.cos((PROPERTY_CENTER.latitude * Math.PI) / 180);

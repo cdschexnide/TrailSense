@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, Switch, Pressable, Platform } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -16,18 +17,25 @@ import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
-import { useAppSelector, useAppDispatch } from '@store';
+import { useAppSelector, useAppDispatch } from '@store/index';
 import { useTheme } from '@hooks/useTheme';
+import { updateSettings } from '@store/slices/settingsSlice';
+import { MoreStackParamList } from '@navigation/types';
 
-export const QuietHoursScreen = ({ navigation }: any) => {
+type Props = NativeStackScreenProps<MoreStackParamList, 'QuietHours'>;
+
+export const QuietHoursScreen = ({ navigation }: Props) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const quietHoursEnabled = useAppSelector(state => state.settings?.quietHoursEnabled) || false;
+  const settings = useAppSelector(state => state.settings.settings);
   const dispatch = useAppDispatch();
 
+  const quietHoursEnabled = settings.quietHoursEnabled;
+  const initialStart = parseTime(settings.quietHoursStart);
+  const initialEnd = parseTime(settings.quietHoursEnd);
   const [enabled, setEnabled] = useState(quietHoursEnabled);
-  const [startTime, setStartTime] = useState(new Date(2024, 0, 1, 22, 0));
-  const [endTime, setEndTime] = useState(new Date(2024, 0, 1, 7, 0));
+  const [startTime, setStartTime] = useState(initialStart);
+  const [endTime, setEndTime] = useState(initialEnd);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
 
@@ -41,11 +49,13 @@ export const QuietHoursScreen = ({ navigation }: any) => {
 
   const handleSave = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    console.log('Saving quiet hours:', {
-      enabled,
-      startTime: formatTime(startTime),
-      endTime: formatTime(endTime),
-    });
+    dispatch(
+      updateSettings({
+        quietHoursEnabled: enabled,
+        quietHoursStart: serializeTime(startTime),
+        quietHoursEnd: serializeTime(endTime),
+      })
+    );
     navigation.goBack();
   };
 
@@ -59,7 +69,12 @@ export const QuietHoursScreen = ({ navigation }: any) => {
       scrollable
     >
       {/* Hero Card */}
-      <View style={[styles.heroCard, { backgroundColor: colors.secondarySystemBackground }]}>
+      <View
+        style={[
+          styles.heroCard,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
         <LinearGradient
           colors={['#5856D6', '#AF52DE']}
           start={{ x: 0, y: 0 }}
@@ -68,19 +83,33 @@ export const QuietHoursScreen = ({ navigation }: any) => {
         >
           <Icon name="moon" size={36} color="#FFFFFF" />
         </LinearGradient>
-        <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={{ marginTop: 16 }}
+        >
           Quiet Hours
         </Text>
-        <Text variant="subheadline" style={[styles.heroDescription, { color: colors.secondaryLabel }]}>
-          Silence notifications during specific hours. Critical alerts will still appear but without sound.
+        <Text
+          variant="subheadline"
+          style={[styles.heroDescription, { color: colors.secondaryLabel }]}
+        >
+          Silence notifications during specific hours. Critical alerts will
+          still appear but without sound.
         </Text>
         <View style={styles.masterToggle}>
-          <Text variant="body" weight="semibold" color="label" style={{ marginRight: 12 }}>
+          <Text
+            variant="body"
+            weight="semibold"
+            color="label"
+            style={{ marginRight: 12 }}
+          >
             {enabled ? 'Enabled' : 'Disabled'}
           </Text>
           <Switch
             value={enabled}
-            onValueChange={(val) => {
+            onValueChange={val => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               setEnabled(val);
             }}
@@ -105,8 +134,17 @@ export const QuietHoursScreen = ({ navigation }: any) => {
               pressed && { opacity: 0.7 },
             ]}
           >
-            <View style={[styles.timeIcon, { backgroundColor: colors.systemOrange + '20' }]}>
-              <Icon name="sunny-outline" size={22} color={colors.systemOrange} />
+            <View
+              style={[
+                styles.timeIcon,
+                { backgroundColor: colors.systemOrange + '20' },
+              ]}
+            >
+              <Icon
+                name="sunny-outline"
+                size={22}
+                color={colors.systemOrange}
+              />
             </View>
             <View style={styles.timeContent}>
               <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
@@ -116,7 +154,11 @@ export const QuietHoursScreen = ({ navigation }: any) => {
                 {formatTime(startTime)}
               </Text>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.tertiaryLabel} />
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={colors.tertiaryLabel}
+            />
           </Pressable>
 
           {/* End Time */}
@@ -131,7 +173,12 @@ export const QuietHoursScreen = ({ navigation }: any) => {
               pressed && { opacity: 0.7 },
             ]}
           >
-            <View style={[styles.timeIcon, { backgroundColor: colors.systemYellow + '20' }]}>
+            <View
+              style={[
+                styles.timeIcon,
+                { backgroundColor: colors.systemYellow + '20' },
+              ]}
+            >
               <Icon name="sunny" size={22} color={colors.systemYellow} />
             </View>
             <View style={styles.timeContent}>
@@ -142,17 +189,30 @@ export const QuietHoursScreen = ({ navigation }: any) => {
                 {formatTime(endTime)}
               </Text>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.tertiaryLabel} />
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={colors.tertiaryLabel}
+            />
           </Pressable>
 
           {/* Duration Info */}
-          <View style={[styles.durationCard, { backgroundColor: colors.systemIndigo + '10' }]}>
+          <View
+            style={[
+              styles.durationCard,
+              { backgroundColor: colors.systemIndigo + '10' },
+            ]}
+          >
             <Icon name="time-outline" size={20} color={colors.systemIndigo} />
-            <Text variant="subheadline" style={{ color: colors.systemIndigo, marginLeft: 10 }}>
+            <Text
+              variant="subheadline"
+              style={{ color: colors.systemIndigo, marginLeft: 10 }}
+            >
               {(() => {
-                const start = startTime.getHours() * 60 + startTime.getMinutes();
+                const start =
+                  startTime.getHours() * 60 + startTime.getMinutes();
                 const end = endTime.getHours() * 60 + endTime.getMinutes();
-                const diff = end > start ? end - start : (24 * 60 - start) + end;
+                const diff = end > start ? end - start : 24 * 60 - start + end;
                 const hours = Math.floor(diff / 60);
                 const mins = diff % 60;
                 return `${hours}h ${mins}m quiet time`;
@@ -164,17 +224,38 @@ export const QuietHoursScreen = ({ navigation }: any) => {
 
       {/* Info Section */}
       <ListSection header="ABOUT" style={styles.section}>
-        <View style={[styles.infoCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.infoCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           <View style={styles.infoRow}>
-            <Icon name="notifications-off-outline" size={20} color={colors.secondaryLabel} />
-            <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginLeft: 12, flex: 1 }}>
+            <Icon
+              name="notifications-off-outline"
+              size={20}
+              color={colors.secondaryLabel}
+            />
+            <Text
+              variant="subheadline"
+              style={{ color: colors.secondaryLabel, marginLeft: 12, flex: 1 }}
+            >
               Regular alerts will be silenced during quiet hours
             </Text>
           </View>
-          <View style={[styles.infoDivider, { backgroundColor: colors.separator }]} />
+          <View
+            style={[styles.infoDivider, { backgroundColor: colors.separator }]}
+          />
           <View style={styles.infoRow}>
-            <Icon name="alert-circle-outline" size={20} color={colors.systemRed} />
-            <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginLeft: 12, flex: 1 }}>
+            <Icon
+              name="alert-circle-outline"
+              size={20}
+              color={colors.systemRed}
+            />
+            <Text
+              variant="subheadline"
+              style={{ color: colors.secondaryLabel, marginLeft: 12, flex: 1 }}
+            >
               Critical alerts will still appear visually
             </Text>
           </View>
@@ -194,7 +275,11 @@ export const QuietHoursScreen = ({ navigation }: any) => {
             style={styles.saveButton}
           >
             <Icon name="checkmark-circle" size={20} color="#FFFFFF" />
-            <Text variant="headline" weight="semibold" style={{ color: '#FFFFFF', marginLeft: 8 }}>
+            <Text
+              variant="headline"
+              weight="semibold"
+              style={{ color: '#FFFFFF', marginLeft: 8 }}
+            >
               Save Changes
             </Text>
           </LinearGradient>
@@ -208,7 +293,7 @@ export const QuietHoursScreen = ({ navigation }: any) => {
           mode="time"
           is24Hour={false}
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, selectedDate) => {
+          onChange={(_event, selectedDate) => {
             setShowStartPicker(Platform.OS === 'ios');
             if (selectedDate) {
               setStartTime(selectedDate);
@@ -222,7 +307,7 @@ export const QuietHoursScreen = ({ navigation }: any) => {
           mode="time"
           is24Hour={false}
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, selectedDate) => {
+          onChange={(_event, selectedDate) => {
             setShowEndPicker(Platform.OS === 'ios');
             if (selectedDate) {
               setEndTime(selectedDate);
@@ -313,3 +398,14 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
 });
+
+function parseTime(value: string): Date {
+  const [hours, minutes] = value.split(':').map(Number);
+  return new Date(2024, 0, 1, hours || 0, minutes || 0);
+}
+
+function serializeTime(value: Date): string {
+  const hours = value.getHours().toString().padStart(2, '0');
+  const minutes = value.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}

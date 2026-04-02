@@ -9,15 +9,11 @@
  */
 
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Pressable,
-} from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
 import { Text, Icon } from '@components/atoms';
+import type { IconName } from '@components/atoms/Icon/Icon';
 import { useTheme } from '@hooks/useTheme';
 
 interface Device {
@@ -75,7 +71,7 @@ export const MapHeaderHero: React.FC<MapHeaderHeroProps> = ({
     return colors.systemRed;
   };
 
-  const getBatteryIcon = (level: number) => {
+  const getBatteryIcon = (level: number): IconName => {
     if (level > 75) return 'battery-full';
     if (level > 50) return 'battery-half';
     if (level > 25) return 'battery-half';
@@ -95,7 +91,11 @@ export const MapHeaderHero: React.FC<MapHeaderHeroProps> = ({
             },
           ]}
         >
-          <Icon name="hardware-chip-outline" size={24} color={colors.tertiaryLabel} />
+          <Icon
+            name="hardware-chip-outline"
+            size={24}
+            color={colors.tertiaryLabel}
+          />
           <Text variant="subheadline" color="tertiaryLabel">
             No device selected
           </Text>
@@ -138,12 +138,16 @@ export const MapHeaderHero: React.FC<MapHeaderHeroProps> = ({
               <Text variant="headline" color="label">
                 {selectedDevice.name}
               </Text>
-              {selectedDevice.latitude != null && selectedDevice.longitude != null && (
+              {selectedDevice.location && (
                 <View style={styles.locationRow}>
-                  <Icon name="location" size={12} color={colors.tertiaryLabel} />
+                  <Icon
+                    name="location"
+                    size={12}
+                    color={colors.tertiaryLabel}
+                  />
                   <Text variant="caption1" color="tertiaryLabel">
-                    {selectedDevice.latitude.toFixed(6)},{' '}
-                    {selectedDevice.longitude.toFixed(6)}
+                    {selectedDevice.location.latitude.toFixed(6)},{' '}
+                    {selectedDevice.location.longitude.toFixed(6)}
                   </Text>
                 </View>
               )}
@@ -177,19 +181,14 @@ export const MapHeaderHero: React.FC<MapHeaderHeroProps> = ({
         </Pressable>
 
         {/* Divider */}
-        <View
-          style={[
-            styles.divider,
-            { backgroundColor: colors.separator },
-          ]}
-        />
+        <View style={[styles.divider, { backgroundColor: colors.separator }]} />
 
         {/* Stats row */}
         <View style={styles.statsRow}>
           {/* Battery */}
           <View style={styles.statItem}>
             <Icon
-              name={getBatteryIcon(selectedDevice.battery) as any}
+              name={getBatteryIcon(selectedDevice.battery)}
               size={16}
               color={getBatteryColor(selectedDevice.battery)}
             />

@@ -19,8 +19,15 @@ describe('settingsSlice', () => {
     settings: {
       theme: 'auto' as const,
       notificationsEnabled: true,
+      pushEnabled: true,
       soundEnabled: true,
       vibrationEnabled: true,
+      notifyCritical: true,
+      notifyHigh: true,
+      notifyMedium: true,
+      notifyLow: false,
+      notifyDeviceOffline: true,
+      notifyLowBattery: true,
       radarUpdateInterval: 60,
       alertSeverityFilter: [],
       mapStyle: 'standard' as const,
@@ -28,6 +35,11 @@ describe('settingsSlice', () => {
       temperatureUnit: 'fahrenheit' as const,
       autoRefresh: true,
       refreshInterval: 300,
+      sensitivity: 'medium' as const,
+      quietHoursEnabled: false,
+      quietHoursStart: '22:00',
+      quietHoursEnd: '07:00',
+      vacationMode: false,
     },
   };
 

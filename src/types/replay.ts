@@ -7,6 +7,8 @@ export interface BucketEntry {
   macAddress: string;
   x: number;
   y: number;
+  latitude: number;
+  longitude: number;
   threatLevel: ThreatLevel;
   confidence: number;
   signalType: DetectionType;

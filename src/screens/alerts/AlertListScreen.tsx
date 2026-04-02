@@ -9,18 +9,20 @@
  * - Screen-specific gradient accents
  */
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { RefreshControl, StyleSheet, View, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAlerts } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
 import { AlertCard, AlertsHeaderHero } from '@components/organisms';
 import { ScreenLayout, EmptyState, ErrorState } from '@components/templates';
 import { SearchBar } from '@components/molecules/SearchBar';
 import { Button, Icon, SkeletonCard } from '@components/atoms';
-import { Alert, ThreatLevel } from '@types';
+import { Alert, Device, ThreatLevel } from '@types';
 import { useTheme } from '@hooks/useTheme';
 import { useBlockedDevices } from '@hooks/useBlockedDevices';
+import { AlertsStackParamList, AlertFilterParams } from '@navigation/types';
 
 // Threat level configuration
 const THREAT_LABELS: Record<ThreatLevel, string> = {
@@ -30,30 +32,38 @@ const THREAT_LABELS: Record<ThreatLevel, string> = {
   low: 'Low',
 };
 
-export const AlertListScreen = ({ navigation }: any) => {
+type Props = NativeStackScreenProps<AlertsStackParamList, 'AlertList'>;
+
+export const AlertListScreen = ({ navigation, route }: Props) => {
   const { theme } = useTheme();
   const colors = theme.colors;
   const { data: alerts, isLoading, error, refetch } = useAlerts();
   const { data: devices } = useDevices();
   const { isBlocked } = useBlockedDevices();
   const [search, setSearch] = useState('');
+  const routeFilters = route.params?.filters;
+  const selectedThreatFilters = useMemo(
+    () => routeFilters?.threatLevels ?? [],
+    [routeFilters?.threatLevels]
+  );
+  const selectedDetectionTypes = useMemo(
+    () => routeFilters?.detectionTypes ?? [],
+    [routeFilters?.detectionTypes]
+  );
 
   // Create device name lookup map
   const deviceNameMap = useMemo(() => {
     const map: Record<string, string> = {};
     if (devices) {
-      devices.forEach((device: any) => {
+      devices.forEach((device: Device) => {
         map[device.id] = device.name;
       });
     }
     return map;
   }, [devices]);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedThreatFilter, setSelectedThreatFilter] =
-    useState<ThreatLevel | null>(null);
-
   // Animated scroll value for header
-  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollY = useMemo(() => new Animated.Value(0), []);
 
   // Calculate threat level counts
   const threatCounts = useMemo(() => {
@@ -92,16 +102,28 @@ export const AlertListScreen = ({ navigation }: any) => {
     }
 
     // Filter by threat level
-    if (selectedThreatFilter) {
-      result = result.filter(
-        (alert: Alert) => alert.threatLevel === selectedThreatFilter
+    if (selectedThreatFilters.length > 0) {
+      result = result.filter((alert: Alert) =>
+        selectedThreatFilters.includes(alert.threatLevel)
+      );
+    }
+
+    if (selectedDetectionTypes.length > 0) {
+      result = result.filter((alert: Alert) =>
+        selectedDetectionTypes.includes(alert.detectionType)
       );
     }
 
     result = result.filter((alert: Alert) => !isBlocked(alert.macAddress));
 
     return result;
-  }, [alerts, search, selectedThreatFilter, isBlocked]);
+  }, [
+    alerts,
+    search,
+    selectedThreatFilters,
+    selectedDetectionTypes,
+    isBlocked,
+  ]);
 
   if (isLoading) {
     return (
@@ -128,12 +150,10 @@ export const AlertListScreen = ({ navigation }: any) => {
 
   if (error) return <ErrorState message="Failed to load alerts" />;
 
-  const handleDismiss = (alertId: string) => {
-    console.log('Dismissing alert:', alertId);
-  };
+  const handleDismiss = () => {};
 
   const handleAddToKnown = (macAddress: string) => {
-    navigation.navigate('MoreTab', {
+    navigation.getParent()?.navigate('MoreTab', {
       screen: 'AddKnownDevice',
       params: { macAddress },
     });
@@ -147,7 +167,12 @@ export const AlertListScreen = ({ navigation }: any) => {
   };
 
   const handleFilterSelect = (level: ThreatLevel | null) => {
-    setSelectedThreatFilter(level);
+    const nextFilters: AlertFilterParams = {
+      threatLevels: level ? [level] : [],
+      detectionTypes: selectedDetectionTypes,
+    };
+
+    navigation.setParams({ filters: nextFilters });
   };
 
   // Hero section component
@@ -157,7 +182,7 @@ export const AlertListScreen = ({ navigation }: any) => {
       {threatCounts.total > 0 && (
         <AlertsHeaderHero
           threatCounts={threatCounts}
-          selectedFilter={selectedThreatFilter}
+          selectedFilter={selectedThreatFilters[0] || null}
           onFilterSelect={handleFilterSelect}
         />
       )}
@@ -172,7 +197,14 @@ export const AlertListScreen = ({ navigation }: any) => {
         rightActions: (
           <Button
             buttonStyle="plain"
-            onPress={() => navigation.navigate('AlertFilter')}
+            onPress={() =>
+              navigation.navigate('AlertFilter', {
+                filters: {
+                  threatLevels: selectedThreatFilters,
+                  detectionTypes: selectedDetectionTypes,
+                },
+              })
+            }
             leftIcon={<Icon name="options" size={20} color="systemBlue" />}
           >
             Filter
@@ -228,16 +260,22 @@ export const AlertListScreen = ({ navigation }: any) => {
             title={
               search
                 ? 'No Results'
-                : selectedThreatFilter
-                  ? `No ${THREAT_LABELS[selectedThreatFilter]} Alerts`
-                  : 'No Alerts'
+                : selectedThreatFilters.length > 0
+                  ? `No ${selectedThreatFilters
+                      .map(level => THREAT_LABELS[level])
+                      .join(', ')} Alerts`
+                  : selectedDetectionTypes.length > 0
+                    ? 'No Matching Alert Types'
+                    : 'No Alerts'
             }
             message={
               search
                 ? `No alerts matching "${search}"`
-                : selectedThreatFilter
+                : selectedThreatFilters.length > 0
                   ? 'Try selecting a different filter'
-                  : 'You have no security alerts'
+                  : selectedDetectionTypes.length > 0
+                    ? 'Try selecting a different alert type filter'
+                    : 'You have no security alerts'
             }
           />
         }

@@ -1,39 +1,89 @@
 import { io, Socket } from 'socket.io-client';
 import { WS_URL } from '@constants/config';
 import { Alert } from '@/types/alert';
+import { Device } from '@/types/device';
 import { mockConfig } from '@/config/mockConfig';
 import { mockWebSocketService } from '@/mocks/mockWebSocket';
 
+type DeviceStatusEvent = Partial<Device> & {
+  friendly_name?: string;
+  whitelisted?: boolean;
+  metadata?: {
+    device_name?: string;
+  };
+};
+
+type PositionUpdate = {
+  latitude: number;
+  longitude: number;
+  timestamp?: string;
+  accuracy?: number;
+};
+
+type PositionsUpdatedEvent = {
+  deviceId: string;
+  positions: PositionUpdate[];
+};
+
+type WebSocketEventMap = {
+  alert: Alert;
+  'device-status': DeviceStatusEvent;
+  'positions-updated': PositionsUpdatedEvent;
+  connect: Record<string, never>;
+  disconnect: Record<string, never>;
+};
+
+type WebSocketEventName = keyof WebSocketEventMap;
+type Listener<TEvent extends WebSocketEventName> = (
+  payload: WebSocketEventMap[TEvent]
+) => void;
+
 class WebSocketService {
   private socket: Socket | null = null;
-  private listeners: Map<string, Set<Function>> = new Map();
+  private listeners: Map<
+    WebSocketEventName,
+    Set<Listener<WebSocketEventName>>
+  > = new Map();
+  private mockForwardersRegistered = false;
+  private mockAlertHandler: ((alert: Alert) => void) | null = null;
+  private mockDeviceStatusHandler:
+    | ((status: DeviceStatusEvent) => void)
+    | null = null;
+  private mockPositionsHandler: ((data: PositionsUpdatedEvent) => void) | null =
+    null;
+  private mockConnectHandler: (() => void) | null = null;
+  private mockDisconnectHandler: (() => void) | null = null;
 
   connect(token: string) {
     // Use mock WebSocket if enabled
     if (mockConfig.mockWebSocket) {
-      console.log('[WebSocket] Using mock WebSocket service');
       mockWebSocketService.connect(token);
 
-      // Forward events from mock service to our listeners
-      mockWebSocketService.on('alert', (alert: Alert) => {
-        this.emit('alert', alert);
-      });
+      if (!this.mockForwardersRegistered) {
+        this.mockForwardersRegistered = true;
 
-      mockWebSocketService.on('device-status', status => {
-        this.emit('device-status', status);
-      });
+        this.mockAlertHandler = (alert: Alert) => {
+          this.emit('alert', alert);
+        };
+        this.mockDeviceStatusHandler = status => {
+          this.emit('device-status', status);
+        };
+        this.mockPositionsHandler = data => {
+          this.emit('positions-updated', data);
+        };
+        this.mockConnectHandler = () => {
+          this.emit('connect', {});
+        };
+        this.mockDisconnectHandler = () => {
+          this.emit('disconnect', {});
+        };
 
-      mockWebSocketService.on('positions-updated', (data: { deviceId: string; positions: any[] }) => {
-        this.emit('positions-updated', data);
-      });
-
-      mockWebSocketService.on('connect', () => {
-        this.emit('connect', {});
-      });
-
-      mockWebSocketService.on('disconnect', () => {
-        this.emit('disconnect', {});
-      });
+        mockWebSocketService.on('alert', this.mockAlertHandler);
+        mockWebSocketService.on('device-status', this.mockDeviceStatusHandler);
+        mockWebSocketService.on('positions-updated', this.mockPositionsHandler);
+        mockWebSocketService.on('connect', this.mockConnectHandler);
+        mockWebSocketService.on('disconnect', this.mockDisconnectHandler);
+      }
 
       return;
     }
@@ -48,24 +98,22 @@ class WebSocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('WebSocket connected');
+      this.emit('connect', {});
     });
 
     this.socket.on('disconnect', () => {
-      console.log('WebSocket disconnected');
+      this.emit('disconnect', {});
     });
 
     this.socket.on('alert', (alert: Alert) => {
       this.emit('alert', alert);
     });
 
-    this.socket.on('device-status', status => {
+    this.socket.on('device-status', (status: DeviceStatusEvent) => {
       this.emit('device-status', status);
     });
 
-    // Handle positions-updated event
-    this.socket.on('positions-updated', (data: { deviceId: string; positions: any[] }) => {
-      console.log('[WebSocket] Positions updated:', data.deviceId, data.positions.length);
+    this.socket.on('positions-updated', (data: PositionsUpdatedEvent) => {
       this.emit('positions-updated', data);
     });
   }
@@ -74,6 +122,38 @@ class WebSocketService {
     // Disconnect mock WebSocket if enabled
     if (mockConfig.mockWebSocket) {
       mockWebSocketService.disconnect();
+
+      if (this.mockForwardersRegistered) {
+        if (this.mockAlertHandler) {
+          mockWebSocketService.off('alert', this.mockAlertHandler);
+        }
+        if (this.mockDeviceStatusHandler) {
+          mockWebSocketService.off(
+            'device-status',
+            this.mockDeviceStatusHandler
+          );
+        }
+        if (this.mockPositionsHandler) {
+          mockWebSocketService.off(
+            'positions-updated',
+            this.mockPositionsHandler
+          );
+        }
+        if (this.mockConnectHandler) {
+          mockWebSocketService.off('connect', this.mockConnectHandler);
+        }
+        if (this.mockDisconnectHandler) {
+          mockWebSocketService.off('disconnect', this.mockDisconnectHandler);
+        }
+
+        this.mockAlertHandler = null;
+        this.mockDeviceStatusHandler = null;
+        this.mockPositionsHandler = null;
+        this.mockConnectHandler = null;
+        this.mockDisconnectHandler = null;
+        this.mockForwardersRegistered = false;
+      }
+
       return;
     }
 
@@ -84,24 +164,35 @@ class WebSocketService {
     }
   }
 
-  on(event: string, callback: Function) {
+  on<TEvent extends WebSocketEventName>(
+    event: TEvent,
+    callback: Listener<TEvent>
+  ) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)!.add(callback);
+    this.listeners.get(event)!.add(callback as Listener<WebSocketEventName>);
   }
 
-  off(event: string, callback: Function) {
+  off<TEvent extends WebSocketEventName>(
+    event: TEvent,
+    callback: Listener<TEvent>
+  ) {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
-      callbacks.delete(callback);
+      callbacks.delete(callback as Listener<WebSocketEventName>);
     }
   }
 
-  private emit(event: string, data: any) {
+  private emit<TEvent extends WebSocketEventName>(
+    event: TEvent,
+    data: WebSocketEventMap[TEvent]
+  ) {
     const callbacks = this.listeners.get(event);
     if (callbacks) {
-      callbacks.forEach(callback => callback(data));
+      callbacks.forEach(callback =>
+        callback(data as WebSocketEventMap[WebSocketEventName])
+      );
     }
   }
 }

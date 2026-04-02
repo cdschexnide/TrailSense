@@ -9,17 +9,20 @@
 
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert, TextInput, Pressable } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
-import { Button } from '@components/atoms/Button';
 import { ScreenLayout } from '@components/templates';
 import { ListSection } from '@components/molecules/ListSection';
-import { useAppSelector } from '@store';
+import { useAppSelector } from '@store/index';
 import { useTheme } from '@hooks/useTheme';
+import { MoreStackParamList } from '@navigation/types';
 
-export const ProfileScreen = ({ navigation }: any) => {
+type Props = NativeStackScreenProps<MoreStackParamList, 'Profile'>;
+
+export const ProfileScreen = ({ navigation }: Props) => {
   const { theme } = useTheme();
   const colors = theme.colors;
   const user = useAppSelector(state => state.auth.user);
@@ -27,6 +30,7 @@ export const ProfileScreen = ({ navigation }: any) => {
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
+  const placeholderTextColor = colors.tertiaryLabel;
 
   const handleSave = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -35,7 +39,10 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleChangePassword = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate('ChangePassword');
+    Alert.alert(
+      'Change Password',
+      'Password changes are not wired to a dedicated screen yet.'
+    );
   };
 
   const handleDeleteAccount = () => {
@@ -48,9 +55,7 @@ export const ProfileScreen = ({ navigation }: any) => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
-            console.log('Deleting account...');
-          },
+          onPress: async () => {},
         },
       ]
     );
@@ -89,19 +94,37 @@ export const ProfileScreen = ({ navigation }: any) => {
         >
           <Icon name="camera" size={16} color="#FFFFFF" />
         </Pressable>
-        <Text variant="headline" weight="semibold" color="label" style={{ marginTop: 16 }}>
+        <Text
+          variant="headline"
+          weight="semibold"
+          color="label"
+          style={{ marginTop: 16 }}
+        >
           {name || 'Your Name'}
         </Text>
-        <Text variant="subheadline" style={{ color: colors.secondaryLabel, marginTop: 4 }}>
+        <Text
+          variant="subheadline"
+          style={{ color: colors.secondaryLabel, marginTop: 4 }}
+        >
           {email || 'email@example.com'}
         </Text>
       </View>
 
       {/* Personal Information */}
       <ListSection header="PERSONAL INFORMATION" style={styles.section}>
-        <View style={[styles.inputCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.inputCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           <View style={styles.inputRow}>
-            <View style={[styles.inputIconBox, { backgroundColor: colors.systemBlue + '20' }]}>
+            <View
+              style={[
+                styles.inputIconBox,
+                { backgroundColor: colors.systemBlue + '20' },
+              ]}
+            >
               <Icon name="person-outline" size={18} color={colors.systemBlue} />
             </View>
             <View style={styles.inputContent}>
@@ -113,15 +136,25 @@ export const ProfileScreen = ({ navigation }: any) => {
                 value={name}
                 onChangeText={setName}
                 placeholder="Enter your name"
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor={placeholderTextColor}
               />
             </View>
           </View>
         </View>
 
-        <View style={[styles.inputCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.inputCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           <View style={styles.inputRow}>
-            <View style={[styles.inputIconBox, { backgroundColor: colors.systemOrange + '20' }]}>
+            <View
+              style={[
+                styles.inputIconBox,
+                { backgroundColor: colors.systemOrange + '20' },
+              ]}
+            >
               <Icon name="mail-outline" size={18} color={colors.systemOrange} />
             </View>
             <View style={styles.inputContent}>
@@ -133,7 +166,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="Enter your email"
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor={placeholderTextColor}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -141,9 +174,19 @@ export const ProfileScreen = ({ navigation }: any) => {
           </View>
         </View>
 
-        <View style={[styles.inputCard, { backgroundColor: colors.secondarySystemBackground }]}>
+        <View
+          style={[
+            styles.inputCard,
+            { backgroundColor: colors.secondarySystemBackground },
+          ]}
+        >
           <View style={styles.inputRow}>
-            <View style={[styles.inputIconBox, { backgroundColor: colors.systemGreen + '20' }]}>
+            <View
+              style={[
+                styles.inputIconBox,
+                { backgroundColor: colors.systemGreen + '20' },
+              ]}
+            >
               <Icon name="call-outline" size={18} color={colors.systemGreen} />
             </View>
             <View style={styles.inputContent}>
@@ -155,7 +198,7 @@ export const ProfileScreen = ({ navigation }: any) => {
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="Enter your phone"
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor={placeholderTextColor}
                 keyboardType="phone-pad"
               />
             </View>
@@ -176,7 +219,11 @@ export const ProfileScreen = ({ navigation }: any) => {
             style={styles.saveButton}
           >
             <Icon name="checkmark-circle" size={20} color="#FFFFFF" />
-            <Text variant="headline" weight="semibold" style={{ color: '#FFFFFF', marginLeft: 8 }}>
+            <Text
+              variant="headline"
+              weight="semibold"
+              style={{ color: '#FFFFFF', marginLeft: 8 }}
+            >
               Save Changes
             </Text>
           </LinearGradient>
@@ -193,14 +240,22 @@ export const ProfileScreen = ({ navigation }: any) => {
             pressed && { opacity: 0.7 },
           ]}
         >
-          <View style={[styles.actionIconBox, { backgroundColor: colors.systemIndigo + '20' }]}>
+          <View
+            style={[
+              styles.actionIconBox,
+              { backgroundColor: colors.systemIndigo + '20' },
+            ]}
+          >
             <Icon name="key-outline" size={20} color={colors.systemIndigo} />
           </View>
           <View style={styles.actionContent}>
             <Text variant="body" weight="semibold" color="label">
               Change Password
             </Text>
-            <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 2 }}>
+            <Text
+              variant="caption1"
+              style={{ color: colors.secondaryLabel, marginTop: 2 }}
+            >
               Update your account password
             </Text>
           </View>
@@ -214,18 +269,33 @@ export const ProfileScreen = ({ navigation }: any) => {
           onPress={handleDeleteAccount}
           style={({ pressed }) => [
             styles.dangerCard,
-            { backgroundColor: colors.systemRed + '10', borderColor: colors.systemRed + '30' },
+            {
+              backgroundColor: colors.systemRed + '10',
+              borderColor: colors.systemRed + '30',
+            },
             pressed && { opacity: 0.7 },
           ]}
         >
-          <View style={[styles.actionIconBox, { backgroundColor: colors.systemRed + '20' }]}>
+          <View
+            style={[
+              styles.actionIconBox,
+              { backgroundColor: colors.systemRed + '20' },
+            ]}
+          >
             <Icon name="trash-outline" size={20} color={colors.systemRed} />
           </View>
           <View style={styles.actionContent}>
-            <Text variant="body" weight="semibold" style={{ color: colors.systemRed }}>
+            <Text
+              variant="body"
+              weight="semibold"
+              style={{ color: colors.systemRed }}
+            >
               Delete Account
             </Text>
-            <Text variant="caption1" style={{ color: colors.systemRed + 'CC', marginTop: 2 }}>
+            <Text
+              variant="caption1"
+              style={{ color: colors.systemRed + 'CC', marginTop: 2 }}
+            >
               Permanently remove your account and data
             </Text>
           </View>

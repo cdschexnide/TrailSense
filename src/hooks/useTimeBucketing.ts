@@ -102,6 +102,8 @@ export function useTimeBucketing({
         macAddress: matchingAlert?.macAddress ?? position.macAddress ?? '',
         x,
         y,
+        latitude: position.latitude,
+        longitude: position.longitude,
         threatLevel: matchingAlert?.threatLevel ?? 'medium',
         confidence: position.confidence,
         signalType: mapSignalType(position.signalType),

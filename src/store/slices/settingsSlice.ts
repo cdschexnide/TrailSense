@@ -3,8 +3,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 export interface AppSettings {
   theme: 'light' | 'dark' | 'auto';
   notificationsEnabled: boolean;
+  pushEnabled: boolean;
   soundEnabled: boolean;
   vibrationEnabled: boolean;
+  notifyCritical: boolean;
+  notifyHigh: boolean;
+  notifyMedium: boolean;
+  notifyLow: boolean;
+  notifyDeviceOffline: boolean;
+  notifyLowBattery: boolean;
   radarUpdateInterval: number; // in seconds
   alertSeverityFilter: string[];
   mapStyle: 'standard' | 'satellite' | 'terrain';
@@ -12,6 +19,11 @@ export interface AppSettings {
   temperatureUnit: 'fahrenheit' | 'celsius';
   autoRefresh: boolean;
   refreshInterval: number; // in seconds
+  sensitivity: 'low' | 'medium' | 'high' | 'maximum';
+  quietHoursEnabled: boolean;
+  quietHoursStart: string;
+  quietHoursEnd: string;
+  vacationMode: boolean;
 }
 
 interface SettingsState {
@@ -22,8 +34,15 @@ const initialState: SettingsState = {
   settings: {
     theme: 'auto',
     notificationsEnabled: true,
+    pushEnabled: true,
     soundEnabled: true,
     vibrationEnabled: true,
+    notifyCritical: true,
+    notifyHigh: true,
+    notifyMedium: true,
+    notifyLow: false,
+    notifyDeviceOffline: true,
+    notifyLowBattery: true,
     radarUpdateInterval: 60,
     alertSeverityFilter: [],
     mapStyle: 'standard',
@@ -31,6 +50,11 @@ const initialState: SettingsState = {
     temperatureUnit: 'fahrenheit',
     autoRefresh: true,
     refreshInterval: 300,
+    sensitivity: 'medium',
+    quietHoursEnabled: false,
+    quietHoursStart: '22:00',
+    quietHoursEnd: '07:00',
+    vacationMode: false,
   },
 };
 

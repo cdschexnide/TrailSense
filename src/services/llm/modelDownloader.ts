@@ -10,10 +10,25 @@ import { LLM_CONFIG } from '@/config/llmConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Conditionally import RNFS to avoid crashes in Expo managed workflow
+type RNFSDownloadBeginResult = {
+  statusCode: number;
+  contentLength: number;
+};
+
+type RNFSDownloadProgressResult = {
+  bytesWritten: number;
+  contentLength: number;
+};
+
+type RNFSDownloadResult = {
+  statusCode: number;
+  bytesWritten: number;
+};
+
 let RNFS: any = null;
 try {
   RNFS = require('react-native-fs');
-} catch (error) {
+} catch {
   console.warn(
     '[ModelDownloader] react-native-fs not available. LLM features disabled.'
   );
@@ -120,6 +135,8 @@ export class ModelDownloader {
    * Get model information
    */
   async getModelInfo(): Promise<ModelInfo> {
+    this.checkRNFSAvailable();
+
     const isDownloaded = await this.isModelDownloaded();
 
     let modelSize = 0;
@@ -160,6 +177,8 @@ export class ModelDownloader {
   async downloadModel(
     onProgress?: (progress: ModelDownloadProgress) => void
   ): Promise<void> {
+    this.checkRNFSAvailable();
+
     // If model is bundled, no download needed
     if (LLM_CONFIG.MODEL_STRATEGY === 'bundled') {
       llmLogger.info('Model is bundled with app, no download needed');
@@ -272,6 +291,8 @@ export class ModelDownloader {
    * Cancel ongoing download
    */
   async cancelDownload(): Promise<void> {
+    this.checkRNFSAvailable();
+
     if (!this.downloadInProgress || this.currentDownloadJobId === null) {
       return;
     }
@@ -294,6 +315,10 @@ export class ModelDownloader {
    * Delete downloaded model files
    */
   async deleteModel(): Promise<void> {
+    if (!RNFS) {
+      return;
+    }
+
     try {
       llmLogger.info('Deleting model files...');
 
@@ -347,7 +372,7 @@ export class ModelDownloader {
         toFile: destination,
         progressInterval: 1000, // Update every second
         progressDivider: 1,
-        begin: res => {
+        begin: (res: RNFSDownloadBeginResult) => {
           llmLogger.debug('Download started', {
             statusCode: res.statusCode,
             contentLength: res.contentLength,
@@ -364,7 +389,7 @@ export class ModelDownloader {
             });
           }
         },
-        progress: res => {
+        progress: (res: RNFSDownloadProgressResult) => {
           const progress: ModelDownloadProgress = {
             bytesDownloaded: res.bytesWritten,
             totalBytes: res.contentLength,
@@ -382,7 +407,7 @@ export class ModelDownloader {
       this.currentDownloadJobId = download.jobId;
 
       download.promise
-        .then(result => {
+        .then((result: RNFSDownloadResult) => {
           if (result.statusCode === 200) {
             llmLogger.info('Download completed', {
               statusCode: result.statusCode,
@@ -395,7 +420,7 @@ export class ModelDownloader {
             );
           }
         })
-        .catch(error => {
+        .catch((error: unknown) => {
           reject(error);
         });
     });
@@ -438,20 +463,6 @@ export class ModelDownloader {
     }
   }
 
-  /**
-   * Calculate checksum of a file (for integrity verification)
-   */
-  private async calculateChecksum(filePath: string): Promise<string> {
-    try {
-      // Note: Full file checksum is expensive for 2GB files
-      // In production, consider checking only a sample or using a CDN-provided checksum
-      const hash = await RNFS.hash(filePath, 'sha256');
-      return hash;
-    } catch (error) {
-      llmLogger.warn('Could not calculate checksum', error);
-      return '';
-    }
-  }
 }
 
 // Export singleton instance

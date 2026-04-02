@@ -9,6 +9,10 @@ export const LLM_CONFIG = {
   // Model Configuration
   MODEL_NAME: 'llama-3.2-1b',
   MODEL_VERSION: '3.2',
+  MODEL_FILE_NAME: 'llama-3.2-1b.pte',
+  TOKENIZER_FILE_NAME: 'llama-3.2-1b-tokenizer.json',
+  MODEL_DOWNLOAD_URL: '',
+  TOKENIZER_DOWNLOAD_URL: '',
 
   // Using built-in models from react-native-executorch
   // These will be downloaded on-demand, not bundled in the app

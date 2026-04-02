@@ -10,7 +10,7 @@ export const ReportsScreen = () => {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Text variant="h1">Reports</Text>
+      <Text variant="title1">Reports</Text>
       <Text variant="body">Placeholder for reports</Text>
     </View>
   );

@@ -6,6 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getPositions, clearPositions } from '../../api/endpoints/positions';
+import { isDemoOrMockMode } from '@/config/demoModeRuntime';
 
 export const POSITIONS_QUERY_KEY = 'positions';
 
@@ -13,12 +14,13 @@ export const POSITIONS_QUERY_KEY = 'positions';
  * Fetch positions for a specific device
  */
 export function usePositions(deviceId: string | undefined, options?: { enabled?: boolean }) {
+  const mockMode = isDemoOrMockMode();
   return useQuery({
     queryKey: [POSITIONS_QUERY_KEY, deviceId],
     queryFn: () => getPositions(deviceId!),
     enabled: !!deviceId && (options?.enabled !== false),
-    refetchInterval: 10000, // Poll every 10 seconds
-    staleTime: 5000, // Consider data stale after 5 seconds
+    refetchInterval: mockMode ? false : 10000,
+    staleTime: mockMode ? Infinity : 5000,
   });
 }
 

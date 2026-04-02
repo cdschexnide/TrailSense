@@ -1,9 +1,12 @@
 import { apiClient } from '../client';
 import { Device, CreateDeviceDTO } from '@types';
+import type { DeviceFilters } from '@hooks/api/useDevices';
 
 export const devicesApi = {
-  getDevices: async (): Promise<Device[]> => {
-    const { data } = await apiClient.get('/api/devices');
+  getDevices: async (filters?: DeviceFilters): Promise<Device[]> => {
+    const { data } = await apiClient.get('/api/devices', {
+      params: filters,
+    });
     return data;
   },
 

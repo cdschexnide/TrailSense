@@ -9,8 +9,8 @@ import React, {
 import { Modal, View, StyleSheet, Platform } from 'react-native';
 import { modelManager } from './modelManager';
 import { llmService } from './LLMService';
+import { inferenceEngine } from './inferenceEngine';
 import { llmLogger } from '@/utils/llmLogger';
-import { LLM_CONFIG } from '@/config/llmConfig';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
 import {
   Message,
@@ -137,26 +137,27 @@ export const AIProvider: React.FC<AIProviderProps> = ({
     setIsEnabling(true);
     setDownloadProgress(0);
     setError(null);
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
 
     try {
       llmLogger.info('Enabling AI...');
 
       // The model manager will handle download progress internally
       // We monitor it via polling during load
-      const progressInterval = setInterval(() => {
-        const progress = modelManager.getDownloadProgress();
-        setDownloadProgress(progress);
-        setIsDownloading(progress > 0 && progress < 100);
-      }, 100);
+      if (!FEATURE_FLAGS.LLM_MOCK_MODE) {
+        progressInterval = setInterval(() => {
+          const progress = modelManager.getDownloadProgress();
+          setDownloadProgress(progress);
+          setIsDownloading(progress > 0 && progress < 100);
+        }, 100);
+      }
 
-      await modelManager.loadModel();
-
-      clearInterval(progressInterval);
-      setIsDownloading(false);
-      setDownloadProgress(100);
-
-      // Initialize the LLM service
       await llmService.initialize();
+
+      if (!FEATURE_FLAGS.LLM_MOCK_MODE) {
+        setIsDownloading(false);
+        setDownloadProgress(100);
+      }
 
       setIsReady(true);
       llmLogger.info('AI enabled successfully');
@@ -166,6 +167,9 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       setError(error);
       setIsReady(false);
     } finally {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
       setIsEnabling(false);
       setIsDownloading(false);
     }
@@ -182,7 +186,6 @@ export const AIProvider: React.FC<AIProviderProps> = ({
     try {
       llmLogger.info('Disabling AI...');
       await llmService.shutdown();
-      await modelManager.unloadModel();
       setIsReady(false);
       setResponse('');
       setToken('');
@@ -206,7 +209,9 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       setIsGenerating(true);
 
       try {
-        const result = await modelManager.generate(messages);
+        const result = FEATURE_FLAGS.LLM_MOCK_MODE
+          ? await inferenceEngine.generate(messages)
+          : await modelManager.generate(messages);
         setResponse(result);
         return result;
       } catch (err) {
@@ -233,7 +238,9 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       setIsGenerating(true);
 
       try {
-        const result = await modelManager.sendMessage(message);
+        const result = FEATURE_FLAGS.LLM_MOCK_MODE
+          ? await inferenceEngine.generate([{ role: 'user', content: message }])
+          : await modelManager.sendMessage(message);
         setResponse(result);
         return result;
       } catch (err) {

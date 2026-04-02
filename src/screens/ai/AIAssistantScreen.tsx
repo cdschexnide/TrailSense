@@ -40,7 +40,6 @@ import { useSecurityContext } from '@/hooks/useSecurityContext';
 import { useTheme } from '@hooks/useTheme';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
-import { Button } from '@components/atoms/Button';
 import {
   ChatMessage,
   SuggestionChips,
@@ -49,6 +48,7 @@ import {
   getContextualSuggestions,
   Suggestion,
 } from '@/components/ai';
+import SmallTrailSenseCompanyLogo from '@assets/images/SmallTrailSenseCompanyLogo.png';
 
 const CHAT_STORAGE_KEY = '@trailsense/ai_chat_history';
 const MAX_STORED_MESSAGES = 50;
@@ -66,7 +66,6 @@ export const AIAssistantScreen: React.FC = () => {
     downloadProgress,
     response,
     enableAI,
-    error,
   } = useAI();
 
   // Security context
@@ -76,6 +75,7 @@ export const AIAssistantScreen: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [inputText, setInputText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const logoSource = SmallTrailSenseCompanyLogo;
 
   // Refs
   const flatListRef = useRef<FlatList>(null);
@@ -97,25 +97,45 @@ export const AIAssistantScreen: React.FC = () => {
 
   const allSuggestions = useMemo(() => {
     const combined = [...contextualSuggestions];
-    DEFAULT_SUGGESTIONS.forEach((suggestion) => {
-      if (!combined.find((s) => s.id === suggestion.id)) {
+    DEFAULT_SUGGESTIONS.forEach(suggestion => {
+      if (!combined.find(s => s.id === suggestion.id)) {
         combined.push(suggestion);
       }
     });
     return combined.slice(0, 6);
   }, [contextualSuggestions]);
 
-  // Load chat history
-  useEffect(() => {
-    loadChatHistory();
+  const loadChatHistory = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(CHAT_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as ChatMessageType[];
+        setMessages(parsed.slice(-MAX_STORED_MESSAGES));
+        setShowSuggestions(parsed.length === 0);
+      }
+    } catch (err) {
+      console.error('Failed to load chat history:', err);
+    }
   }, []);
 
-  // Save chat history
-  useEffect(() => {
-    if (messages.length > 0) {
-      saveChatHistory();
+  const saveChatHistory = useCallback(async () => {
+    try {
+      const toStore = messages.slice(-MAX_STORED_MESSAGES);
+      await AsyncStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
+    } catch (err) {
+      console.error('Failed to save chat history:', err);
     }
   }, [messages]);
+
+  useEffect(() => {
+    void loadChatHistory();
+  }, [loadChatHistory]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      void saveChatHistory();
+    }
+  }, [messages, saveChatHistory]);
 
   // Scroll to bottom
   useEffect(() => {
@@ -129,7 +149,7 @@ export const AIAssistantScreen: React.FC = () => {
   // Update streaming response
   useEffect(() => {
     if (isGenerating && response) {
-      setMessages((prev) => {
+      setMessages(prev => {
         const lastMsg = prev[prev.length - 1];
         if (lastMsg?.role === 'assistant') {
           return [...prev.slice(0, -1), { ...lastMsg, content: response }];
@@ -138,28 +158,6 @@ export const AIAssistantScreen: React.FC = () => {
       });
     }
   }, [response, isGenerating]);
-
-  const loadChatHistory = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(CHAT_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setMessages(parsed.slice(-MAX_STORED_MESSAGES));
-        setShowSuggestions(parsed.length === 0);
-      }
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
-    }
-  };
-
-  const saveChatHistory = async () => {
-    try {
-      const toStore = messages.slice(-MAX_STORED_MESSAGES);
-      await AsyncStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
-    } catch (err) {
-      console.error('Failed to save chat history:', err);
-    }
-  };
 
   const handleClearChat = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -185,7 +183,7 @@ export const AIAssistantScreen: React.FC = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await enableAI();
-    } catch (err) {
+    } catch {
       Alert.alert(
         'Failed to Enable AI',
         'Could not load the AI model. Please check your connection and try again.',
@@ -209,36 +207,28 @@ export const AIAssistantScreen: React.FC = () => {
         content: text,
         timestamp: Date.now(),
       };
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages(prev => [...prev, userMessage]);
 
       const assistantPlaceholder: ChatMessageType = {
         role: 'assistant',
         content: '',
         timestamp: Date.now(),
       };
-      setMessages((prev) => [...prev, assistantPlaceholder]);
+      setMessages(prev => [...prev, assistantPlaceholder]);
 
       try {
-        const contextualPrompt = `
-${securityContext.contextString}
-
-USER QUESTION: ${text}
-
-Respond helpfully based on the security context above. Be concise and actionable.
-        `.trim();
-
-        const { chat } = await import('@/services/llm');
-        const llmService = (await import('@/services/llm/LLMService')).llmService;
+        const llmService = (await import('@/services/llm/LLMService'))
+          .llmService;
 
         const chatResponse = await llmService.chat({
-          messages: [...messages.filter((m) => m.role !== 'system'), userMessage],
+          messages: [...messages.filter(m => m.role !== 'system'), userMessage],
           securityContext: {
             recentAlerts: securityContext.recentAlerts,
             deviceStatus: [],
           },
         });
 
-        setMessages((prev) => {
+        setMessages(prev => {
           const updatedMessages = [...prev];
           updatedMessages[updatedMessages.length - 1] = {
             role: 'assistant',
@@ -252,11 +242,12 @@ Respond helpfully based on the security context above. Be concise and actionable
         });
       } catch (err) {
         console.error('Chat error:', err);
-        setMessages((prev) => {
+        setMessages(prev => {
           const updatedMessages = [...prev];
           updatedMessages[updatedMessages.length - 1] = {
             role: 'assistant',
-            content: 'I encountered an error processing your request. Please try again.',
+            content:
+              'I encountered an error processing your request. Please try again.',
             timestamp: Date.now(),
           };
           return updatedMessages;
@@ -274,19 +265,19 @@ Respond helpfully based on the security context above. Be concise and actionable
     [handleSendMessage]
   );
 
-  const handleCopyMessage = useCallback((text: string) => {
+  const handleCopyMessage = useCallback(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, []);
 
-  const handleFeedback = useCallback((positive: boolean) => {
+  const handleFeedback = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log('Feedback:', positive ? 'positive' : 'negative');
   }, []);
 
   const renderMessage = useCallback(
     ({ item, index }: { item: ChatMessageType; index: number }) => {
       const isLastMessage = index === messages.length - 1;
-      const isStreaming = isGenerating && isLastMessage && item.role === 'assistant';
+      const isStreaming =
+        isGenerating && isLastMessage && item.role === 'assistant';
 
       return (
         <ChatMessage
@@ -312,15 +303,24 @@ Respond helpfully based on the security context above. Be concise and actionable
       {/* AI Branding */}
       <View style={styles.brandingContainer}>
         <Image
-          source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+          source={logoSource}
           style={styles.aiIconLarge}
           resizeMode="contain"
         />
-        <Text variant="largeTitle" weight="bold" color="label" style={styles.brandTitle}>
+        <Text
+          variant="largeTitle"
+          weight="bold"
+          color="label"
+          style={styles.brandTitle}
+        >
           TrailSense AI
         </Text>
-        <Text variant="body" style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}>
-          Your on-device security assistant. Ask about alerts, detection patterns, sensor status, and more.
+        <Text
+          variant="body"
+          style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
+        >
+          Your on-device security assistant. Ask about alerts, detection
+          patterns, sensor status, and more.
         </Text>
       </View>
 
@@ -337,34 +337,59 @@ Respond helpfully based on the security context above. Be concise and actionable
   const renderEnablePrompt = () => (
     <View style={styles.enableContainer}>
       <Image
-        source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+        source={logoSource}
         style={styles.aiIconLarge}
         resizeMode="contain"
       />
 
-      <Text variant="title1" weight="bold" color="label" style={styles.enableTitle}>
+      <Text
+        variant="title1"
+        weight="bold"
+        color="label"
+        style={styles.enableTitle}
+      >
         Enable TrailSense AI
       </Text>
 
-      <Text variant="body" style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}>
+      <Text
+        variant="body"
+        style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}
+      >
         Download the on-device AI model to enable intelligent security analysis.
       </Text>
 
-      <View style={[styles.featureList, { backgroundColor: colors.secondarySystemBackground }]}>
+      <View
+        style={[
+          styles.featureList,
+          { backgroundColor: colors.secondarySystemBackground },
+        ]}
+      >
         <View style={styles.featureRow}>
-          <Icon name="cloud-download-outline" size={20} color={colors.systemBlue} />
+          <Icon
+            name="cloud-download-outline"
+            size={20}
+            color={colors.systemBlue}
+          />
           <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
             ~400MB one-time download
           </Text>
         </View>
         <View style={styles.featureRow}>
-          <Icon name="phone-portrait-outline" size={20} color={colors.systemGreen} />
+          <Icon
+            name="phone-portrait-outline"
+            size={20}
+            color={colors.systemGreen}
+          />
           <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
             Runs 100% on-device
           </Text>
         </View>
         <View style={styles.featureRow}>
-          <Icon name="shield-checkmark-outline" size={20} color={colors.systemPurple} />
+          <Icon
+            name="shield-checkmark-outline"
+            size={20}
+            color={colors.systemPurple}
+          />
           <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
             No data sent to cloud
           </Text>
@@ -373,15 +398,26 @@ Respond helpfully based on the security context above. Be concise and actionable
 
       {isEnabling && (
         <View style={styles.progressContainer}>
-          <View style={[styles.progressBar, { backgroundColor: colors.systemGray5 }]}>
+          <View
+            style={[
+              styles.progressBar,
+              { backgroundColor: colors.systemGray5 },
+            ]}
+          >
             <LinearGradient
               colors={['#667EEA', '#764BA2']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={[styles.progressFill, { width: `${downloadProgress * 100}%` }]}
+              style={[
+                styles.progressFill,
+                { width: `${downloadProgress * 100}%` },
+              ]}
             />
           </View>
-          <Text variant="caption1" style={{ color: colors.secondaryLabel, marginTop: 8 }}>
+          <Text
+            variant="caption1"
+            style={{ color: colors.secondaryLabel, marginTop: 8 }}
+          >
             Downloading... {(downloadProgress * 100).toFixed(0)}%
           </Text>
         </View>
@@ -403,7 +439,11 @@ Respond helpfully based on the security context above. Be concise and actionable
           ) : (
             <>
               <Icon name="download-outline" size={20} color="#FFFFFF" />
-              <Text variant="headline" weight="semibold" style={{ color: '#FFFFFF', marginLeft: 8 }}>
+              <Text
+                variant="headline"
+                weight="semibold"
+                style={{ color: '#FFFFFF', marginLeft: 8 }}
+              >
                 Download & Enable
               </Text>
             </>
@@ -416,21 +456,35 @@ Respond helpfully based on the security context above. Be concise and actionable
   // Not available
   const renderNotAvailable = () => (
     <View style={styles.enableContainer}>
-      <View style={[styles.aiIconLarge, { backgroundColor: colors.systemGray4 }]}>
+      <View
+        style={[styles.aiIconLarge, { backgroundColor: colors.systemGray4 }]}
+      >
         <Icon name="close" size={36} color={colors.secondaryLabel} />
       </View>
-      <Text variant="title1" weight="bold" color="label" style={styles.enableTitle}>
+      <Text
+        variant="title1"
+        weight="bold"
+        color="label"
+        style={styles.enableTitle}
+      >
         AI Not Available
       </Text>
-      <Text variant="body" style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}>
-        The AI assistant feature is not available on your device or has been disabled.
+      <Text
+        variant="body"
+        style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}
+      >
+        The AI assistant feature is not available on your device or has been
+        disabled.
       </Text>
     </View>
   );
 
   if (!isFeatureEnabled) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.systemBackground }]} edges={['top', 'bottom']}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.systemBackground }]}
+        edges={['top', 'bottom']}
+      >
         {renderNotAvailable()}
       </SafeAreaView>
     );
@@ -438,14 +492,20 @@ Respond helpfully based on the security context above. Be concise and actionable
 
   if (!isReady) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.systemBackground }]} edges={['top', 'bottom']}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.systemBackground }]}
+        edges={['top', 'bottom']}
+      >
         {renderEnablePrompt()}
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.systemBackground }]} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.systemBackground }]}
+      edges={['top', 'bottom']}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -455,7 +515,7 @@ Respond helpfully based on the security context above. Be concise and actionable
         <View style={[styles.header, { borderBottomColor: colors.separator }]}>
           <View style={styles.headerLeft}>
             <Image
-              source={require('@assets/images/SmallTrailSenseCompanyLogo.png')}
+              source={logoSource}
               style={styles.aiIconSmall}
               resizeMode="contain"
             />
@@ -497,14 +557,32 @@ Respond helpfully based on the security context above. Be concise and actionable
               keyExtractor={(item, index) => `${item.timestamp}-${index}`}
               renderItem={renderMessage}
               contentContainerStyle={styles.messageListContent}
-              onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+              onContentSizeChange={() =>
+                flatListRef.current?.scrollToEnd({ animated: true })
+              }
               showsVerticalScrollIndicator={false}
               ListHeaderComponent={
                 <View style={styles.conversationHeader}>
-                  <View style={[styles.dateBadge, { backgroundColor: colors.secondarySystemBackground }]}>
-                    <Icon name="calendar-outline" size={12} color={colors.secondaryLabel} />
-                    <Text variant="caption2" style={{ color: colors.secondaryLabel, marginLeft: 4 }}>
-                      {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                  <View
+                    style={[
+                      styles.dateBadge,
+                      { backgroundColor: colors.secondarySystemBackground },
+                    ]}
+                  >
+                    <Icon
+                      name="calendar-outline"
+                      size={12}
+                      color={colors.secondaryLabel}
+                    />
+                    <Text
+                      variant="caption2"
+                      style={{ color: colors.secondaryLabel, marginLeft: 4 }}
+                    >
+                      {new Date().toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </Text>
                   </View>
                 </View>
@@ -523,10 +601,19 @@ Respond helpfully based on the security context above. Be concise and actionable
         )}
 
         {/* Enhanced Input Area */}
-        <View style={[styles.inputContainer, { backgroundColor: colors.systemBackground }]}>
+        <View
+          style={[
+            styles.inputContainer,
+            { backgroundColor: colors.systemBackground },
+          ]}
+        >
           {/* Subtle top border with gradient */}
           <LinearGradient
-            colors={['rgba(74,82,64,0.2)', 'rgba(184,166,124,0.25)', 'rgba(74,82,64,0.2)']}
+            colors={[
+              'rgba(74,82,64,0.2)',
+              'rgba(184,166,124,0.25)',
+              'rgba(74,82,64,0.2)',
+            ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.inputBorderGradient}
@@ -542,7 +629,7 @@ Respond helpfully based on the security context above. Be concise and actionable
                   borderColor: inputText.trim()
                     ? 'rgba(74, 82, 64, 0.4)'
                     : 'transparent',
-                }
+                },
               ]}
             >
               <TextInput
@@ -551,7 +638,7 @@ Respond helpfully based on the security context above. Be concise and actionable
                 value={inputText}
                 onChangeText={setInputText}
                 placeholder="Ask about your security..."
-                placeholderTextColor={colors.placeholderText}
+                placeholderTextColor={colors.secondaryLabel}
                 multiline
                 maxLength={500}
                 returnKeyType="default"
@@ -563,7 +650,7 @@ Respond helpfully based on the security context above. Be concise and actionable
               disabled={!inputText.trim() || isGenerating}
               style={({ pressed }) => [
                 styles.sendButtonWrapper,
-                pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] }
+                pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
               ]}
             >
               <LinearGradient

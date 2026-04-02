@@ -141,9 +141,7 @@ export class ModelManager {
         messageHistoryCallback: (messageHistory: Message[]) => {
           this._messageHistory = messageHistory;
           llmLogger.debug(
-            'Message history updated:',
-            messageHistory.length,
-            'messages'
+            `Message history updated: ${messageHistory.length} messages`
           );
         },
         responseCallback: (response: string) => {

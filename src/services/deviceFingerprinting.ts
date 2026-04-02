@@ -1,10 +1,10 @@
-import { database } from '@database';
 import { Alert, DeviceFingerprint } from '@types';
 import {
   computeVisitPattern,
   generateInsightText,
   VisitPattern,
 } from './patternDetection';
+import { getFingerprintRepository } from './fingerprintStore';
 
 export class DeviceFingerprintingService {
   static async trackDevice(macAddress: string, alert: Alert): Promise<void> {
@@ -32,13 +32,21 @@ export class DeviceFingerprintingService {
   static async getDeviceHistory(
     macAddress: string
   ): Promise<DeviceFingerprint> {
-    return await database.fingerprints.findOne({ macAddress });
+    const repository = getFingerprintRepository();
+    const fingerprint = await repository.findOne({ macAddress });
+
+    if (!fingerprint) {
+      throw new Error(`No fingerprint found for device ${macAddress}`);
+    }
+
+    return fingerprint;
   }
 
   private static async getOrCreateFingerprint(
     macAddress: string
   ): Promise<DeviceFingerprint> {
-    let fingerprint = await database.fingerprints.findOne({ macAddress });
+    const repository = getFingerprintRepository();
+    let fingerprint = await repository.findOne({ macAddress });
 
     if (!fingerprint) {
       const timestamp = Date.now();
@@ -62,16 +70,12 @@ export class DeviceFingerprintingService {
   private static async saveFingerprint(
     fingerprint: DeviceFingerprint
   ): Promise<void> {
-    await database.fingerprints.upsert(fingerprint);
+    const repository = getFingerprintRepository();
+    await repository.upsert(fingerprint);
   }
 
   private static calculateAverageDuration(
-    detections: Array<{
-      timestamp: string;
-      rssi: number;
-      location?: any;
-      type: string;
-    }>
+    detections: DeviceFingerprint['detections']
   ): number {
     if (detections.length === 0) return 0;
 
@@ -120,7 +124,7 @@ export class DeviceFingerprintingService {
 
     // Find hours that appear more than once
     return Object.entries(hourCounts)
-      .filter(([_, count]) => count > 1)
+      .filter(([, count]) => count > 1)
       .map(([hour]) => parseInt(hour))
       .sort((a, b) => hourCounts[b] - hourCounts[a])
       .slice(0, 5); // Top 5 common hours
@@ -134,7 +138,8 @@ export class DeviceFingerprintingService {
     newDevices: DeviceFingerprint[];
     suspiciousDevices: DeviceFingerprint[];
   }> {
-    const allFingerprints: DeviceFingerprint[] = await database.fingerprints.find();
+    const repository = getFingerprintRepository();
+    const allFingerprints: DeviceFingerprint[] = await repository.find();
 
     const frequentVisitors = allFingerprints.filter(
       (fp: DeviceFingerprint) => fp.totalVisits >= 5
@@ -159,7 +164,10 @@ export class DeviceFingerprintingService {
     };
   }
 
-  static computeVisitPattern(alerts: Alert[], macAddress: string): VisitPattern {
+  static computeVisitPattern(
+    alerts: Alert[],
+    macAddress: string
+  ): VisitPattern {
     return computeVisitPattern(alerts, macAddress);
   }
 
