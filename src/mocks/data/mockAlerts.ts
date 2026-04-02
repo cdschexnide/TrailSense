@@ -1,4 +1,9 @@
-import type { Alert, ThreatLevel, DetectionType } from '@/types/alert';
+import type {
+  Alert,
+  AlertMetadata,
+  ThreatLevel,
+  DetectionType,
+} from '@/types/alert';
 import { mockDevices } from './mockDevices';
 
 // Helper to generate timestamps over the last 30 days
@@ -31,6 +36,211 @@ const generateLocation = (deviceId: string, variance: number = 0.0005) => {
     longitude: device.longitude + (Math.random() - 0.5) * variance,
   };
 };
+
+// === Persona-based alerts for realistic fingerprint profiles ===
+
+interface PersonaDefinition {
+  macAddress: string;
+  detectionType: DetectionType;
+  threatLevel: ThreatLevel;
+  rssiBase: number;
+  /** Days of the week this persona visits (0=Sun, 1=Mon, ..., 6=Sat) */
+  visitDays: number[];
+  /** Hour and minute of typical arrival */
+  arrivalHour: number;
+  arrivalMinute: number;
+  /** Duration of each visit in seconds */
+  durationSeconds: number;
+  /** How many days back to generate visits */
+  lookbackDays: number;
+  metadata?: AlertMetadata;
+}
+
+const PERSONAS: PersonaDefinition[] = [
+  {
+    macAddress: 'E4:A1:30:7B:22:01',
+    detectionType: 'cellular',
+    threatLevel: 'low',
+    rssiBase: -52,
+    visitDays: [1, 2, 3, 4, 5, 6], // Mon-Sat
+    arrivalHour: 10,
+    arrivalMinute: 15,
+    durationSeconds: 180,
+    lookbackDays: 14,
+    metadata: { band: '700MHz', provider: 'USPS Vehicle' },
+  },
+  {
+    macAddress: 'F8:B2:41:8C:33:02',
+    detectionType: 'bluetooth',
+    threatLevel: 'low',
+    rssiBase: -68,
+    visitDays: [2, 4, 6], // Tue, Thu, Sat
+    arrivalHour: 7,
+    arrivalMinute: 0,
+    durationSeconds: 420,
+    lookbackDays: 14,
+    metadata: { deviceName: 'iPhone 15 Pro' },
+  },
+  {
+    macAddress: '1A:C3:52:9D:44:03',
+    detectionType: 'cellular',
+    threatLevel: 'critical',
+    rssiBase: -58,
+    visitDays: [], // Manual — see special handling
+    arrivalHour: 2,
+    arrivalMinute: 30,
+    durationSeconds: 600,
+    lookbackDays: 5,
+    metadata: { band: '850MHz', provider: 'Unknown' },
+  },
+  {
+    macAddress: '2B:D4:63:AE:55:04',
+    detectionType: 'wifi',
+    threatLevel: 'low',
+    rssiBase: -60,
+    visitDays: [1, 3, 5], // Mon, Wed, Fri
+    arrivalHour: 13,
+    arrivalMinute: 30,
+    durationSeconds: 300,
+    lookbackDays: 14,
+    metadata: { ssid: 'FedEx-Van-4417', vendor: 'Intel Corporate' },
+  },
+  {
+    macAddress: '3C:E5:74:BF:66:05',
+    detectionType: 'wifi',
+    threatLevel: 'medium',
+    rssiBase: -65,
+    visitDays: [0, 6], // Sat, Sun
+    arrivalHour: 17,
+    arrivalMinute: 45,
+    durationSeconds: 900,
+    lookbackDays: 14,
+    metadata: { ssid: 'Pixel-8', vendor: 'Google' },
+  },
+  {
+    macAddress: '4D:F6:85:C0:77:06',
+    detectionType: 'bluetooth',
+    threatLevel: 'high',
+    rssiBase: -72,
+    visitDays: [], // Single visit — see special handling
+    arrivalHour: 23,
+    arrivalMinute: 42,
+    durationSeconds: 45,
+    lookbackDays: 1,
+    metadata: { deviceName: 'Unknown BLE' },
+  },
+];
+
+function generatePersonaAlerts(): Alert[] {
+  const alerts: Alert[] = [];
+  let alertIndex = 200; // Start after existing mock alert indices
+
+  for (const persona of PERSONAS) {
+    // Special handling for irregular visitors
+    if (persona.macAddress === '1A:C3:52:9D:44:03') {
+      // Suspicious vehicle: exactly 2 visits in last 5 days
+      const visit1 = new Date();
+      visit1.setDate(visit1.getDate() - 3);
+      visit1.setHours(2, 30, 0, 0);
+
+      const visit2 = new Date();
+      visit2.setDate(visit2.getDate() - 1);
+      visit2.setHours(3, 15, 0, 0);
+
+      for (const ts of [visit1, visit2]) {
+        alerts.push({
+          id: `alert-persona-${alertIndex++}`,
+          deviceId: 'device-001',
+          timestamp: ts.toISOString(),
+          threatLevel: persona.threatLevel,
+          detectionType: persona.detectionType,
+          rssi: persona.rssiBase + Math.floor(Math.random() * 6),
+          macAddress: persona.macAddress,
+          cellularStrength: persona.rssiBase,
+          isReviewed: false,
+          isFalsePositive: false,
+          location: generateLocation('device-001'),
+          wifiDetected: false,
+          bluetoothDetected: false,
+          multiband: false,
+          isStationary: true,
+          seenCount: 4,
+          duration: persona.durationSeconds,
+          metadata: persona.metadata,
+        });
+      }
+      continue;
+    }
+
+    if (persona.macAddress === '4D:F6:85:C0:77:06') {
+      // One-time unknown: single detection yesterday
+      const ts = new Date();
+      ts.setDate(ts.getDate() - 1);
+      ts.setHours(23, 42, 0, 0);
+
+      alerts.push({
+        id: `alert-persona-${alertIndex++}`,
+        deviceId: 'device-001',
+        timestamp: ts.toISOString(),
+        threatLevel: persona.threatLevel,
+        detectionType: persona.detectionType,
+        rssi: persona.rssiBase,
+        macAddress: persona.macAddress,
+        isReviewed: false,
+        isFalsePositive: false,
+        location: generateLocation('device-001'),
+        wifiDetected: false,
+        bluetoothDetected: persona.detectionType === 'bluetooth',
+        multiband: false,
+        seenCount: 1,
+        duration: persona.durationSeconds,
+        metadata: persona.metadata,
+      });
+      continue;
+    }
+
+    // Regular visitors: generate visits for each matching day in lookback
+    for (let daysAgo = 0; daysAgo < persona.lookbackDays; daysAgo++) {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      const dayOfWeek = date.getDay();
+
+      if (!persona.visitDays.includes(dayOfWeek)) continue;
+
+      // Add small time variance (±10 minutes), clamped to [0, 59]
+      const rawMinute =
+        persona.arrivalMinute + (Math.floor(Math.random() * 20) - 10);
+      const safeMinute = Math.max(0, Math.min(59, rawMinute));
+      date.setHours(persona.arrivalHour, safeMinute, 0, 0);
+
+      alerts.push({
+        id: `alert-persona-${alertIndex++}`,
+        deviceId: 'device-001',
+        timestamp: date.toISOString(),
+        threatLevel: persona.threatLevel,
+        detectionType: persona.detectionType,
+        rssi: persona.rssiBase + Math.floor(Math.random() * 10 - 5),
+        macAddress: persona.macAddress,
+        cellularStrength:
+          persona.detectionType === 'cellular'
+            ? persona.rssiBase + Math.floor(Math.random() * 8 - 4)
+            : undefined,
+        isReviewed: daysAgo > 1,
+        isFalsePositive: false,
+        location: generateLocation('device-001'),
+        wifiDetected: persona.detectionType === 'wifi',
+        bluetoothDetected: persona.detectionType === 'bluetooth',
+        multiband: false,
+        isStationary: false,
+        seenCount: 1 + Math.floor(Math.random() * 4),
+        duration: persona.durationSeconds,
+        metadata: persona.metadata as any,
+      });
+    }
+  }
+
+  return alerts;
+}
 
 export const mockAlerts: Alert[] = [
   // Critical alerts - cellular only (stealth mode detection)
@@ -269,6 +479,7 @@ export const mockAlerts: Alert[] = [
         detectionType === 'wifi' ? { ssid: `Device-${index}` } : undefined,
     } as Alert;
   }),
+  ...generatePersonaAlerts(),
 ];
 
 // Filtered alert collections
@@ -283,3 +494,9 @@ export const mockMediumAlerts = mockAlerts.filter(
 export const mockLowAlerts = mockAlerts.filter(a => a.threatLevel === 'low');
 export const mockMultibandAlerts = mockAlerts.filter(a => a.multiband);
 export const mockRecentAlerts = mockAlerts.slice(0, 20);
+
+/** MAC addresses of persona devices — used by seedMockData for live positions */
+export const PERSONA_MACS = PERSONAS.map(p => ({
+  macAddress: p.macAddress,
+  signalType: p.detectionType as 'wifi' | 'bluetooth' | 'cellular',
+}));

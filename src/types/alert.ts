@@ -16,7 +16,13 @@ export interface AlertMetadata {
   // BLE-specific
   deviceName?: string;
 
+  // WiFi-specific (extended)
+  ssid?: string;
+  vendor?: string;
+
   // Cellular-specific
+  band?: string;
+  provider?: string;
   cellularPeak?: number;
   cellularAvg?: number;
   cellularDelta?: number;
