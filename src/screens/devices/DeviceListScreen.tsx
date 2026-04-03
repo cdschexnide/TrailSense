@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { useDevices } from '@hooks/api/useDevices';
 import { DeviceCard } from '@components/organisms/DeviceCard';
 import { DevicesHeaderHero } from '@components/organisms/HeaderHero';
+import { TacticalHeader } from '@components/organisms';
 import { ScreenLayout, ErrorState, EmptyState } from '@components/templates';
 import { Button, Icon, SkeletonCard } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
@@ -67,10 +68,7 @@ export const DeviceListScreen = ({ navigation }: any) => {
   if (isLoading) {
     return (
       <ScreenLayout
-        header={{
-          title: 'Devices',
-          largeTitle: true,
-        }}
+        customHeader={<TacticalHeader title="DEVICES" />}
         scrollable={true}
       >
         <View style={styles.skeletonContainer}>
@@ -104,25 +102,30 @@ export const DeviceListScreen = ({ navigation }: any) => {
     setRefreshing(false);
   };
 
+  const addButton = (
+    <Button
+      buttonStyle="plain"
+      onPress={handleAddDevice}
+      leftIcon={<Icon name="add" size={20} color="systemBlue" />}
+    >
+      Add
+    </Button>
+  );
+
   const renderListHeader = () => (
     <View>{stats.total > 0 && <DevicesHeaderHero deviceCounts={stats} />}</View>
   );
 
   return (
     <ScreenLayout
-      header={{
-        title: 'Devices',
-        largeTitle: true,
-        rightActions: (
-          <Button
-            buttonStyle="plain"
-            onPress={handleAddDevice}
-            leftIcon={<Icon name="add" size={20} color="systemBlue" />}
-          >
-            Add
-          </Button>
-        ),
-      }}
+      customHeader={
+        <TacticalHeader
+          title="DEVICES"
+          statusLabel={`${stats.online}/${stats.total} ONLINE`}
+          statusVariant={stats.offline > 0 ? 'warning' : 'success'}
+          rightAction={addButton}
+        />
+      }
       scrollable={false}
     >
       <FlatList

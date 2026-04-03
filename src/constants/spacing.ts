@@ -149,6 +149,23 @@ export const Layout = {
   cardRadius: 12,
 
   // ======================
+  // Tactical Card Tier Spacing
+  // ======================
+
+  briefingCardPadding: 10,
+  briefingCardRadius: 10,
+
+  dataCardPadding: 10,
+  dataCardRadius: 10,
+
+  surfaceCardPadding: 16,
+  surfaceCardRadius: 10,
+
+  innerCardRadius: 6,
+  accentBarWidth: 3,
+  severityBorderWidth: 2,
+
+  // ======================
   // List Layout
   // ======================
 

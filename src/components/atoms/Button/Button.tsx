@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
   View,
+  Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@hooks/useTheme';
@@ -73,9 +74,8 @@ export const Button: React.FC<ButtonProps> = ({
   textStyle,
   testID,
 }) => {
-  const { theme, colorScheme } = useTheme();
+  const { theme } = useTheme();
   const colors = theme.colors;
-  const isDark = colorScheme === 'dark';
 
   // ======================
   // Event Handlers
@@ -148,24 +148,22 @@ export const Button: React.FC<ButtonProps> = ({
             return colors.systemGray;
           case 'default':
           default:
-            return colors.systemBlue;
+            return colors.primary;
         }
 
       case 'tinted':
         switch (role) {
           case 'destructive':
-            return isDark
-              ? `${colors.systemRed}26` // 15% opacity
-              : `${colors.systemRed}26`;
+            return `${colors.systemRed}26`;
           case 'cancel':
-            return isDark ? `${colors.systemGray}26` : `${colors.systemGray}26`;
+            return `${colors.systemGray}26`;
           case 'default':
           default:
-            return isDark ? `${colors.systemBlue}26` : `${colors.systemBlue}26`;
+            return `${colors.primary}26`;
         }
 
       case 'gray':
-        return isDark ? colors.systemGray3 : colors.systemGray4;
+        return colors.systemGray3;
 
       case 'plain':
       default:
@@ -179,7 +177,7 @@ export const Button: React.FC<ButtonProps> = ({
   const getTextColor = (): string => {
     switch (buttonStyle) {
       case 'filled':
-        return '#FFFFFF';
+        return role === 'default' ? '#111210' : '#FFFFFF';
 
       case 'tinted':
         switch (role) {
@@ -189,7 +187,7 @@ export const Button: React.FC<ButtonProps> = ({
             return colors.label;
           case 'default':
           default:
-            return colors.systemBlue;
+            return colors.primary;
         }
 
       case 'gray':
@@ -203,7 +201,7 @@ export const Button: React.FC<ButtonProps> = ({
             return colors.systemGray;
           case 'default':
           default:
-            return colors.systemBlue;
+            return colors.primary;
         }
 
       default:
@@ -221,6 +219,9 @@ export const Button: React.FC<ButtonProps> = ({
     return {
       ...baseStyle,
       color: getTextColor(),
+      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     };
   };
 

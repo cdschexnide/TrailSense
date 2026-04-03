@@ -46,22 +46,24 @@ export const FilterChip: React.FC<FilterChipProps> = ({
         {
           backgroundColor: isSelected
             ? colors.brandAccentBackground
-            : colors.secondarySystemBackground,
+            : 'transparent',
           borderColor: isSelected ? colors.brandAccent : colors.separator,
         },
         pressed && styles.pressed,
       ]}
     >
       <View style={[styles.dot, { backgroundColor: color }]} />
-      <Text
-        variant="headline"
-        weight="semibold"
-        color="label"
-        style={styles.count}
-      >
+      <Text variant="caption1" tactical style={[styles.count, { color }]}>
         {count}
       </Text>
-      <Text variant="caption1" color="secondaryLabel" style={styles.label}>
+      <Text
+        variant="caption1"
+        tactical
+        style={[
+          styles.label,
+          { color: isSelected ? colors.primary : colors.tertiaryLabel },
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -70,13 +72,12 @@ export const FilterChip: React.FC<FilterChipProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 10,
+    paddingHorizontal: 10,
+    borderRadius: 8,
     borderWidth: 1,
     gap: 4,
   },
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     minWidth: 12,
   },
   label: {
-    textTransform: 'capitalize',
+    letterSpacing: 0.5,
   },
 });
 

@@ -1,7 +1,12 @@
 import React from 'react';
+import { View, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@components/atoms';
+import type { IconName } from '@components/atoms/Icon';
 import { useTheme } from '@hooks/useTheme';
+import { useAlerts } from '@hooks/api/useAlerts';
+import { useDevices } from '@hooks/api/useDevices';
+import { isDeviceOnline } from '@utils/dateUtils';
 import { MainTabParamList } from './types';
 import HomeStack from './stacks/HomeStack';
 import AlertsStack from './stacks/AlertsStack';
@@ -11,6 +16,57 @@ import DevicesStack from './stacks/DevicesStack';
 import MoreStack from './stacks/MoreStack';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
+const MONO_FONT = Platform.OS === 'ios' ? 'Menlo' : 'monospace';
+
+const StatusDot = ({ color }: { color: string }) => (
+  <View
+    style={{
+      position: 'absolute',
+      top: 2,
+      right: -4,
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: color,
+    }}
+  />
+);
+
+const AlertsTabIcon = ({ color }: { color: string }) => {
+  const { data: alerts } = useAlerts();
+  const criticalCount =
+    alerts?.filter(
+      alert =>
+        !alert.isReviewed &&
+        (alert.threatLevel === 'critical' || alert.threatLevel === 'high')
+    ).length ?? 0;
+
+  return (
+    <View>
+      <Icon name="alert-circle" color={color} size="base" />
+      {criticalCount > 0 ? <StatusDot color="#ef4444" /> : null}
+    </View>
+  );
+};
+
+const DevicesTabIcon = ({ color }: { color: string }) => {
+  const { data: devices } = useDevices();
+  const offlineCount =
+    devices?.filter(device => !isDeviceOnline(device.lastSeen)).length ?? 0;
+
+  return (
+    <View>
+      <Icon name="hardware-chip" color={color} size="base" />
+      {offlineCount > 0 ? <StatusDot color="#f59e0b" /> : null}
+    </View>
+  );
+};
+
+const SimpleTabIcon = ({ name, color }: { name: IconName; color: string }) => (
+  <View>
+    <Icon name={name} color={color} size="base" />
+  </View>
+);
 
 export const MainNavigator = () => {
   const { theme } = useTheme();
@@ -19,11 +75,21 @@ export const MainNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.brandAccent || theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.secondaryLabel,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.tertiaryLabel,
+        tabBarLabelStyle: {
+          fontFamily: MONO_FONT,
+          fontSize: 10,
+          letterSpacing: 0.5,
+          textTransform: 'uppercase',
+        },
         tabBarStyle: {
-          backgroundColor: theme.colors.systemBackground,
+          backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.separator,
+          borderTopWidth: 1,
+        },
+        sceneStyle: {
+          backgroundColor: theme.colors.systemBackground,
         },
       }}
     >
@@ -33,7 +99,7 @@ export const MainNavigator = () => {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <Icon name="home-outline" color={color} size="base" />
+            <SimpleTabIcon name="home-outline" color={color} />
           ),
         }}
       />
@@ -42,9 +108,7 @@ export const MainNavigator = () => {
         component={AlertsStack}
         options={{
           title: 'Alerts',
-          tabBarIcon: ({ color }) => (
-            <Icon name="alert-circle" color={color} size="base" />
-          ),
+          tabBarIcon: ({ color }) => <AlertsTabIcon color={color} />,
         }}
       />
       <Tab.Screen
@@ -53,7 +117,7 @@ export const MainNavigator = () => {
         options={{
           title: 'AI',
           tabBarIcon: ({ color }) => (
-            <Icon name="sparkles-outline" color={color} size="base" />
+            <SimpleTabIcon name="sparkles-outline" color={color} />
           ),
         }}
       />
@@ -63,7 +127,7 @@ export const MainNavigator = () => {
         options={{
           title: 'Radar',
           tabBarIcon: ({ color }) => (
-            <Icon name="radio-outline" color={color} size="base" />
+            <SimpleTabIcon name="radio-outline" color={color} />
           ),
         }}
       />
@@ -72,18 +136,16 @@ export const MainNavigator = () => {
         component={DevicesStack}
         options={{
           title: 'Devices',
-          tabBarIcon: ({ color }) => (
-            <Icon name="hardware-chip" color={color} size="base" />
-          ),
+          tabBarIcon: ({ color }) => <DevicesTabIcon color={color} />,
         }}
       />
       <Tab.Screen
         name="MoreTab"
         component={MoreStack}
         options={{
-          tabBarLabel: () => null,
+          title: 'More',
           tabBarIcon: ({ color }) => (
-            <Icon name="settings-outline" color={color} size="base" />
+            <SimpleTabIcon name="settings-outline" color={color} />
           ),
         }}
       />

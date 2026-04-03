@@ -67,7 +67,6 @@ export type MoreStackParamList = {
   Profile: undefined;
   KnownDevices: undefined;
   NotificationSettings: undefined;
-  Theme: undefined;
   AlertSound: undefined;
   Biometric: undefined;
   Security: undefined;
@@ -83,7 +82,6 @@ export type SettingsStackParamList = {
   Profile: undefined;
   KnownDevices: undefined;
   NotificationSettings: undefined;
-  Theme: undefined;
   AlertSound: undefined;
   Biometric: undefined;
   Security: undefined;

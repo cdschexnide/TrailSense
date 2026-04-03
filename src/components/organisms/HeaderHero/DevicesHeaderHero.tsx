@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text } from '@components/atoms';
+import { Card, Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
 
 interface DevicesHeaderHeroProps {
@@ -37,26 +37,51 @@ export const DevicesHeaderHero: React.FC<DevicesHeaderHeroProps> = ({
     : `${deviceCounts.total} device${deviceCounts.total !== 1 ? 's' : ''} active`;
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colors.secondarySystemBackground },
-      ]}
-    >
+    <Card tier="briefing" headerLabel="FLEET STATUS" style={styles.container}>
       <View style={styles.statusRow}>
         <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-        <Text variant="title3" weight="semibold" color="label">
+        <Text variant="caption1" tactical color="label">
           {statusText}
         </Text>
       </View>
-      <Text
-        variant="subheadline"
-        color="secondaryLabel"
-        style={styles.subtitle}
-      >
+      <View style={styles.metricsRow}>
+        <View style={styles.metric}>
+          <Text variant="headline" tactical style={{ color: colors.label }}>
+            {deviceCounts.total}
+          </Text>
+          <Text variant="caption2" tactical color="secondaryLabel">
+            Total
+          </Text>
+        </View>
+        <View style={styles.metric}>
+          <Text
+            variant="headline"
+            tactical
+            style={{ color: colors.systemGreen }}
+          >
+            {deviceCounts.online}
+          </Text>
+          <Text variant="caption2" tactical color="secondaryLabel">
+            Online
+          </Text>
+        </View>
+        <View style={styles.metric}>
+          <Text
+            variant="headline"
+            tactical
+            style={{ color: hasOffline ? colors.systemRed : colors.systemGray }}
+          >
+            {deviceCounts.offline}
+          </Text>
+          <Text variant="caption2" tactical color="secondaryLabel">
+            Offline
+          </Text>
+        </View>
+      </View>
+      <Text variant="footnote" color="secondaryLabel" style={styles.subtitle}>
         {subtitleText}
       </Text>
-    </View>
+    </Card>
   );
 };
 
@@ -64,19 +89,25 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginVertical: 12,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
   },
   statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginBottom: 12,
   },
   statusDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
+  },
+  metricsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  metric: {
+    flex: 1,
   },
   subtitle: {
     marginTop: 4,

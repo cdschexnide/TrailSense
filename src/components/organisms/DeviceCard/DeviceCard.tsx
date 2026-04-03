@@ -156,7 +156,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
       style={[
         styles.card,
         {
-          backgroundColor: colors.secondarySystemBackground,
+          backgroundColor: colors.surface,
+          borderColor: colors.separator,
           opacity: opacityAnim,
           transform: [{ translateY: translateYAnim }, { scale: scaleAnim }],
         },
@@ -171,12 +172,7 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
       >
         {/* Header: Name + Status Dot */}
         <View style={styles.header}>
-          <Text
-            variant="headline"
-            weight="semibold"
-            color="label"
-            style={styles.name}
-          >
+          <Text variant="caption1" tactical color="label" style={styles.name}>
             {device.name}
           </Text>
           <View
@@ -193,7 +189,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
 
         {/* Status + Last Seen */}
         <Text
-          variant="subheadline"
+          variant="caption1"
+          tactical
           color="secondaryLabel"
           style={styles.statusLine}
         >
@@ -230,16 +227,17 @@ const styles = StyleSheet.create({
   glowWrapper: {
     marginHorizontal: 16,
     marginVertical: 8,
-    borderRadius: 16,
+    borderRadius: 10,
   },
   cardWrapper: {
     marginHorizontal: 16,
     marginVertical: 8,
   },
   card: {
-    borderRadius: 16,
+    borderRadius: 10,
     padding: 16,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   header: {
     flexDirection: 'row',

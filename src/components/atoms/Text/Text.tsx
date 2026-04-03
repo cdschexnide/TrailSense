@@ -4,6 +4,7 @@ import {
   TextProps as RNTextProps,
   StyleProp,
   TextStyle,
+  Platform,
 } from 'react-native';
 import { useTheme } from '@hooks/useTheme';
 import { TextStyles, FontWeight } from '@constants/typography';
@@ -60,6 +61,7 @@ export interface TextProps extends RNTextProps {
   color?: TextColor;
   weight?: TextWeight;
   align?: TextAlign;
+  tactical?: boolean;
   numberOfLines?: number;
   style?: StyleProp<TextStyle>;
   onPress?: () => void;
@@ -75,6 +77,7 @@ export const Text: React.FC<TextProps> = ({
   color = 'label',
   weight,
   align = 'left',
+  tactical = false,
   numberOfLines,
   style,
   onPress,
@@ -159,6 +162,13 @@ export const Text: React.FC<TextProps> = ({
     ...getColorStyle(),
     ...getWeightStyle(),
     ...getAlignStyle(),
+    ...(tactical
+      ? {
+          fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+          textTransform: 'uppercase',
+          letterSpacing: 0.5,
+        }
+      : {}),
   };
 
   // ======================

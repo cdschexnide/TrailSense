@@ -8,20 +8,19 @@
  * - App info footer
  */
 
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { View, StyleSheet, Pressable, Alert, Image } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 import { Icon } from '@components/atoms/Icon';
 import { Text } from '@components/atoms/Text';
 import { useAppSelector, useAppDispatch } from '@store/index';
 import { ScreenLayout } from '@components/templates';
 import { GroupedListSection } from '@components/molecules/GroupedListSection';
 import { GroupedListRow } from '@components/molecules/GroupedListRow';
+import { TacticalHeader } from '@components/organisms';
 import { useTheme } from '@hooks/useTheme';
 import { isDemoMode } from '@/config/demoMode';
 import { featureFlagsManager } from '@/config/featureFlags';
@@ -39,29 +38,8 @@ export const SettingsScreen = ({ navigation }: Props) => {
   const colors = theme.colors;
   const settings = useAppSelector(state => state.settings.settings);
   const user = useAppSelector(state => state.auth.user);
-  const [themePreference, setThemePreference] = useState<string>('System');
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
-
-  // Load theme preference when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      const loadThemePreference = async () => {
-        const saved = await AsyncStorage.getItem('@trailsense:theme');
-        if (saved) {
-          // Capitalize first letter for display
-          const displayName =
-            saved === 'auto'
-              ? 'System'
-              : saved.charAt(0).toUpperCase() + saved.slice(1);
-          setThemePreference(displayName);
-        } else {
-          setThemePreference('System');
-        }
-      };
-      loadThemePreference();
-    }, [])
-  );
 
   const handleLogout = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -86,13 +64,7 @@ export const SettingsScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <ScreenLayout
-      header={{
-        title: 'Settings',
-        largeTitle: true,
-      }}
-      scrollable
-    >
+    <ScreenLayout customHeader={<TacticalHeader title="SETTINGS" />} scrollable>
       {/* User Profile Card */}
       <Pressable
         onPress={() => {
@@ -104,21 +76,29 @@ export const SettingsScreen = ({ navigation }: Props) => {
         <View
           style={[
             styles.profileCard,
-            { backgroundColor: colors.secondarySystemBackground },
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.separator,
+            },
           ]}
         >
           <LinearGradient
-            colors={['#667EEA', '#764BA2']}
+            colors={['rgba(251, 191, 36, 0.22)', 'rgba(251, 191, 36, 0.08)']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.profileAvatar}
           >
-            <Text variant="title1" weight="bold" style={{ color: '#FFFFFF' }}>
+            <Text
+              variant="title1"
+              weight="bold"
+              tactical
+              style={{ color: colors.primary }}
+            >
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </Text>
           </LinearGradient>
           <View style={styles.profileInfo}>
-            <Text variant="headline" weight="semibold" color="label">
+            <Text variant="caption1" tactical color="label">
               {user?.name || 'User'}
             </Text>
             <Text
@@ -182,20 +162,6 @@ export const SettingsScreen = ({ navigation }: Props) => {
           onPress={() => navigation.navigate('AlertSound')}
         />
       </GroupedListSection>
-
-      {/* Appearance */}
-      <GroupedListSection title="Appearance">
-        <GroupedListRow
-          icon="color-palette-outline"
-          iconColor={colors.systemPurple}
-          title="Theme"
-          subtitle="Light, dark, or system"
-          value={themePreference}
-          showChevron
-          onPress={() => navigation.navigate('Theme')}
-        />
-      </GroupedListSection>
-
       {/* Security */}
       <GroupedListSection title="Security">
         <GroupedListRow
@@ -258,7 +224,10 @@ export const SettingsScreen = ({ navigation }: Props) => {
           onPress={handleLogout}
           style={({ pressed }) => [
             styles.logoutButton,
-            { backgroundColor: colors.systemRed + '15' },
+            {
+              backgroundColor: 'transparent',
+              borderColor: colors.systemRed,
+            },
             pressed && { opacity: 0.7 },
           ]}
         >
@@ -304,7 +273,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 24,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   profileAvatar: {
     width: 56,
@@ -326,7 +296,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   footer: {
     alignItems: 'center',

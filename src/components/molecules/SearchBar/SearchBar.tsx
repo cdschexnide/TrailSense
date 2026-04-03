@@ -7,6 +7,7 @@ import {
   ViewStyle,
   Animated,
   Keyboard,
+  Platform,
 } from 'react-native';
 import { Icon } from '@components/atoms';
 import { Text } from '@components/atoms/Text/Text';
@@ -26,7 +27,7 @@ interface SearchBarProps {
 export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChangeText,
-  placeholder = 'Search',
+  placeholder = 'SEARCH...',
   showCancelButton = false,
   onCancel,
   debounceMs = 300,
@@ -95,7 +96,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         style={[
           styles.container,
           {
-            backgroundColor: colors.systemGray5,
+            backgroundColor: colors.surface,
+            borderColor: isFocused ? colors.primary : colors.separator,
           },
         ]}
         testID={testID}
@@ -115,8 +117,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             styles.input,
             {
               color: colors.label,
-              fontFamily: theme.typography.fonts.regular,
-              fontSize: 17, // Body text size
+              fontFamily:
+                Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+              fontSize: 14,
             },
           ]}
         />
@@ -132,7 +135,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <Animated.View style={{ width: cancelButtonWidth, overflow: 'hidden' }}>
           <Pressable onPress={handleCancel} style={styles.cancelButton}>
             <Text variant="body" color="systemBlue">
-              Cancel
+              CANCEL
             </Text>
           </Pressable>
         </Animated.View>
@@ -153,6 +156,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     height: 36,
     borderRadius: 10,
+    borderWidth: 1,
   },
   iconLeft: {
     marginRight: 6,
