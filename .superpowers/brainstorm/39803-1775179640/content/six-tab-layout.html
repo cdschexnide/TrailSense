@@ -1,0 +1,126 @@
+<h2>6-Tab Layout Options</h2>
+<p class="subtitle">Comparing the current 5-tab bar with two 6-tab variants. Focus on label readability and tap target size.</p>
+
+<div class="section">
+  <h3>Current 5-Tab Bar</h3>
+  <div class="mockup">
+    <div class="mockup-header">Current — 5 tabs</div>
+    <div class="mockup-body" style="background: #1c1c1e; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+      <div style="display: flex; justify-content: space-around; padding: 8px 0 20px; border-top: 1px solid #38383a;">
+        <div style="text-align: center; flex: 1;">
+          <div style="font-size: 22px; color: #4A5240;">🏠</div>
+          <div style="font-size: 10px; color: #4A5240; margin-top: 2px;">Home</div>
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <div style="font-size: 22px; color: #8e8e93;">🔔</div>
+          <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">Alerts</div>
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <div style="font-size: 22px; color: #8e8e93;">📡</div>
+          <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">Radar</div>
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <div style="font-size: 22px; color: #8e8e93;">💾</div>
+          <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">Devices</div>
+        </div>
+        <div style="text-align: center; flex: 1;">
+          <div style="font-size: 22px; color: #8e8e93;">•••</div>
+          <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">More</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Pick a 6-tab variant</h3>
+<p class="subtitle">Both add AI as a dedicated tab. They differ in how "More" is presented.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>AI tab + "More" with label</h3>
+      <p>All 6 tabs have text labels. Labels will be smaller (~8px) to fit. Standard iOS pattern when apps push to 6.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="background: #1c1c1e; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+          <div style="display: flex; justify-content: space-around; padding: 8px 4px 20px; border-top: 1px solid #38383a;">
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 20px; color: #4A5240;">🏠</div>
+              <div style="font-size: 9px; color: #4A5240; margin-top: 1px; white-space: nowrap;">Home</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 20px; color: #8e8e93;">🔔</div>
+              <div style="font-size: 9px; color: #8e8e93; margin-top: 1px; white-space: nowrap;">Alerts</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 20px; color: #8e8e93;">📡</div>
+              <div style="font-size: 9px; color: #8e8e93; margin-top: 1px; white-space: nowrap;">Radar</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 20px; color: #8e8e93;">💾</div>
+              <div style="font-size: 9px; color: #8e8e93; margin-top: 1px; white-space: nowrap;">Devices</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 20px; color: #8e8e93; position: relative;">
+                <span style="background: linear-gradient(135deg, #4A5240, #3D4536); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: bold;">✦</span>
+              </div>
+              <div style="font-size: 9px; color: #8e8e93; margin-top: 1px; white-space: nowrap;">AI</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 20px; color: #8e8e93;">•••</div>
+              <div style="font-size: 9px; color: #8e8e93; margin-top: 1px; white-space: nowrap;">More</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Every tab has a label — no ambiguity</li><li>Standard iOS pattern (Apple Music has 6)</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Labels shrink to ~9px, harder to read</li><li>Tap targets narrower (~65pt each)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>AI tab + gear icon (no "More" label)</h3>
+      <p>"More" becomes a gear icon with no label, saving horizontal space. Other 5 tabs keep labels at normal size.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="background: #1c1c1e; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+          <div style="display: flex; justify-content: space-around; padding: 8px 4px 20px; border-top: 1px solid #38383a;">
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 22px; color: #4A5240;">🏠</div>
+              <div style="font-size: 10px; color: #4A5240; margin-top: 2px;">Home</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 22px; color: #8e8e93;">🔔</div>
+              <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">Alerts</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 22px; color: #8e8e93;">📡</div>
+              <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">Radar</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 22px; color: #8e8e93;">💾</div>
+              <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">Devices</div>
+            </div>
+            <div style="text-align: center; flex: 1; min-width: 0;">
+              <div style="font-size: 22px; position: relative;">
+                <span style="color: #8e8e93; font-weight: bold;">✦</span>
+              </div>
+              <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;">AI</div>
+            </div>
+            <div style="text-align: center; flex: 0.7; min-width: 0;">
+              <div style="font-size: 22px; color: #8e8e93;">⚙️</div>
+              <div style="font-size: 10px; color: #8e8e93; margin-top: 2px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>5 primary tabs keep full-size labels</li><li>Gear icon is universally understood</li><li>Visual hierarchy: 5 main features + settings</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Asymmetric — one tab has no label</li><li>Gear icon could be confused with device settings</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

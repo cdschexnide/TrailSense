@@ -39,12 +39,9 @@ export const TabSegment: React.FC<TabSegmentProps> = ({
 
   return (
     <View
-      style={[
-        styles.container,
-        { backgroundColor: colors.tertiarySystemFill },
-      ]}
+      style={[styles.container, { backgroundColor: colors.tertiarySystemFill }]}
     >
-      {tabs.map((tab) => {
+      {tabs.map(tab => {
         const isSelected = tab.key === selectedKey;
 
         return (

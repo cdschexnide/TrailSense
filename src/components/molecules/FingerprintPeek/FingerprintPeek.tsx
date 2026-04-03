@@ -48,7 +48,10 @@ export const FingerprintPeek: React.FC<FingerprintPeekProps> = ({
         </View>
 
         <Pressable
-          style={[styles.profileButton, !macAddress && styles.profileButtonDisabled]}
+          style={[
+            styles.profileButton,
+            !macAddress && styles.profileButtonDisabled,
+          ]}
           onPress={() => onViewProfile(macAddress)}
           disabled={!macAddress}
         >

@@ -1,12 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
-import {
-  Canvas,
-  Circle,
-  Group,
-  Line,
-  vec,
-} from '@shopify/react-native-skia';
+import { Canvas, Circle, Group, Line, vec } from '@shopify/react-native-skia';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import { Text } from '@components/atoms';
@@ -157,7 +151,11 @@ export const ReplayRadarDisplay: React.FC<ReplayRadarDisplayProps> = ({
 
       {visibleDots.length === 0 ? (
         <View style={styles.noActivityOverlay}>
-          <Text variant="title3" color="secondaryLabel" style={styles.noActivityText}>
+          <Text
+            variant="title3"
+            color="secondaryLabel"
+            style={styles.noActivityText}
+          >
             No Activity
           </Text>
         </View>

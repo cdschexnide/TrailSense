@@ -140,10 +140,7 @@ export const seedMockData = async ({
           device.latitude,
           device.longitude
         );
-        queryClient.setQueryData(
-          [POSITIONS_QUERY_KEY, device.id],
-          posData
-        );
+        queryClient.setQueryData([POSITIONS_QUERY_KEY, device.id], posData);
       }
     });
 

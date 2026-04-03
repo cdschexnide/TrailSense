@@ -26,10 +26,8 @@ export const ActivitySparkline: React.FC<ActivitySparklineProps> = ({
   const { theme } = useTheme();
 
   const hourlyData = useMemo(() => {
-    const buckets: Array<{ count: number; maxThreat: ThreatLevel }> = Array.from(
-      { length: 24 },
-      () => ({ count: 0, maxThreat: 'low' })
-    );
+    const buckets: Array<{ count: number; maxThreat: ThreatLevel }> =
+      Array.from({ length: 24 }, () => ({ count: 0, maxThreat: 'low' }));
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);

@@ -38,7 +38,9 @@ export const DeviceFingerprintScreen = ({ navigation, route }: any) => {
         ),
     [alerts, macAddress]
   );
-  const knownDevice = knownDevices.find(device => device.macAddress === macAddress);
+  const knownDevice = knownDevices.find(
+    device => device.macAddress === macAddress
+  );
   const blocked = isBlocked(macAddress);
 
   React.useEffect(() => {
@@ -46,10 +48,13 @@ export const DeviceFingerprintScreen = ({ navigation, route }: any) => {
   }, [macAddress]);
 
   const latestAlert = deviceAlerts[0];
-  const topDays = DAY_KEYS.filter(day => (pattern.dayOfWeekFrequency[day] ?? 0) > 0)
+  const topDays = DAY_KEYS.filter(
+    day => (pattern.dayOfWeekFrequency[day] ?? 0) > 0
+  )
     .sort(
       (a, b) =>
-        (pattern.dayOfWeekFrequency[b] ?? 0) - (pattern.dayOfWeekFrequency[a] ?? 0)
+        (pattern.dayOfWeekFrequency[b] ?? 0) -
+        (pattern.dayOfWeekFrequency[a] ?? 0)
     )
     .slice(0, 3)
     .join(', ');
@@ -156,7 +161,9 @@ export const DeviceFingerprintScreen = ({ navigation, route }: any) => {
             icon="today-outline"
             iconColor={colors.systemGreen}
             title="First seen"
-            value={pattern.firstSeen ? formatDate(pattern.firstSeen) : 'Unknown'}
+            value={
+              pattern.firstSeen ? formatDate(pattern.firstSeen) : 'Unknown'
+            }
           />
           <GroupedListRow
             icon="refresh-outline"

@@ -49,7 +49,11 @@ export const DevicesHeaderHero: React.FC<DevicesHeaderHeroProps> = ({
           {statusText}
         </Text>
       </View>
-      <Text variant="subheadline" color="secondaryLabel" style={styles.subtitle}>
+      <Text
+        variant="subheadline"
+        color="secondaryLabel"
+        style={styles.subtitle}
+      >
         {subtitleText}
       </Text>
     </View>

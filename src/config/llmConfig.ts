@@ -112,7 +112,10 @@ export function isLLMAvailable(): boolean {
   }
 
   if (Platform.OS === 'ios') {
-    const iosMajorVersion = parseInt(String(Platform.Version).split('.')[0], 10);
+    const iosMajorVersion = parseInt(
+      String(Platform.Version).split('.')[0],
+      10
+    );
     return iosMajorVersion >= 17;
   }
 
@@ -146,8 +149,7 @@ export function getLLMErrorMessage(code: string): string {
     OUT_OF_MEMORY:
       'Not enough memory available for AI features. Try closing other apps.',
     INVALID_INPUT: 'Invalid input provided to AI.',
-    PLATFORM_NOT_SUPPORTED:
-      'TrailSense AI requires iOS 17+ or Android 13+.',
+    PLATFORM_NOT_SUPPORTED: 'TrailSense AI requires iOS 17+ or Android 13+.',
   };
 
   return errorMessages[code] || 'An unknown error occurred with AI features.';

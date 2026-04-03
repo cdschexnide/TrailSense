@@ -48,11 +48,20 @@ export const useWebSocket = (token: string | null) => {
     };
 
     // Handle positions-updated event
-    const handlePositionsUpdated = (data: { deviceId: string; positions: any[] }) => {
-      console.log('[WebSocket] Positions updated:', data.deviceId, data.positions.length);
+    const handlePositionsUpdated = (data: {
+      deviceId: string;
+      positions: any[];
+    }) => {
+      console.log(
+        '[WebSocket] Positions updated:',
+        data.deviceId,
+        data.positions.length
+      );
       // Invalidate React Query cache for positions
       // This will trigger a refetch on any component using usePositions
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, data.deviceId] });
+      queryClient.invalidateQueries({
+        queryKey: [POSITIONS_QUERY_KEY, data.deviceId],
+      });
     };
 
     // Subscribe to events

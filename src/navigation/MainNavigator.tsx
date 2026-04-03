@@ -5,6 +5,7 @@ import { useTheme } from '@hooks/useTheme';
 import { MainTabParamList } from './types';
 import HomeStack from './stacks/HomeStack';
 import AlertsStack from './stacks/AlertsStack';
+import AIStack from './stacks/AIStack';
 import RadarStack from './stacks/RadarStack';
 import DevicesStack from './stacks/DevicesStack';
 import MoreStack from './stacks/MoreStack';
@@ -47,6 +48,16 @@ export const MainNavigator = () => {
         }}
       />
       <Tab.Screen
+        name="AITab"
+        component={AIStack}
+        options={{
+          title: 'AI',
+          tabBarIcon: ({ color }) => (
+            <Icon name="sparkles-outline" color={color} size="base" />
+          ),
+        }}
+      />
+      <Tab.Screen
         name="RadarTab"
         component={RadarStack}
         options={{
@@ -70,9 +81,9 @@ export const MainNavigator = () => {
         name="MoreTab"
         component={MoreStack}
         options={{
-          title: 'More',
+          tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
-            <Icon name="ellipsis-horizontal" color={color} size="base" />
+            <Icon name="settings-outline" color={color} size="base" />
           ),
         }}
       />

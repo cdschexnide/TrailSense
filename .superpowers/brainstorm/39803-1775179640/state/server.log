@@ -1,0 +1,4 @@
+{"type":"server-started","port":58335,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:58335","screen_dir":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/39803-1775179640/content","state_dir":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/39803-1775179640/state"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/39803-1775179640/content/six-tab-layout.html"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/39803-1775179640/content/waiting-2.html"}
+{"type":"server-stopped","reason":"idle timeout"}

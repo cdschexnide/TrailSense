@@ -1,28 +1,39 @@
 import React, { useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Icon, SkeletonCard, Text } from '@components/atoms';
 import { ActivitySparkline, GlowContainer } from '@components/molecules';
 import { EmptyState, ScreenLayout } from '@components/templates';
-import { AlertCard, MiniPropertyMap } from '@components/organisms';
-import { usePropertyStatus, PropertyStatusLevel } from '@hooks/usePropertyStatus';
+import { AlertCard } from '@components/organisms/AlertCard';
+import { MiniPropertyMap } from '@components/organisms/MiniPropertyMap';
+import {
+  usePropertyStatus,
+  PropertyStatusLevel,
+} from '@hooks/usePropertyStatus';
 import { useReducedMotion } from '@hooks/useReducedMotion';
 import { useTheme } from '@hooks/useTheme';
 
-const STATUS_COLORS: Record<PropertyStatusLevel, { bg: string; dot: string }> = {
-  clear: {
-    bg: 'rgba(90, 138, 90, 0.12)',
-    dot: '#5A8A5A',
-  },
-  warning: {
-    bg: 'rgba(196, 127, 48, 0.12)',
-    dot: '#C47F30',
-  },
-  critical: {
-    bg: 'rgba(184, 74, 66, 0.12)',
-    dot: '#B84A42',
-  },
-};
+const STATUS_COLORS: Record<PropertyStatusLevel, { bg: string; dot: string }> =
+  {
+    clear: {
+      bg: 'rgba(90, 138, 90, 0.12)',
+      dot: '#5A8A5A',
+    },
+    warning: {
+      bg: 'rgba(196, 127, 48, 0.12)',
+      dot: '#C47F30',
+    },
+    critical: {
+      bg: 'rgba(184, 74, 66, 0.12)',
+      dot: '#B84A42',
+    },
+  };
 
 export const PropertyCommandCenter = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -75,15 +86,43 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
     return (
       <ScreenLayout header={{ title: 'My Property', largeTitle: true }}>
         <View style={styles.skeletons}>
-          <SkeletonCard height={60} borderRadius={16} style={styles.skeletonItem} />
+          <SkeletonCard
+            height={60}
+            borderRadius={16}
+            style={styles.skeletonItem}
+          />
           <View style={styles.statsRowSkeleton}>
-            <SkeletonCard height={80} borderRadius={12} style={styles.flexCard} />
-            <SkeletonCard height={80} borderRadius={12} style={styles.flexCard} />
-            <SkeletonCard height={80} borderRadius={12} style={styles.flexCard} />
+            <SkeletonCard
+              height={80}
+              borderRadius={12}
+              style={styles.flexCard}
+            />
+            <SkeletonCard
+              height={80}
+              borderRadius={12}
+              style={styles.flexCard}
+            />
+            <SkeletonCard
+              height={80}
+              borderRadius={12}
+              style={styles.flexCard}
+            />
           </View>
-          <SkeletonCard height={200} borderRadius={16} style={styles.skeletonItem} />
-          <SkeletonCard height={76} borderRadius={12} style={styles.skeletonItem} />
-          <SkeletonCard height={76} borderRadius={12} style={styles.skeletonItem} />
+          <SkeletonCard
+            height={200}
+            borderRadius={16}
+            style={styles.skeletonItem}
+          />
+          <SkeletonCard
+            height={76}
+            borderRadius={12}
+            style={styles.skeletonItem}
+          />
+          <SkeletonCard
+            height={76}
+            borderRadius={12}
+            style={styles.skeletonItem}
+          />
         </View>
       </ScreenLayout>
     );
@@ -227,7 +266,9 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
 
         <MiniPropertyMap
           devices={status.allDevices}
-          onPress={() => navigation.navigate('RadarTab', { screen: 'LiveRadar' })}
+          onPress={() =>
+            navigation.navigate('RadarTab', { screen: 'LiveRadar' })
+          }
         />
 
         {!status.alertsError && status.recentAlerts.length > 0 && (
@@ -350,7 +391,7 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
 
         <ActivitySparkline
           alerts={status.allAlerts}
-          onHourPress={(hour) =>
+          onHourPress={hour =>
             navigation.navigate('RadarTab', {
               screen: 'LiveRadar',
               params: { startHour: hour },
@@ -387,7 +428,11 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
                 <Text variant="caption1" color="secondaryLabel">
                   Online
                 </Text>
-                <Text variant="caption2" color="tertiaryLabel" numberOfLines={1}>
+                <Text
+                  variant="caption2"
+                  color="tertiaryLabel"
+                  numberOfLines={1}
+                >
                   {status.onlineDeviceNames.join(', ') || '—'}
                 </Text>
               </View>
@@ -404,7 +449,11 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
                   <Text variant="caption1" color="secondaryLabel">
                     Offline
                   </Text>
-                  <Text variant="caption2" color="tertiaryLabel" numberOfLines={1}>
+                  <Text
+                    variant="caption2"
+                    color="tertiaryLabel"
+                    numberOfLines={1}
+                  >
                     {status.offlineDeviceNames.join(', ') || '—'}
                   </Text>
                 </View>

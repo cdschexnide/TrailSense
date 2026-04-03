@@ -1,12 +1,11 @@
 /**
- * AIAssistantScreen - REDESIGNED
+ * AIAssistantScreen — Tactical Redesign
  *
- * Beautiful AI chat interface with:
- * - Modern header with gradient AI icon
- * - Enhanced status display
- * - Improved chat bubbles
- * - Better input design
- * - Smooth animations
+ * Amber tactical security briefing interface with:
+ * - Compact tactical header with threat status dot
+ * - Rich response cards via CardRouter
+ * - Terminal-style command input
+ * - Tactical quick-action buttons
  */
 
 import React, {
@@ -20,7 +19,6 @@ import {
   View,
   TextInput,
   StyleSheet,
-  FlatList,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -32,34 +30,34 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAI } from '@/services/llm';
 import { FEATURE_FLAGS, shouldShowLLMFeatures } from '@/config/featureFlags';
 import { getStorageRequirements } from '@/config/llmConfig';
 import { ChatMessage as ChatMessageType } from '@/types/llm';
 import { useSecurityContext } from '@/hooks/useSecurityContext';
-import { useTheme } from '@hooks/useTheme';
+import { useAlerts } from '@/hooks/api/useAlerts';
+import { useDevices } from '@/hooks/api/useDevices';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
 import {
   ChatMessage,
   SuggestionChips,
-  SecurityStatusCard,
   DEFAULT_SUGGESTIONS,
   getContextualSuggestions,
   Suggestion,
 } from '@/components/ai';
+import {
+  tacticalColors as c,
+  tacticalTypography as t,
+} from '@/constants/tacticalTheme';
 import SmallTrailSenseCompanyLogo from '@assets/images/SmallTrailSenseCompanyLogo.png';
 
 const CHAT_STORAGE_KEY = '@trailsense/ai_chat_history';
 const MAX_STORED_MESSAGES = 50;
 
 export const AIAssistantScreen: React.FC = () => {
-  const { theme, colorScheme } = useTheme();
-  const colors = theme.colors;
-  const isDark = colorScheme === 'dark';
-
   // AI context
   const {
     isAvailable,
@@ -67,21 +65,21 @@ export const AIAssistantScreen: React.FC = () => {
     isEnabling,
     isGenerating,
     downloadProgress,
-    response,
     enableAI,
   } = useAI();
 
   // Security context
   const securityContext = useSecurityContext();
+  const { data: alerts = [] } = useAlerts({});
+  const { data: devices = [] } = useDevices();
 
   // Local state
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [inputText, setInputText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
-  const logoSource = SmallTrailSenseCompanyLogo;
 
   // Refs
-  const flatListRef = useRef<FlatList>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
   // Feature check
@@ -91,26 +89,39 @@ export const AIAssistantScreen: React.FC = () => {
     FEATURE_FLAGS.LLM_CONVERSATIONAL_ASSISTANT;
   const modelDownloadSize = getStorageRequirements().formattedTotal;
 
-  // Contextual suggestions
-  const contextualSuggestions = useMemo(() => {
-    return getContextualSuggestions({
-      unreviewedAlerts: securityContext.unreviewedAlerts,
-      criticalAlerts: securityContext.criticalAlerts,
-      offlineDevices: securityContext.offlineDevices,
-      lowBatteryDevices: securityContext.lowBatteryDevices,
-    });
+  // Threat status for header dot
+  const threatStatus = useMemo(() => {
+    if (securityContext.criticalAlerts > 0)
+      return { color: c.accentDanger, label: 'CRITICAL' };
+    if (
+      securityContext.totalAlerts > 0 &&
+      securityContext.unreviewedAlerts > 0
+    )
+      return { color: c.accentWarning, label: 'ELEVATED' };
+    return { color: c.accentSuccess, label: 'READY' };
   }, [securityContext]);
+
+  // Suggestions
+  const contextualSuggestions = useMemo(
+    () =>
+      getContextualSuggestions({
+        unreviewedAlerts: securityContext.unreviewedAlerts,
+        criticalAlerts: securityContext.criticalAlerts,
+        offlineDevices: securityContext.offlineDevices,
+        lowBatteryDevices: securityContext.lowBatteryDevices,
+      }),
+    [securityContext]
+  );
 
   const allSuggestions = useMemo(() => {
     const combined = [...contextualSuggestions];
-    DEFAULT_SUGGESTIONS.forEach(suggestion => {
-      if (!combined.find(s => s.id === suggestion.id)) {
-        combined.push(suggestion);
-      }
+    DEFAULT_SUGGESTIONS.forEach(s => {
+      if (!combined.find(c => c.id === s.id)) combined.push(s);
     });
     return combined.slice(0, 6);
   }, [contextualSuggestions]);
 
+  // Persistence
   const loadChatHistory = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(CHAT_STORAGE_KEY);
@@ -119,8 +130,8 @@ export const AIAssistantScreen: React.FC = () => {
         setMessages(parsed.slice(-MAX_STORED_MESSAGES));
         setShowSuggestions(parsed.length === 0);
       }
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
+    } catch {
+      // Silently ignore load failures
     }
   }, []);
 
@@ -128,8 +139,8 @@ export const AIAssistantScreen: React.FC = () => {
     try {
       const toStore = messages.slice(-MAX_STORED_MESSAGES);
       await AsyncStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toStore));
-    } catch (err) {
-      console.error('Failed to save chat history:', err);
+    } catch {
+      // Silently ignore save failures
     }
   }, [messages]);
 
@@ -138,33 +149,22 @@ export const AIAssistantScreen: React.FC = () => {
   }, [loadChatHistory]);
 
   useEffect(() => {
-    if (messages.length > 0) {
-      void saveChatHistory();
-    }
+    if (messages.length > 0) void saveChatHistory();
   }, [messages, saveChatHistory]);
 
-  // Scroll to bottom
+  // Auto-scroll when a new message is added
+  const prevMessageCount = useRef(0);
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+    if (messages.length > prevMessageCount.current) {
+      setTimeout(
+        () => scrollRef.current?.scrollToEnd({ animated: true }),
+        200
+      );
     }
-  }, [messages]);
+    prevMessageCount.current = messages.length;
+  }, [messages.length]);
 
-  // Update streaming response
-  useEffect(() => {
-    if (isGenerating && response) {
-      setMessages(prev => {
-        const lastMsg = prev[prev.length - 1];
-        if (lastMsg?.role === 'assistant') {
-          return [...prev.slice(0, -1), { ...lastMsg, content: response }];
-        }
-        return prev;
-      });
-    }
-  }, [response, isGenerating]);
-
+  // Handlers
   const handleClearChat = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Alert.alert(
@@ -215,53 +215,55 @@ export const AIAssistantScreen: React.FC = () => {
       };
       setMessages(prev => [...prev, userMessage]);
 
-      const assistantPlaceholder: ChatMessageType = {
+      // Placeholder with empty content triggers typing indicator
+      const placeholder: ChatMessageType = {
         role: 'assistant',
         content: '',
         timestamp: Date.now(),
       };
-      setMessages(prev => [...prev, assistantPlaceholder]);
+      setMessages(prev => [...prev, placeholder]);
 
       try {
         const llmService = (await import('@/services/llm/LLMService'))
           .llmService;
 
         const chatResponse = await llmService.chat({
-          messages: [...messages.filter(m => m.role !== 'system'), userMessage],
-          securityContext: {
-            recentAlerts: securityContext.recentAlerts,
-            deviceStatus: securityContext.deviceList,
-            contextString: securityContext.contextString,
-          },
+          messages: [
+            ...messages.filter(m => m.role !== 'system'),
+            userMessage,
+          ],
+          rawAlerts: alerts,
+          rawDevices: devices,
         });
 
+        // Replace placeholder with full response including structuredData
         setMessages(prev => {
-          const updatedMessages = [...prev];
-          updatedMessages[updatedMessages.length - 1] = {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
             role: 'assistant',
             content:
               chatResponse.message ||
-              response ||
-              "I apologize, but I couldn't generate a response. Please try again.",
+              "I couldn't generate a response. Please try again.",
             timestamp: Date.now(),
+            intent: chatResponse.intent,
+            structuredData: chatResponse.structuredData,
           };
-          return updatedMessages;
+          return updated;
         });
-      } catch (err) {
-        console.error('Chat error:', err);
+      } catch {
         setMessages(prev => {
-          const updatedMessages = [...prev];
-          updatedMessages[updatedMessages.length - 1] = {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
             role: 'assistant',
             content:
               'I encountered an error processing your request. Please try again.',
             timestamp: Date.now(),
           };
-          return updatedMessages;
+          return updated;
         });
       }
     },
-    [inputText, messages, isGenerating, securityContext, response]
+    [alerts, devices, inputText, isGenerating, messages]
   );
 
   const handleSuggestionSelect = useCallback(
@@ -272,34 +274,8 @@ export const AIAssistantScreen: React.FC = () => {
     [handleSendMessage]
   );
 
-  const handleCopyMessage = useCallback(() => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, []);
 
-  const handleFeedback = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }, []);
-
-  const renderMessage = useCallback(
-    ({ item, index }: { item: ChatMessageType; index: number }) => {
-      const isLastMessage = index === messages.length - 1;
-      const isStreaming =
-        isGenerating && isLastMessage && item.role === 'assistant';
-
-      return (
-        <ChatMessage
-          message={item}
-          isStreaming={isStreaming}
-          onCopy={handleCopyMessage}
-          onFeedback={handleFeedback}
-          showFeedback={!isStreaming && item.role === 'assistant'}
-        />
-      );
-    },
-    [messages.length, isGenerating, handleCopyMessage, handleFeedback]
-  );
-
-  // Welcome screen
+  // ── Welcome screen ──────────────────────────────────
   const renderWelcome = () => (
     <ScrollView
       style={styles.welcomeContainer}
@@ -307,116 +283,70 @@ export const AIAssistantScreen: React.FC = () => {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      {/* Security Status */}
-      {!securityContext.isLoading && (
-        <SecurityStatusCard context={securityContext} />
-      )}
-
-      {/* AI Branding - subtitle only; title is already in the header */}
-      <View style={styles.brandingContainer}>
-        <Text
-          variant="body"
-          style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
-        >
-          Your on-device security assistant. Ask about alerts, detection
-          patterns, sensor status, and more.
+      <View style={styles.welcomeBranding}>
+        <Image
+          source={SmallTrailSenseCompanyLogo}
+          style={styles.welcomeLogo}
+          resizeMode="contain"
+        />
+        <Text style={styles.welcomeTitle}>TRAILSENSE AI</Text>
+        <Text style={styles.welcomeSubtitle}>
+          Your on-device security analyst
         </Text>
       </View>
 
-      {/* Suggestions */}
       <SuggestionChips
         suggestions={allSuggestions}
         onSelect={handleSuggestionSelect}
-        title="Try asking"
       />
     </ScrollView>
   );
 
-  // Enable AI prompt
+  // ── Enable prompt (unchanged in structure, tactical colors) ──
   const renderEnablePrompt = () => (
     <View style={styles.enableContainer}>
       <Image
-        source={logoSource}
-        style={styles.aiIconLarge}
+        source={SmallTrailSenseCompanyLogo}
+        style={styles.enableLogo}
         resizeMode="contain"
       />
-
-      <Text
-        variant="title1"
-        weight="bold"
-        color="label"
-        style={styles.enableTitle}
-      >
-        Enable TrailSense AI
+      <Text style={styles.enableTitle}>Enable TrailSense AI</Text>
+      <Text style={styles.enableSubtitle}>
+        Download the on-device AI model to enable intelligent security
+        analysis.
       </Text>
 
-      <Text
-        variant="body"
-        style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}
-      >
-        Download the on-device AI model to enable intelligent security analysis.
-      </Text>
-
-      <View
-        style={[
-          styles.featureList,
-          { backgroundColor: colors.secondarySystemBackground },
-        ]}
-      >
+      <View style={styles.featureList}>
         <View style={styles.featureRow}>
-          <Icon
-            name="cloud-download-outline"
-            size={20}
-            color={colors.systemBlue}
-          />
-          <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
+          <Icon name="cloud-download-outline" size={20} color={c.accentPrimary} />
+          <Text style={styles.featureText}>
             {`~${modelDownloadSize} one-time download`}
           </Text>
         </View>
         <View style={styles.featureRow}>
-          <Icon
-            name="phone-portrait-outline"
-            size={20}
-            color={colors.systemGreen}
-          />
-          <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
-            Runs 100% on-device
-          </Text>
+          <Icon name="phone-portrait-outline" size={20} color={c.accentSuccess} />
+          <Text style={styles.featureText}>Runs 100% on-device</Text>
         </View>
         <View style={styles.featureRow}>
-          <Icon
-            name="shield-checkmark-outline"
-            size={20}
-            color={colors.systemPurple}
-          />
-          <Text variant="subheadline" color="label" style={{ marginLeft: 12 }}>
-            No data sent to cloud
-          </Text>
+          <Icon name="shield-checkmark-outline" size={20} color={c.accentPrimary} />
+          <Text style={styles.featureText}>No data sent to cloud</Text>
         </View>
       </View>
 
       {isEnabling && (
         <View style={styles.progressContainer}>
-          <View
-            style={[
-              styles.progressBar,
-              { backgroundColor: colors.systemGray5 },
-            ]}
-          >
-            <LinearGradient
-              colors={['#667EEA', '#764BA2']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
+          <View style={styles.progressBar}>
+            <View
               style={[
                 styles.progressFill,
-                { width: `${downloadProgress * 100}%` },
+                {
+                  width: `${downloadProgress * 100}%`,
+                  backgroundColor: c.accentPrimary,
+                },
               ]}
             />
           </View>
-          <Text
-            variant="caption1"
-            style={{ color: colors.secondaryLabel, marginTop: 8 }}
-          >
+          <Text style={styles.progressText}>
             Downloading... {(downloadProgress * 100).toFixed(0)}%
           </Text>
         </View>
@@ -425,65 +355,41 @@ export const AIAssistantScreen: React.FC = () => {
       <Pressable
         onPress={handleEnableAI}
         disabled={isEnabling}
-        style={({ pressed }) => [pressed && { opacity: 0.8 }]}
+        style={({ pressed }) => [
+          styles.enableButton,
+          isEnabling && { opacity: 0.6 },
+          pressed && { opacity: 0.8 },
+        ]}
       >
-        <LinearGradient
-          colors={isEnabling ? ['#636366', '#8E8E93'] : ['#667EEA', '#764BA2']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.enableButton}
-        >
-          {isEnabling ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <>
-              <Icon name="download-outline" size={20} color="#FFFFFF" />
-              <Text
-                variant="headline"
-                weight="semibold"
-                style={{ color: '#FFFFFF', marginLeft: 8 }}
-              >
-                Download & Enable
-              </Text>
-            </>
-          )}
-        </LinearGradient>
+        {isEnabling ? (
+          <ActivityIndicator size="small" color={c.textPrimary} />
+        ) : (
+          <>
+            <Icon name="download-outline" size={20} color={c.textPrimary} />
+            <Text style={styles.enableButtonText}>Download & Enable</Text>
+          </>
+        )}
       </Pressable>
     </View>
   );
 
-  // Not available
+  // ── Not available ───────────────────────────────────
   const renderNotAvailable = () => (
     <View style={styles.enableContainer}>
-      <View
-        style={[styles.aiIconLarge, { backgroundColor: colors.systemGray4 }]}
-      >
-        <Icon name="close" size={36} color={colors.secondaryLabel} />
+      <View style={styles.notAvailableIcon}>
+        <Icon name="close" size={36} color={c.textTertiary} />
       </View>
-      <Text
-        variant="title1"
-        weight="bold"
-        color="label"
-        style={styles.enableTitle}
-      >
-        AI Not Available
-      </Text>
-      <Text
-        variant="body"
-        style={[styles.enableSubtitle, { color: colors.secondaryLabel }]}
-      >
-        TrailSense AI requires a custom development build with ExecuTorch and
-        iOS 17+ or Android 13+.
+      <Text style={styles.enableTitle}>AI Not Available</Text>
+      <Text style={styles.enableSubtitle}>
+        TrailSense AI requires a custom development build with ExecuTorch
+        and iOS 17+ or Android 13+.
       </Text>
     </View>
   );
 
   if (!isFeatureEnabled) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top']}
-      >
+      <SafeAreaView style={styles.container} edges={['top']}>
         {renderNotAvailable()}
       </SafeAreaView>
     );
@@ -491,185 +397,141 @@ export const AIAssistantScreen: React.FC = () => {
 
   if (!isReady) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top']}
-      >
+      <SafeAreaView style={styles.container} edges={['top']}>
         {renderEnablePrompt()}
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.systemBackground }]}
-      edges={['top']}
-    >
+    <SafeAreaView style={styles.container} edges={['top']}>
       <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.separator }]}>
+        {/* ── Tactical Header ──────────────────────── */}
+        <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Image
-              source={logoSource}
-              style={styles.aiIconSmall}
-              resizeMode="contain"
-            />
-            <View style={styles.headerTitleContainer}>
-              <Text variant="headline" weight="semibold" color="label">
-                TrailSense AI
-              </Text>
-              <SecurityStatusCard context={securityContext} compact />
+            <View style={styles.headerIcon}>
+              <Image
+                source={SmallTrailSenseCompanyLogo}
+                style={styles.headerIconImg}
+                resizeMode="contain"
+              />
             </View>
+            <Text style={styles.headerTitle}>TRAILSENSE AI</Text>
           </View>
           <View style={styles.headerRight}>
-            {isGenerating && (
-              <View style={styles.generatingBadge}>
-                <ActivityIndicator size="small" color={colors.systemBlue} />
-              </View>
-            )}
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: threatStatus.color },
+              ]}
+            />
+            <Text
+              style={[styles.statusLabel, { color: threatStatus.color }]}
+            >
+              {threatStatus.label}
+            </Text>
             {messages.length > 0 && (
               <Pressable
                 onPress={handleClearChat}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                style={styles.clearBtn}
+                hitSlop={10}
               >
-                <Text variant="subheadline" style={{ color: colors.systemRed }}>
-                  Clear
-                </Text>
+                <Text style={styles.clearText}>CLEAR</Text>
               </Pressable>
             )}
           </View>
         </View>
 
-        {/* Messages or Welcome */}
+        {/* ── Content area ── */}
         {messages.length === 0 && showSuggestions ? (
           renderWelcome()
         ) : (
-          <>
-            <FlatList
-              ref={flatListRef}
-              style={styles.messageList}
-              data={messages}
-              keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-              renderItem={renderMessage}
-              contentContainerStyle={styles.messageListContent}
-              onContentSizeChange={() =>
-                flatListRef.current?.scrollToEnd({ animated: true })
-              }
-              showsVerticalScrollIndicator={false}
-              ListHeaderComponent={
-                <View style={styles.conversationHeader}>
-                  <View
-                    style={[
-                      styles.dateBadge,
-                      { backgroundColor: colors.secondarySystemBackground },
-                    ]}
-                  >
-                    <Icon
-                      name="calendar-outline"
-                      size={12}
-                      color={colors.secondaryLabel}
-                    />
-                    <Text
-                      variant="caption2"
-                      style={{ color: colors.secondaryLabel, marginLeft: 4 }}
-                    >
-                      {new Date().toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </Text>
-                  </View>
-                </View>
-              }
-            />
-
-            {/* Quick suggestions - Enhanced */}
-            {!inputText && messages.length > 0 && !isGenerating && (
-              <SuggestionChips
-                suggestions={contextualSuggestions.slice(0, 3)}
-                onSelect={handleSuggestionSelect}
-                compact
-              />
-            )}
-          </>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.flex}
+            contentContainerStyle={styles.messageListContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {messages.map((item, index) => {
+              const isLastMessage = index === messages.length - 1;
+              const isStreamingMsg =
+                isGenerating && isLastMessage && item.role === 'assistant';
+              return (
+                <ChatMessage
+                  key={`${item.timestamp}-${index}`}
+                  message={item}
+                  isStreaming={isStreamingMsg}
+                  onCopy={() =>
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Success
+                    )
+                  }
+                  onFeedback={() =>
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                  }
+                  showFeedback={
+                    !isStreamingMsg && item.role === 'assistant'
+                  }
+                />
+              );
+            })}
+          </ScrollView>
         )}
 
-        {/* Enhanced Input Area */}
-        <View
-          style={[
-            styles.inputContainer,
-            { backgroundColor: colors.systemBackground },
-          ]}
-        >
-          {/* Subtle top border with gradient */}
-          <LinearGradient
-            colors={[
-              'rgba(74,82,64,0.2)',
-              'rgba(184,166,124,0.25)',
-              'rgba(74,82,64,0.2)',
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.inputBorderGradient}
+        {/* ── Quick actions (pinned above input) ── */}
+        {messages.length > 0 && !inputText && !isGenerating && (
+          <SuggestionChips
+            suggestions={[
+              ...contextualSuggestions.slice(0, 2),
+              ...DEFAULT_SUGGESTIONS.slice(0, 3),
+            ].slice(0, 4)}
+            onSelect={handleSuggestionSelect}
+            compact
           />
-          <View style={styles.inputInner}>
-            <View
-              style={[
-                styles.inputWrapper,
-                {
-                  backgroundColor: isDark
-                    ? 'rgba(44, 44, 46, 0.8)'
-                    : 'rgba(242, 242, 247, 0.9)',
-                  borderColor: inputText.trim()
-                    ? 'rgba(74, 82, 64, 0.4)'
-                    : 'transparent',
-                },
-              ]}
-            >
-              {/* NOTE: In iOS Simulator, toggle software keyboard with Cmd+K
-                  or I/O > Keyboard > Toggle Software Keyboard */}
-              <TextInput
-                ref={inputRef}
-                style={[styles.input, { color: colors.label }]}
-                value={inputText}
-                onChangeText={setInputText}
-                placeholder="Ask about your security..."
-                placeholderTextColor={colors.secondaryLabel}
-                multiline
-                maxLength={500}
-                returnKeyType="default"
-                editable={!isGenerating}
-              />
-            </View>
+        )}
+
+        {/* ── Terminal-style Input ──────────────────── */}
+        <View style={styles.inputContainer}>
+          <View style={styles.inputRow}>
+            <Text style={styles.promptChar}>{'›'}</Text>
+            <TextInput
+              ref={inputRef}
+              style={styles.input}
+              value={inputText}
+              onChangeText={setInputText}
+              placeholder="Ask about your property..."
+              placeholderTextColor={c.textTertiary}
+              multiline
+              maxLength={500}
+              returnKeyType="default"
+              editable={!isGenerating}
+            />
             <Pressable
               onPress={() => handleSendMessage()}
               disabled={!inputText.trim() || isGenerating}
               style={({ pressed }) => [
-                styles.sendButtonWrapper,
-                pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
+                styles.sendBtn,
+                (!inputText.trim() || isGenerating) &&
+                  styles.sendBtnDisabled,
+                pressed && { opacity: 0.8 },
               ]}
             >
-              <LinearGradient
-                colors={
-                  !inputText.trim() || isGenerating
-                    ? [colors.systemGray4, colors.systemGray3]
-                    : ['#4A5240', '#3D4536']
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.sendButton}
-              >
-                {isGenerating ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <Icon name="arrow-up" size={20} color="#FFFFFF" />
-                )}
-              </LinearGradient>
+              {isGenerating ? (
+                <ActivityIndicator size="small" color={c.accentPrimary} />
+              ) : (
+                <Icon
+                  name="arrow-up"
+                  size={18}
+                  color={
+                    inputText.trim() ? c.accentPrimary : c.textTertiary
+                  }
+                />
+              )}
             </Pressable>
           </View>
         </View>
@@ -681,144 +543,191 @@ export const AIAssistantScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: c.background,
   },
-  keyboardAvoid: {
+  flex: {
     flex: 1,
   },
+
+  // ── Header ────────────────────────────────────────
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderBottomWidth: 1,
+    borderBottomColor: c.border,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
+    gap: 10,
   },
-  headerTitleContainer: {
-    marginLeft: 12,
+  headerIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerIconImg: {
+    width: 24,
+    height: 24,
+  },
+  headerTitle: {
+    fontFamily: t.mono,
+    fontSize: 15,
+    fontWeight: '700',
+    color: c.textPrimary,
+    letterSpacing: 0.5,
   },
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 6,
   },
-  aiIconSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
-  generatingBadge: {
-    padding: 4,
+  statusLabel: {
+    ...t.headerLabel,
+    fontSize: 10,
   },
-  messageList: {
-    flex: 1,
+  clearBtn: {
+    marginLeft: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 4,
   },
+  clearText: {
+    ...t.dataValue,
+    color: c.textTertiary,
+  },
+
+  // ── Messages ──────────────────────────────────────
   messageListContent: {
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
   },
-  conversationHeader: {
-    alignItems: 'center',
-    paddingVertical: 12,
-    marginBottom: 8,
-  },
-  dateBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
+
+  // ── Input ─────────────────────────────────────────
   inputContainer: {
-    paddingBottom: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
+    flexShrink: 0,
   },
-  inputBorderGradient: {
-    height: 1,
-  },
-  inputInner: {
+  inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 4,
     gap: 8,
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 10,
+    paddingLeft: 14,
+    paddingRight: 4,
+    paddingVertical: 4,
   },
-  inputWrapper: {
-    flex: 1,
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderWidth: 1.5,
-    minHeight: 44,
-    justifyContent: 'center',
+  promptChar: {
+    ...t.promptChar,
+    color: c.accentPrimary,
   },
   input: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 14,
+    color: c.textPrimary,
     maxHeight: 100,
     minHeight: 22,
+    paddingVertical: 6,
   },
-  sendButtonWrapper: {
-    shadowColor: '#4A5240',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  sendBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: c.surfaceDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  sendBtnDisabled: {
+    opacity: 0.5,
+  },
+
+  // ── Welcome ───────────────────────────────────────
   welcomeContainer: {
     flex: 1,
   },
   welcomeContent: {
     paddingBottom: 16,
   },
-  brandingContainer: {
+  welcomeBranding: {
     alignItems: 'center',
+    paddingTop: 48,
+    paddingBottom: 24,
     paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 8,
   },
-  aiIconLarge: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
+  welcomeLogo: {
+    width: 64,
+    height: 64,
+    marginBottom: 16,
   },
-  brandSubtitle: {
+  welcomeTitle: {
+    fontFamily: t.mono,
+    fontSize: 22,
+    fontWeight: '700',
+    color: c.textPrimary,
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: c.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
+
+  // ── Enable Prompt ─────────────────────────────────
   enableContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
   },
+  enableLogo: {
+    width: 80,
+    height: 80,
+    marginBottom: 20,
+  },
   enableTitle: {
-    marginTop: 20,
+    fontFamily: t.mono,
+    fontSize: 20,
+    fontWeight: '700',
+    color: c.textPrimary,
+    letterSpacing: 1,
     marginBottom: 12,
   },
   enableSubtitle: {
+    fontSize: 14,
+    color: c.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
     marginBottom: 24,
   },
   featureList: {
     width: '100%',
-    borderRadius: 16,
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: 12,
     padding: 16,
     marginBottom: 24,
     gap: 14,
@@ -827,6 +736,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  featureText: {
+    fontSize: 14,
+    color: c.textPrimary,
+    marginLeft: 12,
+  },
   progressContainer: {
     width: '100%',
     marginBottom: 24,
@@ -834,20 +748,45 @@ const styles = StyleSheet.create({
   progressBar: {
     height: 8,
     borderRadius: 4,
+    backgroundColor: c.surface,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     borderRadius: 4,
   },
+  progressText: {
+    ...t.dataValue,
+    color: c.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
   enableButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: c.accentPrimary,
     paddingHorizontal: 32,
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 10,
     minWidth: 220,
+    gap: 8,
+  },
+  enableButtonText: {
+    fontFamily: t.mono,
+    fontSize: 14,
+    fontWeight: '700',
+    color: c.background,
+    letterSpacing: 0.5,
+  },
+  notAvailableIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: c.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
 });
 

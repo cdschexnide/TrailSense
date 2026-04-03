@@ -1,5 +1,6 @@
-import type { Alert } from '@/types/alert';
+import type { Alert, ThreatLevel, DetectionType } from '@/types/alert';
 import type { Device } from '@/types/device';
+import type { StructuredCardData } from '@/types/cardData';
 
 export interface LLMStructuredValue {
   [key: string]:
@@ -55,7 +56,7 @@ export interface Message {
 // LLM Request/Response Types
 export interface LLMRequest {
   messages: Message[];
-  context?: LLMStructuredValue;
+  context?: unknown;
   options?: GenerationOptions;
   cacheKey?: string;
 }
@@ -159,12 +160,16 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
+  intent?: IntentType;
+  structuredData?: StructuredCardData;
 }
 
 export interface ChatResponse {
   message: string;
   confidence: number;
   sources?: string[];
+  intent: IntentType;
+  structuredData: StructuredCardData;
 }
 
 export interface ConversationContext {
@@ -182,4 +187,35 @@ export interface ConversationContext {
     >;
     contextString?: string;
   };
+}
+
+// Intent Classification Types
+export type IntentType =
+  | 'alert_query'
+  | 'device_query'
+  | 'status_overview'
+  | 'pattern_query'
+  | 'time_query'
+  | 'help';
+
+export interface IntentFilters {
+  threatLevel?: ThreatLevel;
+  detectionType?: DetectionType;
+  timeRange?: '24h' | '7d';
+  deviceName?: string;
+  isReviewed?: boolean;
+  online?: boolean;
+}
+
+export interface ClassifiedIntent {
+  intent: IntentType;
+  filters: IntentFilters;
+  confidence: number;
+}
+
+// New chat context — replaces ConversationContext for chat()
+export interface ChatContext {
+  messages: ChatMessage[];
+  rawAlerts: Alert[];
+  rawDevices: Device[];
 }

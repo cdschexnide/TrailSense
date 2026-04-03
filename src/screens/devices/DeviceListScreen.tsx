@@ -18,7 +18,8 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useDevices } from '@hooks/api/useDevices';
-import { DeviceCard, DevicesHeaderHero } from '@components/organisms';
+import { DeviceCard } from '@components/organisms/DeviceCard';
+import { DevicesHeaderHero } from '@components/organisms/HeaderHero';
 import { ScreenLayout, ErrorState, EmptyState } from '@components/templates';
 import { Button, Icon, SkeletonCard } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';

@@ -75,7 +75,8 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
     }
   };
 
-  const hasSecondaryActions = (secondaryActions && secondaryActions.length > 0) || onMorePress;
+  const hasSecondaryActions =
+    (secondaryActions && secondaryActions.length > 0) || onMorePress;
 
   return (
     <View
@@ -106,11 +107,7 @@ export const FloatingActionBar: React.FC<FloatingActionBarProps> = ({
               style={styles.primaryIcon}
             />
           )}
-          <Text
-            variant="body"
-            weight="semibold"
-            style={styles.primaryText}
-          >
+          <Text variant="body" weight="semibold" style={styles.primaryText}>
             {primaryAction.label}
           </Text>
         </Pressable>

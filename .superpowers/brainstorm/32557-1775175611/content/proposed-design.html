@@ -1,0 +1,242 @@
+<h2>Proposed Design — AI Assistant Welcome Screen</h2>
+<p class="subtitle">Side-by-side: current layout vs proposed. Key changes highlighted in green.</p>
+
+<div class="split">
+  <!-- CURRENT -->
+  <div class="mockup">
+    <div class="mockup-header">Current Layout</div>
+    <div class="mockup-body" style="background: #1c1c1e; padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-height: 700px;">
+
+      <!-- Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #38383a;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 36px; height: 36px; border-radius: 12px; background: #4A5240; display: flex; align-items: center; justify-content: center;">
+            <span style="color: white; font-size: 12px; font-weight: 700;">TS</span>
+          </div>
+          <div>
+            <div style="color: white; font-weight: 600; font-size: 14px;">TrailSense AI</div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 6px; height: 6px; border-radius: 3px; background: #34C759;"></div>
+              <span style="color: #8e8e93; font-size: 10px;">5 alerts today • 4/5 online</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Card -->
+      <div style="margin: 8px 12px 0; border-radius: 16px; overflow: hidden; background: #2c2c2e;">
+        <div style="background: linear-gradient(to right, #FF9500, #E08600); padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;"><span style="font-size: 14px;">⚠️</span></div>
+            <div>
+              <div style="color: rgba(255,255,255,0.8); font-size: 8px; letter-spacing: 0.8px;">SECURITY STATUS</div>
+              <div style="color: white; font-weight: 700; font-size: 14px;">Alert</div>
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 10px; display: flex; align-items: center; gap: 4px;">
+            <div style="width: 5px; height: 5px; border-radius: 3px; background: white;"></div>
+            <span style="color: white; font-size: 8px; font-weight: 600;">LIVE</span>
+          </div>
+        </div>
+        <div style="display: flex; padding: 14px 12px; text-align: center;">
+          <div style="flex: 1;"><div style="color: white; font-size: 18px; font-weight: 700;">5</div><div style="color: #8e8e93; font-size: 9px;">Today</div></div>
+          <div style="width: 1px; background: #38383a; height: 32px; align-self: center;"></div>
+          <div style="flex: 1;"><div style="color: white; font-size: 18px; font-weight: 700;">12</div><div style="color: #8e8e93; font-size: 9px;">Unreviewed</div></div>
+          <div style="width: 1px; background: #38383a; height: 32px; align-self: center;"></div>
+          <div style="flex: 1;"><div style="color: white; font-size: 18px; font-weight: 700;">4/5</div><div style="color: #8e8e93; font-size: 9px;">Sensors</div></div>
+        </div>
+      </div>
+
+      <!-- LARGE GAP (32px padding) -->
+      <div style="background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,59,48,0.06) 5px, rgba(255,59,48,0.06) 10px); border-left: 2px dashed rgba(255,59,48,0.3); border-right: 2px dashed rgba(255,59,48,0.3); margin: 0 12px; height: 32px; display: flex; align-items: center; justify-content: center;">
+        <span style="color: #FF3B30; font-size: 8px; font-weight: 600; opacity: 0.6;">32px gap</span>
+      </div>
+
+      <!-- Large branding -->
+      <div style="text-align: center; padding: 0 24px 24px;">
+        <div style="width: 60px; height: 60px; border-radius: 18px; background: #4A5240; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;">
+          <span style="color: white; font-size: 20px; font-weight: 700;">TS</span>
+        </div>
+        <div style="color: white; font-size: 22px; font-weight: 700; margin-bottom: 6px;">TrailSense AI</div>
+        <div style="color: #8e8e93; font-size: 12px; line-height: 1.4;">Your on-device security assistant. Ask about alerts, detection patterns, sensor status, and more.</div>
+      </div>
+
+      <!-- Suggestions (partially visible) -->
+      <div style="padding: 0 12px;">
+        <div style="color: #8e8e93; font-size: 9px; letter-spacing: 0.6px; font-weight: 600; margin-bottom: 8px;">TRY ASKING</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(166,93,76,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">📊</div>
+            <span style="color: white; font-size: 12px; flex: 1;">Summarize today's activity</span>
+          </div>
+          <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(166,93,76,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">⚠️</div>
+            <span style="color: white; font-size: 12px; flex: 1;">Show unreviewed alerts</span>
+          </div>
+          <!-- Clipped -->
+          <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; opacity: 0.3; clip-path: inset(0 0 50% 0);">
+            <div style="width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px;">📡</div>
+            <span style="color: white; font-size: 12px;">Check sensor status</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div style="padding: 8px 12px 4px; border-top: 1px solid rgba(74,82,64,0.2); margin-top: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="flex: 1; background: rgba(44,44,46,0.8); border-radius: 18px; padding: 8px 14px; min-height: 36px; display: flex; align-items: center;">
+            <span style="color: #8e8e93; font-size: 13px;">Ask about your security...</span>
+          </div>
+          <div style="width: 36px; height: 36px; border-radius: 18px; background: #48484a; display: flex; align-items: center; justify-content: center;">
+            <span style="color: white; font-size: 14px;">↑</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div style="display: flex; justify-content: space-around; padding: 8px 0 16px; background: #1c1c1e; border-top: 1px solid #38383a;">
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">🏠</div><div style="font-size: 8px; color: #8e8e93;">Home</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">🔔</div><div style="font-size: 8px; color: #8e8e93;">Alerts</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">📡</div><div style="font-size: 8px; color: #8e8e93;">Radar</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">💾</div><div style="font-size: 8px; color: #8e8e93;">Devices</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #4A5240;">⋯</div><div style="font-size: 8px; color: #4A5240;">More</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPOSED -->
+  <div class="mockup">
+    <div class="mockup-header">Proposed Layout</div>
+    <div class="mockup-body" style="background: #1c1c1e; padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-height: 700px;">
+
+      <!-- Header (unchanged) -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #38383a;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 36px; height: 36px; border-radius: 12px; background: #4A5240; display: flex; align-items: center; justify-content: center;">
+            <span style="color: white; font-size: 12px; font-weight: 700;">TS</span>
+          </div>
+          <div>
+            <div style="color: white; font-weight: 600; font-size: 14px;">TrailSense AI</div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div style="width: 6px; height: 6px; border-radius: 3px; background: #34C759;"></div>
+              <span style="color: #8e8e93; font-size: 10px;">5 alerts today • 4/5 online</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCROLLABLE AREA starts here -->
+      <div style="overflow-y: auto;">
+
+        <!-- Status Card (unchanged) -->
+        <div style="margin: 8px 12px 0; border-radius: 16px; overflow: hidden; background: #2c2c2e;">
+          <div style="background: linear-gradient(to right, #FF9500, #E08600); padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;"><span style="font-size: 14px;">⚠️</span></div>
+              <div>
+                <div style="color: rgba(255,255,255,0.8); font-size: 8px; letter-spacing: 0.8px;">SECURITY STATUS</div>
+                <div style="color: white; font-weight: 700; font-size: 14px;">Alert</div>
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 10px; display: flex; align-items: center; gap: 4px;">
+              <div style="width: 5px; height: 5px; border-radius: 3px; background: white;"></div>
+              <span style="color: white; font-size: 8px; font-weight: 600;">LIVE</span>
+            </div>
+          </div>
+          <div style="display: flex; padding: 14px 12px; text-align: center;">
+            <div style="flex: 1;"><div style="color: white; font-size: 18px; font-weight: 700;">5</div><div style="color: #8e8e93; font-size: 9px;">Today</div></div>
+            <div style="width: 1px; background: #38383a; height: 32px; align-self: center;"></div>
+            <div style="flex: 1;"><div style="color: white; font-size: 18px; font-weight: 700;">12</div><div style="color: #8e8e93; font-size: 9px;">Unreviewed</div></div>
+            <div style="width: 1px; background: #38383a; height: 32px; align-self: center;"></div>
+            <div style="flex: 1;"><div style="color: white; font-size: 18px; font-weight: 700;">4/5</div><div style="color: #8e8e93; font-size: 9px;">Sensors</div></div>
+          </div>
+        </div>
+
+        <!-- COMPACT branding (reduced) -->
+        <div style="text-align: center; padding: 16px 24px 12px; border: 2px solid rgba(52,199,89,0.3); border-radius: 12px; margin: 8px 12px 0; background: rgba(52,199,89,0.03);">
+          <div style="position: relative; top: -8px;">
+            <span style="background: #34C759; color: white; padding: 2px 8px; border-radius: 6px; font-size: 8px; font-weight: 700;">CHANGED</span>
+          </div>
+          <div style="color: #8e8e93; font-size: 12px; line-height: 1.4; margin-top: -4px;">Your on-device security assistant. Ask about alerts, patterns, and sensor status.</div>
+        </div>
+
+        <!-- Suggestions (ALL visible, scrollable) -->
+        <div style="padding: 16px 12px 0;">
+          <div style="color: #8e8e93; font-size: 9px; letter-spacing: 0.6px; font-weight: 600; margin-bottom: 8px;">TRY ASKING</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(166,93,76,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">📊</div>
+              <span style="color: white; font-size: 12px; flex: 1;">Summarize today's activity</span>
+              <span style="color: #48484a; font-size: 12px;">›</span>
+            </div>
+            <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(166,93,76,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">⚠️</div>
+              <span style="color: white; font-size: 12px; flex: 1;">Show unreviewed alerts</span>
+              <span style="color: #48484a; font-size: 12px;">›</span>
+            </div>
+            <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(93,122,107,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">📡</div>
+              <span style="color: white; font-size: 12px; flex: 1;">Check sensor status</span>
+              <span style="color: #48484a; font-size: 12px;">›</span>
+            </div>
+            <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(107,107,94,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">🔍</div>
+              <span style="color: white; font-size: 12px; flex: 1;">Any suspicious activity?</span>
+              <span style="color: #48484a; font-size: 12px;">›</span>
+            </div>
+            <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(107,107,94,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">📈</div>
+              <span style="color: white; font-size: 12px; flex: 1;">Weekly security report</span>
+              <span style="color: #48484a; font-size: 12px;">›</span>
+            </div>
+            <div style="background: #2c2c2e; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(107,107,94,0.12); display: flex; align-items: center; justify-content: center; font-size: 12px;">🌙</div>
+              <span style="color: white; font-size: 12px; flex: 1;">When is it quietest?</span>
+              <span style="color: #48484a; font-size: 12px;">›</span>
+            </div>
+          </div>
+          <!-- Bottom padding for scroll clearance -->
+          <div style="height: 16px;"></div>
+        </div>
+
+      </div>
+      <!-- END scrollable -->
+
+      <!-- Input (unchanged) -->
+      <div style="padding: 8px 12px 4px; border-top: 1px solid rgba(74,82,64,0.2);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="flex: 1; background: rgba(44,44,46,0.8); border-radius: 18px; padding: 8px 14px; min-height: 36px; display: flex; align-items: center;">
+            <span style="color: #8e8e93; font-size: 13px;">Ask about your security...</span>
+          </div>
+          <div style="width: 36px; height: 36px; border-radius: 18px; background: #4A5240; display: flex; align-items: center; justify-content: center;">
+            <span style="color: white; font-size: 14px;">↑</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div style="display: flex; justify-content: space-around; padding: 8px 0 16px; background: #1c1c1e; border-top: 1px solid #38383a;">
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">🏠</div><div style="font-size: 8px; color: #8e8e93;">Home</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">🔔</div><div style="font-size: 8px; color: #8e8e93;">Alerts</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">📡</div><div style="font-size: 8px; color: #8e8e93;">Radar</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #8e8e93;">💾</div><div style="font-size: 8px; color: #8e8e93;">Devices</div></div>
+        <div style="text-align: center;"><div style="font-size: 16px; color: #4A5240;">⋯</div><div style="font-size: 8px; color: #4A5240;">More</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>Changes Summary</h3>
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="background: rgba(52,199,89,0.08); border-left: 3px solid #34C759; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+      <strong style="color: #34C759;">Fix 1 — Shrink branding:</strong> Remove 80px logo and "TrailSense AI" title (already in header). Keep only the one-line subtitle as context. Reduce <code>brandingContainer</code> from <code>paddingVertical: 32</code> to <code>paddingVertical: 16</code>, remove <code>paddingTop</code> on subtitle. Saves ~150px of vertical space.
+    </div>
+    <div style="background: rgba(52,199,89,0.08); border-left: 3px solid #34C759; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+      <strong style="color: #34C759;">Fix 2 — Keyboard:</strong> The iOS simulator disables the software keyboard by default (toggle with <code>I/O > Keyboard > Toggle Software Keyboard</code> or <code>Cmd+K</code>). On real devices the TextInput already works. No code change needed — document the simulator behavior.
+    </div>
+    <div style="background: rgba(52,199,89,0.08); border-left: 3px solid #34C759; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+      <strong style="color: #34C759;">Fix 3 — Scrollable welcome:</strong> Wrap the welcome content (SecurityStatusCard + branding + SuggestionChips) in a <code>ScrollView</code> so all suggestions are reachable. Add bottom padding to the scroll content to clear the input bar. The <code>SafeAreaView edges</code> stays <code>['top']</code> only — the tab bar already handles bottom insets.
+    </div>
+  </div>
+</div>

@@ -28,7 +28,10 @@ export const SettingsStack = () => {
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="KnownDevices" component={KnownDevicesScreen} />
-      <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+      />
       <Stack.Screen name="Theme" component={ThemeScreen} />
       <Stack.Screen name="AlertSound" component={AlertSoundScreen} />
       <Stack.Screen name="Biometric" component={BiometricScreen} />

@@ -111,6 +111,7 @@
     "lint-staged": "^16.2.6",
     "msw": "^2.12.2",
     "prettier": "^3.6.2",
+    "react-test-renderer": "^19.1.0",
     "typescript": "^5.9.3"
   },
   "private": true

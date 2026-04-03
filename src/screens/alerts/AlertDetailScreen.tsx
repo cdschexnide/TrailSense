@@ -184,7 +184,10 @@ export const AlertDetailScreen = () => {
           <View style={styles.summaryGrid}>
             {alert.metadata.signalCount && (
               <View style={styles.summaryItem}>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel }}
+                >
                   Detections
                 </Text>
                 <Text variant="title3" weight="semibold" color="label">
@@ -195,7 +198,10 @@ export const AlertDetailScreen = () => {
 
             {alert.metadata.windowDuration && (
               <View style={styles.summaryItem}>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel }}
+                >
                   Window
                 </Text>
                 <Text variant="title3" weight="semibold" color="label">
@@ -206,7 +212,10 @@ export const AlertDetailScreen = () => {
 
             {alert.metadata.distance && (
               <View style={styles.summaryItem}>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel }}
+                >
                   Distance
                 </Text>
                 <Text variant="title3" weight="semibold" color="label">
@@ -217,7 +226,10 @@ export const AlertDetailScreen = () => {
 
             {alert.metadata.burstCount && (
               <View style={styles.summaryItem}>
-                <Text variant="caption1" style={{ color: colors.secondaryLabel }}>
+                <Text
+                  variant="caption1"
+                  style={{ color: colors.secondaryLabel }}
+                >
                   Bursts
                 </Text>
                 <Text variant="title3" weight="semibold" color="label">
@@ -319,7 +331,11 @@ export const AlertDetailScreen = () => {
                   weight="semibold"
                   style={{ color: '#FFFFFF' }}
                 >
-                  +/-{alert.metadata.triangulatedPosition.accuracyMeters.toFixed(1)}m
+                  +/-
+                  {alert.metadata.triangulatedPosition.accuracyMeters.toFixed(
+                    1
+                  )}
+                  m
                 </Text>
               </View>
               <View style={styles.positionRow}>
@@ -369,7 +385,9 @@ export const AlertDetailScreen = () => {
             iconColor={colors.systemBlue}
             title="View on Map"
             showChevron
-            onPress={() => openInMaps(alert.location!.latitude, alert.location!.longitude)}
+            onPress={() =>
+              openInMaps(alert.location!.latitude, alert.location!.longitude)
+            }
           />
         </GroupedListSection>
       )}
@@ -434,7 +452,9 @@ export const AlertDetailScreen = () => {
       <GroupedListSection title="Status">
         <GroupedListRow
           icon={alert.isReviewed ? 'checkmark-circle' : 'ellipse-outline'}
-          iconColor={alert.isReviewed ? colors.systemGreen : colors.secondaryLabel}
+          iconColor={
+            alert.isReviewed ? colors.systemGreen : colors.secondaryLabel
+          }
           title="Reviewed"
           value={alert.isReviewed ? 'Yes' : 'No'}
         />

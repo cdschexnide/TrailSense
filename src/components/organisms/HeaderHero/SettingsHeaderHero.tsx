@@ -9,12 +9,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Image,
-} from 'react-native';
+import { View, StyleSheet, Pressable, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Text, Icon } from '@components/atoms';
@@ -50,7 +45,7 @@ export const SettingsHeaderHero: React.FC<SettingsHeaderHeroProps> = ({
     user.initials ||
     user.name
       .split(' ')
-      .map((n) => n[0])
+      .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -114,11 +109,7 @@ export const SettingsHeaderHero: React.FC<SettingsHeaderHeroProps> = ({
 
           {/* User info */}
           <View style={styles.userInfo}>
-            <Text
-              variant="headline"
-              color="label"
-              style={styles.userName}
-            >
+            <Text variant="headline" color="label" style={styles.userName}>
               {user.name}
             </Text>
             <Text

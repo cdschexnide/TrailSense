@@ -1,6 +1,10 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { AxiosAdapter } from 'axios';
-import { apiClient, mockApiAdapter, setMockAdapterQueryClient } from '@api/client';
+import {
+  apiClient,
+  mockApiAdapter,
+  setMockAdapterQueryClient,
+} from '@api/client';
 import { isMockMode } from '@/config/mockConfig';
 import { isDemoMode } from '@/config/demoMode';
 

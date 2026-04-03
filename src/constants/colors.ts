@@ -350,7 +350,11 @@ export const Colors = {
     gradients: {
       cardHeader: ['rgba(90, 90, 80, 0.04)', 'rgba(90, 90, 80, 0)'],
       statsBackground: ['#E4E3DD', '#D5D5CB'],
-      shimmer: ['rgba(90, 90, 80, 0)', 'rgba(90, 90, 80, 0.06)', 'rgba(90, 90, 80, 0)'],
+      shimmer: [
+        'rgba(90, 90, 80, 0)',
+        'rgba(90, 90, 80, 0.06)',
+        'rgba(90, 90, 80, 0)',
+      ],
       onlineStatus: ['rgba(90, 138, 90, 0.15)', 'rgba(90, 138, 90, 0)'],
       offlineStatus: ['rgba(184, 74, 66, 0.15)', 'rgba(184, 74, 66, 0)'],
     },

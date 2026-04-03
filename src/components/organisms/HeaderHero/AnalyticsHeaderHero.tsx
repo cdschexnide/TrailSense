@@ -8,12 +8,7 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  Pressable,
-  Animated,
-} from 'react-native';
+import { View, StyleSheet, Pressable, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { Text, Icon } from '@components/atoms';
@@ -113,7 +108,7 @@ export const AnalyticsHeaderHero: React.FC<AnalyticsHeaderHeroProps> = ({
           },
         ]}
       >
-        {PERIODS.map((period) => {
+        {PERIODS.map(period => {
           const isSelected = selectedPeriod === period.key;
           return (
             <Animated.View
@@ -170,11 +165,7 @@ export const AnalyticsHeaderHero: React.FC<AnalyticsHeaderHeroProps> = ({
       >
         {/* Total Detections */}
         <LinearGradient
-          colors={
-            isDark
-              ? ['#1E3A5F', '#0D2137']
-              : ['#E8F4FD', '#D0E8FA']
-          }
+          colors={isDark ? ['#1E3A5F', '#0D2137'] : ['#E8F4FD', '#D0E8FA']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.statCard, { borderColor: 'rgba(10, 132, 255, 0.25)' }]}
@@ -220,11 +211,7 @@ export const AnalyticsHeaderHero: React.FC<AnalyticsHeaderHeroProps> = ({
 
         {/* Active Devices */}
         <LinearGradient
-          colors={
-            isDark
-              ? ['#1A3D2E', '#0D2518']
-              : ['#E6F7ED', '#CCF0DB']
-          }
+          colors={isDark ? ['#1A3D2E', '#0D2518'] : ['#E6F7ED', '#CCF0DB']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[styles.statCard, { borderColor: 'rgba(48, 209, 88, 0.25)' }]}
@@ -253,7 +240,11 @@ export const AnalyticsHeaderHero: React.FC<AnalyticsHeaderHeroProps> = ({
               <Icon
                 name={stats.allDevicesOnline ? 'checkmark-circle' : 'warning'}
                 size={12}
-                color={stats.allDevicesOnline ? colors.systemGreen : colors.systemYellow}
+                color={
+                  stats.allDevicesOnline
+                    ? colors.systemGreen
+                    : colors.systemYellow
+                }
               />
               <Text
                 variant="caption2"

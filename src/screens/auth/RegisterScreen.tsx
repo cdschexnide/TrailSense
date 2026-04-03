@@ -40,7 +40,9 @@ interface RegisterScreenProps {
   navigation: any;
 }
 
-export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+export const RegisterScreen: React.FC<RegisterScreenProps> = ({
+  navigation,
+}) => {
   const { theme, colorScheme } = useTheme();
   const colors = theme.colors;
   const isDark = colorScheme === 'dark';
@@ -56,7 +58,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
   const [nameError, setNameError] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -74,7 +77,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
   const brandOlive = '#4A5240';
   const brandTan = '#B8A67C';
 
-  const getPasswordStrength = (pwd: string): { level: string; score: number } => {
+  const getPasswordStrength = (
+    pwd: string
+  ): { level: string; score: number } => {
     if (!pwd) return { level: 'none', score: 0 };
     if (pwd.length < 6) return { level: 'weak', score: 1 };
     if (pwd.length < 8) return { level: 'fair', score: 2 };
@@ -84,20 +89,32 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     const hasNumbers = /\d/.test(pwd);
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
 
-    const strengthCount = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
+    const strengthCount = [
+      hasUpperCase,
+      hasLowerCase,
+      hasNumbers,
+      hasSpecialChar,
+    ].filter(Boolean).length;
 
-    if (strengthCount >= 3 && pwd.length >= 10) return { level: 'strong', score: 4 };
-    if (strengthCount >= 2 && pwd.length >= 8) return { level: 'good', score: 3 };
+    if (strengthCount >= 3 && pwd.length >= 10)
+      return { level: 'strong', score: 4 };
+    if (strengthCount >= 2 && pwd.length >= 8)
+      return { level: 'good', score: 3 };
     return { level: 'fair', score: 2 };
   };
 
   const getStrengthColor = (level: string): string => {
     switch (level) {
-      case 'weak': return colors.systemRed;
-      case 'fair': return colors.systemOrange;
-      case 'good': return colors.systemYellow;
-      case 'strong': return colors.systemGreen;
-      default: return colors.systemGray4;
+      case 'weak':
+        return colors.systemRed;
+      case 'fair':
+        return colors.systemOrange;
+      case 'good':
+        return colors.systemYellow;
+      case 'strong':
+        return colors.systemGreen;
+      default:
+        return colors.systemGray4;
     }
   };
 
@@ -165,25 +182,40 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     const isPasswordValid = validatePassword(password);
     const isConfirmPasswordValid = validateConfirmPassword(confirmPassword);
 
-    if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+    if (
+      !isNameValid ||
+      !isEmailValid ||
+      !isPasswordValid ||
+      !isConfirmPasswordValid
+    ) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 
     if (!acceptedTerms) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-      Alert.alert('Terms & Conditions', 'Please accept the Terms & Conditions to continue');
+      Alert.alert(
+        'Terms & Conditions',
+        'Please accept the Terms & Conditions to continue'
+      );
       return;
     }
 
     try {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      await dispatch(register({ name: name.trim(), email: email.trim(), password })).unwrap();
+      await dispatch(
+        register({ name: name.trim(), email: email.trim(), password })
+      ).unwrap();
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Welcome!', 'Your account has been created successfully!', [{ text: 'OK' }]);
+      Alert.alert('Welcome!', 'Your account has been created successfully!', [
+        { text: 'OK' },
+      ]);
     } catch (error: any) {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Registration Failed', error.message || 'Unable to create account. Please try again.');
+      Alert.alert(
+        'Registration Failed',
+        error.message || 'Unable to create account. Please try again.'
+      );
     }
   };
 
@@ -192,7 +224,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     navigation.navigate('Login');
   };
 
-  const { level: strengthLevel, score: strengthScore } = getPasswordStrength(password);
+  const { level: strengthLevel, score: strengthScore } =
+    getPasswordStrength(password);
 
   const renderInput = (
     label: string,
@@ -224,25 +257,35 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
       >
         {label}
       </Text>
-      <View style={[
-        styles.inputContainer,
-        {
-          backgroundColor: isDark ? 'rgba(44, 44, 46, 0.6)' : 'rgba(242, 242, 247, 0.8)',
-          borderColor: error
-            ? colors.systemRed
-            : focused
-              ? colors.systemBlue
-              : isDark
-                ? 'rgba(255, 255, 255, 0.1)'
-                : 'rgba(0, 0, 0, 0.08)',
-        },
-        focused && !error && styles.inputFocused,
-        error && styles.inputError,
-      ]}>
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: isDark
+              ? 'rgba(44, 44, 46, 0.6)'
+              : 'rgba(242, 242, 247, 0.8)',
+            borderColor: error
+              ? colors.systemRed
+              : focused
+                ? colors.systemBlue
+                : isDark
+                  ? 'rgba(255, 255, 255, 0.1)'
+                  : 'rgba(0, 0, 0, 0.08)',
+          },
+          focused && !error && styles.inputFocused,
+          error && styles.inputError,
+        ]}
+      >
         <Icon
           name={iconName as any}
           size={20}
-          color={error ? colors.systemRed : focused ? colors.systemBlue : colors.secondaryLabel}
+          color={
+            error
+              ? colors.systemRed
+              : focused
+                ? colors.systemBlue
+                : colors.secondaryLabel
+          }
         />
         <TextInput
           ref={options.ref}
@@ -253,7 +296,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
           placeholderTextColor={colors.tertiaryLabel}
           secureTextEntry={options.secureTextEntry && !options.isVisible}
           keyboardType={options.keyboardType || 'default'}
-          autoCapitalize={options.keyboardType === 'email-address' ? 'none' : 'words'}
+          autoCapitalize={
+            options.keyboardType === 'email-address' ? 'none' : 'words'
+          }
           autoCorrect={false}
           editable={!isLoading}
           onFocus={() => setFocused(true)}
@@ -295,9 +340,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     <View style={styles.container}>
       {/* Background Gradient */}
       <LinearGradient
-        colors={isDark
-          ? ['#0A0A0A', '#1A1A1A', '#0D1210', '#0A0A0A']
-          : ['#F5F5F7', '#FFFFFF', '#F0F2F0', '#F5F5F7']
+        colors={
+          isDark
+            ? ['#0A0A0A', '#1A1A1A', '#0D1210', '#0A0A0A']
+            : ['#F5F5F7', '#FFFFFF', '#F0F2F0', '#F5F5F7']
         }
         locations={[0, 0.3, 0.7, 1]}
         style={StyleSheet.absoluteFill}
@@ -331,7 +377,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                 onPress={handleLogin}
                 style={({ pressed }) => [
                   styles.backButton,
-                  { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' },
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(255,255,255,0.1)'
+                      : 'rgba(0,0,0,0.05)',
+                  },
                   pressed && { opacity: 0.7 },
                 ]}
               >
@@ -352,27 +402,45 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
 
             {/* Title Section */}
             <View style={styles.titleSection}>
-              <Text variant="largeTitle" weight="bold" color="label" style={styles.title}>
+              <Text
+                variant="largeTitle"
+                weight="bold"
+                color="label"
+                style={styles.title}
+              >
                 Create Account
               </Text>
-              <Text variant="body" color="secondaryLabel" style={styles.subtitle}>
+              <Text
+                variant="body"
+                color="secondaryLabel"
+                style={styles.subtitle}
+              >
                 Join TrailSense to secure your property
               </Text>
             </View>
 
             {/* Form Card */}
-            <View style={[
-              styles.formCard,
-              {
-                backgroundColor: isDark ? 'rgba(28, 28, 30, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-              }
-            ]}>
+            <View
+              style={[
+                styles.formCard,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(28, 28, 30, 0.8)'
+                    : 'rgba(255, 255, 255, 0.9)',
+                  borderColor: isDark
+                    ? 'rgba(255, 255, 255, 0.1)'
+                    : 'rgba(0, 0, 0, 0.05)',
+                },
+              ]}
+            >
               {/* Name Input */}
               {renderInput(
                 'Full Name',
                 name,
-                (text) => { setName(text); if (nameError) validateName(text); },
+                text => {
+                  setName(text);
+                  if (nameError) validateName(text);
+                },
                 'Enter your full name',
                 'person-outline',
                 nameFocused,
@@ -389,7 +457,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               {renderInput(
                 'Email Address',
                 email,
-                (text) => { setEmail(text); if (emailError) validateEmail(text); },
+                text => {
+                  setEmail(text);
+                  if (emailError) validateEmail(text);
+                },
                 'Enter your email',
                 'mail-outline',
                 emailFocused,
@@ -408,7 +479,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               {renderInput(
                 'Password',
                 password,
-                (text) => {
+                text => {
                   setPassword(text);
                   if (passwordError) validatePassword(text);
                   if (confirmPassword) validateConfirmPassword(confirmPassword);
@@ -433,15 +504,18 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               {password.length > 0 && (
                 <View style={styles.strengthContainer}>
                   <View style={styles.strengthBars}>
-                    {[1, 2, 3, 4].map((bar) => (
+                    {[1, 2, 3, 4].map(bar => (
                       <View
                         key={bar}
                         style={[
                           styles.strengthBar,
                           {
-                            backgroundColor: bar <= strengthScore
-                              ? getStrengthColor(strengthLevel)
-                              : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                            backgroundColor:
+                              bar <= strengthScore
+                                ? getStrengthColor(strengthLevel)
+                                : isDark
+                                  ? 'rgba(255,255,255,0.1)'
+                                  : 'rgba(0,0,0,0.1)',
                           },
                         ]}
                       />
@@ -449,7 +523,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                   </View>
                   <Text variant="caption1" style={styles.strengthText}>
                     <Text style={{ color: getStrengthColor(strengthLevel) }}>
-                      {strengthLevel.charAt(0).toUpperCase() + strengthLevel.slice(1)}
+                      {strengthLevel.charAt(0).toUpperCase() +
+                        strengthLevel.slice(1)}
                     </Text>
                   </Text>
                 </View>
@@ -459,7 +534,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               {renderInput(
                 'Confirm Password',
                 confirmPassword,
-                (text) => { setConfirmPassword(text); if (confirmPasswordError) validateConfirmPassword(text); },
+                text => {
+                  setConfirmPassword(text);
+                  if (confirmPasswordError) validateConfirmPassword(text);
+                },
                 'Re-enter your password',
                 'shield-checkmark-outline',
                 confirmPasswordFocused,
@@ -485,22 +563,40 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                 }}
                 style={styles.termsContainer}
               >
-                <View style={[
-                  styles.checkbox,
-                  {
-                    backgroundColor: acceptedTerms ? brandOlive : 'transparent',
-                    borderColor: acceptedTerms ? brandOlive : colors.systemGray3,
-                  },
-                ]}>
-                  {acceptedTerms && <Icon name="checkmark" size={14} color="#FFFFFF" />}
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      backgroundColor: acceptedTerms
+                        ? brandOlive
+                        : 'transparent',
+                      borderColor: acceptedTerms
+                        ? brandOlive
+                        : colors.systemGray3,
+                    },
+                  ]}
+                >
+                  {acceptedTerms && (
+                    <Icon name="checkmark" size={14} color="#FFFFFF" />
+                  )}
                 </View>
-                <Text variant="subheadline" color="secondaryLabel" style={styles.termsText}>
+                <Text
+                  variant="subheadline"
+                  color="secondaryLabel"
+                  style={styles.termsText}
+                >
                   I agree to the{' '}
-                  <Text variant="subheadline" style={{ color: colors.systemBlue }}>
+                  <Text
+                    variant="subheadline"
+                    style={{ color: colors.systemBlue }}
+                  >
                     Terms of Service
                   </Text>{' '}
                   and{' '}
-                  <Text variant="subheadline" style={{ color: colors.systemBlue }}>
+                  <Text
+                    variant="subheadline"
+                    style={{ color: colors.systemBlue }}
+                  >
                     Privacy Policy
                   </Text>
                 </Text>
@@ -516,9 +612,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                 ]}
               >
                 <LinearGradient
-                  colors={isLoading
-                    ? [colors.systemGray3, colors.systemGray4]
-                    : [brandOlive, '#3D4536']
+                  colors={
+                    isLoading
+                      ? [colors.systemGray3, colors.systemGray4]
+                      : [brandOlive, '#3D4536']
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
@@ -528,7 +625,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                     <ActivityIndicator size="small" color="#FFFFFF" />
                   ) : (
                     <>
-                      <Text variant="headline" weight="semibold" style={styles.createButtonText}>
+                      <Text
+                        variant="headline"
+                        weight="semibold"
+                        style={styles.createButtonText}
+                      >
                         Create Account
                       </Text>
                       <Icon name="arrow-forward" size={20} color="#FFFFFF" />
@@ -547,19 +648,36 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                 onPress={handleLogin}
                 style={({ pressed }) => [pressed && { opacity: 0.7 }]}
               >
-                <Text variant="body" weight="semibold" style={{ color: colors.systemBlue, marginLeft: 6 }}>
+                <Text
+                  variant="body"
+                  weight="semibold"
+                  style={{ color: colors.systemBlue, marginLeft: 6 }}
+                >
                   Sign In
                 </Text>
               </Pressable>
             </View>
 
             {/* Security Badge */}
-            <View style={[
-              styles.securityBadge,
-              { backgroundColor: isDark ? 'rgba(52, 199, 89, 0.1)' : 'rgba(52, 199, 89, 0.08)' }
-            ]}>
-              <Icon name="shield-checkmark" size={16} color={colors.systemGreen} />
-              <Text variant="caption1" style={{ color: colors.systemGreen, marginLeft: 6 }}>
+            <View
+              style={[
+                styles.securityBadge,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(52, 199, 89, 0.1)'
+                    : 'rgba(52, 199, 89, 0.08)',
+                },
+              ]}
+            >
+              <Icon
+                name="shield-checkmark"
+                size={16}
+                color={colors.systemGreen}
+              />
+              <Text
+                variant="caption1"
+                style={{ color: colors.systemGreen, marginLeft: 6 }}
+              >
                 Your data stays on your device
               </Text>
             </View>

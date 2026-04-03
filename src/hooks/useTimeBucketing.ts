@@ -35,7 +35,9 @@ function findMatchingAlert(
         continue;
       }
 
-      const distance = Math.abs(new Date(alert.timestamp).getTime() - positionTimeMs);
+      const distance = Math.abs(
+        new Date(alert.timestamp).getTime() - positionTimeMs
+      );
       if (distance <= windowMs && distance < bestDistance) {
         best = alert;
         bestDistance = distance;
@@ -52,7 +54,9 @@ function findMatchingAlert(
       continue;
     }
 
-    const distance = Math.abs(new Date(alert.timestamp).getTime() - positionTimeMs);
+    const distance = Math.abs(
+      new Date(alert.timestamp).getTime() - positionTimeMs
+    );
     if (distance <= windowMs && distance < bestDistance) {
       best = alert;
       bestDistance = distance;

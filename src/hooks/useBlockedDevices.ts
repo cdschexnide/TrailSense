@@ -2,10 +2,7 @@ import { useCallback } from 'react';
 import { useToast } from '@components/templates';
 import { AnalyticsEvents, logEvent } from '@services/analyticsEvents';
 import { useAppDispatch, useAppSelector } from '@store/index';
-import {
-  blockDevice,
-  unblockDevice,
-} from '@store/slices/blockedDevicesSlice';
+import { blockDevice, unblockDevice } from '@store/slices/blockedDevicesSlice';
 
 export function useBlockedDevices() {
   const dispatch = useAppDispatch();
@@ -23,7 +20,10 @@ export function useBlockedDevices() {
     (macAddress: string, reason?: string) => {
       dispatch(blockDevice({ macAddress, reason }));
       logEvent(AnalyticsEvents.DEVICE_BLOCKED, { macAddress });
-      showToast('Device blocked. Alerts from this device are now hidden.', 'info');
+      showToast(
+        'Device blocked. Alerts from this device are now hidden.',
+        'info'
+      );
     },
     [dispatch, showToast]
   );

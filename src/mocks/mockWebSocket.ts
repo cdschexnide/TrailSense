@@ -172,12 +172,13 @@ class MockWebSocketService {
       cellularStrength: detectionType === 'cellular' ? rssi : undefined,
       isReviewed: false,
       isFalsePositive: false,
-      location: device.latitude !== undefined && device.longitude !== undefined
-        ? {
-            latitude: device.latitude + (Math.random() - 0.5) * 0.001,
-            longitude: device.longitude + (Math.random() - 0.5) * 0.001,
-          }
-        : undefined,
+      location:
+        device.latitude !== undefined && device.longitude !== undefined
+          ? {
+              latitude: device.latitude + (Math.random() - 0.5) * 0.001,
+              longitude: device.longitude + (Math.random() - 0.5) * 0.001,
+            }
+          : undefined,
       wifiDetected: isMultiband || detectionType === 'wifi',
       bluetoothDetected: isMultiband || detectionType === 'bluetooth',
       multiband: isMultiband,

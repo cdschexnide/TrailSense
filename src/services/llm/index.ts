@@ -11,6 +11,9 @@ export { inferenceEngine } from './inferenceEngine';
 
 // Cache
 export { responseCache } from './cache/ResponseCache';
+export { IntentClassifier } from './IntentClassifier';
+export { FocusedContextBuilder } from './FocusedContextBuilder';
+export { ResponseProcessor } from './ResponseProcessor';
 
 // Templates
 export {
@@ -34,6 +37,10 @@ export type {
   ChatMessage,
   ChatResponse,
   ConversationContext,
+  ChatContext,
+  IntentType,
+  IntentFilters,
+  ClassifiedIntent,
   ModelInfo,
   ModelDownloadProgress,
   Message,

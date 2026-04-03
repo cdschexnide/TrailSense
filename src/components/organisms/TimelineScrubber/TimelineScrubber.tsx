@@ -106,7 +106,12 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text variant="title2" weight="bold" color="white" style={styles.timestamp}>
+      <Text
+        variant="title2"
+        weight="bold"
+        color="white"
+        style={styles.timestamp}
+      >
         {formatTime(minuteIndex)}
       </Text>
 
@@ -168,11 +173,21 @@ export const TimelineScrubber: React.FC<TimelineScrubberProps> = ({
       </GestureDetector>
 
       <View style={styles.labels}>
-        <Text variant="caption2" color="secondaryLabel">12am</Text>
-        <Text variant="caption2" color="secondaryLabel">6am</Text>
-        <Text variant="caption2" color="secondaryLabel">12pm</Text>
-        <Text variant="caption2" color="secondaryLabel">6pm</Text>
-        <Text variant="caption2" color="secondaryLabel">Now</Text>
+        <Text variant="caption2" color="secondaryLabel">
+          12am
+        </Text>
+        <Text variant="caption2" color="secondaryLabel">
+          6am
+        </Text>
+        <Text variant="caption2" color="secondaryLabel">
+          12pm
+        </Text>
+        <Text variant="caption2" color="secondaryLabel">
+          6pm
+        </Text>
+        <Text variant="caption2" color="secondaryLabel">
+          Now
+        </Text>
       </View>
     </View>
   );

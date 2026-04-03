@@ -7,7 +7,6 @@ import {
   HeatmapScreen,
   ReportsScreen,
 } from '@screens/analytics';
-import { AIAssistantScreen } from '@screens/ai';
 import { DeviceFingerprintScreen } from '@screens/fingerprint';
 import {
   SettingsScreen,
@@ -37,7 +36,6 @@ export const MoreStack = () => {
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Heatmap" component={HeatmapScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
-      <Stack.Screen name="TrailSenseAI" component={AIAssistantScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="KnownDevices" component={KnownDevicesScreen} />
@@ -53,7 +51,10 @@ export const MoreStack = () => {
       <Stack.Screen name="QuietHours" component={QuietHoursScreen} />
       <Stack.Screen name="VacationMode" component={VacationModeScreen} />
       <Stack.Screen name="AddKnownDevice" component={AddKnownDeviceScreen} />
-      <Stack.Screen name="DeviceFingerprint" component={DeviceFingerprintScreen} />
+      <Stack.Screen
+        name="DeviceFingerprint"
+        component={DeviceFingerprintScreen}
+      />
     </Stack.Navigator>
   );
 };

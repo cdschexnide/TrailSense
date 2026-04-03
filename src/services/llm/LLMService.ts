@@ -12,13 +12,16 @@ import {
   ChatResponse,
   AlertContext,
   DeviceContext,
-  ConversationContext,
+  ChatContext,
 } from '@/types/llm';
 import {
   AlertSummaryTemplate,
   PatternAnalysisTemplate,
   ConversationalTemplate,
 } from './templates';
+import { IntentClassifier } from './IntentClassifier';
+import { FocusedContextBuilder } from './FocusedContextBuilder';
+import { ResponseProcessor } from './ResponseProcessor';
 
 /**
  * Unified LLM Service
@@ -161,16 +164,40 @@ class LLMService {
   /**
    * Handle conversational query
    */
-  async chat(context: ConversationContext): Promise<ChatResponse> {
+  async chat(context: ChatContext): Promise<ChatResponse> {
+    const userMessage =
+      [...context.messages].reverse().find(message => message.role === 'user')
+        ?.content ?? '';
+    const classifiedIntent = IntentClassifier.classify(
+      userMessage,
+      context.rawDevices
+    );
+
+    // Build structured data for card rendering (computed before LLM call)
+    const structuredData = FocusedContextBuilder.buildStructuredData(
+      classifiedIntent.intent,
+      classifiedIntent.filters,
+      context.rawAlerts,
+      context.rawDevices
+    );
+
     try {
       llmLogger.info('Processing chat message', {
         messageCount: context.messages.length,
       });
 
-      // Build chat messages
-      const messages = this.conversationalTemplate.buildPrompt(context);
+      const focusedContext = FocusedContextBuilder.build(
+        classifiedIntent.intent,
+        classifiedIntent.filters,
+        context.rawAlerts,
+        context.rawDevices
+      );
+      const messages = this.conversationalTemplate.buildPrompt({
+        messages: context.messages,
+        intent: classifiedIntent.intent,
+        focusedContext,
+      });
 
-      // Generate response (don't cache conversational responses)
       const response = await this.generate({
         messages,
         context,
@@ -180,13 +207,30 @@ class LLMService {
         },
       });
 
+      const processed = ResponseProcessor.process(
+        response.text,
+        classifiedIntent.intent,
+        classifiedIntent.filters,
+        context.rawAlerts,
+        context.rawDevices
+      );
+
       return {
-        message: response.text,
-        confidence: 0.8, // TODO: Calculate actual confidence from response
+        message: processed,
+        confidence: classifiedIntent.confidence,
+        intent: classifiedIntent.intent,
+        structuredData,
       };
     } catch (error) {
       llmLogger.error('Failed to process chat message', error);
-      throw error;
+      // On LLM failure, still return structured data so cards can render
+      // with "Analysis unavailable" in the assessment section
+      return {
+        message: '',
+        confidence: classifiedIntent.confidence,
+        intent: classifiedIntent.intent,
+        structuredData,
+      };
     }
   }
 
@@ -338,8 +382,7 @@ class LLMService {
     let whitelistSuggestion: PatternAnalysis['whitelistSuggestion'];
 
     if (
-      (textLower.includes('whitelist') ||
-        textLower.includes('known device')) &&
+      (textLower.includes('whitelist') || textLower.includes('known device')) &&
       textLower.includes('suggest')
     ) {
       whitelistSuggestion = {

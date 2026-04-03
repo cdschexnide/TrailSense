@@ -13,10 +13,14 @@ interface MiniPropertyMapProps {
 function buildStaticMapUrl(devices: Device[]): string | null {
   const devicesWithCoords = devices.filter(
     device =>
-      typeof device.latitude === 'number' && typeof device.longitude === 'number'
+      typeof device.latitude === 'number' &&
+      typeof device.longitude === 'number'
   );
 
-  const token = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN || process.env.EXPO_PUBLIC_MAPBOX_TOKEN || '';
+  const token =
+    process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN ||
+    process.env.EXPO_PUBLIC_MAPBOX_TOKEN ||
+    '';
   if (devicesWithCoords.length === 0 || !token) {
     return null;
   }
@@ -44,7 +48,8 @@ export const MiniPropertyMap: React.FC<MiniPropertyMapProps> = ({
   const mapUrl = buildStaticMapUrl(devices);
   const devicesWithCoords = devices.filter(
     device =>
-      typeof device.latitude === 'number' && typeof device.longitude === 'number'
+      typeof device.latitude === 'number' &&
+      typeof device.longitude === 'number'
   );
 
   return (
@@ -56,7 +61,11 @@ export const MiniPropertyMap: React.FC<MiniPropertyMapProps> = ({
       onPress={onPress}
     >
       {mapUrl ? (
-        <Image source={{ uri: mapUrl }} style={styles.mapImage} resizeMode="cover" />
+        <Image
+          source={{ uri: mapUrl }}
+          style={styles.mapImage}
+          resizeMode="cover"
+        />
       ) : (
         <View style={styles.placeholder}>
           <Icon name="map-outline" size={32} color="tertiaryLabel" />
@@ -70,7 +79,8 @@ export const MiniPropertyMap: React.FC<MiniPropertyMapProps> = ({
 
       <View style={styles.footer}>
         <Text variant="footnote" color="secondaryLabel" weight="medium">
-          {devicesWithCoords.length} device{devicesWithCoords.length === 1 ? '' : 's'} on map
+          {devicesWithCoords.length} device
+          {devicesWithCoords.length === 1 ? '' : 's'} on map
         </Text>
         <Text variant="footnote" color="secondaryLabel">
           View Full Map

@@ -19,7 +19,7 @@ import {
   ChatResponse,
   AlertContext,
   DeviceContext,
-  ConversationContext,
+  ChatContext,
 } from '@/types/llm';
 
 /**
@@ -51,7 +51,7 @@ export interface AIContextType {
   // High-Level Features
   generateAlertSummary: (context: AlertContext) => Promise<AlertSummary>;
   analyzeDevicePattern: (context: DeviceContext) => Promise<PatternAnalysis>;
-  chat: (context: ConversationContext) => Promise<ChatResponse>;
+  chat: (context: ChatContext) => Promise<ChatResponse>;
 
   // Status
   getStatus: () => {
@@ -331,7 +331,7 @@ export const AIProvider: React.FC<AIProviderProps> = ({
    * Chat with assistant (high-level API)
    */
   const chat = useCallback(
-    async (context: ConversationContext): Promise<ChatResponse> => {
+    async (context: ChatContext): Promise<ChatResponse> => {
       if (!isReady) {
         await enableAI();
       }

@@ -62,10 +62,13 @@ export const ActivityChart: React.FC<ActivityChartProps> = ({
   return (
     <View style={[styles.container, { height }]}>
       <View style={styles.chartArea}>
-        {bars.map((bar) => (
+        {bars.map(bar => (
           <View
             key={bar.index}
-            style={[styles.barContainer, { width: bar.width, height: height - 8 }]}
+            style={[
+              styles.barContainer,
+              { width: bar.width, height: height - 8 },
+            ]}
           >
             <LinearGradient
               colors={[`${colors.brandAccent}CC`, `${colors.brandAccent}33`]}

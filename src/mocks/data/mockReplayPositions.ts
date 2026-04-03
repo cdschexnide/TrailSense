@@ -23,7 +23,10 @@ type ScenarioDefinition = {
   signalType: TriangulationSignalType;
   threatLevel: ThreatLevel;
   visits: VisitDefinition[];
-  pointForProgress: (progress: number, minuteProgress: number) => {
+  pointForProgress: (
+    progress: number,
+    minuteProgress: number
+  ) => {
     northMeters: number;
     eastMeters: number;
     confidence: number;
@@ -77,8 +80,18 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'cellular',
     threatLevel: 'low',
     visits: [
-      { startHour: 10, startMinute: 15, durationMinutes: 5, positionsPerMinute: 2 },
-      { startHour: 15, startMinute: 30, durationMinutes: 5, positionsPerMinute: 2 },
+      {
+        startHour: 10,
+        startMinute: 15,
+        durationMinutes: 5,
+        positionsPerMinute: 2,
+      },
+      {
+        startHour: 15,
+        startMinute: 30,
+        durationMinutes: 5,
+        positionsPerMinute: 2,
+      },
     ],
     pointForProgress: progress => {
       const northMeters = -70 + progress * 55;
@@ -98,9 +111,24 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'wifi',
     threatLevel: 'medium',
     visits: [
-      { startHour: 8, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
-      { startHour: 12, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
-      { startHour: 18, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
+      {
+        startHour: 8,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionsPerMinute: 2,
+      },
+      {
+        startHour: 12,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionsPerMinute: 2,
+      },
+      {
+        startHour: 18,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionsPerMinute: 2,
+      },
     ],
     pointForProgress: progress => {
       const northMeters = 12 - progress * 6;
@@ -120,7 +148,12 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'bluetooth',
     threatLevel: 'critical',
     visits: [
-      { startHour: 1, startMinute: 30, durationMinutes: 45, positionsPerMinute: 2 },
+      {
+        startHour: 1,
+        startMinute: 30,
+        durationMinutes: 45,
+        positionsPerMinute: 2,
+      },
     ],
     pointForProgress: (progress, minuteProgress) => {
       const sweep = Math.sin(progress * Math.PI * 6) * 70;
@@ -141,7 +174,12 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'cellular',
     threatLevel: 'high',
     visits: [
-      { startHour: 7, startMinute: 45, durationMinutes: 2, positionsPerMinute: 4 },
+      {
+        startHour: 7,
+        startMinute: 45,
+        durationMinutes: 2,
+        positionsPerMinute: 4,
+      },
     ],
     pointForProgress: progress => {
       const northMeters = -20 + progress * 6;
@@ -173,12 +211,14 @@ export function generateReplayData(date?: Date): ReplayData {
         const positionTime = new Date(visitStart);
         positionTime.setSeconds(
           Math.floor((step * 60) / visit.positionsPerMinute),
-          (step % visit.positionsPerMinute) * Math.floor(60 / visit.positionsPerMinute)
+          (step % visit.positionsPerMinute) *
+            Math.floor(60 / visit.positionsPerMinute)
         );
 
         const visitProgress =
           totalPositions <= 1 ? 0 : step / (totalPositions - 1);
-        const minuteProgress = (step % visit.positionsPerMinute) / visit.positionsPerMinute;
+        const minuteProgress =
+          (step % visit.positionsPerMinute) / visit.positionsPerMinute;
         const point = scenario.pointForProgress(visitProgress, minuteProgress);
         const coords = toLatLng(point.northMeters, point.eastMeters);
 
@@ -199,9 +239,7 @@ export function generateReplayData(date?: Date): ReplayData {
         });
 
         // 1:1 correlated alert per position for authoritative join
-        alerts.push(
-          createScenarioAlert(scenario, timestamp, alertIndex++)
-        );
+        alerts.push(createScenarioAlert(scenario, timestamp, alertIndex++));
       }
     }
   }

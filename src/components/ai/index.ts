@@ -6,3 +6,4 @@ export {
 } from './SuggestionChips';
 export type { Suggestion } from './SuggestionChips';
 export { SecurityStatusCard } from './SecurityStatusCard';
+export { CardRouter } from './cards/CardRouter';

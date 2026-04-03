@@ -41,7 +41,8 @@ describe('ModelManager.loadModel (non-mock path)', () => {
 
     expect(mockFromModelName).toHaveBeenCalledTimes(1);
 
-    const [model, progressCb, tokenCb, historyCb] = mockFromModelName.mock.calls[0];
+    const [model, progressCb, tokenCb, historyCb] =
+      mockFromModelName.mock.calls[0];
 
     expect(model).toEqual(
       expect.objectContaining({

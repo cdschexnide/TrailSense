@@ -47,9 +47,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
           backgroundColor: isSelected
             ? colors.brandAccentBackground
             : colors.secondarySystemBackground,
-          borderColor: isSelected
-            ? colors.brandAccent
-            : colors.separator,
+          borderColor: isSelected ? colors.brandAccent : colors.separator,
         },
         pressed && styles.pressed,
       ]}
@@ -63,11 +61,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
       >
         {count}
       </Text>
-      <Text
-        variant="caption1"
-        color="secondaryLabel"
-        style={styles.label}
-      >
+      <Text variant="caption1" color="secondaryLabel" style={styles.label}>
         {label}
       </Text>
     </Pressable>

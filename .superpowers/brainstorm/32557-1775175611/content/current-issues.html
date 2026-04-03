@@ -1,0 +1,170 @@
+<h2>AI Assistant Screen — Current UI Issues</h2>
+<p class="subtitle">Three problems identified in the welcome/empty state. Let's walk through each one.</p>
+
+<div class="section">
+  <h3>Issue Overview</h3>
+  <p>Here's a wireframe of the current welcome screen layout with the three issues highlighted:</p>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">Current Layout — Welcome State (inside MoreStack tab)</div>
+  <div class="mockup-body" style="background: #1c1c1e; padding: 0; overflow: hidden; position: relative;">
+
+    <!-- Custom header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #38383a;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 36px; height: 36px; border-radius: 12px; background: #4A5240; display: flex; align-items: center; justify-content: center;">
+          <span style="color: white; font-size: 14px;">TS</span>
+        </div>
+        <div>
+          <div style="color: white; font-weight: 600; font-size: 15px;">TrailSense AI</div>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <div style="width: 8px; height: 8px; border-radius: 4px; background: #34C759;"></div>
+            <span style="color: #8e8e93; font-size: 11px;">5 alerts today • 4/5 online</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Status Card -->
+    <div style="margin: 8px 16px 0; border-radius: 20px; overflow: hidden; background: #2c2c2e;">
+      <div style="background: linear-gradient(to right, #FF9500, #E08600); padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+            <span style="color: white;">⚠️</span>
+          </div>
+          <div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 10px; letter-spacing: 1px;">SECURITY STATUS</div>
+            <div style="color: white; font-weight: 700; font-size: 17px;">Alert</div>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 12px; display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 3px; background: white;"></div>
+          <span style="color: white; font-size: 10px; font-weight: 600;">LIVE</span>
+        </div>
+      </div>
+      <div style="display: flex; padding: 20px 16px; text-align: center;">
+        <div style="flex: 1;">
+          <div style="color: white; font-size: 24px; font-weight: 700;">5</div>
+          <div style="color: #8e8e93; font-size: 11px;">Today</div>
+        </div>
+        <div style="width: 1px; background: #38383a; height: 44px; align-self: center;"></div>
+        <div style="flex: 1;">
+          <div style="color: white; font-size: 24px; font-weight: 700;">12</div>
+          <div style="color: #8e8e93; font-size: 11px;">Unreviewed</div>
+        </div>
+        <div style="width: 1px; background: #38383a; height: 44px; align-self: center;"></div>
+        <div style="flex: 1;">
+          <div style="color: white; font-size: 24px; font-weight: 700;">4/5</div>
+          <div style="color: #8e8e93; font-size: 11px;">Sensors</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ISSUE 1: Too much gap -->
+    <div style="position: relative;">
+      <div style="border: 2px dashed #FF3B30; margin: 0 16px; padding: 32px 0; text-align: center; position: relative;">
+        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #FF3B30; color: white; padding: 2px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap;">ISSUE 1: 32px padding = excessive gap</div>
+      </div>
+    </div>
+
+    <!-- Branding section -->
+    <div style="text-align: center; padding: 0 32px 32px;">
+      <div style="width: 80px; height: 80px; border-radius: 24px; background: #4A5240; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+        <span style="color: white; font-size: 28px;">TS</span>
+      </div>
+      <div style="color: white; font-size: 28px; font-weight: 700; margin-bottom: 8px;">TrailSense AI</div>
+      <div style="color: #8e8e93; font-size: 15px; line-height: 1.5;">Your on-device security assistant. Ask about alerts, detection patterns, sensor status, and more.</div>
+    </div>
+
+    <!-- Suggestion cards -->
+    <div style="padding: 0 16px;">
+      <div style="color: #8e8e93; font-size: 11px; letter-spacing: 0.8px; font-weight: 600; margin-bottom: 10px;">TRY ASKING</div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: #2c2c2e; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(166,93,76,0.12); display: flex; align-items: center; justify-content: center;">📊</div>
+          <span style="color: white; font-size: 15px; flex: 1;">Summarize today's activity</span>
+          <span style="color: #48484a; font-size: 14px;">›</span>
+        </div>
+        <div style="background: #2c2c2e; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(166,93,76,0.12); display: flex; align-items: center; justify-content: center;">⚠️</div>
+          <span style="color: white; font-size: 15px; flex: 1;">Show unreviewed alerts</span>
+          <span style="color: #48484a; font-size: 14px;">›</span>
+        </div>
+        <div style="background: #2c2c2e; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px;">
+          <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(93,122,107,0.12); display: flex; align-items: center; justify-content: center;">📡</div>
+          <span style="color: white; font-size: 15px; flex: 1;">Check sensor status</span>
+          <span style="color: #48484a; font-size: 14px;">›</span>
+        </div>
+
+        <!-- ISSUE 3: Clipped by tab bar -->
+        <div style="position: relative;">
+          <div style="background: #2c2c2e; border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px; opacity: 0.4; clip-path: inset(0 0 40% 0);">
+            <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(107,107,94,0.12); display: flex; align-items: center; justify-content: center;">🔍</div>
+            <span style="color: white; font-size: 15px; flex: 1;">Any suspicious activity?</span>
+            <span style="color: #48484a; font-size: 14px;">›</span>
+          </div>
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,59,48,0.15); border: 2px dashed #FF3B30; padding: 4px; text-align: center; border-radius: 0 0 16px 16px;">
+            <span style="color: #FF3B30; font-size: 11px; font-weight: 700;">ISSUE 3: Clipped by tab bar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div style="margin-top: 12px; padding: 0 12px 4px; border-top: 1px solid rgba(74,82,64,0.2);">
+      <!-- ISSUE 2 label -->
+      <div style="position: relative; padding-top: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="flex: 1; background: rgba(44,44,46,0.8); border-radius: 22px; padding: 10px 16px; min-height: 44px; display: flex; align-items: center; border: 2px dashed #FF3B30;">
+            <span style="color: #8e8e93; font-size: 16px;">Ask about your security...</span>
+          </div>
+          <div style="width: 44px; height: 44px; border-radius: 22px; background: #48484a; display: flex; align-items: center; justify-content: center;">
+            <span style="color: white; font-size: 18px;">↑</span>
+          </div>
+        </div>
+        <div style="position: absolute; top: 0; left: 16px; background: #FF3B30; color: white; padding: 2px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap;">ISSUE 2: Tap doesn't open keyboard</div>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div style="display: flex; justify-content: space-around; padding: 10px 0 24px; background: #1c1c1e; border-top: 1px solid #38383a; margin-top: 4px;">
+      <div style="text-align: center;">
+        <div style="font-size: 20px; color: #8e8e93;">🏠</div>
+        <div style="font-size: 10px; color: #8e8e93;">Home</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; color: #8e8e93;">🔔</div>
+        <div style="font-size: 10px; color: #8e8e93;">Alerts</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; color: #8e8e93;">📡</div>
+        <div style="font-size: 10px; color: #8e8e93;">Radar</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; color: #8e8e93;">💾</div>
+        <div style="font-size: 10px; color: #8e8e93;">Devices</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 20px; color: #4A5240;">⋯</div>
+        <div style="font-size: 10px; color: #4A5240;">More</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>The Three Issues</h3>
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="background: rgba(255,59,48,0.08); border-left: 3px solid #FF3B30; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+      <strong style="color: #FF3B30;">Issue 1:</strong> <strong>Excessive vertical gap</strong> — <code>brandingContainer</code> has <code>paddingVertical: 32px</code>, creating ~64px of dead space between the SecurityStatusCard and the AI branding. The card already has its own bottom spacing.
+    </div>
+    <div style="background: rgba(255,59,48,0.08); border-left: 3px solid #FF3B30; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+      <strong style="color: #FF3B30;">Issue 2:</strong> <strong>Keyboard doesn't open on tap</strong> — The TextInput sits inside a <code>KeyboardAvoidingView</code> with <code>SafeAreaView edges={['top','bottom']}</code>. In the simulator, the software keyboard may be off by default (<code>Cmd+K</code> to toggle), but the real issue is that the welcome <code>ScrollView</code>-like content (the FlatList-less welcome state) doesn't properly integrate with keyboard avoidance. The input also lacks <code>autoFocus</code> or a tap-to-focus handler.
+    </div>
+    <div style="background: rgba(255,59,48,0.08); border-left: 3px solid #FF3B30; padding: 12px 16px; border-radius: 0 8px 8px 0;">
+      <strong style="color: #FF3B30;">Issue 3:</strong> <strong>Suggestions clipped by tab bar</strong> — The AI screen lives inside <code>MoreStack</code> (a tab stack), so the bottom tab bar is always visible. The welcome container uses <code>flex: 1</code> but there's no scroll — content that overflows the visible area gets clipped behind the tab bar and the input area.
+    </div>
+  </div>
+</div>

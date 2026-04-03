@@ -51,31 +51,12 @@ jest.mock('@/hooks/useSecurityContext', () => ({
   }),
 }));
 
-jest.mock('@hooks/useTheme', () => ({
-  useTheme: () => ({
-    theme: {
-      colors: {
-        systemBackground: '#000',
-        secondarySystemBackground: '#1c1c1e',
-        label: '#fff',
-        secondaryLabel: '#8e8e93',
-        separator: '#38383a',
-        systemBlue: '#007AFF',
-        systemRed: '#FF3B30',
-        systemGray3: '#48484a',
-        systemGray4: '#3a3a3c',
-        systemGray5: '#2c2c2e',
-        brandAccent: '#4A5240',
-        primary: '#4A5240',
-        tertiaryLabel: '#48484a',
-        systemGreen: '#34C759',
-        systemPurple: '#AF52DE',
-        systemYellow: '#FFCC00',
-        systemOrange: '#FF9500',
-      },
-    },
-    colorScheme: 'dark',
-  }),
+jest.mock('@/hooks/api/useAlerts', () => ({
+  useAlerts: () => ({ data: [] }),
+}));
+
+jest.mock('@/hooks/api/useDevices', () => ({
+  useDevices: () => ({ data: [] }),
 }));
 
 jest.mock('@react-native-async-storage/async-storage', () => ({

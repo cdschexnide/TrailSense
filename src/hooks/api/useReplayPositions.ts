@@ -20,7 +20,11 @@ export function useReplayData(deviceId: string | undefined) {
       midnight.setHours(0, 0, 0, 0);
 
       const [positionsResponse, alertsResponse] = await Promise.all([
-        getReplayPositions(deviceId!, midnight.toISOString(), now.toISOString()),
+        getReplayPositions(
+          deviceId!,
+          midnight.toISOString(),
+          now.toISOString()
+        ),
         alertsApi.getAlerts({
           deviceId: deviceId!,
           startDate: midnight.toISOString(),

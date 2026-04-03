@@ -1,8 +1,12 @@
 import React from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenLayout } from '@components/templates';
 import { GroupedListSection, GroupedListRow } from '@components/molecules';
+import { MoreStackParamList } from '@navigation/types';
 
-export const MoreMenuScreen = ({ navigation }: any) => {
+type Props = NativeStackScreenProps<MoreStackParamList, 'MoreMenu'>;
+
+export const MoreMenuScreen = ({ navigation }: Props) => {
   return (
     <ScreenLayout
       header={{ title: 'More', largeTitle: true }}
@@ -15,13 +19,6 @@ export const MoreMenuScreen = ({ navigation }: any) => {
           iconColor="#6B6B4E"
           showChevron
           onPress={() => navigation.navigate('Dashboard')}
-        />
-        <GroupedListRow
-          title="AI Assistant"
-          icon="sparkles-outline"
-          iconColor="#8A6090"
-          showChevron
-          onPress={() => navigation.navigate('TrailSenseAI')}
         />
       </GroupedListSection>
 

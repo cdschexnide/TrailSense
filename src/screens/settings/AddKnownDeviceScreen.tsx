@@ -166,7 +166,11 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
         </Card>
 
         <View style={styles.actions}>
-          <Button buttonStyle="gray" onPress={() => navigation.goBack()} style={styles.button}>
+          <Button
+            buttonStyle="gray"
+            onPress={() => navigation.goBack()}
+            style={styles.button}
+          >
             Cancel
           </Button>
           <Button onPress={handleAdd} style={styles.button}>

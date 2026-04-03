@@ -65,7 +65,7 @@ export const AlertsHeaderHero: React.FC<AlertsHeaderHeroProps> = ({
       <InlineFilterBar
         options={filterOptions}
         selectedKey={selectedFilter}
-        onSelect={(key) => onFilterSelect(key as ThreatLevel | null)}
+        onSelect={key => onFilterSelect(key as ThreatLevel | null)}
       />
     </View>
   );

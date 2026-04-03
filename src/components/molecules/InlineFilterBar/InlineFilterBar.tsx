@@ -34,7 +34,7 @@ export const InlineFilterBar: React.FC<InlineFilterBarProps> = ({
 
   return (
     <View style={styles.container}>
-      {options.map((option) => (
+      {options.map(option => (
         <FilterChip
           key={option.key}
           label={option.label}

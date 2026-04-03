@@ -27,7 +27,11 @@ const generateMac = (index: number): string => {
 // Helper to generate location with slight variations
 const generateLocation = (deviceId: string, variance: number = 0.0005) => {
   const device = mockDevices.find(d => d.id === deviceId);
-  if (!device || device.latitude === undefined || device.longitude === undefined) {
+  if (
+    !device ||
+    device.latitude === undefined ||
+    device.longitude === undefined
+  ) {
     return undefined;
   }
 

@@ -28,6 +28,11 @@ export const linking: LinkingOptions<RootStackParamList> = {
               DeviceFingerprint: 'alerts/fingerprint/:macAddress',
             },
           },
+          AITab: {
+            screens: {
+              TrailSenseAI: 'ai',
+            },
+          },
           RadarTab: {
             screens: {
               LiveRadar: 'radar',
@@ -49,7 +54,6 @@ export const linking: LinkingOptions<RootStackParamList> = {
               Dashboard: 'analytics',
               Heatmap: 'analytics/heatmap',
               Reports: 'analytics/reports',
-              TrailSenseAI: 'ai',
               Settings: 'settings',
               Profile: 'settings/profile',
               KnownDevices: 'settings/known-devices',

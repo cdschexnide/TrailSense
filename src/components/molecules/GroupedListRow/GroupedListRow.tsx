@@ -65,7 +65,8 @@ export const GroupedListRow: React.FC<GroupedListRowProps> = ({
           style={[
             styles.iconContainer,
             {
-              backgroundColor: iconBackgroundColor || `${iconColor || colors.systemBlue}20`,
+              backgroundColor:
+                iconBackgroundColor || `${iconColor || colors.systemBlue}20`,
             },
           ]}
         >
@@ -78,10 +79,7 @@ export const GroupedListRow: React.FC<GroupedListRowProps> = ({
       )}
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text
-            variant="body"
-            style={{ ...styles.title, color: titleColor }}
-          >
+          <Text variant="body" style={{ ...styles.title, color: titleColor }}>
             {title}
           </Text>
           {value && (
@@ -97,11 +95,7 @@ export const GroupedListRow: React.FC<GroupedListRowProps> = ({
         )}
       </View>
       {showChevron && onPress && (
-        <Icon
-          name="chevron-forward"
-          size={18}
-          color={colors.tertiaryLabel}
-        />
+        <Icon name="chevron-forward" size={18} color={colors.tertiaryLabel} />
       )}
     </Pressable>
   );

@@ -42,11 +42,19 @@ const COVERAGE_RANGES = {
 // Signal strength helper
 const getSignalLabel = (strength: string | number | undefined): string => {
   const strengthStr = String(strength || '').toLowerCase();
-  if (strengthStr === 'excellent' || strengthStr === 'strong' || Number(strength) > 75) {
+  if (
+    strengthStr === 'excellent' ||
+    strengthStr === 'strong' ||
+    Number(strength) > 75
+  ) {
     return 'Excellent';
   } else if (strengthStr === 'good' || Number(strength) > 50) {
     return 'Good';
-  } else if (strengthStr === 'fair' || strengthStr === 'moderate' || Number(strength) > 25) {
+  } else if (
+    strengthStr === 'fair' ||
+    strengthStr === 'moderate' ||
+    Number(strength) > 25
+  ) {
     return 'Fair';
   } else {
     return 'Weak';
@@ -112,42 +120,37 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   };
 
   const handleMorePress = () => {
-    Alert.alert(
-      'Device Options',
-      `Manage "${device.name}"`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove Device',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Remove Device',
-              `Are you sure you want to remove "${device.name}"? This action cannot be undone.`,
-              [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Remove',
-                  style: 'destructive',
-                  onPress: () => navigation.goBack(),
-                },
-              ]
-            );
-          },
+    Alert.alert('Device Options', `Manage "${device.name}"`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove Device',
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert(
+            'Remove Device',
+            `Are you sure you want to remove "${device.name}"? This action cannot be undone.`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => navigation.goBack(),
+              },
+            ]
+          );
         },
-      ]
-    );
+      },
+    ]);
   };
 
   // Build subtitle for hero
-  const lastSeenText = device.lastSeen ? formatRelativeTime(device.lastSeen) : 'Never';
+  const lastSeenText = device.lastSeen
+    ? formatRelativeTime(device.lastSeen)
+    : 'Never';
   const heroSubtitle = `${isOnline ? 'Online' : 'Offline'} · Last seen ${lastSeenText}`;
 
   // Build metrics array for hero (battery removed - not measurable with 5V regulator)
-  const heroMetrics = [
-    signalLabel,
-    `${detectionCount} Detections`,
-  ];
+  const heroMetrics = [signalLabel, `${detectionCount} Detections`];
 
   // Render Status tab content
   const renderStatusTab = () => (
@@ -172,13 +175,19 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
           icon="code-slash-outline"
           iconColor={colors.systemPurple}
           title="Firmware"
-          value={(device as any).firmwareVersion || (device as any).firmware || '1.0.0'}
+          value={
+            (device as any).firmwareVersion ||
+            (device as any).firmware ||
+            '1.0.0'
+          }
         />
         <GroupedListRow
           icon="finger-print-outline"
           iconColor={colors.systemIndigo}
           title="Device ID"
-          value={deviceId.length > 12 ? deviceId.slice(0, 12) + '...' : deviceId}
+          value={
+            deviceId.length > 12 ? deviceId.slice(0, 12) + '...' : deviceId
+          }
         />
       </GroupedListSection>
     </>
@@ -205,21 +214,30 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
             >
               {/* Coverage circles */}
               <Circle
-                center={{ latitude: device.latitude!, longitude: device.longitude! }}
+                center={{
+                  latitude: device.latitude!,
+                  longitude: device.longitude!,
+                }}
                 radius={COVERAGE_RANGES.cellular.meters}
                 fillColor={`${colors.systemRed}15`}
                 strokeColor={colors.systemRed}
                 strokeWidth={1}
               />
               <Circle
-                center={{ latitude: device.latitude!, longitude: device.longitude! }}
+                center={{
+                  latitude: device.latitude!,
+                  longitude: device.longitude!,
+                }}
                 radius={COVERAGE_RANGES.wifi.meters}
                 fillColor={`${colors.systemOrange}20`}
                 strokeColor={colors.systemOrange}
                 strokeWidth={1}
               />
               <Circle
-                center={{ latitude: device.latitude!, longitude: device.longitude! }}
+                center={{
+                  latitude: device.latitude!,
+                  longitude: device.longitude!,
+                }}
                 radius={COVERAGE_RANGES.bluetooth.meters}
                 fillColor={`${colors.systemBlue}25`}
                 strokeColor={colors.systemBlue}

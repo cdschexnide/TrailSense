@@ -71,10 +71,12 @@ const calculateAnalytics = (): AnalyticsData => {
     { level: 'medium', count: mediumCount },
     { level: 'low', count: lowCount },
   ];
-  const topDetectedDevices = uniqueMacAddresses.slice(0, 10).map(macAddress => ({
-    macAddress,
-    count: mockAlerts.filter(alert => alert.macAddress === macAddress).length,
-  }));
+  const topDetectedDevices = uniqueMacAddresses
+    .slice(0, 10)
+    .map(macAddress => ({
+      macAddress,
+      count: mockAlerts.filter(alert => alert.macAddress === macAddress).length,
+    }));
 
   return {
     period: '30d',
