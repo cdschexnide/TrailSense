@@ -5,8 +5,9 @@
  */
 import { isDemoMode } from './demoMode';
 
-// Check environment variable for mock mode
-const USE_MOCK_API = process.env.USE_MOCK_API === 'true';
+// Expo only inlines EXPO_PUBLIC_-prefixed vars into the JS bundle at build time.
+// process.env.USE_MOCK_API silently evaluates to undefined at runtime.
+const USE_MOCK_API = process.env.EXPO_PUBLIC_USE_MOCK_API === 'true';
 
 // Mock mode can also be forced for development
 // Set to true to use mock data without a backend
@@ -65,7 +66,7 @@ export const logMockStatus = (): void => {
     console.log('  ✓ Live radar events every 5 seconds');
     console.log('  ✓ No backend connection required');
     console.log('');
-    console.log('  To disable: Set USE_MOCK_API=false in .env');
+    console.log('  To disable: Set EXPO_PUBLIC_USE_MOCK_API=false in .env');
     console.log('═══════════════════════════════════════════');
     console.log('');
   } else {
