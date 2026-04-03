@@ -2049,7 +2049,7 @@ git commit -m "feat: redesign analytics, fingerprint, and settings sub-screens w
 
 **Context:** Task 8 already wired `AlertsTabIcon` (using `useAlerts`) and `DevicesTabIcon` (using `useDevices` + `isDeviceOnline`). This task adds:
 1. Pulse animation for critical-state dots
-2. AI tab status dot (green when AI has processed an unread insight)
+2. AI tab status dot (green when AI service is available via LLM feature flag)
 
 **Step 1: Add PulsingDot component**
 
