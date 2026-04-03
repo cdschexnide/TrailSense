@@ -467,14 +467,23 @@ export class ModelManager {
   /**
    * Private: Wait for current load operation to complete
    */
-  private async waitForLoad(maxWaitMs: number = 30000): Promise<void> {
-    const startTime = Date.now();
+  private async waitForLoad(stallTimeoutMs: number = 30000): Promise<void> {
+    let lastProgressTime = Date.now();
+    let lastProgress = this.downloadProgress;
 
     while (this.isLoading) {
-      if (Date.now() - startTime > maxWaitMs) {
+      const now = Date.now();
+
+      // Reset the stall timer whenever download progress advances
+      if (this.downloadProgress !== lastProgress) {
+        lastProgress = this.downloadProgress;
+        lastProgressTime = now;
+      }
+
+      if (now - lastProgressTime > stallTimeoutMs) {
         throw new LLMError(
           LLMErrorCode.MODEL_LOAD_FAILED,
-          'Timeout waiting for model to load'
+          'Timeout waiting for model to load (download stalled)'
         );
       }
 

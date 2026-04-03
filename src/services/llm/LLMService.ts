@@ -36,10 +36,29 @@ class LLMService {
   // Idle timeout management
   private idleTimeoutId: NodeJS.Timeout | null = null;
 
+  // Deduplicates concurrent initialize() calls so auto-init and user-triggered
+  // enableAI share the same model-load promise instead of racing.
+  private initPromise: Promise<void> | null = null;
+
   /**
    * Initialize LLM service (load model)
    */
   async initialize(): Promise<void> {
+    if (this.initPromise) {
+      llmLogger.info('Initialization already in progress, waiting...');
+      return this.initPromise;
+    }
+
+    this.initPromise = this._doInitialize();
+
+    try {
+      await this.initPromise;
+    } finally {
+      this.initPromise = null;
+    }
+  }
+
+  private async _doInitialize(): Promise<void> {
     llmLogger.info('Initializing LLM service...');
 
     try {
