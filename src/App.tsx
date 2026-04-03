@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -23,6 +24,20 @@ import { setMockAdapterQueryClient } from '@api/client';
 import { useAuth } from '@hooks/useAuth';
 import { llmLogger } from '@/utils/llmLogger';
 
+// Initialize react-native-executorch with Expo resource fetcher adapter
+if (Platform.OS === 'android' || Platform.OS === 'ios') {
+  try {
+    const { initExecutorch } = require('react-native-executorch');
+    const { ExpoResourceFetcher } = require('react-native-executorch-expo-resource-fetcher');
+    initExecutorch({ resourceFetcher: ExpoResourceFetcher });
+    llmLogger.info('react-native-executorch initialized with Expo resource fetcher', {
+      platform: Platform.OS,
+    });
+  } catch (error) {
+    llmLogger.warn('Failed to initialize react-native-executorch', error);
+  }
+}
+
 export default function App() {
   const [isMockDataReady, setIsMockDataReady] = useState(false);
 
@@ -30,17 +45,6 @@ export default function App() {
     let mounted = true;
 
     const initializeApp = async () => {
-      if (Platform.OS === 'android' || Platform.OS === 'ios') {
-        try {
-          await import('react-native-executorch');
-          llmLogger.info('react-native-executorch initialized', {
-            platform: Platform.OS,
-          });
-        } catch (error) {
-          llmLogger.warn('Failed to initialize react-native-executorch', error);
-        }
-      }
-
       await initDemoMode();
       await featureFlagsManager.loadFromStorage();
       featureFlagsManager.updateFlags({
@@ -97,6 +101,13 @@ export default function App() {
   }, []);
 
   // Show loading screen while mock data is being seeded
+  // Hide splash screen once app is ready
+  useEffect(() => {
+    if (isMockDataReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [isMockDataReady]);
+
   if (!isMockDataReady) {
     return (
       <View style={styles.loadingContainer}>
@@ -116,6 +127,9 @@ export default function App() {
                   <ActivityIndicator size="large" />
                 </View>
               }
+              onBeforeLift={() => {
+                console.log('[App] PersistGate rehydrated');
+              }}
               persistor={persistor}
             >
               <QueryClientProvider client={queryClient}>
