@@ -40,7 +40,7 @@ export const Colors = {
 
     label: '#e8e8e0',
     secondaryLabel: '#a8a898',
-    tertiaryLabel: '#5a5a50',
+    tertiaryLabel: '#706e60',
     quaternaryLabel: 'rgba(90, 90, 80, 0.38)',
 
     // ======================
@@ -81,7 +81,7 @@ export const Colors = {
     // Tactical Gray Scale
     // ======================
 
-    systemGray: '#5a5a50',
+    systemGray: '#706e60',
     systemGray2: '#48483e',
     systemGray3: '#3a3a30',
     systemGray4: '#2a2a1a',
@@ -143,7 +143,7 @@ export const Colors = {
     // ======================
 
     online: '#4ade80',
-    offline: '#5a5a50',
+    offline: '#706e60',
 
     battery: {
       full: '#4ade80',
@@ -202,7 +202,7 @@ export const Colors = {
     text: {
       primary: '#e8e8e0',
       secondary: '#a8a898',
-      disabled: '#5a5a50',
+      disabled: '#706e60',
       inverse: '#111210',
     },
 
@@ -402,7 +402,7 @@ export const tacticalColors = {
 
   textPrimary: '#e8e8e0',
   textSecondary: '#a8a898',
-  textTertiary: '#5a5a50',
+  textTertiary: '#706e60',
 
   userBubble: '#2a3a2a',
   userBubbleBorder: '#3a4a3a',
@@ -641,29 +641,61 @@ git commit -m "refactor: simplify theme to dark-only with tactical typography"
 
 ---
 
-### Task 5: Remove theme toggle from Settings screen
+### Task 5: Remove ThemeScreen, theme toggle, and theme routes
 
 **Files:**
+- Delete: `src/screens/settings/ThemeScreen.tsx`
 - Modify: `src/screens/settings/SettingsScreen.tsx`
+- Modify: `src/screens/settings/index.ts` (remove ThemeScreen export)
+- Modify: `src/navigation/stacks/MoreStack.tsx` (remove Theme route)
+- Modify: `src/navigation/stacks/SettingsStack.tsx` (remove Theme route)
+- Modify: `src/navigation/types.ts` (remove Theme from param lists if present)
 
-**Step 1: Remove the Appearance section with Theme toggle**
+**Step 1: Delete ThemeScreen.tsx**
 
-Find the GroupedListSection with label "APPEARANCE" (or "Appearance") that contains the Theme toggle row and remove the entire section. This is around lines 230-250 in the file.
+Delete `src/screens/settings/ThemeScreen.tsx` entirely. This screen models `'light' | 'dark' | 'auto'` options which conflict with the new `ColorScheme = 'dark'` type.
 
-Remove the `themePreference` state and `loadThemePreference` effect (around lines 47-64) and the `handleThemeChange` function if it exists.
+**Step 2: Remove ThemeScreen export from settings index**
 
-Remove the `AsyncStorage` import if no longer needed.
+In `src/screens/settings/index.ts`, remove the line:
+```typescript
+export { ThemeScreen } from './ThemeScreen';
+```
 
-**Step 2: Run type-check**
+**Step 3: Remove Theme route from MoreStack**
+
+In `src/navigation/stacks/MoreStack.tsx`:
+- Remove `ThemeScreen` from the imports (line 16)
+- Remove `<Stack.Screen name="Theme" component={ThemeScreen} />` (line 46)
+
+**Step 4: Remove Theme route from SettingsStack**
+
+In `src/navigation/stacks/SettingsStack.tsx`:
+- Remove `ThemeScreen` from the imports (line 9)
+- Remove `<Stack.Screen name="Theme" component={ThemeScreen} />` (line 35)
+
+**Step 5: Remove the Appearance section from SettingsScreen**
+
+In `src/screens/settings/SettingsScreen.tsx`:
+- Find the GroupedListSection with label "APPEARANCE" (or "Appearance") that contains the Theme toggle row and remove the entire section (around lines 230-250)
+- Remove the `themePreference` state and `loadThemePreference` effect (around lines 47-64)
+- Remove the `AsyncStorage` import if no longer needed by other code in this file
+
+**Step 6: Remove Theme from navigation param list types**
+
+In `src/navigation/types.ts`, remove `Theme: undefined;` from both `MoreStackParamList` and `SettingsStackParamList` if present.
+
+**Step 7: Run type-check**
 
 Run: `npm run type-check`
-Expected: PASS
+Expected: PASS — no more references to the deleted ThemeScreen or its light/dark/auto model
 
-**Step 3: Commit**
+**Step 8: Commit**
 
 ```bash
-git add src/screens/settings/SettingsScreen.tsx
-git commit -m "refactor: remove theme toggle from settings (dark-only app)"
+git add -u src/screens/settings/ThemeScreen.tsx
+git add src/screens/settings/SettingsScreen.tsx src/screens/settings/index.ts src/navigation/stacks/MoreStack.tsx src/navigation/stacks/SettingsStack.tsx src/navigation/types.ts
+git commit -m "refactor: remove ThemeScreen and theme routes (dark-only app)"
 ```
 
 ---
@@ -1031,7 +1063,7 @@ const STATUS_COLORS: Record<StatusVariant, string> = {
   success: '#4ade80',
   warning: '#f59e0b',
   danger: '#ef4444',
-  neutral: '#5a5a50',
+  neutral: '#706e60',
 };
 
 const MONO_FONT = Platform.OS === 'ios' ? 'Menlo' : 'monospace';
@@ -1140,18 +1172,23 @@ git commit -m "feat: create TacticalHeader component with status indicators"
 **Files:**
 - Modify: `src/navigation/MainNavigator.tsx`
 
-**Step 1: Update the tab bar styling**
+**Context:** Status data for tab dots must use the correct hooks:
+- **Alert counts:** `useAlerts()` from `@hooks/api/useAlerts` returns `{ data: Alert[] }`. Filter by `threatLevel` and `!isReviewed` for critical count.
+- **Device offline count:** `useDevices()` from `@hooks/api/useDevices` returns `{ data: Device[] }`. The `Device` type has `online: boolean` field, BUT screens also use `isDeviceOnline(device.lastSeen)` from `@utils/dateUtils`. Use `isDeviceOnline(d.lastSeen)` for consistency with the rest of the app.
+- **Do NOT use `useAlertSummary`** — that hook takes a single `Alert` and generates an LLM summary. It is not an aggregate count hook.
+- Hooks must be called unconditionally (Rules of Hooks). Use small wrapper components for each tab icon that calls the hook internally.
 
-Replace the `Tab.Navigator` `screenOptions` and add tactical styling:
+**Step 1: Rewrite MainNavigator.tsx**
 
 ```typescript
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
-import { useAlertSummary } from '@hooks/useAlertSummary';
+import { useAlerts } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
+import { isDeviceOnline } from '@utils/dateUtils';
 import { MainTabParamList } from './types';
 import HomeStack from './stacks/HomeStack';
 import AlertsStack from './stacks/AlertsStack';
@@ -1178,51 +1215,51 @@ const StatusDot = ({ color }: { color: string }) => (
   />
 );
 
-const TabIcon = ({
-  name,
-  color,
-  statusDotColor,
-}: {
-  name: string;
-  color: string;
-  statusDotColor?: string;
-}) => (
+/** Wrapper component so useAlerts is called unconditionally (Rules of Hooks) */
+const AlertsTabIcon = ({ color }: { color: string }) => {
+  const { data: alerts } = useAlerts();
+  const criticalCount =
+    alerts?.filter(
+      (a) => !a.isReviewed && (a.threatLevel === 'critical' || a.threatLevel === 'high')
+    ).length ?? 0;
+
+  return (
+    <View>
+      <Icon name="alert-circle" color={color} size="base" />
+      {criticalCount > 0 && <StatusDot color="#ef4444" />}
+    </View>
+  );
+};
+
+/** Wrapper component so useDevices is called unconditionally (Rules of Hooks) */
+const DevicesTabIcon = ({ color }: { color: string }) => {
+  const { data: devices } = useDevices();
+  const offlineCount =
+    devices?.filter((d) => !isDeviceOnline(d.lastSeen)).length ?? 0;
+
+  return (
+    <View>
+      <Icon name="hardware-chip" color={color} size="base" />
+      {offlineCount > 0 && <StatusDot color="#f59e0b" />}
+    </View>
+  );
+};
+
+const SimpleTabIcon = ({ name, color }: { name: string; color: string }) => (
   <View>
     <Icon name={name} color={color} size="base" />
-    {statusDotColor && <StatusDot color={statusDotColor} />}
   </View>
 );
 
 export const MainNavigator = () => {
   const { theme } = useTheme();
 
-  // Status data for tab dots — these hooks already exist
-  // Wrap in try/catch or optional chaining in case they fail
-  let criticalCount = 0;
-  let offlineCount = 0;
-
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const alertSummary = useAlertSummary();
-    criticalCount = alertSummary?.criticalCount ?? 0;
-  } catch {
-    // Hooks may not be available in all contexts
-  }
-
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data: devices } = useDevices();
-    offlineCount = devices?.filter((d: any) => !d.isOnline).length ?? 0;
-  } catch {
-    // Hooks may not be available in all contexts
-  }
-
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#fbbf24',
-        tabBarInactiveTintColor: '#5a5a50',
+        tabBarInactiveTintColor: '#706e60',
         tabBarLabelStyle: {
           fontFamily: MONO_FONT,
           fontSize: 10,
@@ -1242,7 +1279,7 @@ export const MainNavigator = () => {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <TabIcon name="home-outline" color={color} />
+            <SimpleTabIcon name="home-outline" color={color} />
           ),
         }}
       />
@@ -1251,13 +1288,7 @@ export const MainNavigator = () => {
         component={AlertsStack}
         options={{
           title: 'Alerts',
-          tabBarIcon: ({ color }) => (
-            <TabIcon
-              name="alert-circle"
-              color={color}
-              statusDotColor={criticalCount > 0 ? '#ef4444' : undefined}
-            />
-          ),
+          tabBarIcon: ({ color }) => <AlertsTabIcon color={color} />,
         }}
       />
       <Tab.Screen
@@ -1266,7 +1297,7 @@ export const MainNavigator = () => {
         options={{
           title: 'AI',
           tabBarIcon: ({ color }) => (
-            <TabIcon name="sparkles-outline" color={color} />
+            <SimpleTabIcon name="sparkles-outline" color={color} />
           ),
         }}
       />
@@ -1276,7 +1307,7 @@ export const MainNavigator = () => {
         options={{
           title: 'Radar',
           tabBarIcon: ({ color }) => (
-            <TabIcon name="radio-outline" color={color} />
+            <SimpleTabIcon name="radio-outline" color={color} />
           ),
         }}
       />
@@ -1285,13 +1316,7 @@ export const MainNavigator = () => {
         component={DevicesStack}
         options={{
           title: 'Devices',
-          tabBarIcon: ({ color }) => (
-            <TabIcon
-              name="hardware-chip"
-              color={color}
-              statusDotColor={offlineCount > 0 ? '#f59e0b' : undefined}
-            />
-          ),
+          tabBarIcon: ({ color }) => <DevicesTabIcon color={color} />,
         }}
       />
       <Tab.Screen
@@ -1300,7 +1325,7 @@ export const MainNavigator = () => {
         options={{
           title: 'More',
           tabBarIcon: ({ color }) => (
-            <TabIcon name="settings-outline" color={color} />
+            <SimpleTabIcon name="settings-outline" color={color} />
           ),
         }}
       />
@@ -1311,12 +1336,10 @@ export const MainNavigator = () => {
 export default MainNavigator;
 ```
 
-**Important note:** The hooks at the top may need adjustment based on how `useAlertSummary` and `useDevices` are actually exported. The implementing engineer should check the actual hook signatures and adjust. If hooks can't be called conditionally, extract the status dot logic into the tab screen options using a wrapper component that calls the hook internally.
-
 **Step 2: Run type-check**
 
 Run: `npm run type-check`
-Expected: PASS (may need hook import adjustments)
+Expected: PASS
 
 **Step 3: Commit**
 
@@ -1513,7 +1536,7 @@ Key changes:
 - Border: Add 1px `#2a2a1a`
 - Placeholder text: monospace, "SEARCH..." uppercase
 - Input text: keep system font for readability
-- Icon color: `#5a5a50` (tertiary)
+- Icon color: `#706e60` (tertiary)
 - Focus state: amber border `#fbbf24`
 
 **Step 2: Update FilterChip**
@@ -1522,7 +1545,7 @@ Key changes:
 - Background: transparent
 - Border: 1px `#2a2a1a`
 - Border radius: 8
-- Text: monospace, uppercase, `#5a5a50` inactive, `#fbbf24` active
+- Text: monospace, uppercase, `#706e60` inactive, `#fbbf24` active
 - Selected state: `rgba(251, 191, 36, 0.12)` background, `#fbbf24` border
 - Dot indicator: keep existing color prop
 
@@ -1533,7 +1556,7 @@ Key changes:
 - Container border: 1px `#2a2a1a`
 - Active tab: `#fbbf24` background fill
 - Active text: `#111210` dark text, monospace, uppercase
-- Inactive text: `#5a5a50`, monospace, uppercase
+- Inactive text: `#706e60`, monospace, uppercase
 
 **Step 4: Run type-check**
 
@@ -1567,11 +1590,25 @@ Import `TacticalHeader` and replace the "My Property" large title with:
 />
 ```
 
-Compute `overallStatus` and `statusVariant` from existing threat data:
+The screen already uses `usePropertyStatus()` from `@hooks/usePropertyStatus` which computes `level: 'clear' | 'warning' | 'critical'` based on alert severity, offline devices, AND stale data. Use it directly — do NOT recompute from alert counts alone:
+
 ```typescript
-const statusVariant = criticalCount > 0 ? 'danger' : highCount > 0 ? 'warning' : 'success';
-const overallStatus = criticalCount > 0 ? 'CRITICAL' : highCount > 0 ? 'ELEVATED' : 'SECURE';
+import { usePropertyStatus } from '@hooks/usePropertyStatus';
+
+// Inside component:
+const propertyStatus = usePropertyStatus();
+
+// Map usePropertyStatus levels to TacticalHeader variants
+const STATUS_MAP: Record<string, { label: string; variant: StatusVariant }> = {
+  critical: { label: 'CRITICAL', variant: 'danger' },
+  warning: { label: 'ELEVATED', variant: 'warning' },
+  clear: { label: 'SECURE', variant: 'success' },
+};
+const { label: statusLabel, variant: statusVariant } =
+  STATUS_MAP[propertyStatus.level] ?? STATUS_MAP.clear;
 ```
+
+This preserves all existing warning states: critical/high alerts, medium/low alerts, offline devices, and stale telemetry data.
 
 **Step 2: Wrap sections in Briefing and Data cards**
 
@@ -1631,7 +1668,7 @@ Key changes to AlertCard:
 - Border: 1px `#2a2a1a`
 - Keep severity-colored left accent (3px)
 - Detection type text: monospace
-- Timestamp: monospace, `#5a5a50`
+- Timestamp: monospace, `#706e60`
 - Description: system font (readable)
 - Remove shadows, use borders
 
@@ -1883,35 +1920,37 @@ git commit -m "feat: redesign Settings and More screens with tactical styling"
 
 ---
 
-### Task 21: Redesign Login screen
+### Task 21: Redesign Auth screens (Login, Register, ForgotPassword)
 
 **Files:**
 - Modify: `src/screens/auth/LoginScreen.tsx`
+- Modify: `src/screens/auth/RegisterScreen.tsx`
+- Modify: `src/screens/auth/ForgotPasswordScreen.tsx`
 
-**Step 1: Update color palette**
+**Step 1: Update LoginScreen color palette**
 
 - Background gradient: Use darker tactical shades — `#0a0b0a` to `#111210`
 - Orb colors: Amber-tinted `rgba(251, 191, 36, 0.08)` instead of olive
 - Logo glow: Amber tint `rgba(251, 191, 36, 0.15)`
 
-**Step 2: Update typography**
+**Step 2: Update LoginScreen typography**
 
 - "Welcome Back" → monospace, uppercase: "WELCOME BACK", 22pt bold, +2pt letter-spacing
 - Subtitle: System font, `#a8a898`
 
-**Step 3: Update form card**
+**Step 3: Update LoginScreen form card**
 
 - Background: `#1a1a14` (surface)
 - Border: 1px `#2a2a1a`
 - Border radius: 16 (slightly softer than tactical 10 for the cinematic entry feel)
 
-**Step 4: Update input fields**
+**Step 4: Update LoginScreen input fields**
 
 - Already updated globally in Task 11
 - Labels above inputs: "EMAIL ADDRESS", "PASSWORD" — monospace uppercase
 - Focus state: amber border
 
-**Step 5: Update buttons**
+**Step 5: Update LoginScreen buttons**
 
 - "Sign In" button: `#fbbf24` amber background, `#111210` dark text, monospace uppercase, no gradient
 - "Explore Demo" button: Transparent background, 1px `#fbbf24` border, `#fbbf24` text, monospace uppercase
@@ -1920,60 +1959,104 @@ git commit -m "feat: redesign Settings and More screens with tactical styling"
 
 If LinearGradient was only used for button gradient, remove it.
 
-**Step 7: Run type-check**
+**Step 7: Update RegisterScreen**
+
+Apply the same cinematic tactical styling as LoginScreen:
+- Same dark background with amber orbs
+- Monospace uppercase title "CREATE ACCOUNT" (22pt bold, +2pt letter-spacing)
+- System font subtitle
+- `surface` background form card with `border` outline
+- Monospace uppercase input labels
+- Amber focus borders on inputs
+- Amber "Sign Up" button, amber-bordered secondary actions
+
+**Step 8: Update ForgotPasswordScreen**
+
+Apply the same cinematic tactical styling:
+- Same dark background
+- Monospace uppercase title "RESET PASSWORD"
+- System font instructions/subtitle
+- Amber submit button, amber-bordered cancel/back button
+
+**Step 9: Run type-check**
 
 Run: `npm run type-check`
 Expected: PASS
 
-**Step 8: Commit**
+**Step 10: Commit**
 
 ```bash
-git add src/screens/auth/LoginScreen.tsx
-git commit -m "feat: redesign Login screen with cinematic tactical entry"
+git add src/screens/auth/
+git commit -m "feat: redesign all auth screens with cinematic tactical entry"
+```
+
+---
+
+### Task 22: Redesign Analytics screens and Settings sub-screens
+
+**Files:**
+- Modify: `src/screens/analytics/DashboardScreen.tsx`
+- Modify: `src/screens/analytics/HeatmapScreen.tsx`
+- Modify: `src/screens/analytics/ReportsScreen.tsx`
+- Modify: `src/screens/fingerprint/DeviceFingerprintScreen.tsx`
+- Modify: All settings sub-screens in `src/screens/settings/` (ProfileScreen, KnownDevicesScreen, NotificationSettingsScreen, AlertSoundScreen, BiometricScreen, SecurityScreen, SensitivityScreen, QuietHoursScreen, VacationModeScreen, AddKnownDeviceScreen)
+
+**Step 1: Update Analytics screens**
+
+For each analytics screen (Dashboard, Heatmap, Reports):
+- Add TacticalHeader with screen name (e.g., `ANALYTICS`, `HEATMAP`, `REPORTS`)
+- Wrap data sections in Briefing cards with monospace headers
+- Apply tactical color scheme to charts/graphs (amber/green/red data colors on dark backgrounds)
+- Use Data cards for data tables/rows
+- Monospace for data values and timestamps
+
+**Step 2: Update Settings sub-screens**
+
+For all settings sub-screens:
+- Add TacticalHeader with screen name (e.g., `PROFILE`, `KNOWN DEVICES`, `NOTIFICATIONS`)
+- Use Surface cards (Tier 3) for settings rows
+- Monospace section labels in `textSecondary` (#a8a898)
+- System font for descriptions
+- Amber interactive elements (toggles, buttons, active states)
+- Amber focus borders on inputs
+
+**Step 3: Update DeviceFingerprintScreen**
+
+- Add TacticalHeader: `DEVICE FINGERPRINT`
+- Use Briefing cards for fingerprint data sections
+- Monospace for technical data (MACs, signal values)
+
+**Step 4: Run type-check**
+
+Run: `npm run type-check`
+Expected: PASS
+
+**Step 5: Commit**
+
+```bash
+git add src/screens/analytics/ src/screens/fingerprint/ src/screens/settings/
+git commit -m "feat: redesign analytics, fingerprint, and settings sub-screens with tactical styling"
 ```
 
 ---
 
 ## Phase 4: Polish
 
-### Task 22: Wire tab bar status dots to real data
+### Task 23: Add pulse animation and AI tab dot to tab bar
 
 **Files:**
 - Modify: `src/navigation/MainNavigator.tsx`
 
-**Step 1: Verify hook integration**
+**Context:** Task 8 already wired `AlertsTabIcon` (using `useAlerts`) and `DevicesTabIcon` (using `useDevices` + `isDeviceOnline`). This task adds:
+1. Pulse animation for critical-state dots
+2. AI tab status dot (green when AI has processed an unread insight)
 
-Check that `useAlertSummary` and `useDevices` hooks work correctly inside the tab navigator. If hooks can't be called at the navigator level (due to React Query provider nesting), create small wrapper components:
-
-```typescript
-const AlertsTabIcon = ({ color }: { color: string }) => {
-  const { data } = useAlertSummary();
-  const criticalCount = data?.criticalCount ?? 0;
-  return (
-    <TabIcon
-      name="alert-circle"
-      color={color}
-      statusDotColor={criticalCount > 0 ? '#ef4444' : undefined}
-    />
-  );
-};
-
-const DevicesTabIcon = ({ color }: { color: string }) => {
-  const { data: devices } = useDevices();
-  const offlineCount = devices?.filter((d: any) => !d.isOnline).length ?? 0;
-  return (
-    <TabIcon
-      name="hardware-chip"
-      color={color}
-      statusDotColor={offlineCount > 0 ? '#f59e0b' : undefined}
-    />
-  );
-};
-```
-
-**Step 2: Add pulse animation for critical dots**
+**Step 1: Add PulsingDot component**
 
 ```typescript
+import { useRef, useEffect } from 'react';
+import { Animated } from 'react-native';
+
 const PulsingDot = ({ color }: { color: string }) => {
   const opacity = useRef(new Animated.Value(1)).current;
 
@@ -2011,23 +2094,82 @@ const PulsingDot = ({ color }: { color: string }) => {
 };
 ```
 
-Use `PulsingDot` for the Alerts tab when critical alerts exist.
+**Step 2: Update AlertsTabIcon to use PulsingDot for critical alerts**
 
-**Step 3: Run the app**
+```typescript
+const AlertsTabIcon = ({ color }: { color: string }) => {
+  const { data: alerts } = useAlerts();
+  const criticalCount =
+    alerts?.filter(
+      (a) => !a.isReviewed && a.threatLevel === 'critical'
+    ).length ?? 0;
+  const hasUnreviewed =
+    alerts?.some((a) => !a.isReviewed && (a.threatLevel === 'critical' || a.threatLevel === 'high')) ?? false;
+
+  return (
+    <View>
+      <Icon name="alert-circle" color={color} size="base" />
+      {criticalCount > 0 ? (
+        <PulsingDot color="#ef4444" />
+      ) : hasUnreviewed ? (
+        <StatusDot color="#ef4444" />
+      ) : null}
+    </View>
+  );
+};
+```
+
+**Step 3: Add AITabIcon with status dot**
+
+The AI tab dot shows green when the AI service has available/ready status. Check how the AI screen determines its "READY" / "ELEVATED" / "CRITICAL" status (in `AIAssistantScreen.tsx`) and extract that logic or use a shared hook/store if available. If no shared state exists, a simple approach: show a static green dot when the LLM feature flag is enabled:
+
+```typescript
+import { FEATURE_FLAGS } from '@/config/featureFlags';
+
+const AITabIcon = ({ color }: { color: string }) => {
+  // Show green dot when AI is available
+  const aiReady = FEATURE_FLAGS.LLM_ENABLED;
+  return (
+    <View>
+      <Icon name="sparkles-outline" color={color} size="base" />
+      {aiReady && <StatusDot color="#4ade80" />}
+    </View>
+  );
+};
+```
+
+Update the AI tab screen to use `AITabIcon`:
+```typescript
+<Tab.Screen
+  name="AITab"
+  component={AIStack}
+  options={{
+    title: 'AI',
+    tabBarIcon: ({ color }) => <AITabIcon color={color} />,
+  }}
+/>
+```
+
+**Step 4: Run type-check**
+
+Run: `npm run type-check`
+Expected: PASS
+
+**Step 5: Run the app**
 
 Run: `npm start` and verify on simulator
-Expected: Tab bar shows status dots that update based on data
+Expected: Tab bar shows pulsing red dot on Alerts when critical, static amber on Devices when offline, green on AI when ready
 
-**Step 4: Commit**
+**Step 6: Commit**
 
 ```bash
 git add src/navigation/MainNavigator.tsx
-git commit -m "feat: wire tab bar status dots to live data with pulse animation"
+git commit -m "feat: add pulse animation and AI tab status dot"
 ```
 
 ---
 
-### Task 23: Wire header status indicators to real data
+### Task 24: Wire header status indicators to real data
 
 **Files:**
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
@@ -2039,8 +2181,8 @@ git commit -m "feat: wire tab bar status dots to live data with pulse animation"
 
 Each screen should already have a TacticalHeader from Phase 3. Verify the status computations use real query data:
 
-- **Home:** Overall threat status from alert summary
-- **Alerts:** Critical count from filtered alerts
+- **Home:** Use `usePropertyStatus().level` to derive status (preserves offline device and stale data warnings)
+- **Alerts:** Critical count from `useAlerts()` filtered by `!isReviewed && threatLevel === 'critical'`
 - **Devices:** Online/total from device query
 - **Radar:** Active detection count from positions query
 
@@ -2057,7 +2199,7 @@ git commit -m "fix: ensure header status indicators reflect live data"
 
 ---
 
-### Task 24: Clean up dead code and unused imports
+### Task 25: Clean up dead code and unused imports
 
 **Files:**
 - Multiple files across the codebase
@@ -2103,7 +2245,7 @@ git commit -m "refactor: remove dead light-mode code and unused theme references
 
 ---
 
-### Task 25: Final visual verification
+### Task 26: Final visual verification
 
 **Step 1: Run the app on simulator**
 
@@ -2113,16 +2255,21 @@ Run: `npm run ios`
 
 Walk through every screen and check:
 - [ ] Login: Cinematic entry, amber buttons, monospace labels
-- [ ] Home: Tactical header with status, Briefing cards, monospace metrics
+- [ ] Register: Same cinematic styling as Login
+- [ ] Forgot Password: Same cinematic styling
+- [ ] Home: Tactical header with status (including offline/stale warnings), Briefing cards, monospace metrics
 - [ ] Alerts: Tactical header, search bar, filter chips, Data card list
 - [ ] Alert Detail: Briefing card layout, tactical tab segment
 - [ ] AI: Unchanged (was already tactical)
 - [ ] Radar: Tactical header, map in Data card, tactical toggle
 - [ ] Devices: Tactical header with online count, Data card list
 - [ ] Device Detail: Briefing card, tactical tabs
-- [ ] Settings: Tactical header, monospace section labels, Surface cards
+- [ ] Settings: Tactical header, monospace section labels, Surface cards, NO theme toggle
+- [ ] Settings sub-screens (Profile, KnownDevices, Notifications, etc.): TacticalHeader, Surface cards
 - [ ] More: Tactical header, Surface card menu items
-- [ ] Tab bar: Amber active, monospace labels, status dots
+- [ ] Analytics (Dashboard, Heatmap, Reports): Briefing cards, tactical colors on charts
+- [ ] Tab bar: Amber active, monospace labels, status dots (red pulse on Alerts, amber on Devices, green on AI)
+- [ ] Contrast: Verify `textTertiary` (#706e60) is legible on backgrounds
 
 **Step 3: Fix any visual issues found**
 

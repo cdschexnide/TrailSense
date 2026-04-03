@@ -26,7 +26,7 @@ Light mode is removed. Single dark tactical theme app-wide.
 | `accentWarning` | `#f59e0b` | High-priority, amber warnings |
 | `textPrimary` | `#e8e8e0` | Primary text |
 | `textSecondary` | `#a8a898` | Secondary/descriptive text |
-| `textTertiary` | `#5a5a50` | Hints, placeholders, disabled |
+| `textTertiary` | `#706e60` | Hints, placeholders, disabled |
 
 ### Severity Colors
 
@@ -125,7 +125,7 @@ Three tiers based on content importance:
 
 | Screen | Status Examples |
 |--------|----------------|
-| Home | `● SECURE` (green) / `● ELEVATED` (amber) / `● CRITICAL` (red) |
+| Home | `● SECURE` (green) / `● ELEVATED` (amber, medium/low alerts OR offline devices OR stale data) / `● CRITICAL` (red, critical/high alerts) — maps to `usePropertyStatus().level` |
 | Alerts | `● 2 CRITICAL` (red) / `● ALL CLEAR` (green) |
 | AI | `● READY` (green) — already implemented |
 | Radar | `● 5 ACTIVE` (green) / `● SCANNING` (amber pulse) |
@@ -139,7 +139,7 @@ Three tiers based on content importance:
 
 - **Background:** `surface` (`#1a1a14`) with top border (`#2a2a1a`)
 - **Active tab:** Amber `#fbbf24` icon + monospace uppercase label (10pt)
-- **Inactive tab:** `textTertiary` (`#5a5a50`) icon + label
+- **Inactive tab:** `textTertiary` (`#706e60`) icon + label
 - **Labels:** Monospace, uppercase, 10pt
 
 ### Status Dots
@@ -195,13 +195,35 @@ Small (6px) colored dots overlaid on tab icons:
 - Header: `MORE` (no status indicator)
 - Menu items: Surface cards, monospace labels, chevrons in `textTertiary`
 
-### Login — "Cinematic Entry"
+### Auth Screens — "Cinematic Entry"
+
+**Login:**
 - Logo with circular glow, tinted amber
 - Title: "WELCOME BACK" — monospace, 22pt bold, +2pt letter-spacing
 - Subtitle: System font, `textSecondary`
 - **Input fields:** `surface` background, `border` outline, amber focus border. Monospace labels above ("EMAIL ADDRESS", "PASSWORD")
 - **Sign In button:** `#fbbf24` amber background, dark text (`#111210`), monospace uppercase
 - **Explore Demo:** Bordered tactical style, amber text, transparent background
+
+**Register:** Same cinematic dark background and amber styling as Login. Monospace uppercase labels, amber focus, amber Sign Up button.
+
+**Forgot Password:** Same cinematic styling. Monospace "RESET PASSWORD" header, amber submit button.
+
+### Analytics Screens (Dashboard, Heatmap, Reports)
+- Accessible from More → Analytics
+- Apply Briefing card layout for data sections
+- Monospace headers and data values
+- Charts/graphs keep their existing rendering but with tactical color scheme (amber/green/red data colors on dark backgrounds)
+
+### Settings Sub-Screens
+All settings sub-screens reachable from Settings (Profile, KnownDevices, NotificationSettings, AlertSound, Biometric, Security, Sensitivity, QuietHours, VacationMode, AddKnownDevice) and from More (DeviceFingerprint):
+- Apply TacticalHeader with screen name
+- Use Surface cards (Tier 3) for settings rows
+- Monospace section labels, system font descriptions
+- Amber interactive elements (toggles, buttons)
+
+### ThemeScreen — Removed
+The Theme selection screen is removed entirely. Remove the route from both MoreStack and SettingsStack, and remove the navigation row from SettingsScreen. The app is dark-only.
 
 ---
 
@@ -277,9 +299,14 @@ Small (6px) colored dots overlaid on tab icons:
 - `src/screens/alerts/` — list + detail redesign
 - `src/screens/devices/` — list + detail redesign
 - `src/screens/radar/` — tactical wrapper
-- `src/screens/settings/` — surface card reskin
+- `src/screens/settings/` — surface card reskin + all sub-screens (Profile, KnownDevices, NotificationSettings, AlertSound, Biometric, Security, Sensitivity, QuietHours, VacationMode, AddKnownDevice)
+- `src/screens/settings/ThemeScreen.tsx` — delete (dark-only app)
 - `src/screens/more/` — surface card reskin
-- `src/screens/auth/` — cinematic login polish
+- `src/screens/analytics/` — Dashboard, Heatmap, Reports tactical reskin
+- `src/screens/auth/` — LoginScreen, RegisterScreen, ForgotPasswordScreen cinematic polish
+- `src/screens/fingerprint/` — DeviceFingerprintScreen tactical reskin
 
 ### Navigation
 - `src/navigation/MainNavigator.tsx` — tab bar restyling + status dots
+- `src/navigation/stacks/MoreStack.tsx` — remove Theme route
+- `src/navigation/stacks/SettingsStack.tsx` — remove Theme route
