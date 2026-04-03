@@ -180,5 +180,6 @@ export interface ConversationContext {
         online?: boolean;
       }
     >;
+    contextString?: string;
   };
 }

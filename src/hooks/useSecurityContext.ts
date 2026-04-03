@@ -32,6 +32,7 @@ export interface SecurityContextData {
 
   // Recent activity
   recentAlerts: any[];
+  deviceList: any[];
   mostActiveDevice: string | null;
   quietestPeriod: string | null;
   busiestPeriod: string | null;
@@ -249,6 +250,7 @@ ${recentAlertsSection}
       bluetoothDetections,
       cellularDetections,
       recentAlerts,
+      deviceList,
       mostActiveDevice,
       quietestPeriod: formatHour(quietestHour),
       busiestPeriod: formatHour(busiestHour),

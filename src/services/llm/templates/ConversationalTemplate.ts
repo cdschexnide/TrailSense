@@ -88,6 +88,16 @@ Respond to the user's latest message helpfully and concisely.`;
       return '';
     }
 
+    // Use the pre-formatted contextString from useSecurityContext when available.
+    // It includes alert details, device statuses, threat breakdown, and time
+    // patterns — everything the model needs to answer data-specific questions.
+    if (securityContext.contextString) {
+      // Budget: ~800 tokens for context (~3200 chars) to leave room for
+      // system prompt (~400 tokens), conversation history, and generation.
+      return '\n\n' + this.truncateText(securityContext.contextString, 800);
+    }
+
+    // Fallback: basic counts when full context string isn't provided
     const { recentAlerts, deviceStatus } = securityContext;
     const recentAlertsCount = recentAlerts?.length ?? 0;
     const activeDevicesCount =
@@ -151,13 +161,16 @@ Current Security Status:
     question: string,
     context: ConversationContext['securityContext']
   ): PromptMessage[] {
-    const alertInfo = context?.recentAlerts?.length
-      ? this.formatAlertsList(context.recentAlerts)
-      : 'No recent alerts';
+    // Prefer the full contextString which has detailed alert info with
+    // device names, signal strength, MAC addresses, and review status.
+    const alertInfo = context?.contextString
+      ? this.truncateText(context.contextString, 800)
+      : context?.recentAlerts?.length
+        ? this.formatAlertsList(context.recentAlerts)
+        : 'No recent alerts';
 
     const userPrompt = `User Question: ${question}
 
-Recent Alerts:
 ${alertInfo}
 
 Answer the user's question based on the alert data provided.`;
@@ -169,13 +182,14 @@ Answer the user's question based on the alert data provided.`;
     question: string,
     context: ConversationContext['securityContext']
   ): PromptMessage[] {
-    const deviceInfo = context?.deviceStatus?.length
-      ? this.formatDeviceList(context.deviceStatus)
-      : 'No device information available';
+    const deviceInfo = context?.contextString
+      ? this.truncateText(context.contextString, 800)
+      : context?.deviceStatus?.length
+        ? this.formatDeviceList(context.deviceStatus)
+        : 'No device information available';
 
     const userPrompt = `User Question: ${question}
 
-Known Devices:
 ${deviceInfo}
 
 Answer the user's question based on the device data provided.`;
@@ -187,11 +201,12 @@ Answer the user's question based on the device data provided.`;
     question: string,
     context: SecurityContextWithHealth
   ): PromptMessage[] {
-    const statusSummary = this.formatSystemStatus(context);
+    const statusSummary = context.contextString
+      ? this.truncateText(context.contextString, 800)
+      : this.formatSystemStatus(context);
 
     const userPrompt = `User Question: ${question}
 
-System Status:
 ${statusSummary}
 
 Provide a clear summary addressing the user's question.`;

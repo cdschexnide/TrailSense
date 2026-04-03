@@ -21,6 +21,7 @@ import {
   TextInput,
   StyleSheet,
   FlatList,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -193,11 +194,7 @@ export const AIAssistantScreen: React.FC = () => {
         err instanceof Error
           ? err.message
           : 'Could not load the on-device AI model.';
-      Alert.alert(
-        'Failed to Enable AI',
-        message,
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Failed to Enable AI', message, [{ text: 'OK' }]);
     }
   }, [enableAI]);
 
@@ -233,7 +230,8 @@ export const AIAssistantScreen: React.FC = () => {
           messages: [...messages.filter(m => m.role !== 'system'), userMessage],
           securityContext: {
             recentAlerts: securityContext.recentAlerts,
-            deviceStatus: [],
+            deviceStatus: securityContext.deviceList,
+            contextString: securityContext.contextString,
           },
         });
 
@@ -303,27 +301,19 @@ export const AIAssistantScreen: React.FC = () => {
 
   // Welcome screen
   const renderWelcome = () => (
-    <View style={styles.welcomeContainer}>
+    <ScrollView
+      style={styles.welcomeContainer}
+      contentContainerStyle={styles.welcomeContent}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
       {/* Security Status */}
       {!securityContext.isLoading && (
         <SecurityStatusCard context={securityContext} />
       )}
 
-      {/* AI Branding */}
+      {/* AI Branding - subtitle only; title is already in the header */}
       <View style={styles.brandingContainer}>
-        <Image
-          source={logoSource}
-          style={styles.aiIconLarge}
-          resizeMode="contain"
-        />
-        <Text
-          variant="largeTitle"
-          weight="bold"
-          color="label"
-          style={styles.brandTitle}
-        >
-          TrailSense AI
-        </Text>
         <Text
           variant="body"
           style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
@@ -339,7 +329,7 @@ export const AIAssistantScreen: React.FC = () => {
         onSelect={handleSuggestionSelect}
         title="Try asking"
       />
-    </View>
+    </ScrollView>
   );
 
   // Enable AI prompt
@@ -492,7 +482,7 @@ export const AIAssistantScreen: React.FC = () => {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top', 'bottom']}
+        edges={['top']}
       >
         {renderNotAvailable()}
       </SafeAreaView>
@@ -503,7 +493,7 @@ export const AIAssistantScreen: React.FC = () => {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top', 'bottom']}
+        edges={['top']}
       >
         {renderEnablePrompt()}
       </SafeAreaView>
@@ -513,7 +503,7 @@ export const AIAssistantScreen: React.FC = () => {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.systemBackground }]}
-      edges={['top', 'bottom']}
+      edges={['top']}
     >
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
@@ -641,6 +631,8 @@ export const AIAssistantScreen: React.FC = () => {
                 },
               ]}
             >
+              {/* NOTE: In iOS Simulator, toggle software keyboard with Cmd+K
+                  or I/O > Keyboard > Toggle Software Keyboard */}
               <TextInput
                 ref={inputRef}
                 style={[styles.input, { color: colors.label }]}
@@ -788,10 +780,14 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     flex: 1,
   },
+  welcomeContent: {
+    paddingBottom: 16,
+  },
   brandingContainer: {
     alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 32,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 8,
   },
   aiIconLarge: {
     width: 80,
@@ -800,9 +796,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  brandTitle: {
-    marginBottom: 8,
   },
   brandSubtitle: {
     textAlign: 'center',
