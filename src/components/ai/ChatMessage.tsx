@@ -141,6 +141,7 @@ const ChatMessageComponent = ({
   if (!message.content && isStreaming) {
     return (
       <Animated.View
+        testID="ai-message-container"
         style={[
           styles.container,
           styles.aiContainer,
@@ -157,6 +158,7 @@ const ChatMessageComponent = ({
 
   return (
     <Animated.View
+      testID="ai-message-container"
       style={[
         styles.container,
         styles.aiContainer,
@@ -179,7 +181,9 @@ const ChatMessageComponent = ({
           onFeedback={onFeedback}
         />
       )}
-      <Text style={styles.timestamp}>{formatTime(message.timestamp)}</Text>
+      <Text testID="ai-message-timestamp" style={styles.timestamp}>
+        {formatTime(message.timestamp)}
+      </Text>
     </Animated.View>
   );
 };
@@ -195,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   aiContainer: {
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
   },
   userBubble: {
     backgroundColor: c.userBubble,
@@ -216,6 +220,7 @@ const styles = StyleSheet.create({
     ...t.timestamp,
     color: c.textTertiary,
     marginTop: 4,
+    alignSelf: 'flex-start',
   },
   typingContainer: {
     flexDirection: 'row',

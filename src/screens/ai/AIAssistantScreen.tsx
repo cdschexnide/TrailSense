@@ -31,7 +31,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAI } from '@/services/llm';
 import { FEATURE_FLAGS, shouldShowLLMFeatures } from '@/config/featureFlags';
 import { getStorageRequirements } from '@/config/llmConfig';
@@ -274,11 +273,15 @@ export const AIAssistantScreen: React.FC = () => {
     [handleSendMessage]
   );
 
+  const isWelcomeState = messages.length === 0 && showSuggestions;
+  const showQuickActions =
+    messages.length > 0 && !inputText && !isGenerating;
 
   // ── Welcome screen ──────────────────────────────────
   const renderWelcome = () => (
     <ScrollView
-      style={styles.welcomeContainer}
+      testID="ai-welcome-body"
+      style={styles.contentScroll}
       contentContainerStyle={styles.welcomeContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
@@ -294,11 +297,6 @@ export const AIAssistantScreen: React.FC = () => {
           Your on-device security analyst
         </Text>
       </View>
-
-      <SuggestionChips
-        suggestions={allSuggestions}
-        onSelect={handleSuggestionSelect}
-      />
     </ScrollView>
   );
 
@@ -447,92 +445,115 @@ export const AIAssistantScreen: React.FC = () => {
         </View>
 
         {/* ── Content area ── */}
-        {messages.length === 0 && showSuggestions ? (
-          renderWelcome()
-        ) : (
-          <ScrollView
-            ref={scrollRef}
-            style={styles.flex}
-            contentContainerStyle={styles.messageListContent}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            {messages.map((item, index) => {
-              const isLastMessage = index === messages.length - 1;
-              const isStreamingMsg =
-                isGenerating && isLastMessage && item.role === 'assistant';
-              return (
-                <ChatMessage
-                  key={`${item.timestamp}-${index}`}
-                  message={item}
-                  isStreaming={isStreamingMsg}
-                  onCopy={() =>
-                    Haptics.notificationAsync(
-                      Haptics.NotificationFeedbackType.Success
-                    )
-                  }
-                  onFeedback={() =>
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-                  }
-                  showFeedback={
-                    !isStreamingMsg && item.role === 'assistant'
-                  }
-                />
-              );
-            })}
-          </ScrollView>
-        )}
-
-        {/* ── Quick actions (pinned above input) ── */}
-        {messages.length > 0 && !inputText && !isGenerating && (
-          <SuggestionChips
-            suggestions={[
-              ...contextualSuggestions.slice(0, 2),
-              ...DEFAULT_SUGGESTIONS.slice(0, 3),
-            ].slice(0, 4)}
-            onSelect={handleSuggestionSelect}
-            compact
-          />
-        )}
+        <View
+          style={styles.contentArea}
+          testID={isWelcomeState ? undefined : 'ai-content-area'}
+        >
+          {isWelcomeState ? (
+            renderWelcome()
+          ) : (
+            <ScrollView
+              testID="ai-chat-scroll"
+              ref={scrollRef}
+              style={styles.contentScroll}
+              contentContainerStyle={styles.messageListContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {messages.map((item, index) => {
+                const isLastMessage = index === messages.length - 1;
+                const isStreamingMsg =
+                  isGenerating &&
+                  isLastMessage &&
+                  item.role === 'assistant';
+                return (
+                  <ChatMessage
+                    key={`${item.timestamp}-${index}`}
+                    message={item}
+                    isStreaming={isStreamingMsg}
+                    onCopy={() =>
+                      Haptics.notificationAsync(
+                        Haptics.NotificationFeedbackType.Success
+                      )
+                    }
+                    onFeedback={() =>
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                    }
+                    showFeedback={
+                      !isStreamingMsg && item.role === 'assistant'
+                    }
+                  />
+                );
+              })}
+            </ScrollView>
+          )}
+        </View>
 
         {/* ── Terminal-style Input ──────────────────── */}
-        <View style={styles.inputContainer}>
-          <View style={styles.inputRow}>
-            <Text style={styles.promptChar}>{'›'}</Text>
-            <TextInput
-              ref={inputRef}
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Ask about your property..."
-              placeholderTextColor={c.textTertiary}
-              multiline
-              maxLength={500}
-              returnKeyType="default"
-              editable={!isGenerating}
-            />
-            <Pressable
-              onPress={() => handleSendMessage()}
-              disabled={!inputText.trim() || isGenerating}
-              style={({ pressed }) => [
-                styles.sendBtn,
-                (!inputText.trim() || isGenerating) &&
-                  styles.sendBtnDisabled,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              {isGenerating ? (
-                <ActivityIndicator size="small" color={c.accentPrimary} />
-              ) : (
-                <Icon
-                  name="arrow-up"
-                  size={18}
-                  color={
-                    inputText.trim() ? c.accentPrimary : c.textTertiary
-                  }
-                />
-              )}
-            </Pressable>
+        <View style={styles.footer} testID="ai-footer">
+          {isWelcomeState && (
+            <View testID="ai-welcome-suggestions">
+              <SuggestionChips
+                suggestions={allSuggestions}
+                onSelect={handleSuggestionSelect}
+              />
+            </View>
+          )}
+
+          {showQuickActions && (
+            <View testID="ai-quick-actions">
+              <SuggestionChips
+                suggestions={[
+                  ...contextualSuggestions.slice(0, 2),
+                  ...DEFAULT_SUGGESTIONS.slice(0, 3),
+                ].slice(0, 4)}
+                onSelect={handleSuggestionSelect}
+                compact
+              />
+            </View>
+          )}
+
+          <View style={styles.inputContainer}>
+            <View style={styles.inputRow}>
+              <Text style={styles.promptChar}>{'›'}</Text>
+              <TextInput
+                ref={inputRef}
+                style={styles.input}
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder="Ask about your property..."
+                placeholderTextColor={c.textTertiary}
+                multiline
+                maxLength={500}
+                returnKeyType="default"
+                editable={!isGenerating}
+              />
+              <Pressable
+                onPress={() => handleSendMessage()}
+                disabled={!inputText.trim() || isGenerating}
+                style={({ pressed }) => [
+                  styles.sendBtn,
+                  (!inputText.trim() || isGenerating) &&
+                    styles.sendBtnDisabled,
+                  pressed && { opacity: 0.8 },
+                ]}
+              >
+                {isGenerating ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={c.accentPrimary}
+                  />
+                ) : (
+                  <Icon
+                    name="arrow-up"
+                    size={18}
+                    color={
+                      inputText.trim() ? c.accentPrimary : c.textTertiary
+                    }
+                  />
+                )}
+              </Pressable>
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -613,18 +634,28 @@ const styles = StyleSheet.create({
   },
 
   // ── Messages ──────────────────────────────────────
+  contentArea: {
+    flex: 1,
+    minHeight: 0,
+  },
+  contentScroll: {
+    flex: 1,
+    minHeight: 0,
+  },
   messageListContent: {
     paddingTop: 12,
-    paddingBottom: 24,
+    paddingBottom: 12,
   },
 
   // ── Input ─────────────────────────────────────────
+  footer: {
+    flexShrink: 0,
+  },
   inputContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: c.border,
-    flexShrink: 0,
   },
   inputRow: {
     flexDirection: 'row',
@@ -663,17 +694,14 @@ const styles = StyleSheet.create({
   },
 
   // ── Welcome ───────────────────────────────────────
-  welcomeContainer: {
-    flex: 1,
-  },
   welcomeContent: {
-    paddingBottom: 16,
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   welcomeBranding: {
     alignItems: 'center',
-    paddingTop: 48,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
   },
   welcomeLogo: {
     width: 64,

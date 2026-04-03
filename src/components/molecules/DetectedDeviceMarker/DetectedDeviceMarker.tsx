@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { PointAnnotation } from '@rnmapbox/maps';
 import { Icon } from '@components/atoms/Icon';
 import type { IconName } from '@components/atoms/Icon/Icon';
@@ -50,17 +50,13 @@ export const DetectedDeviceMarker: React.FC<DetectedDeviceMarkerProps> = ({
       coordinate={coordinate}
       onSelected={onPress}
     >
-      <TouchableOpacity
-        style={[styles.markerContainer, { opacity }]}
-        onPress={onPress}
-        activeOpacity={0.8}
-      >
+      <View style={[styles.markerContainer, { opacity }]}>
         <View style={[styles.markerOuter, { backgroundColor: color }]}>
           <View style={styles.markerInner}>
             <Icon name={iconName} size={14} color={color} />
           </View>
         </View>
-      </TouchableOpacity>
+      </View>
     </PointAnnotation>
   );
 };

@@ -56,7 +56,7 @@ export const TrailSenseDeviceMarker: React.FC<TrailSenseDeviceMarkerProps> = ({
 
   return (
     <PointAnnotation id={`trailsense-device-${id}`} coordinate={coordinate}>
-      <View style={styles.container}>
+      <View collapsable={false} style={styles.container}>
         {/* Pulse ring (only when online) */}
         {isOnline && (
           <Animated.View

@@ -109,6 +109,7 @@ export const BriefingContainer: React.FC<BriefingContainerProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    alignSelf: 'stretch' as const,
     backgroundColor: c.surface,
     borderWidth: 1,
     borderColor: c.border,

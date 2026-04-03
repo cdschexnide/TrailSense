@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { ScrollView } from 'react-native';
 
 // Mock all heavy dependencies so we only test structure
@@ -91,8 +91,16 @@ jest.mock('@components/atoms/Icon', () => ({
 }));
 
 jest.mock('@/components/ai', () => ({
-  ChatMessage: 'ChatMessage',
-  SuggestionChips: 'SuggestionChips',
+  ChatMessage: ({ message }: any) => (
+    <mock-chat-message testID={`chat-message-${message.role}`}>
+      {message.content}
+    </mock-chat-message>
+  ),
+  SuggestionChips: ({ compact }: any) => (
+    <mock-suggestion-chips
+      testID={compact ? 'suggestion-chips-compact' : 'suggestion-chips-full'}
+    />
+  ),
   SecurityStatusCard: 'SecurityStatusCard',
   DEFAULT_SUGGESTIONS: [],
   getContextualSuggestions: () => [],
@@ -103,6 +111,10 @@ jest.mock('@assets/images/SmallTrailSenseCompanyLogo.png', () => 'logo');
 import { AIAssistantScreen } from '@screens/ai/AIAssistantScreen';
 
 describe('AIAssistantScreen welcome state', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders welcome content inside a ScrollView', () => {
     const { UNSAFE_queryByType } = render(<AIAssistantScreen />);
     const scrollView = UNSAFE_queryByType(ScrollView);
@@ -113,5 +125,52 @@ describe('AIAssistantScreen welcome state', () => {
     const { UNSAFE_queryByType } = render(<AIAssistantScreen />);
     const scrollView = UNSAFE_queryByType(ScrollView);
     expect(scrollView?.props.keyboardShouldPersistTaps).toBe('handled');
+  });
+
+  it('keeps welcome suggestions in a footer outside the scroll body', () => {
+    const { getByTestId, queryByTestId } = render(<AIAssistantScreen />);
+
+    expect(getByTestId('ai-footer')).toHaveStyle({
+      flexShrink: 0,
+    });
+    expect(getByTestId('ai-welcome-body')).toHaveStyle({
+      flex: 1,
+      minHeight: 0,
+    });
+    expect(getByTestId('ai-welcome-suggestions')).toBeTruthy();
+    expect(getByTestId('suggestion-chips-full')).toBeTruthy();
+    expect(queryByTestId('ai-quick-actions')).toBeNull();
+  });
+
+  it('uses a bounded chat content area and keeps quick actions in the footer', async () => {
+    const AsyncStorage = require('@react-native-async-storage/async-storage');
+    AsyncStorage.getItem.mockResolvedValueOnce(
+      JSON.stringify([
+        {
+          role: 'user',
+          content: 'Which sensors need attention?',
+          timestamp: 1,
+        },
+        {
+          role: 'assistant',
+          content: 'West perimeter is low on battery.',
+          timestamp: 2,
+        },
+      ])
+    );
+
+    const { getByTestId, queryByTestId } = render(<AIAssistantScreen />);
+
+    await waitFor(() => {
+      expect(getByTestId('ai-content-area')).toHaveStyle({
+        flex: 1,
+        minHeight: 0,
+      });
+    });
+
+    expect(getByTestId('ai-chat-scroll')).toHaveStyle({ flex: 1 });
+    expect(getByTestId('ai-quick-actions')).toBeTruthy();
+    expect(getByTestId('suggestion-chips-compact')).toBeTruthy();
+    expect(queryByTestId('ai-welcome-suggestions')).toBeNull();
   });
 });
