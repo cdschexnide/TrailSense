@@ -61,7 +61,7 @@ Split into two systems used together:
 | Token | Size | Weight | Letter-spacing |
 |-------|------|--------|----------------|
 | `headerLabel` | 10pt | Bold | +1pt |
-| `sectionLabel` | 10pt | Bold | +0.5pt |
+| `sectionLabel` | 10pt | Bold | +1pt |
 | `screenTitle` | 15pt | Bold | +0.5pt |
 | `metric` | 20pt | Bold | 0 |
 | `metricCaption` | 9pt | Regular | +0.5pt |
