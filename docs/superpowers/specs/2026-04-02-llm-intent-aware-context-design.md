@@ -190,7 +190,7 @@ HOURLY DISTRIBUTION:
 
 ANOMALIES:
 - Nighttime activity (12AM-6AM) accounts for 16% of alerts but includes highest-threat detections
-- New device (MAC C8:...) seen 3 times in 48 hours, not in Known Devices
+- New device (MAC C8:...) seen 3 times in 48 hours
 ```
 
 ### `buildTimeContext(alerts)`
@@ -343,12 +343,13 @@ Cross-reference response against the data provided in the prompt.
 
 | Intent | Hallucination Pattern | Detection |
 |---|---|---|
-| `device_query` | "empty", "no devices", "none" when devices exist | Response contains negation + context had devices |
-| `alert_query` | "no critical alerts" when critical alerts exist | Response negates + filtered alerts non-empty |
+| `device_query` | "empty", "no devices", "none" when matching devices exist | Response contains negation + filter-matched devices non-empty (respects `online`, `deviceName` filters) |
+| `alert_query` | "no alerts" when matching alerts exist | Response negates + filter-matched alerts non-empty (respects `threatLevel`, `detectionType`, `timeRange`, `isReviewed` filters) |
 | `status_overview` | "everything looks normal" with critical/high alerts | Response claims normal + critical count > 0 |
-| Any | Claims a count that contradicts the data | Extract numbers from response, compare to actuals |
 
-**On contradiction:** Replace the full response with a **deterministic fallback** built directly from the structured data — no model involved. Example for `alert_query` with `{ threatLevel: 'critical' }`:
+Note: Numeric contradiction detection (e.g., "3 critical alerts" when there are 16) is deferred to a future iteration. The 1B model often phrases counts imprecisely ("several", "a few"), making regex-based count extraction unreliable.
+
+**On contradiction:** Replace the full response with a **deterministic fallback** built directly from the structured data — no model involved. Both the hallucination detection and the fallback builders apply the same `IntentFilters` (threatLevel, detectionType, timeRange, isReviewed, online, deviceName) to ensure the fallback is accurate for the specific query, not just the broad intent. Example for `alert_query` with `{ threatLevel: 'critical' }`:
 
 ```
 16 critical alerts. Most recent:
@@ -430,6 +431,7 @@ async chat(context: ChatContext): Promise<ChatResponse> {
 - `buildPrompt()` gains `intent` and `focusedContext` parameters
 - Routes to intent-specific user prompt templates
 - System prompt shortened to ~70 tokens
+- `focusedContext` is truncated to ~800 tokens via `truncateText()` before injection, enforcing the token budget regardless of how many alerts/devices match the filters
 - Remove unused `buildQuestionPrompt`, `buildAlertQuestionPrompt`, `buildDeviceQuestionPrompt`, `buildStatusQuestionPrompt` methods
 
 ### Type Changes
@@ -464,6 +466,7 @@ interface ChatResponse {
 |---|---|
 | `src/services/llm/templates/ConversationalTemplate.ts` | New system prompt, intent-aware buildPrompt, remove unused question methods |
 | `src/services/llm/LLMService.ts` | `chat()` orchestrates intent → context → prompt → generate → process |
+| `src/services/llm/AIProvider.tsx` | Update `chat` wrapper and `AIContextType` to use `ChatContext` instead of `ConversationContext` |
 | `src/screens/ai/AIAssistantScreen.tsx` | Pass raw alerts/devices instead of pre-built securityContext |
 | `src/types/llm.ts` | Add `ChatContext`, `ClassifiedIntent`, `IntentFilters`; update `ChatResponse` |
 

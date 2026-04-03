@@ -30,8 +30,9 @@
 | `src/types/llm.ts` | Add `ChatContext`, `ClassifiedIntent`, `IntentFilters` types; add `intent` to `ChatResponse` |
 | `src/services/llm/templates/ConversationalTemplate.ts` | New system prompt, intent-aware `buildPrompt`, remove dead question methods |
 | `src/services/llm/LLMService.ts` | Rewrite `chat()` to orchestrate intent → context → prompt → generate → process |
+| `src/services/llm/AIProvider.tsx` | Update `chat` wrapper and `AIContextType` to use `ChatContext` instead of `ConversationContext` |
 | `src/screens/ai/AIAssistantScreen.tsx` | Pass raw alerts/devices instead of pre-built securityContext |
-| `src/services/llm/index.ts` | Export new modules |
+| `src/services/llm/index.ts` | Export new modules, update re-exported types |
 
 ---
 
@@ -42,7 +43,14 @@
 
 - [ ] **Step 1: Add intent and chat context types**
 
-Add the following types at the end of `src/types/llm.ts`, before the closing of the file:
+First, update the import at the top of `src/types/llm.ts` to include `ThreatLevel` and `DetectionType`:
+
+```typescript
+import type { Alert, ThreatLevel, DetectionType } from '@/types/alert';
+import type { Device } from '@/types/device';
+```
+
+Then add the following types at the end of `src/types/llm.ts`, before the closing of the file:
 
 ```typescript
 // Intent Classification Types
@@ -192,9 +200,14 @@ describe('IntentClassifier', () => {
       expect(result.filters.timeRange).toBe('24h');
     });
 
-    it('extracts device name', () => {
+    it('extracts device name - full match', () => {
       const result = IntentClassifier.classify('How is the North Gate Sensor doing?', mockDevices);
       expect(result.intent).toBe('device_query');
+      expect(result.filters.deviceName).toBe('North Gate Sensor');
+    });
+
+    it('extracts device name - partial match', () => {
+      const result = IntentClassifier.classify('What about north gate?', mockDevices);
       expect(result.filters.deviceName).toBe('North Gate Sensor');
     });
 
@@ -453,11 +466,29 @@ export class IntentClassifier {
 
   private static matchDeviceName(message: string, devices: Device[]): string | undefined {
     const messageLower = message.toLowerCase();
+
+    // 1. Try exact full-name match first
     for (const device of devices) {
       if (messageLower.includes(device.name.toLowerCase())) {
         return device.name;
       }
     }
+
+    // 2. Try matching individual significant words from device names
+    // e.g., "north gate" matches "North Gate Sensor", "cabin" matches "Cabin Approach"
+    for (const device of devices) {
+      const nameWords = device.name.toLowerCase().split(/\s+/);
+      // Filter out generic words that would match too broadly
+      const significantWords = nameWords.filter(
+        w => !['sensor', 'monitor', 'device', 'unit', 'the', 'a'].includes(w)
+      );
+      // Require at least one significant word match
+      const matchCount = significantWords.filter(w => messageLower.includes(w)).length;
+      if (matchCount > 0 && matchCount >= Math.min(significantWords.length, 2)) {
+        return device.name;
+      }
+    }
+
     return undefined;
   }
 }
@@ -1059,6 +1090,7 @@ export class FocusedContextBuilder {
       ? filterAlerts(alerts, { timeRange: filters.timeRange })
       : alerts;
 
+    // Always use explicit rolling-window labels, never "today"/"this week"
     const timeLabel = filters.timeRange === '24h' ? 'last 24 hours' : filters.timeRange === '7d' ? 'last 7 days' : 'all time';
 
     // Group by MAC address
@@ -1127,7 +1159,7 @@ export class FocusedContextBuilder {
         parts.push(`- Nighttime activity accounts for ${nightPct}% of detections — higher than typical`);
       }
       for (const [mac, a] of newMacs) {
-        parts.push(`- New device (MAC ${mac}) seen ${a.length} times in 48 hours, not in Known Devices`);
+        parts.push(`- New device (MAC ${mac}) seen ${a.length} times in 48 hours`);
       }
     }
 
@@ -1366,6 +1398,24 @@ describe('ResponseProcessor', () => {
       );
       expect(result).toContain('1 critical alert');
     });
+
+    it('does not flag "no alerts" when filtered results are genuinely empty', () => {
+      // No medium alerts in mockAlerts — "no medium alerts" is correct
+      const result = ResponseProcessor.process(
+        'No medium alerts found.',
+        'alert_query', { threatLevel: 'medium' }, mockAlerts, mockDevices
+      );
+      expect(result).toBe('No medium alerts found.');
+    });
+
+    it('does not flag "no offline sensors" when all sensors are online', () => {
+      const allOnline: Device[] = mockDevices.map(d => ({ ...d, online: true }));
+      const result = ResponseProcessor.process(
+        'No offline sensors.',
+        'device_query', { online: false }, mockAlerts, allOnline
+      );
+      expect(result).toBe('No offline sensors.');
+    });
   });
 
   describe('Stage 3: length enforcement', () => {
@@ -1555,7 +1605,7 @@ export class ResponseProcessor {
   ): boolean {
     switch (intent) {
       case 'device_query':
-        return this.detectDeviceHallucination(response, devices);
+        return this.detectDeviceHallucination(response, filters, devices);
       case 'alert_query':
         return this.detectAlertHallucination(response, filters, alerts);
       case 'status_overview':
@@ -1565,9 +1615,24 @@ export class ResponseProcessor {
     }
   }
 
-  private static detectDeviceHallucination(response: string, devices: Device[]): boolean {
-    if (devices.length === 0) return false;
-    // Model claims no devices when devices exist
+  private static detectDeviceHallucination(
+    response: string,
+    filters: IntentFilters,
+    devices: Device[]
+  ): boolean {
+    // Apply the same filters the context builder would have used
+    let filtered = [...devices];
+    if (filters.online !== undefined) {
+      filtered = filtered.filter(d => d.online === filters.online);
+    }
+    if (filters.deviceName) {
+      filtered = filtered.filter(
+        d => d.name.toLowerCase() === filters.deviceName!.toLowerCase()
+      );
+    }
+
+    if (filtered.length === 0) return false;
+    // Model claims no devices/empty when matching devices exist
     return NEGATION_PATTERNS.some(p => p.test(response));
   }
 
@@ -1576,9 +1641,23 @@ export class ResponseProcessor {
     filters: IntentFilters,
     alerts: Alert[]
   ): boolean {
-    const filtered = filters.threatLevel
-      ? alerts.filter(a => a.threatLevel === filters.threatLevel)
-      : alerts;
+    // Apply ALL filters, not just threatLevel
+    let filtered = [...alerts];
+    if (filters.threatLevel) {
+      filtered = filtered.filter(a => a.threatLevel === filters.threatLevel);
+    }
+    if (filters.detectionType) {
+      filtered = filtered.filter(a => a.detectionType === filters.detectionType);
+    }
+    if (filters.isReviewed !== undefined) {
+      filtered = filtered.filter(a => a.isReviewed === filters.isReviewed);
+    }
+    if (filters.timeRange) {
+      const cutoff = filters.timeRange === '24h'
+        ? Date.now() - 24 * 60 * 60 * 1000
+        : Date.now() - 7 * 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(a => new Date(a.timestamp).getTime() >= cutoff);
+    }
 
     if (filtered.length === 0) return false;
     // Model claims no alerts when matching alerts exist
@@ -1615,7 +1694,7 @@ export class ResponseProcessor {
       case 'alert_query':
         return this.buildAlertFallback(alerts, filters);
       case 'device_query':
-        return this.buildDeviceFallback(devices);
+        return this.buildDeviceFallback(devices, filters);
       case 'status_overview':
         return this.buildStatusFallback(alerts, devices);
       default:
@@ -1624,13 +1703,31 @@ export class ResponseProcessor {
   }
 
   private static buildAlertFallback(alerts: Alert[], filters: IntentFilters): string {
-    const filtered = filters.threatLevel
-      ? alerts.filter(a => a.threatLevel === filters.threatLevel)
-      : alerts;
+    // Apply ALL filters, matching what FocusedContextBuilder does
+    let filtered = [...alerts];
+    if (filters.threatLevel) {
+      filtered = filtered.filter(a => a.threatLevel === filters.threatLevel);
+    }
+    if (filters.detectionType) {
+      filtered = filtered.filter(a => a.detectionType === filters.detectionType);
+    }
+    if (filters.isReviewed !== undefined) {
+      filtered = filtered.filter(a => a.isReviewed === filters.isReviewed);
+    }
+    if (filters.timeRange) {
+      const cutoff = filters.timeRange === '24h'
+        ? Date.now() - 24 * 60 * 60 * 1000
+        : Date.now() - 7 * 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(a => new Date(a.timestamp).getTime() >= cutoff);
+    }
 
     if (filtered.length === 0) {
-      const label = filters.threatLevel ? `${filters.threatLevel} ` : '';
-      return `No ${label}alerts found.`;
+      const parts: string[] = [];
+      if (filters.threatLevel) parts.push(filters.threatLevel);
+      if (filters.detectionType) parts.push(filters.detectionType);
+      if (filters.isReviewed === false) parts.push('unreviewed');
+      const label = parts.length > 0 ? parts.join(' ') + ' ' : '';
+      return `No ${label}alerts found${filters.timeRange ? ` in the last ${filters.timeRange === '24h' ? '24 hours' : '7 days'}` : ''}.`;
     }
 
     const sorted = [...filtered].sort(
@@ -1648,13 +1745,31 @@ export class ResponseProcessor {
     return `${filtered.length} ${label} alerts. Most recent:\n${lines.join('\n')}`;
   }
 
-  private static buildDeviceFallback(devices: Device[]): string {
+  private static buildDeviceFallback(devices: Device[], filters: IntentFilters): string {
     if (devices.length === 0) return 'No sensors registered.';
 
-    const online = devices.filter(d => d.online);
-    const offline = devices.filter(d => !d.online);
+    // Apply filters matching what FocusedContextBuilder does
+    let filtered = [...devices];
+    if (filters.online !== undefined) {
+      filtered = filtered.filter(d => d.online === filters.online);
+    }
+    if (filters.deviceName) {
+      filtered = filtered.filter(
+        d => d.name.toLowerCase() === filters.deviceName!.toLowerCase()
+      );
+    }
 
-    const lines: string[] = [`${devices.length} sensors: ${online.length} online, ${offline.length} offline.`];
+    if (filtered.length === 0) {
+      if (filters.online === false) return 'No offline sensors.';
+      if (filters.online === true) return 'No online sensors.';
+      if (filters.deviceName) return `No sensor named "${filters.deviceName}" found.`;
+      return 'No sensors found matching your criteria.';
+    }
+
+    const online = filtered.filter(d => d.online);
+    const offline = filtered.filter(d => !d.online);
+
+    const lines: string[] = [`${filtered.length} sensors: ${online.length} online, ${offline.length} offline.`];
 
     if (offline.length > 0) {
       lines.push('Offline: ' + offline.map(d => `${d.name} (battery ${d.batteryPercent ?? 'N/A'}%)`).join(', '));
@@ -1773,10 +1888,14 @@ export class ConversationalTemplate extends PromptTemplate {
     const conversationHistory = this.formatConversationHistory(messages);
     const instruction = INTENT_INSTRUCTIONS[intent];
 
+    // Truncate context to ~800 tokens to stay within 2048 context window
+    // Budget: ~70 system + ~200 history + ~800 context + ~40 template + ~938 generation
+    const truncatedContext = this.truncateText(focusedContext, 800);
+
     const userPrompt = `${conversationHistory}
 
 DATA:
-${focusedContext}
+${truncatedContext}
 
 QUESTION: ${messages[messages.length - 1]?.content ?? ''}
 
@@ -1981,7 +2100,68 @@ git commit -m "refactor(llm): pass raw alerts/devices to chat pipeline instead o
 
 ---
 
-### Task 8: Update Exports
+### Task 8: Update AIProvider Chat API
+
+The `AIProvider.tsx` exposes a `chat` method via the `useAI()` hook that still uses the old `ConversationContext` type. This must be migrated to `ChatContext` so the public API is internally consistent.
+
+**Files:**
+- Modify: `src/services/llm/AIProvider.tsx`
+
+- [ ] **Step 1: Update imports**
+
+In `src/services/llm/AIProvider.tsx`, replace the `ConversationContext` import with `ChatContext`:
+
+```typescript
+import {
+  Message,
+  AlertSummary,
+  PatternAnalysis,
+  ChatResponse,
+  AlertContext,
+  DeviceContext,
+  ChatContext,
+} from '@/types/llm';
+```
+
+- [ ] **Step 2: Update AIContextType interface**
+
+Change the `chat` method signature in the `AIContextType` interface:
+
+```typescript
+  chat: (context: ChatContext) => Promise<ChatResponse>;
+```
+
+- [ ] **Step 3: Update the chat callback**
+
+Replace the `chat` callback implementation:
+
+```typescript
+  const chat = useCallback(
+    async (context: ChatContext): Promise<ChatResponse> => {
+      if (!isReady) {
+        await enableAI();
+      }
+      return llmService.chat(context);
+    },
+    [isReady, enableAI]
+  );
+```
+
+- [ ] **Step 4: Run type-check**
+
+Run: `npx tsc --noEmit 2>&1 | head -20`
+Expected: No errors — AIProvider now matches LLMService's chat signature
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/services/llm/AIProvider.tsx
+git commit -m "refactor(llm): migrate AIProvider chat API from ConversationContext to ChatContext"
+```
+
+---
+
+### Task 9: Update Exports
 
 **Files:**
 - Modify: `src/services/llm/index.ts`
@@ -2023,7 +2203,7 @@ git commit -m "chore(llm): export IntentClassifier, FocusedContextBuilder, Respo
 
 ---
 
-### Task 9: Fix Existing mockModeFlow Test
+### Task 10: Fix Existing mockModeFlow Test
 
 The existing `mockModeFlow.test.tsx` calls `llmService.chat()` with the old `ConversationContext` shape (`securityContext: { recentAlerts, deviceStatus }`). It needs to be updated to the new `ChatContext` shape (`rawAlerts, rawDevices`). The test also asserts that the raw mock response is returned verbatim, but now `ResponseProcessor` will clean/transform the response, so the assertion needs to account for post-processing.
 
@@ -2068,14 +2248,14 @@ git commit -m "test(llm): update mockModeFlow test for new ChatContext shape"
 
 ---
 
-### Task 10: Run Full Test Suite
+### Task 11: Run Full Test Suite
 
 **Files:** None (verification only)
 
 - [ ] **Step 1: Run all LLM tests**
 
 Run: `npx jest __tests__/services/llm/ --verbose 2>&1 | tail -40`
-Expected: All 5 test files pass (IntentClassifier, FocusedContextBuilder, ResponseProcessor, mockModeFlow, modelManagerLoad)
+Expected: All 5 test files pass: IntentClassifier, FocusedContextBuilder, ResponseProcessor, mockModeFlow, modelManagerLoad
 
 - [ ] **Step 2: Run type-check on full project**
 
@@ -2095,8 +2275,17 @@ Expected: Files formatted
 - [ ] **Step 5: Final commit if lint/format changed anything**
 
 ```bash
-git add -A
-git status
-# Only commit if there are changes
+# Only stage files that are part of this feature — never git add -A in a dirty worktree
+git add \
+  src/services/llm/IntentClassifier.ts \
+  src/services/llm/FocusedContextBuilder.ts \
+  src/services/llm/ResponseProcessor.ts \
+  src/services/llm/templates/ConversationalTemplate.ts \
+  src/services/llm/LLMService.ts \
+  src/services/llm/AIProvider.tsx \
+  src/services/llm/index.ts \
+  src/screens/ai/AIAssistantScreen.tsx \
+  src/types/llm.ts \
+  __tests__/services/llm/
 git diff --cached --quiet || git commit -m "chore: lint and format intent-aware pipeline"
 ```
