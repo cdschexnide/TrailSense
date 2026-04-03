@@ -39,7 +39,13 @@ export const TabSegment: React.FC<TabSegmentProps> = ({
 
   return (
     <View
-      style={[styles.container, { backgroundColor: colors.tertiarySystemFill }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.separator,
+        },
+      ]}
     >
       {tabs.map(tab => {
         const isSelected = tab.key === selectedKey;
@@ -56,15 +62,16 @@ export const TabSegment: React.FC<TabSegmentProps> = ({
               isSelected && [
                 styles.selectedTab,
                 {
-                  backgroundColor: colors.secondarySystemBackground,
+                  backgroundColor: colors.primary,
                 },
               ],
             ]}
           >
             <Text
-              variant="subheadline"
-              weight={isSelected ? 'semibold' : 'regular'}
-              color={isSelected ? 'label' : 'secondaryLabel'}
+              variant="caption1"
+              tactical
+              weight={isSelected ? 'bold' : 'regular'}
+              style={{ color: isSelected ? '#111210' : colors.tertiaryLabel }}
               align="center"
             >
               {tab.label}
@@ -81,6 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 3,
     borderRadius: 10,
+    borderWidth: 1,
   },
   tab: {
     flex: 1,
@@ -90,11 +98,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selectedTab: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOpacity: 0,
+    elevation: 0,
   },
 });
 

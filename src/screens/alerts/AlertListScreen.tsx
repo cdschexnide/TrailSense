@@ -17,6 +17,7 @@ import { useAlerts } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
 import { AlertCard } from '@components/organisms/AlertCard';
 import { AlertsHeaderHero } from '@components/organisms/HeaderHero';
+import { TacticalHeader } from '@components/organisms';
 import { ScreenLayout, EmptyState, ErrorState } from '@components/templates';
 import { SearchBar } from '@components/molecules/SearchBar';
 import { Button, Icon, SkeletonCard } from '@components/atoms';
@@ -126,13 +127,35 @@ export const AlertListScreen = ({ navigation, route }: Props) => {
     isBlocked,
   ]);
 
+  const criticalCount = useMemo(
+    () =>
+      alerts?.filter(
+        alert => !alert.isReviewed && alert.threatLevel === 'critical'
+      ).length ?? 0,
+    [alerts]
+  );
+
+  const filterButton = (
+    <Button
+      buttonStyle="plain"
+      onPress={() =>
+        navigation.navigate('AlertFilter', {
+          filters: {
+            threatLevels: selectedThreatFilters,
+            detectionTypes: selectedDetectionTypes,
+          },
+        })
+      }
+      leftIcon={<Icon name="options" size={20} color="systemBlue" />}
+    >
+      Filter
+    </Button>
+  );
+
   if (isLoading) {
     return (
       <ScreenLayout
-        header={{
-          title: 'Alerts',
-          largeTitle: true,
-        }}
+        customHeader={<TacticalHeader title="ALERTS" />}
         scrollable={true}
       >
         <View style={styles.skeletonContainer}>
@@ -192,32 +215,22 @@ export const AlertListScreen = ({ navigation, route }: Props) => {
 
   return (
     <ScreenLayout
-      header={{
-        title: 'Alerts',
-        largeTitle: true,
-        rightActions: (
-          <Button
-            buttonStyle="plain"
-            onPress={() =>
-              navigation.navigate('AlertFilter', {
-                filters: {
-                  threatLevels: selectedThreatFilters,
-                  detectionTypes: selectedDetectionTypes,
-                },
-              })
-            }
-            leftIcon={<Icon name="options" size={20} color="systemBlue" />}
-          >
-            Filter
-          </Button>
-        ),
-      }}
+      customHeader={
+        <TacticalHeader
+          title="ALERTS"
+          statusLabel={
+            criticalCount > 0 ? `${criticalCount} CRITICAL` : 'ALL CLEAR'
+          }
+          statusVariant={criticalCount > 0 ? 'danger' : 'success'}
+          rightAction={filterButton}
+        />
+      }
       scrollable={false}
       stickyHeader={
         <SearchBar
           value={search}
           onChangeText={setSearch}
-          placeholder="Search alerts..."
+          placeholder="SEARCH ALERTS..."
           showCancelButton={true}
           onCancel={() => setSearch('')}
         />

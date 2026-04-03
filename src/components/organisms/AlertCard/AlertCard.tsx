@@ -169,7 +169,8 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         // Use different base styles for critical (no margins) vs non-critical (with margins)
         isCritical ? styles.cardInGlow : styles.card,
         {
-          backgroundColor: theme.colors.secondarySystemBackground,
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.separator,
           opacity: opacityAnim,
           transform: [{ translateX: translateXAnim }, { scale: scaleAnim }],
         },
@@ -195,12 +196,18 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             size={20}
             color={detectionConfig.color}
           />
-          <Text variant="headline" color="label" style={styles.detectionTitle}>
+          <Text
+            variant="caption1"
+            tactical
+            color="label"
+            style={styles.detectionTitle}
+          >
             {detectionConfig.label}
           </Text>
           <Text
             variant="caption1"
-            color="secondaryLabel"
+            tactical
+            color="tertiaryLabel"
             style={styles.timestamp}
           >
             {formatTimestamp(alert.timestamp)}
@@ -210,7 +217,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         {/* Single-line metadata with dot separators */}
         <View style={styles.metadataRow}>
           <View style={styles.metadataLine}>
-            <Text variant="caption1" color="secondaryLabel">
+            <Text variant="caption1" tactical color="secondaryLabel">
               {alert.rssi} dBm
             </Text>
             <Text
@@ -228,6 +235,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             >
               <Text
                 variant="caption2"
+                tactical
                 style={{ color: rssiInfo.color, fontWeight: '600' }}
               >
                 {rssiInfo.label}
@@ -313,12 +321,14 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: 16,
     marginVertical: 6,
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   cardInGlow: {
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   leftAccent: {
     position: 'absolute',
@@ -326,8 +336,8 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 3,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
   },
   cardContent: {
     paddingHorizontal: 12,
@@ -342,7 +352,7 @@ const styles = StyleSheet.create({
   },
   detectionTitle: {
     flex: 1,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   timestamp: {
     marginLeft: 'auto',

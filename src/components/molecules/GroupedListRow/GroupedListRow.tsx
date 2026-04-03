@@ -57,6 +57,7 @@ export const GroupedListRow: React.FC<GroupedListRowProps> = ({
       accessibilityState={{ disabled: !onPress }}
       style={({ pressed }) => [
         styles.container,
+        { backgroundColor: colors.systemGray6 },
         pressed && onPress && styles.pressed,
       ]}
     >
@@ -83,7 +84,7 @@ export const GroupedListRow: React.FC<GroupedListRowProps> = ({
             {title}
           </Text>
           {value && (
-            <Text variant="body" color="secondaryLabel">
+            <Text variant="caption1" tactical color="secondaryLabel">
               {value}
             </Text>
           )}
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   pressed: {
-    backgroundColor: 'rgba(128, 128, 128, 0.1)',
+    opacity: 0.75,
   },
   iconContainer: {
     width: 32,

@@ -6,7 +6,6 @@ export { NotificationSettingsScreen } from './NotificationSettingsScreen';
 export { AddKnownDeviceScreen } from './AddKnownDeviceScreen';
 export { SensitivityScreen } from './SensitivityScreen';
 export { QuietHoursScreen } from './QuietHoursScreen';
-export { ThemeScreen } from './ThemeScreen';
 export { AlertSoundScreen } from './AlertSoundScreen';
 export { BiometricScreen } from './BiometricScreen';
 export { SecurityScreen } from './SecurityScreen';

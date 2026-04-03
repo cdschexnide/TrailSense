@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 /**
  * iOS Typography System
  *
@@ -423,6 +425,99 @@ export const TextStyles = {
 };
 
 // ======================
+// Tactical Typography (Monospace)
+// ======================
+
+const monoFont = Platform.OS === 'ios' ? 'Menlo' : 'monospace';
+
+export const TacticalTextStyles = {
+  screenTitle: {
+    fontFamily: monoFont,
+    fontSize: 15,
+    fontWeight: '700' as const,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
+
+  headerLabel: {
+    fontFamily: monoFont,
+    fontSize: 10,
+    fontWeight: '700' as const,
+    letterSpacing: 1,
+    textTransform: 'uppercase' as const,
+  },
+
+  sectionLabel: {
+    fontFamily: monoFont,
+    fontSize: 10,
+    fontWeight: '700' as const,
+    letterSpacing: 1,
+  },
+
+  metric: {
+    fontFamily: monoFont,
+    fontSize: 20,
+    fontWeight: '700' as const,
+  },
+
+  metricCaption: {
+    fontFamily: monoFont,
+    fontSize: 9,
+    fontWeight: '400' as const,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
+
+  dataValue: {
+    fontFamily: monoFont,
+    fontSize: 10,
+    fontWeight: '400' as const,
+  },
+
+  badge: {
+    fontFamily: monoFont,
+    fontSize: 10,
+    fontWeight: '700' as const,
+    letterSpacing: 1,
+  },
+
+  deviceName: {
+    fontFamily: monoFont,
+    fontSize: 11,
+    fontWeight: '400' as const,
+  },
+
+  timestamp: {
+    fontFamily: monoFont,
+    fontSize: 10,
+    fontWeight: '400' as const,
+  },
+
+  tabLabel: {
+    fontFamily: monoFont,
+    fontSize: 10,
+    fontWeight: '400' as const,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
+
+  chipLabel: {
+    fontFamily: monoFont,
+    fontSize: 11,
+    fontWeight: '400' as const,
+    textTransform: 'uppercase' as const,
+  },
+
+  statusLabel: {
+    fontFamily: monoFont,
+    fontSize: 11,
+    fontWeight: '700' as const,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase' as const,
+  },
+} as const;
+
+// ======================
 // TypeScript Type Definitions
 // ======================
 
@@ -472,6 +567,8 @@ export type TextStyle = {
   letterSpacing: number;
 };
 
+export type TacticalTextStyleVariant = keyof typeof TacticalTextStyles;
+
 /**
  * Helper function to get text style
  */
@@ -491,6 +588,7 @@ export const Typography = {
   fontFamily: FontFamily,
   fontWeight: FontWeight,
   textStyles: TextStyles,
+  tacticalTextStyles: TacticalTextStyles,
   getTextStyle,
 
   // Backward compatibility for old font structure

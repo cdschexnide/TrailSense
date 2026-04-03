@@ -27,6 +27,7 @@ import { PositionListItem } from '@components/molecules/PositionListItem';
 import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
 import { TrailSenseDeviceMarker } from '@components/molecules/TrailSenseDeviceMarker';
 import { TimelineScrubber } from '@components/organisms/TimelineScrubber';
+import { TacticalHeader } from '@components/organisms';
 import { ScreenLayout } from '@components/templates';
 import { websocketService } from '@api/websocket';
 import { useAlerts } from '@hooks/api/useAlerts';
@@ -495,9 +496,20 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
     }, [switchToLive])
   );
 
+  const activeCount =
+    mode === 'live' ? positions.length : currentReplayEntries.length;
+
   if (devicesLoading) {
     return (
-      <ScreenLayout header={{ title: 'Proximity Heatmap', largeTitle: true }}>
+      <ScreenLayout
+        customHeader={
+          <TacticalHeader
+            title="RADAR"
+            statusLabel={activeCount > 0 ? `${activeCount} ACTIVE` : 'SCANNING'}
+            statusVariant={activeCount > 0 ? 'success' : 'warning'}
+          />
+        }
+      >
         <View style={styles.centerContainer}>
           <Text variant="body" color="secondaryLabel">
             Loading devices...
@@ -509,7 +521,15 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   if (devices.length === 0) {
     return (
-      <ScreenLayout header={{ title: 'Proximity Heatmap', largeTitle: true }}>
+      <ScreenLayout
+        customHeader={
+          <TacticalHeader
+            title="RADAR"
+            statusLabel="SCANNING"
+            statusVariant="warning"
+          />
+        }
+      >
         <View style={styles.centerContainer}>
           <Icon name="alert-circle-outline" size={64} color="systemGray" />
           <Text variant="title3" color="label" style={styles.emptyTitle}>
@@ -529,27 +549,27 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   return (
     <ScreenLayout
-      header={{
-        title: selectedDevice?.name || 'Map',
-        largeTitle: false,
-        showBack:
-          typeof navigation.canGoBack === 'function'
-            ? navigation.canGoBack()
-            : false,
-        onBackPress: () => navigation.goBack(),
-        rightActions: alerts[0]?.macAddress ? (
-          <Button
-            buttonStyle="plain"
-            onPress={() =>
-              navigation.navigate('DeviceFingerprint', {
-                macAddress: alerts[0].macAddress,
-              })
-            }
-          >
-            Visitor
-          </Button>
-        ) : undefined,
-      }}
+      customHeader={
+        <TacticalHeader
+          title="RADAR"
+          statusLabel={activeCount > 0 ? `${activeCount} ACTIVE` : 'SCANNING'}
+          statusVariant={activeCount > 0 ? 'success' : 'warning'}
+          rightAction={
+            alerts[0]?.macAddress ? (
+              <Button
+                buttonStyle="plain"
+                onPress={() =>
+                  navigation.navigate('DeviceFingerprint', {
+                    macAddress: alerts[0].macAddress,
+                  })
+                }
+              >
+                Visitor
+              </Button>
+            ) : undefined
+          }
+        />
+      }
       scrollable={false}
     >
       <View style={styles.segmentedControl}>

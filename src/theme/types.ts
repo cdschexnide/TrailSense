@@ -5,12 +5,14 @@ import {
   BorderRadius,
   Shadows,
 } from '@constants/index';
+import { TacticalTextStyles } from '@constants/typography';
 
-export type ColorScheme = 'light' | 'dark';
+export type ColorScheme = 'dark';
 
 export interface Theme {
-  colors: typeof Colors.light;
+  colors: typeof Colors.dark;
   typography: typeof Typography;
+  tacticalTypography: typeof TacticalTextStyles;
   spacing: typeof Spacing;
   borderRadius: typeof BorderRadius;
   shadows: typeof Shadows;

@@ -58,7 +58,6 @@ export const linking: LinkingOptions<RootStackParamList> = {
               Profile: 'settings/profile',
               KnownDevices: 'settings/known-devices',
               NotificationSettings: 'settings/notifications',
-              Theme: 'settings/theme',
               AlertSound: 'settings/alert-sound',
               Biometric: 'settings/biometric',
               Security: 'settings/security',

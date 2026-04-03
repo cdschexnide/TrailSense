@@ -13,7 +13,6 @@ import {
   ProfileScreen,
   KnownDevicesScreen,
   NotificationSettingsScreen,
-  ThemeScreen,
   AlertSoundScreen,
   BiometricScreen,
   SecurityScreen,
@@ -43,7 +42,6 @@ export const MoreStack = () => {
         name="NotificationSettings"
         component={NotificationSettingsScreen}
       />
-      <Stack.Screen name="Theme" component={ThemeScreen} />
       <Stack.Screen name="AlertSound" component={AlertSoundScreen} />
       <Stack.Screen name="Biometric" component={BiometricScreen} />
       <Stack.Screen name="Security" component={SecurityScreen} />

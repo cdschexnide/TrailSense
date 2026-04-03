@@ -31,17 +31,21 @@ export const GroupedListSection: React.FC<GroupedListSectionProps> = ({
     <View style={styles.section}>
       {title && (
         <Text
-          variant="footnote"
+          variant="caption1"
+          tactical
           color="secondaryLabel"
           style={styles.sectionTitle}
         >
-          {title.toUpperCase()}
+          {title}
         </Text>
       )}
       <View
         style={[
           styles.container,
-          { backgroundColor: colors.secondarySystemGroupedBackground },
+          {
+            backgroundColor: colors.systemGray6,
+            borderColor: colors.separator,
+          },
         ]}
       >
         {childArray.map((child, index) => (
@@ -81,12 +85,13 @@ const styles = StyleSheet.create({
   },
   container: {
     marginHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    marginLeft: 52, // Inset separator
+    marginLeft: 16,
   },
   sectionFooter: {
     marginLeft: 16,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { Text } from '../Text/Text';
 import { useTheme } from '@hooks/useTheme';
 import { BorderRadius } from '@constants/spacing';
@@ -53,9 +53,25 @@ export const Badge: React.FC<BadgeProps> = ({
   style,
   testID,
 }) => {
-  const { theme, colorScheme } = useTheme();
+  const { theme } = useTheme();
   const colors = theme.colors;
-  const isDark = colorScheme === 'dark';
+
+  const BADGE_COLORS: Record<BadgeVariant, { bg: string; text: string }> = {
+    critical: { bg: '#3a1a1a', text: '#f87171' },
+    high: { bg: '#3a2a1a', text: '#fbbf24' },
+    medium: { bg: '#2a2a1a', text: '#fcd34d' },
+    low: { bg: '#1a2a1a', text: '#86efac' },
+    cellular: { bg: 'rgba(167, 139, 250, 0.16)', text: colors.systemPurple },
+    wifi: { bg: 'rgba(96, 165, 250, 0.16)', text: colors.info },
+    bluetooth: { bg: 'rgba(45, 212, 191, 0.16)', text: colors.systemTeal },
+    multiband: { bg: 'rgba(129, 140, 248, 0.16)', text: colors.systemIndigo },
+    info: { bg: 'rgba(96, 165, 250, 0.16)', text: colors.info },
+    success: { bg: 'rgba(74, 222, 128, 0.16)', text: colors.success },
+    warning: { bg: '#3a2a1a', text: '#fbbf24' },
+    error: { bg: '#3a1a1a', text: '#f87171' },
+    online: { bg: '#1a2a1a', text: '#86efac' },
+    offline: { bg: 'rgba(138, 136, 122, 0.18)', text: colors.systemGray },
+  };
 
   // ======================
   // Style Functions
@@ -65,98 +81,14 @@ export const Badge: React.FC<BadgeProps> = ({
    * Get background color with 15% opacity for subtle appearance
    */
   const getBackgroundColor = (): string => {
-    const opacity15 = '26'; // Hex for 15% opacity
-
-    switch (variant) {
-      // Threat levels
-      case 'critical':
-        return `${colors.systemRed}${opacity15}`;
-      case 'high':
-        return `${colors.systemOrange}${opacity15}`;
-      case 'medium':
-        // Yellow needs 20% opacity for better visibility
-        return isDark
-          ? `${colors.systemYellow}33` // 20% opacity
-          : `${colors.systemYellow}33`;
-      case 'low':
-        return `${colors.systemGreen}${opacity15}`;
-
-      // Detection types
-      case 'cellular':
-        return `${colors.systemPurple}${opacity15}`;
-      case 'wifi':
-        return `${colors.systemBlue}${opacity15}`;
-      case 'bluetooth':
-        return `${colors.systemTeal}${opacity15}`;
-      case 'multiband':
-        return `${colors.systemIndigo}${opacity15}`;
-
-      // Semantic
-      case 'info':
-        return `${colors.systemBlue}${opacity15}`;
-      case 'success':
-        return `${colors.systemGreen}${opacity15}`;
-      case 'warning':
-        return `${colors.systemOrange}${opacity15}`;
-      case 'error':
-        return `${colors.systemRed}${opacity15}`;
-
-      // Status
-      case 'online':
-        return `${colors.systemGreen}${opacity15}`;
-      case 'offline':
-        return `${colors.systemGray}${opacity15}`;
-
-      default:
-        return `${colors.systemGray}${opacity15}`;
-    }
+    return BADGE_COLORS[variant].bg;
   };
 
   /**
    * Get text color matching the background base color
    */
   const getTextColor = (): string => {
-    switch (variant) {
-      // Threat levels
-      case 'critical':
-        return colors.systemRed;
-      case 'high':
-        return colors.systemOrange;
-      case 'medium':
-        // Dark yellow for better contrast
-        return isDark ? colors.systemYellow : '#CC9900';
-      case 'low':
-        return colors.systemGreen;
-
-      // Detection types
-      case 'cellular':
-        return colors.systemPurple;
-      case 'wifi':
-        return colors.systemBlue;
-      case 'bluetooth':
-        return colors.systemTeal;
-      case 'multiband':
-        return colors.systemIndigo;
-
-      // Semantic
-      case 'info':
-        return colors.systemBlue;
-      case 'success':
-        return colors.systemGreen;
-      case 'warning':
-        return colors.systemOrange;
-      case 'error':
-        return colors.systemRed;
-
-      // Status
-      case 'online':
-        return colors.systemGreen;
-      case 'offline':
-        return colors.systemGray;
-
-      default:
-        return colors.label;
-    }
+    return BADGE_COLORS[variant].text;
   };
 
   /**
@@ -215,7 +147,12 @@ export const Badge: React.FC<BadgeProps> = ({
     >
       <Text
         variant={getTextVariant()}
-        style={{ color: getTextColor() }}
+        style={{
+          color: getTextColor(),
+          fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+          textTransform: 'uppercase',
+          letterSpacing: 1,
+        }}
         numberOfLines={1}
       >
         {children}

@@ -9,6 +9,7 @@ import {
   Pressable,
   KeyboardTypeOptions,
   ReturnKeyTypeOptions,
+  Platform,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text } from '../Text/Text';
@@ -165,8 +166,8 @@ export const Input: React.FC<InputProps> = ({
    */
   const getBorderColor = (): string => {
     if (error) return colors.systemRed;
-    if (isFocused) return colors.systemBlue;
-    return colors.systemGray4;
+    if (isFocused) return colors.primary;
+    return colors.separator;
   };
 
   /**
@@ -180,8 +181,8 @@ export const Input: React.FC<InputProps> = ({
    * Get background color based on state
    */
   const getBackgroundColor = (): string => {
-    if (disabled || !editable) return colors.systemGray5;
-    return colors.secondarySystemBackground;
+    if (disabled || !editable) return colors.systemGray6;
+    return colors.surface;
   };
 
   /**
@@ -206,8 +207,9 @@ export const Input: React.FC<InputProps> = ({
       {/* Label */}
       {label && (
         <Text
-          variant="subheadline"
+          variant="caption1"
           color={error ? 'systemRed' : 'label'}
+          tactical
           style={styles.label}
         >
           {label}
@@ -225,7 +227,13 @@ export const Input: React.FC<InputProps> = ({
             backgroundColor: getBackgroundColor(),
             minHeight: Layout.inputHeight, // 44pt
           },
-          isFocused && styles.focused,
+          isFocused && {
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 2,
+          },
           (disabled || !editable) && styles.disabled,
           style,
         ]}
@@ -242,6 +250,10 @@ export const Input: React.FC<InputProps> = ({
             {
               ...TextStyles.body,
               color: colors.label,
+              fontFamily:
+                Platform.OS === 'ios'
+                  ? 'System'
+                  : theme.typography.fonts.regular,
             },
             inputStyle,
           ]}
@@ -316,6 +328,8 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 6,
+    fontSize: 10,
+    letterSpacing: 0.5,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -341,14 +355,7 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 6,
   },
-  focused: {
-    // Subtle glow/shadow on focus
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+  // focused style moved inline to use theme.colors.primary
   disabled: {
     opacity: 0.5,
   },

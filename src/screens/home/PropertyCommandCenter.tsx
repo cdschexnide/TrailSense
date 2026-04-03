@@ -13,6 +13,10 @@ import { EmptyState, ScreenLayout } from '@components/templates';
 import { AlertCard } from '@components/organisms/AlertCard';
 import { MiniPropertyMap } from '@components/organisms/MiniPropertyMap';
 import {
+  TacticalHeader,
+  StatusVariant,
+} from '@components/organisms/TacticalHeader';
+import {
   usePropertyStatus,
   PropertyStatusLevel,
 } from '@hooks/usePropertyStatus';
@@ -35,12 +39,23 @@ const STATUS_COLORS: Record<PropertyStatusLevel, { bg: string; dot: string }> =
     },
   };
 
+const HEADER_STATUS_MAP: Record<
+  PropertyStatusLevel,
+  { label: string; variant: StatusVariant }
+> = {
+  critical: { label: 'CRITICAL', variant: 'danger' },
+  warning: { label: 'ELEVATED', variant: 'warning' },
+  clear: { label: 'SECURE', variant: 'success' },
+};
+
 export const PropertyCommandCenter = ({ navigation }: any) => {
   const { theme } = useTheme();
   const colors = theme.colors;
   const status = usePropertyStatus();
   const reduceMotion = useReducedMotion();
   const [refreshing, setRefreshing] = useState(false);
+  const headerStatus =
+    HEADER_STATUS_MAP[status.level] ?? HEADER_STATUS_MAP.clear;
 
   const handleRefresh = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -59,7 +74,15 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
     const hasDevices = status.devicesTotal > 0;
 
     return (
-      <ScreenLayout header={{ title: 'My Property', largeTitle: true }}>
+      <ScreenLayout
+        customHeader={
+          <TacticalHeader
+            title="HOME"
+            statusLabel={headerStatus.label}
+            statusVariant={headerStatus.variant}
+          />
+        }
+      >
         <EmptyState
           icon={hasDevices ? 'radio-outline' : 'shield-checkmark-outline'}
           title={hasDevices ? 'Monitoring Active' : 'Welcome to TrailSense'}
@@ -84,7 +107,15 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
 
   if (status.isLoading) {
     return (
-      <ScreenLayout header={{ title: 'My Property', largeTitle: true }}>
+      <ScreenLayout
+        customHeader={
+          <TacticalHeader
+            title="HOME"
+            statusLabel={headerStatus.label}
+            statusVariant={headerStatus.variant}
+          />
+        }
+      >
         <View style={styles.skeletons}>
           <SkeletonCard
             height={60}
@@ -153,7 +184,13 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
 
   return (
     <ScreenLayout
-      header={{ title: 'My Property', largeTitle: true }}
+      customHeader={
+        <TacticalHeader
+          title="HOME"
+          statusLabel={headerStatus.label}
+          statusVariant={headerStatus.variant}
+        />
+      }
       scrollable={false}
     >
       <ScrollView

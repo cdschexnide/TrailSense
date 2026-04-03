@@ -2,16 +2,14 @@ import React from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenLayout } from '@components/templates';
 import { GroupedListSection, GroupedListRow } from '@components/molecules';
+import { TacticalHeader } from '@components/organisms';
 import { MoreStackParamList } from '@navigation/types';
 
 type Props = NativeStackScreenProps<MoreStackParamList, 'MoreMenu'>;
 
 export const MoreMenuScreen = ({ navigation }: Props) => {
   return (
-    <ScreenLayout
-      header={{ title: 'More', largeTitle: true }}
-      scrollable={true}
-    >
+    <ScreenLayout customHeader={<TacticalHeader title="MORE" />} scrollable>
       <GroupedListSection title="Insights">
         <GroupedListRow
           title="Analytics"
