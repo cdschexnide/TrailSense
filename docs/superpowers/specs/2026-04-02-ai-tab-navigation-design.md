@@ -36,9 +36,10 @@ The existing `AIStack` (`src/navigation/stacks/AIStack.tsx`) becomes the tab's s
 
 - Add `AIStack` import and register as `AITab` at position 3 (between AlertsTab and RadarTab)
 - Icon: `sparkles-outline` (inactive) / `sparkles` (active), label: "AI"
-- Rename `MoreTab` to `SettingsTab`
+- Keep route key as `MoreTab` (stack contains non-settings screens like Dashboard, Heatmap)
 - Change MoreTab icon from `ellipsis-horizontal` to `settings-outline` (inactive) / `settings-sharp` (active)
-- Remove the label for SettingsTab: set `tabBarLabel` to `() => null`
+- Remove the label for MoreTab: set `tabBarLabel` to `() => null`
+- All tabs must branch on `focused` to switch between outline (inactive) and filled (active) icon variants
 
 ### `src/navigation/stacks/MoreStack.tsx`
 
@@ -52,6 +53,10 @@ The existing `AIStack` (`src/navigation/stacks/AIStack.tsx`) becomes the tab's s
 ### `src/navigation/linking.ts`
 
 - Move the `TrailSenseAI` deep link from inside `MoreTab` to `AITab`
+
+### `src/screens/more/MoreMenuScreen.tsx`
+
+- Remove the "AI Assistant" `GroupedListRow` entry (lines 19-25) since AI is now a top-level tab
 
 ### Files not changed
 

@@ -128,8 +128,8 @@ export const MainNavigator = () => {
         component={HomeStack}
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <Icon name="home-outline" color={color} size="base" />
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name={focused ? "home" : "home-outline"} color={color} size="base" />
           ),
         }}
       />
@@ -138,8 +138,8 @@ export const MainNavigator = () => {
         component={AlertsStack}
         options={{
           title: 'Alerts',
-          tabBarIcon: ({ color }) => (
-            <Icon name="alert-circle" color={color} size="base" />
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name={focused ? "alert-circle" : "alert-circle-outline"} color={color} size="base" />
           ),
         }}
       />
@@ -148,8 +148,8 @@ export const MainNavigator = () => {
         component={AIStack}
         options={{
           title: 'AI',
-          tabBarIcon: ({ color }) => (
-            <Icon name="sparkles-outline" color={color} size="base" />
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name={focused ? "sparkles" : "sparkles-outline"} color={color} size="base" />
           ),
         }}
       />
@@ -158,8 +158,8 @@ export const MainNavigator = () => {
         component={RadarStack}
         options={{
           title: 'Radar',
-          tabBarIcon: ({ color }) => (
-            <Icon name="radio-outline" color={color} size="base" />
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name={focused ? "radio" : "radio-outline"} color={color} size="base" />
           ),
         }}
       />
@@ -168,8 +168,8 @@ export const MainNavigator = () => {
         component={DevicesStack}
         options={{
           title: 'Devices',
-          tabBarIcon: ({ color }) => (
-            <Icon name="hardware-chip" color={color} size="base" />
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name={focused ? "hardware-chip" : "hardware-chip-outline"} color={color} size="base" />
           ),
         }}
       />
@@ -178,8 +178,8 @@ export const MainNavigator = () => {
         component={MoreStack}
         options={{
           tabBarLabel: () => null,
-          tabBarIcon: ({ color }) => (
-            <Icon name="settings-outline" color={color} size="base" />
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name={focused ? "settings-sharp" : "settings-outline"} color={color} size="base" />
           ),
         }}
       />
