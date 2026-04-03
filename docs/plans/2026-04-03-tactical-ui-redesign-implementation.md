@@ -40,7 +40,7 @@ export const Colors = {
 
     label: '#e8e8e0',
     secondaryLabel: '#a8a898',
-    tertiaryLabel: '#706e60',
+    tertiaryLabel: '#8a887a',
     quaternaryLabel: 'rgba(90, 90, 80, 0.38)',
 
     // ======================
@@ -81,7 +81,7 @@ export const Colors = {
     // Tactical Gray Scale
     // ======================
 
-    systemGray: '#706e60',
+    systemGray: '#8a887a',
     systemGray2: '#48483e',
     systemGray3: '#3a3a30',
     systemGray4: '#2a2a1a',
@@ -143,7 +143,7 @@ export const Colors = {
     // ======================
 
     online: '#4ade80',
-    offline: '#706e60',
+    offline: '#8a887a',
 
     battery: {
       full: '#4ade80',
@@ -202,7 +202,7 @@ export const Colors = {
     text: {
       primary: '#e8e8e0',
       secondary: '#a8a898',
-      disabled: '#706e60',
+      disabled: '#8a887a',
       inverse: '#111210',
     },
 
@@ -402,7 +402,7 @@ export const tacticalColors = {
 
   textPrimary: '#e8e8e0',
   textSecondary: '#a8a898',
-  textTertiary: '#706e60',
+  textTertiary: '#8a887a',
 
   userBubble: '#2a3a2a',
   userBubbleBorder: '#3a4a3a',
@@ -1063,7 +1063,7 @@ const STATUS_COLORS: Record<StatusVariant, string> = {
   success: '#4ade80',
   warning: '#f59e0b',
   danger: '#ef4444',
-  neutral: '#706e60',
+  neutral: '#8a887a',
 };
 
 const MONO_FONT = Platform.OS === 'ios' ? 'Menlo' : 'monospace';
@@ -1259,7 +1259,7 @@ export const MainNavigator = () => {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#fbbf24',
-        tabBarInactiveTintColor: '#706e60',
+        tabBarInactiveTintColor: '#8a887a',
         tabBarLabelStyle: {
           fontFamily: MONO_FONT,
           fontSize: 10,
@@ -1493,10 +1493,10 @@ Key changes:
 Update the color mapping function to use tactical colors:
 ```typescript
 const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  critical: { bg: '#3a1a1a', text: '#ef4444' },
-  high: { bg: '#3a2a1a', text: '#f59e0b' },
-  medium: { bg: '#2a2a1a', text: '#fbbf24' },
-  low: { bg: '#1a2a1a', text: '#4ade80' },
+  critical: { bg: '#3a1a1a', text: '#f87171' },
+  high: { bg: '#3a2a1a', text: '#fbbf24' },
+  medium: { bg: '#2a2a1a', text: '#fcd34d' },
+  low: { bg: '#1a2a1a', text: '#86efac' },
   // ... other variants
 };
 ```
@@ -1536,7 +1536,7 @@ Key changes:
 - Border: Add 1px `#2a2a1a`
 - Placeholder text: monospace, "SEARCH..." uppercase
 - Input text: keep system font for readability
-- Icon color: `#706e60` (tertiary)
+- Icon color: `#8a887a` (tertiary)
 - Focus state: amber border `#fbbf24`
 
 **Step 2: Update FilterChip**
@@ -1545,7 +1545,7 @@ Key changes:
 - Background: transparent
 - Border: 1px `#2a2a1a`
 - Border radius: 8
-- Text: monospace, uppercase, `#706e60` inactive, `#fbbf24` active
+- Text: monospace, uppercase, `#8a887a` inactive, `#fbbf24` active
 - Selected state: `rgba(251, 191, 36, 0.12)` background, `#fbbf24` border
 - Dot indicator: keep existing color prop
 
@@ -1556,7 +1556,7 @@ Key changes:
 - Container border: 1px `#2a2a1a`
 - Active tab: `#fbbf24` background fill
 - Active text: `#111210` dark text, monospace, uppercase
-- Inactive text: `#706e60`, monospace, uppercase
+- Inactive text: `#8a887a`, monospace, uppercase
 
 **Step 4: Run type-check**
 
@@ -1668,7 +1668,7 @@ Key changes to AlertCard:
 - Border: 1px `#2a2a1a`
 - Keep severity-colored left accent (3px)
 - Detection type text: monospace
-- Timestamp: monospace, `#706e60`
+- Timestamp: monospace, `#8a887a`
 - Description: system font (readable)
 - Remove shadows, use borders
 
@@ -2269,7 +2269,7 @@ Walk through every screen and check:
 - [ ] More: Tactical header, Surface card menu items
 - [ ] Analytics (Dashboard, Heatmap, Reports): Briefing cards, tactical colors on charts
 - [ ] Tab bar: Amber active, monospace labels, status dots (red pulse on Alerts, amber on Devices, green on AI)
-- [ ] Contrast: Verify `textTertiary` (#706e60) is legible on backgrounds
+- [ ] Contrast: Verify `textTertiary` (#8a887a) is legible on backgrounds
 
 **Step 3: Fix any visual issues found**
 

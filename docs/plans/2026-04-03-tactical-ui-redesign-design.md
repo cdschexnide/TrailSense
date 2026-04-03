@@ -26,16 +26,18 @@ Light mode is removed. Single dark tactical theme app-wide.
 | `accentWarning` | `#f59e0b` | High-priority, amber warnings |
 | `textPrimary` | `#e8e8e0` | Primary text |
 | `textSecondary` | `#a8a898` | Secondary/descriptive text |
-| `textTertiary` | `#706e60` | Hints, placeholders, disabled |
+| `textTertiary` | `#8a887a` | Hints, placeholders, disabled |
 
 ### Severity Colors
 
-| Level | Text/Border | Background |
-|-------|-------------|------------|
-| Critical | `#ef4444` | `#3a1a1a` |
-| High | `#f59e0b` | `#3a2a1a` |
-| Medium | `#fbbf24` | `#2a2a1a` |
-| Low | `#4ade80` | `#1a2a1a` |
+| Level | Text (on severity bg) | Border | Background |
+|-------|-----------------------|--------|------------|
+| Critical | `#f87171` | `#ef4444` | `#3a1a1a` |
+| High | `#fbbf24` | `#f59e0b` | `#3a2a1a` |
+| Medium | `#fcd34d` | `#fbbf24` | `#2a2a1a` |
+| Low | `#86efac` | `#4ade80` | `#1a2a1a` |
+
+Text colors are lightened variants of the border color to meet WCAG AA (4.5:1) contrast against their severity backgrounds at 10pt sizes. Border/standalone usage keeps the original saturated color.
 
 ### Interactive States
 
@@ -139,14 +141,14 @@ Three tiers based on content importance:
 
 - **Background:** `surface` (`#1a1a14`) with top border (`#2a2a1a`)
 - **Active tab:** Amber `#fbbf24` icon + monospace uppercase label (10pt)
-- **Inactive tab:** `textTertiary` (`#706e60`) icon + label
+- **Inactive tab:** `textTertiary` (`#8a887a`) icon + label
 - **Labels:** Monospace, uppercase, 10pt
 
 ### Status Dots
 Small (6px) colored dots overlaid on tab icons:
 - **Alerts tab:** Red dot when unreviewed critical alerts exist
 - **Devices tab:** Amber dot when any sensor is offline
-- **AI tab:** Green dot when AI has an unread insight
+- **AI tab:** Green dot when AI service is available (LLM feature flag enabled)
 - Critical-state dots pulse subtly (opacity animation 0.4 → 1.0, 2s cycle)
 
 ---
