@@ -121,6 +121,27 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       setIsGenerating(generating);
     };
 
+    // Auto-initialize if runtime is available. If the model is already
+    // downloaded this completes instantly; otherwise it starts the download
+    // in the background so the user doesn't have to tap "Enable" every
+    // cold start.
+    if (
+      FEATURE_FLAGS.LLM_ENABLED &&
+      !FEATURE_FLAGS.LLM_MOCK_MODE &&
+      getAvailability()
+    ) {
+      llmLogger.info('Auto-initializing LLM on mount');
+      llmService
+        .initialize()
+        .then(() => {
+          setIsReady(true);
+          llmLogger.info('LLM auto-initialized successfully');
+        })
+        .catch(err => {
+          llmLogger.warn('LLM auto-init failed (user can retry manually)', err);
+        });
+    }
+
     // Cleanup on unmount
     return () => {
       modelManager.onTokenReceived = undefined;
@@ -330,7 +351,8 @@ export const AIProvider: React.FC<AIProviderProps> = ({
       isGenerating,
       downloadProgress,
       platformSupported:
-        FEATURE_FLAGS.LLM_MOCK_MODE || modelManager.isPlatformVersionSupported(),
+        FEATURE_FLAGS.LLM_MOCK_MODE ||
+        modelManager.isPlatformVersionSupported(),
     }),
     [isAvailable, isReady, isEnabling, isGenerating, downloadProgress]
   );

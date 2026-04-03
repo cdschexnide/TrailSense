@@ -28,11 +28,16 @@ import { llmLogger } from '@/utils/llmLogger';
 if (Platform.OS === 'android' || Platform.OS === 'ios') {
   try {
     const { initExecutorch } = require('react-native-executorch');
-    const { ExpoResourceFetcher } = require('react-native-executorch-expo-resource-fetcher');
+    const {
+      ExpoResourceFetcher,
+    } = require('react-native-executorch-expo-resource-fetcher');
     initExecutorch({ resourceFetcher: ExpoResourceFetcher });
-    llmLogger.info('react-native-executorch initialized with Expo resource fetcher', {
-      platform: Platform.OS,
-    });
+    llmLogger.info(
+      'react-native-executorch initialized with Expo resource fetcher',
+      {
+        platform: Platform.OS,
+      }
+    );
   } catch (error) {
     llmLogger.warn('Failed to initialize react-native-executorch', error);
   }
@@ -57,6 +62,11 @@ export default function App() {
       if (isDemoMode()) {
         llmLogger.info('Persisted demo session detected');
         applyDemoModeConfig(queryClient);
+        try {
+          await seedMockData({ queryClient, store });
+        } catch (error) {
+          console.error('[App] Failed to seed mock data on demo restore:', error);
+        }
         websocketService.connect('mock-token-for-testing');
         if (mounted) {
           setIsMockDataReady(true);
