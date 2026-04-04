@@ -20,7 +20,9 @@ The backend Prisma schema defines `confidence Int` (0-100). All mobile code must
 
 `fingerprintHash` is the canonical visitor identifier everywhere that consumes the `Alert` type: alert UI, alert services, blocked devices, known devices, analytics, LLM context, AI cards, home screen status.
 
-`TriangulatedPosition` already uses `fingerprintHash` as its primary key with an optional `macAddress`. Replay/radar types (`BucketEntry` in `replay.ts`) carry both `fingerprintHash` and `macAddress`. The replay system joins alerts to positions via `fingerprintHash` (already present on `BucketEntry`). The `macAddress` field on replay/position types stays as an optional secondary field for backwards compat with any existing persisted data — but all UI display and navigation shifts to `fingerprintHash`.
+`TriangulatedPosition` already uses `fingerprintHash` as its primary key with an optional `macAddress`. The optional `macAddress` on `TriangulatedPosition` stays for backwards compat with any existing persisted position data — this is the ONLY type that retains it.
+
+`BucketEntry` in `replay.ts` is ephemeral (derived at runtime from positions). It currently carries both `fingerprintHash` and `macAddress`. Since it's not persisted, the `macAddress` field is removed — `BucketEntry` uses `fingerprintHash` only. All replay UI display and navigation uses `fingerprintHash`.
 
 ### 3. Proximity Semantics: confidence and accuracy are separate concepts
 
@@ -181,9 +183,10 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 - "MAC Address" → "Fingerprint ID" showing `fingerprintHash`
 - Navigation to DeviceFingerprintScreen passes `fingerprintHash`
 
-**Header/Hero:**
-- RSSI in hero metrics → `confidence` percentage
-- Proximity label → derived from `accuracyMeters`
+**Header/Hero metrics array (3 items):**
+1. `confidence` as percentage (e.g. "85%")
+2. Proximity label derived from `accuracyMeters` via `interpretAccuracy()` (e.g. "Close") — NOT from confidence
+3. Device name or device ID fallback
 
 ### AlertListScreen
 - Search matches `fingerprintHash` instead of `macAddress`
@@ -289,4 +292,14 @@ interface AlertDTO {
 
 The `toAlertDTO` mapper maps `latitude`/`longitude` into the `location` object. Applied in `getAlerts()` and `getAlertById()`. No schema migration needed.
 
-**This task is tracked separately and not part of this workspace's implementation plan.**
+### Additional Backend Coordination Required
+
+The mobile plan also changes API calls in `src/api/analytics.ts` and `src/api/endpoints/knownDevices.ts` to send/receive `fingerprintHash` instead of `macAddress`. This creates backend contract dependencies beyond the alerts DTO:
+
+1. **Analytics device history:** `GET /analytics/devices/:macAddress` → must accept `:fingerprintHash` as the path param (or be renamed to `/analytics/devices/:fingerprintHash`)
+2. **Analytics top devices:** `GET /api/analytics` response includes `topDetectedDevices[].macAddress` → must return `fingerprintHash` instead
+3. **Known devices (whitelist):** `POST /whitelist` currently accepts `CreateKnownDeviceDTO` with `macAddress` → must accept `fingerprintHash`. Same for `PATCH /whitelist/:id`.
+
+If the backend already handles these via fingerprintHash, no changes needed. If not, these are required backend changes to prevent production contract gaps.
+
+**All backend tasks are tracked separately and not part of this workspace's implementation plan.**

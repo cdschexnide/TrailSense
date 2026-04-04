@@ -379,32 +379,28 @@ git commit -m "refactor: update AlertCard to use confidence, accuracyMeters, fin
 **Files:**
 - Modify: `src/screens/alerts/AlertDetailScreen.tsx`
 
-- [ ] **Step 1: Replace getProximityLabel helper**
+- [ ] **Step 1: Replace getProximityLabel helper with accuracy-based version**
 
+Import `interpretAccuracy` from `@utils/visualEffects`:
 ```typescript
-// Old:
-const getProximityLabel = (rssi: number): string => {
-  if (rssi > -60) return 'Strong';
-  if (rssi > -70) return 'Moderate';
-  return 'Weak';
-};
-// New:
-const getConfidenceLabel = (confidence: number): string => {
-  if (confidence >= 80) return 'High';
-  if (confidence >= 50) return 'Moderate';
-  return 'Low';
-};
+import { interpretAccuracy } from '@utils/visualEffects';
 ```
 
+Remove the old `getProximityLabel` function (lines 46-50) entirely — it is no longer needed. The proximity label now comes from `interpretAccuracy(alert.accuracyMeters).label`.
+
 - [ ] **Step 2: Update heroMetrics**
+
+The hero shows 3 metrics: confidence %, proximity label from accuracy, and device name.
 
 ```typescript
 const heroMetrics = [
   `${alert.confidence}%`,
-  getConfidenceLabel(alert.confidence),
+  interpretAccuracy(alert.accuracyMeters).label,
   deviceName || alert.deviceId,
 ];
 ```
+
+Note: the second metric uses `accuracyMeters` (position accuracy), NOT confidence. These are separate concepts per the design spec.
 
 - [ ] **Step 3: Update Signal section rows**
 
@@ -868,10 +864,13 @@ git commit -m "refactor: update useSecurityContext to use confidence/fingerprint
 - Modify: `src/api/analytics.ts`
 - Modify: `src/hooks/useAnalytics.ts`
 
+**Backend dependency:** These changes assume the backend analytics endpoints accept `fingerprintHash`. If the backend still expects `macAddress` in the URL path (`/analytics/devices/:macAddress`) or response shape (`topDetectedDevices[].macAddress`), those backend endpoints must be updated first or simultaneously. See spec Section 7 for the full list.
+
 - [ ] **Step 1: Update analytics API**
 
 In `src/api/analytics.ts`:
-- Line 37: `async getDeviceHistory(fingerprintHash: string)` — update param name and URL path
+- Line 37: `async getDeviceHistory(fingerprintHash: string)` — update param name
+- Line 38: URL path changes to `/analytics/devices/${fingerprintHash}`
 - Update `getTopDevices` return type: `macAddress` → `fingerprintHash`
 
 - [ ] **Step 2: Update useAnalytics hook**
@@ -956,6 +955,8 @@ git commit -m "refactor: update replay/radar to use fingerprintHash instead of m
 - Modify: `src/screens/settings/AddKnownDeviceScreen.tsx`
 - Modify: `src/screens/settings/KnownDevicesScreen.tsx`
 - Modify: `src/components/molecules/KnownDeviceItem/KnownDeviceItem.tsx`
+
+**Backend dependency:** `AddKnownDeviceScreen` submits `CreateKnownDeviceDTO` via `POST /whitelist`. If the backend whitelist endpoint still expects `macAddress` in the request body, it must be updated to accept `fingerprintHash`. See spec Section 7.
 
 - [ ] **Step 1: Update AddKnownDeviceScreen**
 
