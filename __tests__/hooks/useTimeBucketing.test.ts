@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react-native';
 import { Alert } from '@/types/alert';
-import { TriangulatedPosition } from '@/types/triangulation';
+import { ReplayPosition } from '@/types/triangulation';
 import { useTimeBucketing } from '@hooks/useTimeBucketing';
 
 const PROPERTY_CENTER = { latitude: 31.530757, longitude: -110.287842 };
@@ -9,7 +9,7 @@ function makePosition(
   hour: number,
   minute: number,
   hash = 'fp-test'
-): TriangulatedPosition {
+): ReplayPosition {
   const timestamp = new Date();
   timestamp.setHours(hour, minute, 0, 0);
 
@@ -23,7 +23,7 @@ function makePosition(
     accuracyMeters: 15,
     confidence: 80,
     measurementCount: 4,
-    updatedAt: timestamp.toISOString(),
+    observedAt: timestamp.toISOString(),
   };
 }
 

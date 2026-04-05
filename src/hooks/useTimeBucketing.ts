@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { Alert } from '@/types/alert';
 import { BucketEntry, TimeBucketedPositions } from '@/types/replay';
-import { TriangulatedPosition } from '@/types/triangulation';
+import { ReplayPosition } from '@/types/triangulation';
 import { useRadarProjection } from './useRadarProjection';
 
 interface UseTimeBucketingOptions {
-  positions: TriangulatedPosition[];
+  positions: ReplayPosition[];
   alerts: Alert[];
   propertyCenter: { latitude: number; longitude: number };
   canvasSize: number;
@@ -21,7 +21,7 @@ function mapSignalType(signalType: string): BucketEntry['signalType'] {
 }
 
 function findMatchingAlert(
-  position: TriangulatedPosition,
+  position: ReplayPosition,
   alerts: Alert[],
   positionTimeMs: number
 ) {
@@ -86,11 +86,11 @@ export function useTimeBucketing({
       return { startTime: midnight.getTime(), buckets };
     }
 
-    const firstDate = new Date(positions[0].updatedAt);
+    const firstDate = new Date(positions[0].observedAt);
     firstDate.setHours(0, 0, 0, 0);
 
     for (const position of positions) {
-      const timestamp = new Date(position.updatedAt);
+      const timestamp = new Date(position.observedAt);
       const minuteIndex = timestamp.getHours() * 60 + timestamp.getMinutes();
       const { x, y } = project(position.latitude, position.longitude);
       const matchingAlert = findMatchingAlert(

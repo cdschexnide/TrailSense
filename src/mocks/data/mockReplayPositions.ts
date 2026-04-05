@@ -1,6 +1,6 @@
 import { Alert, DetectionType, ThreatLevel } from '@/types/alert';
 import {
-  TriangulatedPosition,
+  ReplayPosition,
   TriangulationSignalType,
 } from '@/types/triangulation';
 
@@ -34,7 +34,7 @@ type ScenarioDefinition = {
 };
 
 export interface ReplayData {
-  positions: TriangulatedPosition[];
+  positions: ReplayPosition[];
   alerts: Alert[];
 }
 
@@ -152,7 +152,7 @@ const SCENARIOS: ScenarioDefinition[] = [
 ];
 
 export function generateReplayData(date?: Date): ReplayData {
-  const positions: TriangulatedPosition[] = [];
+  const positions: ReplayPosition[] = [];
   const alerts: Alert[] = [];
   const baseDate = createBaseDate(date);
   let alertIndex = 0;
@@ -192,7 +192,7 @@ export function generateReplayData(date?: Date): ReplayData {
           accuracyMeters,
           confidence,
           measurementCount: 4 + (step % 3),
-          updatedAt: timestamp,
+          observedAt: timestamp,
         });
 
         alerts.push(
@@ -208,13 +208,13 @@ export function generateReplayData(date?: Date): ReplayData {
     }
   }
 
-  positions.sort((a, b) => a.updatedAt.localeCompare(b.updatedAt));
+  positions.sort((a, b) => a.observedAt.localeCompare(b.observedAt));
   alerts.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
   return { positions, alerts };
 }
 
-export function generateReplayPositions(date?: Date): TriangulatedPosition[] {
+export function generateReplayPositions(date?: Date): ReplayPosition[] {
   return generateReplayData(date).positions;
 }
 

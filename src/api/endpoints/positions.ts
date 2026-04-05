@@ -5,10 +5,14 @@
  */
 
 import { apiClient } from '../client';
-import { TriangulatedPosition } from '../../types/triangulation';
+import { ReplayPosition, TriangulatedPosition } from '../../types/triangulation';
 
 export interface PositionsResponse {
   positions: TriangulatedPosition[];
+}
+
+export interface ReplayPositionsResponse {
+  positions: ReplayPosition[];
 }
 
 /**
@@ -32,9 +36,9 @@ export const getReplayPositions = async (
   deviceId: string,
   from: string,
   to: string
-): Promise<PositionsResponse> => {
+): Promise<ReplayPositionsResponse> => {
   const params = new URLSearchParams({ deviceId, from, to });
-  const response = await apiClient.get<PositionsResponse>(
+  const response = await apiClient.get<ReplayPositionsResponse>(
     `/api/positions/history?${params.toString()}`
   );
   return response.data;

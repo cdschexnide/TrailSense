@@ -20,6 +20,19 @@ export interface TriangulatedPosition {
   updatedAt: string;
 }
 
+export interface ReplayPosition {
+  id: string;
+  deviceId: string;
+  fingerprintHash: string;
+  signalType: TriangulationSignalType;
+  latitude: number;
+  longitude: number;
+  accuracyMeters: number;
+  confidence: number;
+  measurementCount: number;
+  observedAt: string;
+}
+
 export interface TriangulatedMarker {
   id: string;
   coordinate: {
