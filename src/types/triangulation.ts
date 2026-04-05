@@ -6,30 +6,24 @@
 
 export type TriangulationSignalType = 'wifi' | 'bluetooth' | 'cellular';
 
-export interface TriangulatedPosition {
+interface BasePosition {
   id: string;
   deviceId: string;
   fingerprintHash: string;
-  macAddress?: string;
   signalType: TriangulationSignalType;
   latitude: number;
   longitude: number;
   accuracyMeters: number;
   confidence: number;
   measurementCount: number;
+}
+
+export interface TriangulatedPosition extends BasePosition {
+  macAddress?: string;
   updatedAt: string;
 }
 
-export interface ReplayPosition {
-  id: string;
-  deviceId: string;
-  fingerprintHash: string;
-  signalType: TriangulationSignalType;
-  latitude: number;
-  longitude: number;
-  accuracyMeters: number;
-  confidence: number;
-  measurementCount: number;
+export interface ReplayPosition extends BasePosition {
   observedAt: string;
 }
 
