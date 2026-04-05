@@ -21,8 +21,8 @@ import { ToastProvider } from '@components/templates';
 import { initDemoMode, isDemoMode } from '@/config/demoMode';
 import { applyDemoModeConfig } from '@/config/demoModeRuntime';
 import { setMockAdapterQueryClient } from '@api/client';
-import { useAuth } from '@hooks/useAuth';
 import { llmLogger } from '@/utils/llmLogger';
+import { AuthLifecycle } from '@components/AuthLifecycle';
 
 // Initialize react-native-executorch with Expo resource fetcher adapter
 if (Platform.OS === 'android' || Platform.OS === 'ios') {
@@ -67,7 +67,6 @@ export default function App() {
         } catch (error) {
           console.error('[App] Failed to seed mock data on demo restore:', error);
         }
-        websocketService.connect('mock-token-for-testing');
         if (mounted) {
           setIsMockDataReady(true);
         }
@@ -82,7 +81,6 @@ export default function App() {
             return;
           }
           llmLogger.info('Initializing mock WebSocket');
-          websocketService.connect('mock-token-for-testing');
         } catch (error) {
           console.error('[App] Failed to seed mock data:', error);
         } finally {
@@ -158,11 +156,6 @@ export default function App() {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
-}
-
-function AuthLifecycle() {
-  useAuth();
-  return null;
 }
 
 const styles = StyleSheet.create({
