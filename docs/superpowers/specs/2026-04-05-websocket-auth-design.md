@@ -9,33 +9,42 @@ In real (non-mock) mode the mobile app never establishes an authenticated WebSoc
 
 ## Solution
 
-Wire `useWebSocket` into the existing `AuthLifecycle` component in `App.tsx`, passing the access token from Redux auth state. No new files, no new abstractions, no backend changes.
+Extract `AuthLifecycle` from `App.tsx` into its own file (`src/components/AuthLifecycle.tsx`) and wire `useWebSocket` into it, passing the access token from Redux auth state. Also remove the now-redundant `websocketService.connect('mock-token-for-testing')` calls from `App.tsx` — `useWebSocket` handles connection in both real and mock mode since `seedMockData` always populates Redux auth tokens with `mockAuthTokens`. No backend changes.
 
 ## Architecture
 
-### Change — `TrailSense/src/App.tsx`
-
-`AuthLifecycle` gains one additional hook call:
+### New file — `src/components/AuthLifecycle.tsx`
 
 ```tsx
-function AuthLifecycle() {
-  const auth = useAuth();
+import { useAuth } from '@hooks/useAuth';
+import { useAppSelector } from '@store/index';
+import { useWebSocket } from '@hooks/useWebSocket';
+
+export function AuthLifecycle() {
+  useAuth();
   const token = useAppSelector(state => state.auth.tokens?.accessToken ?? null);
   useWebSocket(token);
   return null;
 }
 ```
 
-`AuthLifecycle` is already rendered inside both `ReduxProvider` and `QueryClientProvider` for the full app lifetime, making it the correct integration point.
+### Changes to `src/App.tsx`
 
-Note: `App.tsx` will need `useAppSelector` imported from `@store/index` and `useWebSocket` imported from `@hooks/useWebSocket`.
+1. Replace the inline `function AuthLifecycle()` with an import from `src/components/AuthLifecycle`
+2. Remove both `websocketService.connect('mock-token-for-testing')` calls in the mock/demo branches of `initializeApp` — `useWebSocket` now handles connection once `AuthLifecycle` mounts
 
-### No changes required
+### No changes required elsewhere
 
-- `src/hooks/useWebSocket.ts` — already correct, no changes
-- `src/api/websocket.ts` — already correct, no changes
-- `trailsense-backend/` — already correct, no changes
-- `src/screens/radar/ProximityHeatmapScreen.tsx` — already listens to `positions-updated` via `websocketService.on`; works once socket is connected
+- `src/hooks/useWebSocket.ts` — already correct
+- `src/api/websocket.ts` — already correct
+- `trailsense-backend/` — already correct
+- `src/screens/radar/ProximityHeatmapScreen.tsx` — already listens to `positions-updated` via `websocketService.on`; works once socket is connected (see Double Handler note below)
+
+## Structural Constraints
+
+**`AuthLifecycle` must remain inside `PersistGate` in the component tree.** `PersistGate` delays rendering until redux-persist finishes rehydrating AsyncStorage. If `AuthLifecycle` is placed above `PersistGate`, it mounts with `tokens = null`, `useWebSocket(null)` no-ops, and no WebSocket connection is made on app resume even though valid persisted tokens exist.
+
+**`AuthLifecycle` must remain inside `QueryClientProvider`.** `useWebSocket` calls `useQueryClient()` internally. Rendering it above the provider throws: `"No QueryClient set, use QueryClientProvider to set one"`.
 
 ## Data Flow
 
@@ -54,7 +63,7 @@ backend ingestion pipeline
   → socket.io emits 'positions-updated'
   → websocketService listener fires
   → useWebSocket handlePositionsUpdated()
-  → queryClient.invalidateQueries([POSITIONS_QUERY_KEY, deviceId])
+  → queryClient.invalidateQueries([POSITIONS_QUERY_KEY, data.deviceId])
   → ProximityHeatmapScreen refetches live data
 ```
 
@@ -65,8 +74,28 @@ backend ingestion pipeline
 | App launch, not logged in | `null` | No connection — `useWebSocket` returns early |
 | After login | `accessToken` string | Connected with JWT |
 | Token refresh (`setCredentials`) | New `accessToken` string | Old socket disconnected, new socket connected |
-| Logout | `null` (after `logout.fulfilled`) | Disconnected by both `authSlice` and hook cleanup |
-| Demo/mock mode | `null` in Redux | `useWebSocket(null)` is a no-op; mock socket already connected by `App.tsx` before `AuthLifecycle` renders |
+| Logout | `null` (after `logout.fulfilled`) | Disconnected by `authSlice` cleanup AND hook cleanup (both are safe — `disconnect()` is idempotent) |
+| Demo/mock mode | `mockAuthTokens.accessToken` (set by `seedMockData`) | `useWebSocket(token)` connects; previously `App.tsx` also called `connect()` first — those calls are removed as part of this change |
+| App resume | Rehydrated `accessToken` (via `PersistGate`) | `useWebSocket(token)` connects after `PersistGate` finishes rehydration |
+
+## Disconnect Call Sites
+
+There are three places that call `websocketService.disconnect()`:
+
+1. `authSlice` `logout` thunk — explicit disconnect on user logout
+2. `useWebSocket` cleanup (via `AuthLifecycle` unmount) — React effect cleanup fires when `token` changes or component unmounts
+3. `App.tsx` `initializeApp` useEffect cleanup — fires on App component unmount (app exit)
+
+All three are safe because `WebSocketService.disconnect()` is idempotent: in real mode it checks `if (this.socket)` before disconnecting; in mock mode `MockWebSocketService.disconnect()` checks `if (!this.isConnected) return`.
+
+## Double Event Handler Note
+
+After this change, `positions-updated` has two independent handlers:
+
+1. **`useWebSocket`** (app-level, always active when authenticated): unconditionally invalidates `[POSITIONS_QUERY_KEY, data.deviceId]`
+2. **`ProximityHeatmapScreen`** (screen-level, active only when radar screen is mounted): invalidates the same key but only if `data.deviceId === selectedDevice?.id`
+
+When both are active (radar screen open), React Query receives two invalidations for the same key per event. React Query deduplicates in-flight requests, so this is functionally correct but redundant. The screen-level handler is intentionally left in place as a belt-and-suspenders fallback for cases where the app-level handler might not be connected (e.g., during initial authentication race).
 
 ## Event Handling (existing, unchanged)
 
@@ -80,10 +109,9 @@ All three events are handled by `useWebSocket`:
 
 - `useWebSocket` unit tests already exist (confirmed by coverage report)
 - `ProximityHeatmapScreen` replay tests already cover the `positions-updated` handler
-- **New test:** `AuthLifecycle` integration test — verify `websocketService.connect` is called when Redux auth state transitions from unauthenticated → authenticated, and is not called when `tokens` is null
+- **New test:** `__tests__/components/AuthLifecycle.test.tsx` — verify `useWebSocket` is called with `null` when `auth.tokens` is null, and with the access token string when `auth.tokens` is populated
 
 ## Scope
 
-- Frontend: 1 file changed (`src/App.tsx`), ~4 lines
+- Frontend: 2 files changed (`src/App.tsx` modifications, import cleanup), 1 new file (`src/components/AuthLifecycle.tsx`)
 - Backend: 0 changes
-- New files: 0
