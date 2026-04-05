@@ -8,14 +8,14 @@ import { useTheme } from '@hooks/useTheme';
 
 interface KnownDeviceItemProps {
   name: string;
-  macAddress: string;
+  fingerprintHash: string;
   category: string;
   onDelete: () => void;
 }
 
 export const KnownDeviceItem: React.FC<KnownDeviceItemProps> = ({
   name,
-  macAddress,
+  fingerprintHash,
   category,
   onDelete,
 }) => {
@@ -26,7 +26,7 @@ export const KnownDeviceItem: React.FC<KnownDeviceItemProps> = ({
     <SwipeableRow rightActions={[swipeActions.delete(onDelete)]}>
       <ListRow
         title={name}
-        subtitle={macAddress}
+        subtitle={fingerprintHash}
         rightText={category}
         accessoryType="none"
       />

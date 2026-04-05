@@ -17,7 +17,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
           HomeTab: {
             screens: {
               PropertyCommandCenter: 'home',
-              DeviceFingerprint: 'home/fingerprint/:macAddress',
+              DeviceFingerprint: 'home/fingerprint/:fingerprintHash',
             },
           },
           AlertsTab: {
@@ -25,7 +25,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               AlertList: 'alerts',
               AlertDetail: 'alerts/:alertId',
               AlertFilter: 'alerts/filter',
-              DeviceFingerprint: 'alerts/fingerprint/:macAddress',
+              DeviceFingerprint: 'alerts/fingerprint/:fingerprintHash',
             },
           },
           AITab: {
@@ -37,7 +37,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
             screens: {
               LiveRadar: 'radar',
               RadarSettings: 'radar/settings',
-              DeviceFingerprint: 'radar/fingerprint/:macAddress',
+              DeviceFingerprint: 'radar/fingerprint/:fingerprintHash',
             },
           },
           DevicesTab: {
@@ -45,7 +45,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               DeviceList: 'devices',
               DeviceDetail: 'devices/:deviceId',
               AddDevice: 'devices/add',
-              DeviceFingerprint: 'devices/fingerprint/:macAddress',
+              DeviceFingerprint: 'devices/fingerprint/:fingerprintHash',
             },
           },
           MoreTab: {
@@ -65,7 +65,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               QuietHours: 'settings/quiet-hours',
               VacationMode: 'settings/vacation-mode',
               AddKnownDevice: 'settings/known-devices/add',
-              DeviceFingerprint: 'more/fingerprint/:macAddress',
+              DeviceFingerprint: 'more/fingerprint/:fingerprintHash',
             },
           },
         },

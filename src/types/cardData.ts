@@ -40,7 +40,7 @@ export interface SitrepData {
 export interface PatternData {
   type: 'pattern_query';
   visitors: {
-    mac: string;
+    fingerprint: string;
     count: number;
     classification: 'ROUTINE' | 'SUSPICIOUS' | 'UNKNOWN';
     detectionType: string;

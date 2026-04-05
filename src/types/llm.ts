@@ -81,7 +81,8 @@ export interface AlertContext {
   alert: Partial<Alert> & {
     detection_type?: string;
     threat_level?: string;
-    mac_address?: string;
+    fingerprint_hash?: string;
+    accuracy_meters?: number;
     metadata?: Record<string, unknown>;
     trend?: string;
     zone?: string;
@@ -130,7 +131,7 @@ export interface PatternAnalysis {
 
 export interface DeviceContext {
   device: Partial<Device> & {
-    mac_address?: string;
+    fingerprint_hash?: string;
     first_seen?: string;
     metadata?: {
       ssid?: string;

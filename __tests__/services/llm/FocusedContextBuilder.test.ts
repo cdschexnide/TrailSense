@@ -34,8 +34,9 @@ const alerts: Alert[] = [
     timestamp: '2026-04-02T10:00:00Z',
     threatLevel: 'critical',
     detectionType: 'cellular',
-    rssi: -58,
-    macAddress: 'AA:BB:CC:11:22:33',
+    fingerprintHash: 'c_aabbcc112233',
+    confidence: 85,
+    accuracyMeters: 4.2,
     isReviewed: false,
     isFalsePositive: false,
   },
@@ -45,8 +46,9 @@ const alerts: Alert[] = [
     timestamp: '2026-04-01T03:15:00Z',
     threatLevel: 'high',
     detectionType: 'wifi',
-    rssi: -66,
-    macAddress: 'DD:EE:FF:44:55:66',
+    fingerprintHash: 'w_ddeeff445566',
+    confidence: 72,
+    accuracyMeters: 8.5,
     isReviewed: true,
     isFalsePositive: false,
   },
@@ -56,8 +58,9 @@ const alerts: Alert[] = [
     timestamp: '2026-03-20T03:15:00Z',
     threatLevel: 'low',
     detectionType: 'bluetooth',
-    rssi: -79,
-    macAddress: 'AA:BB:CC:11:22:33',
+    fingerprintHash: 'c_aabbcc112233',
+    confidence: 60,
+    accuracyMeters: 22.0,
     isReviewed: false,
     isFalsePositive: false,
   },
@@ -114,7 +117,7 @@ describe('FocusedContextBuilder', () => {
     );
 
     expect(result).toContain('REPEAT VISITORS');
-    expect(result).toContain('AA:BB:CC:XX:XX:XX');
+    expect(result).toContain('c_aabbcc112233');
   });
 
   it('builds time context with hourly breakdown', () => {

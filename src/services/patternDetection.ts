@@ -15,10 +15,10 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function computeVisitPattern(
   allAlerts: Alert[],
-  macAddress: string
+  fingerprintHash: string
 ): VisitPattern {
   const deviceAlerts = allAlerts
-    .filter(alert => alert.macAddress === macAddress)
+    .filter(alert => alert.fingerprintHash === fingerprintHash)
     .sort(
       (a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()

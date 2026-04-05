@@ -31,7 +31,7 @@ const DOT_RADII: Record<ThreatLevel, number> = {
 interface ReplayRadarDisplayProps {
   currentMinute: number;
   positions: TimeBucketedPositions;
-  onDotTap?: (macAddress: string) => void;
+  onDotTap?: (fingerprintHash: string) => void;
   onEmptyTap?: () => void;
   style?: ViewStyle;
 }
@@ -77,14 +77,14 @@ export const ReplayRadarDisplay: React.FC<ReplayRadarDisplayProps> = ({
   const handleTap = useCallback(
     (x: number, y: number) => {
       for (const dot of visibleDots) {
-        if (!dot.macAddress) {
+        if (!dot.fingerprintHash) {
           continue;
         }
 
         const dx = x - dot.x;
         const dy = y - dot.y;
         if (dx * dx + dy * dy <= HIT_RADIUS * HIT_RADIUS) {
-          onDotTap?.(dot.macAddress);
+          onDotTap?.(dot.fingerprintHash);
           return;
         }
       }

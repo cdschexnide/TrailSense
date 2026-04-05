@@ -34,8 +34,10 @@ export const analyticsApi = {
     return response.data;
   },
 
-  async getDeviceHistory(macAddress: string): Promise<DeviceFingerprint> {
-    const response = await apiClient.get(`/analytics/devices/${macAddress}`);
+  async getDeviceHistory(fingerprintHash: string): Promise<DeviceFingerprint> {
+    const response = await apiClient.get(
+      `/analytics/devices/${fingerprintHash}`
+    );
     return response.data;
   },
 
@@ -99,7 +101,7 @@ export const analyticsApi = {
     period?: 'day' | 'week' | 'month';
   }): Promise<
     Array<{
-      macAddress: string;
+      fingerprintHash: string;
       visits: number;
       lastSeen: string;
       threatLevel: 'low' | 'medium' | 'high' | 'critical';

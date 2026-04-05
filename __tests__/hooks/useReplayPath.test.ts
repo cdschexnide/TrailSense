@@ -5,13 +5,12 @@ import { BucketEntry } from '@/types/replay';
 function makeEntry(overrides: Partial<BucketEntry> = {}): BucketEntry {
   return {
     fingerprintHash: 'fp-test',
-    macAddress: 'AA:BB:CC:DD:EE:01',
     x: 100,
     y: 100,
     latitude: 30.396,
     longitude: -94.317,
     threatLevel: 'medium',
-    confidence: 0.7,
+    confidence: 70,
     signalType: 'cellular',
     ...overrides,
   };
@@ -46,12 +45,12 @@ describe('useReplayPath', () => {
 
   it('suppresses future-only devices (first waypoint after effectiveTime)', () => {
     const deviceA = makeEntry({
-      macAddress: 'AA:AA:AA:AA:AA:AA',
+      fingerprintHash: 'c_aaaaaaaa',
       latitude: 30.0,
       longitude: -94.0,
     });
     const deviceB = makeEntry({
-      macAddress: 'BB:BB:BB:BB:BB:BB',
+      fingerprintHash: 'c_bbbbbbbb',
       latitude: 31.0,
       longitude: -95.0,
     });
@@ -67,9 +66,11 @@ describe('useReplayPath', () => {
 
     // deviceA should appear (first waypoint at 100 <= 100.5)
     // deviceB should NOT appear (first waypoint at 101 > 100.5)
-    const macs = result.current.interpolatedDevices.map(d => d.macAddress);
-    expect(macs).toContain('AA:AA:AA:AA:AA:AA');
-    expect(macs).not.toContain('BB:BB:BB:BB:BB:BB');
+    const hashes = result.current.interpolatedDevices.map(
+      d => d.fingerprintHash
+    );
+    expect(hashes).toContain('c_aaaaaaaa');
+    expect(hashes).not.toContain('c_bbbbbbbb');
   });
 
   it('includes lookahead so marker moves during current minute', () => {

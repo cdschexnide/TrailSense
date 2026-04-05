@@ -37,7 +37,7 @@ describe('useKnownDevices', () => {
       {
         id: '1',
         name: 'Test Device',
-        macAddress: 'AA:BB:CC:DD:EE:FF',
+        fingerprintHash: 'c_aabbccddeeff',
         category: 'family',
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
@@ -63,7 +63,7 @@ describe('useAddKnownDevice', () => {
     const mockKnownDevice = {
       id: '1',
       name: 'Test Device',
-      macAddress: 'AA:BB:CC:DD:EE:FF',
+      fingerprintHash: 'c_aabbccddeeff',
       category: 'family',
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
@@ -80,7 +80,7 @@ describe('useAddKnownDevice', () => {
     await waitFor(() => {
       result.current.mutate({
         name: 'Test Device',
-        macAddress: 'AA:BB:CC:DD:EE:FF',
+        fingerprintHash: 'c_aabbccddeeff',
         category: 'family',
       });
     });
@@ -89,7 +89,7 @@ describe('useAddKnownDevice', () => {
 
     expect(knownDevicesApi.addKnownDevice).toHaveBeenCalledWith({
       name: 'Test Device',
-      macAddress: 'AA:BB:CC:DD:EE:FF',
+      fingerprintHash: 'c_aabbccddeeff',
       category: 'family',
     });
   });
@@ -120,7 +120,7 @@ describe('useUpdateKnownDevice', () => {
     const mockKnownDevice = {
       id: '1',
       name: 'Updated Device',
-      macAddress: 'AA:BB:CC:DD:EE:FF',
+      fingerprintHash: 'c_aabbccddeeff',
       category: 'family',
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-02T00:00:00Z',

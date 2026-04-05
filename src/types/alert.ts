@@ -10,29 +10,11 @@ export interface AlertMetadata {
   zone?: number;
   distance?: number;
 
-  // WiFi-specific
-  channel?: number;
-
-  // BLE-specific
-  deviceName?: string;
-
-  // WiFi-specific (extended)
-  ssid?: string;
-  vendor?: string;
-
-  // Cellular-specific
-  band?: string;
-  provider?: string;
-  cellularPeak?: number;
-  cellularAvg?: number;
-  cellularDelta?: number;
-  burstCount?: number;
-  clusterIndex?: number;
-
   // Summary-specific fields
-  source?: 'legacy' | 'summary';
+  source?: 'legacy' | 'summary' | 'positions';
   signalCount?: number;
   windowDuration?: number;
+  measurementCount?: number;
 
   // Triangulation-specific fields
   triangulatedPosition?: {
@@ -49,9 +31,9 @@ export interface Alert {
   timestamp: string;
   threatLevel: ThreatLevel;
   detectionType: DetectionType;
-  rssi: number;
-  macAddress: string;
-  cellularStrength?: number;
+  fingerprintHash: string;
+  confidence: number;
+  accuracyMeters: number;
   isReviewed: boolean;
   isFalsePositive: boolean;
   location?: {
@@ -59,13 +41,6 @@ export interface Alert {
     longitude: number;
   };
   metadata?: AlertMetadata;
-  // Additional properties for threat classification
-  wifiDetected?: boolean;
-  bluetoothDetected?: boolean;
-  multiband?: boolean;
-  isStationary?: boolean;
-  seenCount?: number;
-  duration?: number; // Duration in seconds
 }
 
 export interface AlertFilters {
@@ -97,7 +72,7 @@ export interface AnalyticsData {
   detectionTypeDistribution: Array<{ type: string; count: number }>;
   deviceDistribution: Array<{ deviceId: string; count: number }>;
   dailyTrend: Array<{ date: string; count: number }>;
-  topDetectedDevices: Array<{ macAddress: string; count: number }>;
+  topDetectedDevices: Array<{ fingerprintHash: string; count: number }>;
   // Legacy fields for backward compatibility
   totalDetections?: number;
   unknownDevices?: number;
@@ -121,13 +96,13 @@ export interface HeatmapPoint {
 
 export interface DeviceFingerprint {
   id: string;
-  macAddress: string;
+  fingerprintHash: string;
   firstSeen: string;
   lastSeen: string;
   totalVisits: number;
   detections: Array<{
     timestamp: string;
-    rssi: number;
+    confidence: number;
     location?: {
       latitude: number;
       longitude: number;

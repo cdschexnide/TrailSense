@@ -26,7 +26,7 @@ export {
   mockLowAlerts,
   mockMultibandAlerts,
   mockRecentAlerts,
-  PERSONA_MACS,
+  PERSONA_FINGERPRINTS,
 } from './mockAlerts';
 
 // Known devices

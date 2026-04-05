@@ -7,12 +7,15 @@ import {
 import { getFingerprintRepository } from './fingerprintStore';
 
 export class DeviceFingerprintingService {
-  static async trackDevice(macAddress: string, alert: Alert): Promise<void> {
-    const fingerprint = await this.getOrCreateFingerprint(macAddress);
+  static async trackDevice(
+    fingerprintHash: string,
+    alert: Alert
+  ): Promise<void> {
+    const fingerprint = await this.getOrCreateFingerprint(fingerprintHash);
 
     fingerprint.detections.push({
       timestamp: alert.timestamp,
-      rssi: alert.rssi,
+      confidence: alert.confidence,
       location: alert.location,
       type: alert.detectionType,
     });
@@ -30,30 +33,30 @@ export class DeviceFingerprintingService {
   }
 
   static async getDeviceHistory(
-    macAddress: string
+    fingerprintHash: string
   ): Promise<DeviceFingerprint> {
     const repository = getFingerprintRepository();
-    const fingerprint = await repository.findOne({ macAddress });
+    const fingerprint = await repository.findOne({ fingerprintHash });
 
     if (!fingerprint) {
-      throw new Error(`No fingerprint found for device ${macAddress}`);
+      throw new Error(`No fingerprint found for device ${fingerprintHash}`);
     }
 
     return fingerprint;
   }
 
   private static async getOrCreateFingerprint(
-    macAddress: string
+    fingerprintHash: string
   ): Promise<DeviceFingerprint> {
     const repository = getFingerprintRepository();
-    let fingerprint = await repository.findOne({ macAddress });
+    let fingerprint = await repository.findOne({ fingerprintHash });
 
     if (!fingerprint) {
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substr(2, 9);
       fingerprint = {
         id: `fp-${timestamp}-${randomId}`,
-        macAddress,
+        fingerprintHash,
         firstSeen: new Date().toISOString(),
         lastSeen: new Date().toISOString(),
         totalVisits: 0,
@@ -166,9 +169,9 @@ export class DeviceFingerprintingService {
 
   static computeVisitPattern(
     alerts: Alert[],
-    macAddress: string
+    fingerprintHash: string
   ): VisitPattern {
-    return computeVisitPattern(alerts, macAddress);
+    return computeVisitPattern(alerts, fingerprintHash);
   }
 
   static generateInsightText(pattern: VisitPattern): string {

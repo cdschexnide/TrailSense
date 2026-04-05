@@ -36,9 +36,8 @@ describe('generateReplayPositions', () => {
       expect(position.fingerprintHash).toBeDefined();
       expect(position.signalType).toMatch(/wifi|bluetooth|cellular/);
       expect(position.confidence).toBeGreaterThan(0);
-      expect(position.confidence).toBeLessThanOrEqual(1);
+      expect(position.confidence).toBeLessThanOrEqual(100);
       expect(position.updatedAt).toBeDefined();
-      expect(position.macAddress).toBeDefined();
     }
   });
 

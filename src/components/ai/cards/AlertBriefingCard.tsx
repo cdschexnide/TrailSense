@@ -8,8 +8,8 @@ import {
   tacticalSpacing as s,
 } from '@/constants/tacticalTheme';
 import {
-  rssiToZone,
-  formatMac,
+  accuracyToZone,
+  formatFingerprint,
   formatDate,
 } from '@/services/llm/FocusedContextBuilder';
 import { BriefingContainer } from './BriefingContainer';
@@ -110,10 +110,11 @@ export const AlertBriefingCard: React.FC<AlertBriefingCardProps> = ({
           </Text>
           <View style={styles.alertMeta}>
             <Text style={styles.metaText}>
-              {alert.rssi} dBm · {rssiToZone(alert.rssi).split(' ')[0]}
+              {alert.confidence}% ·{' '}
+              {accuracyToZone(alert.accuracyMeters).split(' ')[0]}
             </Text>
             <Text style={styles.metaText}>
-              MAC: {formatMac(alert.macAddress)}
+              Fingerprint: {formatFingerprint(alert.fingerprintHash)}
             </Text>
           </View>
         </View>

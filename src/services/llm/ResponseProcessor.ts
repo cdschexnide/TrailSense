@@ -76,7 +76,7 @@ function buildFallback(
             hour: 'numeric',
             minute: '2-digit',
           });
-          return `${index + 1}. ${alert.detectionType} detection at ${deviceName}, ${time} - signal ${alert.rssi} dBm`;
+          return `${index + 1}. ${alert.detectionType} detection at ${deviceName}, ${time} - confidence ${alert.confidence}% with ~${alert.accuracyMeters.toFixed(1)}m accuracy`;
         })
         .join(' ');
 

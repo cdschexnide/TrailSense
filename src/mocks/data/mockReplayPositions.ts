@@ -19,7 +19,6 @@ type VisitDefinition = {
 type ScenarioDefinition = {
   deviceId: string;
   fingerprintHash: string;
-  macAddress: string;
   signalType: TriangulationSignalType;
   threatLevel: ThreatLevel;
   visits: VisitDefinition[];
@@ -55,7 +54,9 @@ function createBaseDate(date?: Date) {
 function createScenarioAlert(
   scenario: ScenarioDefinition,
   timestamp: string,
-  index: number
+  index: number,
+  accuracyMeters: number,
+  confidence: number
 ): Alert {
   return {
     id: `replay-alert-${scenario.fingerprintHash}-${index}`,
@@ -64,11 +65,22 @@ function createScenarioAlert(
     threatLevel: scenario.threatLevel,
     detectionType:
       scenario.signalType === 'bluetooth' ? 'bluetooth' : scenario.signalType,
-    rssi: -62,
-    macAddress: scenario.macAddress,
+    fingerprintHash: scenario.fingerprintHash,
+    confidence,
+    accuracyMeters,
     isReviewed: false,
     isFalsePositive: false,
     location: { ...PROPERTY_CENTER },
+    metadata: {
+      source: 'positions',
+      measurementCount: 4,
+      signalCount: 2,
+      triangulatedPosition: {
+        ...PROPERTY_CENTER,
+        accuracyMeters,
+        confidence,
+      },
+    },
   };
 }
 
@@ -76,121 +88,66 @@ const SCENARIOS: ScenarioDefinition[] = [
   {
     deviceId: 'device-001',
     fingerprintHash: 'fp-delivery-a1b2c3',
-    macAddress: 'AA:14:1E:28:32:3C',
     signalType: 'cellular',
     threatLevel: 'low',
     visits: [
-      {
-        startHour: 10,
-        startMinute: 15,
-        durationMinutes: 5,
-        positionsPerMinute: 2,
-      },
-      {
-        startHour: 15,
-        startMinute: 30,
-        durationMinutes: 5,
-        positionsPerMinute: 2,
-      },
+      { startHour: 10, startMinute: 15, durationMinutes: 5, positionsPerMinute: 2 },
+      { startHour: 15, startMinute: 30, durationMinutes: 5, positionsPerMinute: 2 },
     ],
-    pointForProgress: progress => {
-      const northMeters = -70 + progress * 55;
-      const eastMeters = 8 * Math.sin(progress * Math.PI);
-      return {
-        northMeters,
-        eastMeters,
-        confidence: 0.72 + progress * 0.18,
-        detectionType: 'cellular',
-      };
-    },
+    pointForProgress: progress => ({
+      northMeters: -70 + progress * 55,
+      eastMeters: 8 * Math.sin(progress * Math.PI),
+      confidence: 72 + progress * 18,
+      detectionType: 'cellular',
+    }),
   },
   {
     deviceId: 'device-001',
     fingerprintHash: 'fp-visitor-d4e5f6',
-    macAddress: 'BB:15:1F:29:33:3D',
     signalType: 'wifi',
     threatLevel: 'medium',
     visits: [
-      {
-        startHour: 8,
-        startMinute: 0,
-        durationMinutes: 3,
-        positionsPerMinute: 2,
-      },
-      {
-        startHour: 12,
-        startMinute: 0,
-        durationMinutes: 3,
-        positionsPerMinute: 2,
-      },
-      {
-        startHour: 18,
-        startMinute: 0,
-        durationMinutes: 3,
-        positionsPerMinute: 2,
-      },
+      { startHour: 8, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
+      { startHour: 12, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
+      { startHour: 18, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
     ],
-    pointForProgress: progress => {
-      const northMeters = 12 - progress * 6;
-      const eastMeters = 85 - progress * 45;
-      return {
-        northMeters,
-        eastMeters,
-        confidence: 0.78,
-        detectionType: 'wifi',
-      };
-    },
+    pointForProgress: progress => ({
+      northMeters: 12 - progress * 6,
+      eastMeters: 85 - progress * 45,
+      confidence: 78,
+      detectionType: 'wifi',
+    }),
   },
   {
     deviceId: 'device-001',
     fingerprintHash: 'fp-loiterer-g7h8i9',
-    macAddress: 'CC:16:20:2A:34:3E',
     signalType: 'bluetooth',
     threatLevel: 'critical',
     visits: [
-      {
-        startHour: 1,
-        startMinute: 30,
-        durationMinutes: 45,
-        positionsPerMinute: 2,
-      },
+      { startHour: 1, startMinute: 30, durationMinutes: 45, positionsPerMinute: 2 },
     ],
-    pointForProgress: (progress, minuteProgress) => {
-      const sweep = Math.sin(progress * Math.PI * 6) * 70;
-      const northMeters = 98 + Math.sin(progress * Math.PI * 3) * 8;
-      const eastMeters = sweep + (minuteProgress - 0.5) * 6;
-      return {
-        northMeters,
-        eastMeters,
-        confidence: 0.9 - Math.abs(minuteProgress - 0.5) * 0.08,
-        detectionType: 'bluetooth',
-      };
-    },
+    pointForProgress: (progress, minuteProgress) => ({
+      northMeters: 98 + Math.sin(progress * Math.PI * 3) * 8,
+      eastMeters:
+        Math.sin(progress * Math.PI * 6) * 70 + (minuteProgress - 0.5) * 6,
+      confidence: 90 - Math.abs(minuteProgress - 0.5) * 8,
+      detectionType: 'bluetooth',
+    }),
   },
   {
     deviceId: 'device-001',
     fingerprintHash: 'fp-vehicle-j0k1l2',
-    macAddress: 'DD:17:21:2B:35:3F',
     signalType: 'cellular',
     threatLevel: 'high',
     visits: [
-      {
-        startHour: 7,
-        startMinute: 45,
-        durationMinutes: 2,
-        positionsPerMinute: 4,
-      },
+      { startHour: 7, startMinute: 45, durationMinutes: 2, positionsPerMinute: 4 },
     ],
-    pointForProgress: progress => {
-      const northMeters = -20 + progress * 6;
-      const eastMeters = -210 + progress * 420;
-      return {
-        northMeters,
-        eastMeters,
-        confidence: 0.64,
-        detectionType: 'cellular',
-      };
-    },
+    pointForProgress: progress => ({
+      northMeters: -20 + progress * 6,
+      eastMeters: -210 + progress * 420,
+      confidence: 64,
+      detectionType: 'cellular',
+    }),
   },
 ];
 
@@ -221,25 +178,32 @@ export function generateReplayData(date?: Date): ReplayData {
           (step % visit.positionsPerMinute) / visit.positionsPerMinute;
         const point = scenario.pointForProgress(visitProgress, minuteProgress);
         const coords = toLatLng(point.northMeters, point.eastMeters);
-
+        const accuracyMeters = 10 + (step % 5) * 2;
+        const confidence = Math.round(Math.min(99, Math.max(55, point.confidence)));
         const timestamp = positionTime.toISOString();
 
         positions.push({
           id: `replay-${scenario.fingerprintHash}-${visit.startHour}-${visit.startMinute}-${step}`,
           deviceId: scenario.deviceId,
           fingerprintHash: scenario.fingerprintHash,
-          macAddress: scenario.macAddress,
           signalType: scenario.signalType,
           latitude: coords.latitude,
           longitude: coords.longitude,
-          accuracyMeters: 10 + (step % 5) * 2,
-          confidence: Math.min(1, Math.max(0.55, point.confidence)),
+          accuracyMeters,
+          confidence,
           measurementCount: 4 + (step % 3),
           updatedAt: timestamp,
         });
 
-        // 1:1 correlated alert per position for authoritative join
-        alerts.push(createScenarioAlert(scenario, timestamp, alertIndex++));
+        alerts.push(
+          createScenarioAlert(
+            scenario,
+            timestamp,
+            alertIndex++,
+            accuracyMeters,
+            confidence
+          )
+        );
       }
     }
   }

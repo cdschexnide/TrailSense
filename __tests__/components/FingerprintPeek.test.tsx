@@ -39,27 +39,25 @@ jest.mock('@expo/vector-icons', () => ({
 
 describe('FingerprintPeek', () => {
   const props = {
-    macAddress: 'AA:BB:CC:DD:EE:FF',
     fingerprintHash: 'fp-test',
-    scrubTimestamp: Date.now(),
     onViewProfile: jest.fn(),
     onDismiss: jest.fn(),
   };
 
-  it('renders the unknown device label and truncated mac', () => {
+  it('renders the unknown device label and fingerprint hash', () => {
     const { getByText } = render(<FingerprintPeek {...props} />);
     expect(getByText('Unknown Device')).toBeTruthy();
-    expect(getByText('AA:BB:CC')).toBeTruthy();
+    expect(getByText('fp-test')).toBeTruthy();
   });
 
-  it('calls onViewProfile with the mac address', () => {
+  it('calls onViewProfile with the fingerprint hash', () => {
     const onViewProfile = jest.fn();
     const { getByText } = render(
       <FingerprintPeek {...props} onViewProfile={onViewProfile} />
     );
 
     fireEvent.press(getByText('View Full Profile'));
-    expect(onViewProfile).toHaveBeenCalledWith('AA:BB:CC:DD:EE:FF');
+    expect(onViewProfile).toHaveBeenCalledWith('fp-test');
   });
 
   it('dismisses through the backdrop', () => {

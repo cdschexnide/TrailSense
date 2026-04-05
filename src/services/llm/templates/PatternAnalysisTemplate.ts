@@ -51,7 +51,10 @@ Your analysis should:
     const { device, detectionHistory, similarDevices } = context;
 
     // Extract device details
-    const macAddress = device.mac_address || 'Unknown';
+    const fingerprintHash =
+      device.fingerprint_hash ||
+      (device as Partial<{ fingerprintHash: string }>).fingerprintHash ||
+      'Unknown';
     const deviceName = this.getDeviceName(device);
     const firstSeen = device.first_seen;
     const totalDetections = detectionHistory.length;
@@ -64,9 +67,9 @@ Your analysis should:
     // Build the user prompt
     const userPrompt = `Analyze this device's detection pattern:
 
-Device ID: ${macAddress}
+Fingerprint ID: ${fingerprintHash}
 Device Name: ${deviceName}
-First Seen: ${this.formatDate(firstSeen)}
+First Seen: ${this.formatDate(firstSeen || new Date().toISOString())}
 Total Detections: ${totalDetections}
 
 Detection Schedule:

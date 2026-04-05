@@ -198,70 +198,32 @@ export const getBatteryBackgroundTint = (percentage: number): string | null => {
 };
 
 // =============================================================================
-// SIGNAL STRENGTH
+// ACCURACY INTERPRETATION
 // =============================================================================
 
-export type SignalStrength = 'excellent' | 'good' | 'fair' | 'poor' | 'none';
-
-/**
- * Get signal strength category from string value
- */
-export const getSignalStrengthCategory = (
-  value: string | undefined
-): SignalStrength => {
-  if (!value) return 'none';
-  const lower = value.toLowerCase();
-  if (lower === 'excellent' || lower === 'strong') return 'excellent';
-  if (lower === 'good') return 'good';
-  if (lower === 'fair' || lower === 'moderate') return 'fair';
-  if (lower === 'poor' || lower === 'weak') return 'poor';
-  return 'none';
-};
-
-/**
- * Get signal strength color
- */
-export const getSignalColor = (strength: SignalStrength): string => {
-  switch (strength) {
-    case 'excellent':
-      return '#30D158';
-    case 'good':
-      return '#30D158';
-    case 'fair':
-      return '#FF9F0A';
-    case 'poor':
-      return '#FF453A';
-    case 'none':
-    default:
-      return '#8E8E93';
-  }
-};
-
-// =============================================================================
-// RSSI INTERPRETATION
-// =============================================================================
-
-export interface RSSIInterpretation {
+export interface AccuracyInterpretation {
   label: string;
   color: string;
   percentage: number; // For progress bar visualization (0-100)
 }
 
 /**
- * Interpret RSSI value into human-readable form
- * RSSI values typically range from -30 (very close) to -100 (far away)
+ * Interpret position accuracy (meters) into human-readable proximity form.
+ * Lower accuracy value = closer/more precise position.
  */
-export const interpretRSSI = (rssi: number): RSSIInterpretation => {
-  if (rssi >= -40) {
+export const interpretAccuracy = (
+  accuracyMeters: number
+): AccuracyInterpretation => {
+  if (accuracyMeters < 5) {
     return { label: 'Very Close', color: '#FF453A', percentage: 95 };
   }
-  if (rssi >= -55) {
+  if (accuracyMeters < 10) {
     return { label: 'Close', color: '#FF9F0A', percentage: 75 };
   }
-  if (rssi >= -70) {
+  if (accuracyMeters < 25) {
     return { label: 'Nearby', color: '#FFCC00', percentage: 55 };
   }
-  if (rssi >= -85) {
+  if (accuracyMeters < 50) {
     return { label: 'Moderate', color: '#30D158', percentage: 35 };
   }
   return { label: 'Distant', color: '#8E8E93', percentage: 15 };

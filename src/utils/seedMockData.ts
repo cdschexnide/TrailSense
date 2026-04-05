@@ -17,7 +17,7 @@ import {
   mockHeatmapPoints,
   mockDeviceFingerprints,
   mockAppSettings,
-  PERSONA_MACS,
+  PERSONA_FINGERPRINTS,
 } from '@/mocks/data';
 import { TriangulatedPosition } from '@/types/triangulation';
 
@@ -39,26 +39,25 @@ function generateMockPositions(
   centerLng: number
 ): { positions: TriangulatedPosition[] } {
   const positions: TriangulatedPosition[] = [];
-  // Use persona MACs for the first 6, then fill remaining with generated ones
+  // Use persona fingerprints for the first positions, then fill remaining with generated ones
   for (let i = 0; i < 8; i++) {
-    const persona = PERSONA_MACS[i];
-    const mac = persona
-      ? persona.macAddress
-      : `AA:BB:CC:DD:${i.toString(16).padStart(2, '0').toUpperCase()}:${deviceId.slice(-2)}`;
+    const persona = PERSONA_FINGERPRINTS[i];
     const signalType = persona
       ? persona.signalType
       : (['wifi', 'bluetooth', 'cellular'] as const)[i % 3];
+    const fingerprintHash = persona
+      ? persona.fingerprintHash
+      : `fp-${deviceId.toLowerCase()}-${i.toString(16).padStart(2, '0')}`;
 
     positions.push({
       id: `pos-${deviceId}-${i}`,
       deviceId,
-      fingerprintHash: `fp-${mac.replace(/:/g, '').slice(-6)}`,
-      macAddress: mac,
+      fingerprintHash,
       signalType,
       latitude: centerLat + (Math.random() - 0.5) * 0.002,
       longitude: centerLng + (Math.random() - 0.5) * 0.002,
       accuracyMeters: 5 + Math.random() * 20,
-      confidence: 0.7 + Math.random() * 0.3,
+      confidence: Math.round(70 + Math.random() * 30),
       measurementCount: 3 + Math.floor(Math.random() * 5),
       updatedAt: new Date(Date.now() - Math.random() * 3600000).toISOString(),
     });
@@ -170,7 +169,7 @@ export const seedMockData = async ({
     // Device history/fingerprints
     mockDeviceFingerprints.forEach(fingerprint => {
       queryClient.setQueryData(
-        [DEVICE_HISTORY_QUERY_KEY, fingerprint.macAddress],
+        [DEVICE_HISTORY_QUERY_KEY, fingerprint.fingerprintHash],
         fingerprint
       );
     });

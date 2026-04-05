@@ -10,13 +10,12 @@ jest.mock('@/config/demoModeRuntime', () => ({
 function makeBuckets() {
   const entry: BucketEntry = {
     fingerprintHash: 'fp-test',
-    macAddress: 'AA:BB:CC:DD:EE:01',
     x: 100,
     y: 100,
     latitude: 30.396,
     longitude: -94.317,
     threatLevel: 'medium',
-    confidence: 0.7,
+    confidence: 70,
     signalType: 'cellular',
   };
 
@@ -137,13 +136,12 @@ describe('useAutoPlay (smooth mode)', () => {
     const buckets = new Map<number, BucketEntry[]>();
     const entry: BucketEntry = {
       fingerprintHash: 'fp-test',
-      macAddress: 'AA:BB:CC:DD:EE:01',
       x: 100,
       y: 100,
       latitude: 30.396,
       longitude: -94.317,
       threatLevel: 'medium',
-      confidence: 0.7,
+      confidence: 70,
       signalType: 'cellular',
     };
     // Fill minutes 0 through 20 so no auto-skip triggers
@@ -178,13 +176,12 @@ describe('useAutoPlay (smooth mode)', () => {
   it('stops at minute 1440', () => {
     const entry: BucketEntry = {
       fingerprintHash: 'fp-test',
-      macAddress: 'AA:BB:CC:DD:EE:01',
       x: 100,
       y: 100,
       latitude: 30.396,
       longitude: -94.317,
       threatLevel: 'medium',
-      confidence: 0.7,
+      confidence: 70,
       signalType: 'cellular',
     };
     const buckets = new Map<number, BucketEntry[]>();

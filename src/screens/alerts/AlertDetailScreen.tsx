@@ -27,7 +27,7 @@ import { AlertsStackParamList } from '@navigation/types';
 import { useAlert } from '@hooks/api/useAlerts';
 import { useDevices } from '@hooks/api/useDevices';
 import { formatTime } from '@utils/dateUtils';
-import { getThreatColor } from '@utils/visualEffects';
+import { getThreatColor, interpretAccuracy } from '@utils/visualEffects';
 import { useTheme } from '@hooks/useTheme';
 import { ThreatLevel } from '@types';
 
@@ -41,12 +41,6 @@ const openInMaps = (latitude: number, longitude: number) => {
   if (url) {
     Linking.openURL(url);
   }
-};
-
-const getProximityLabel = (rssi: number): string => {
-  if (rssi > -60) return 'Strong';
-  if (rssi > -70) return 'Moderate';
-  return 'Weak';
 };
 
 const getPriorityLabel = (threatLevel: ThreatLevel): string => {
@@ -102,11 +96,12 @@ export const AlertDetailScreen = () => {
   const priorityLabel = getPriorityLabel(alert.threatLevel);
   const timeLabel = formatTime(alert.timestamp);
   const threatColor = getThreatColor(alert.threatLevel);
+  const accuracy = interpretAccuracy(alert.accuracyMeters);
 
   // Build metrics for DetailHero
   const heroMetrics = [
-    `${alert.rssi} dBm`,
-    getProximityLabel(alert.rssi),
+    `${alert.confidence}%`,
+    accuracy.label,
     deviceName || alert.deviceId,
   ];
 
@@ -118,47 +113,49 @@ export const AlertDetailScreen = () => {
         <GroupedListRow
           icon="cellular"
           iconColor={colors.systemBlue}
-          title="RSSI"
-          value={`${alert.rssi} dBm`}
+          title="Confidence"
+          value={`${alert.confidence}%`}
         />
         <GroupedListRow
           icon="radio-outline"
           iconColor={colors.systemGreen}
+          title="Estimated Accuracy"
+          value={`~${alert.accuracyMeters.toFixed(1)}m`}
+        />
+        <GroupedListRow
+          icon="locate-outline"
+          iconColor={colors.systemOrange}
           title="Proximity"
-          value={getProximityLabel(alert.rssi)}
+          value={accuracy.label}
         />
       </GroupedListSection>
 
       {/* Device Fingerprint Section */}
       <GroupedListSection title="Device Fingerprint">
-        {alert.macAddress && (
-          <GroupedListRow
-            icon="qr-code-outline"
-            iconColor={colors.systemPurple}
-            title="MAC Address"
-            value={alert.macAddress}
-          />
-        )}
+        <GroupedListRow
+          icon="qr-code-outline"
+          iconColor={colors.systemPurple}
+          title="Fingerprint ID"
+          value={alert.fingerprintHash}
+        />
         <GroupedListRow
           icon="finger-print-outline"
           iconColor={colors.systemIndigo}
           title="Detection Type"
           value={capitalizeDetectionType(alert.detectionType)}
         />
-        {alert.macAddress && (
-          <GroupedListRow
-            icon="analytics-outline"
-            iconColor={colors.systemBlue}
-            title="Open fingerprint"
-            subtitle="View visits, patterns, and actions"
-            showChevron
-            onPress={() =>
-              (navigation as any).navigate('DeviceFingerprint', {
-                macAddress: alert.macAddress,
-              })
-            }
-          />
-        )}
+        <GroupedListRow
+          icon="analytics-outline"
+          iconColor={colors.systemBlue}
+          title="Open fingerprint"
+          subtitle="View visits, patterns, and actions"
+          showChevron
+          onPress={() =>
+            (navigation as any).navigate('DeviceFingerprint', {
+              fingerprintHash: alert.fingerprintHash,
+            })
+          }
+        />
       </GroupedListSection>
 
       {/* Summary Details Section (if from summary source) */}
@@ -224,16 +221,16 @@ export const AlertDetailScreen = () => {
               </View>
             )}
 
-            {alert.metadata.burstCount && (
+            {alert.metadata.measurementCount && (
               <View style={styles.summaryItem}>
                 <Text
                   variant="caption1"
                   style={{ color: colors.secondaryLabel }}
                 >
-                  Bursts
+                  Measurements
                 </Text>
                 <Text variant="title3" weight="semibold" color="label">
-                  {alert.metadata.burstCount}
+                  {alert.metadata.measurementCount}
                 </Text>
               </View>
             )}

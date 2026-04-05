@@ -12,14 +12,14 @@ export function useBlockedDevices() {
   const { showToast } = useToast();
 
   const isBlocked = useCallback(
-    (macAddress: string) => macAddress in blockedDevices,
+    (fingerprintHash: string) => fingerprintHash in blockedDevices,
     [blockedDevices]
   );
 
   const block = useCallback(
-    (macAddress: string, reason?: string) => {
-      dispatch(blockDevice({ macAddress, reason }));
-      logEvent(AnalyticsEvents.DEVICE_BLOCKED, { macAddress });
+    (fingerprintHash: string, reason?: string) => {
+      dispatch(blockDevice({ fingerprintHash, reason }));
+      logEvent(AnalyticsEvents.DEVICE_BLOCKED, { fingerprintHash });
       showToast(
         'Device blocked. Alerts from this device are now hidden.',
         'info'
@@ -29,8 +29,8 @@ export function useBlockedDevices() {
   );
 
   const unblock = useCallback(
-    (macAddress: string) => {
-      dispatch(unblockDevice(macAddress));
+    (fingerprintHash: string) => {
+      dispatch(unblockDevice(fingerprintHash));
       showToast('Device unblocked', 'success');
     },
     [dispatch, showToast]

@@ -187,14 +187,15 @@ export const useSecurityContext = (): SecurityContextData => {
                 a.timestamp || a.createdAt
               ).toLocaleString();
               const deviceName = getDeviceName(a.deviceId);
-              const rssi = a.rssi ? `${a.rssi} dBm` : 'N/A';
-              const mac = a.macAddress || 'N/A';
+              const confidence =
+                typeof a.confidence === 'number' ? `${a.confidence}%` : 'N/A';
+              const fingerprint = a.fingerprintHash || 'N/A';
               const reviewed = a.isReviewed ? 'Reviewed' : 'UNREVIEWED';
               return `${i + 1}. [${a.threatLevel?.toUpperCase() || 'UNKNOWN'}] ${a.detectionType || 'Unknown'} detection
      - Detected by: ${deviceName}
      - Time: ${time}
-     - Signal strength: ${rssi}
-     - MAC: ${mac}
+     - Confidence: ${confidence}
+     - Fingerprint: ${fingerprint}
      - Status: ${reviewed}`;
             })
             .join('\n')

@@ -3,7 +3,7 @@ export type KnownDeviceCategory = 'family' | 'guests' | 'service' | 'other';
 export interface KnownDevice {
   id: string;
   name: string;
-  macAddress: string;
+  fingerprintHash: string;
   category: KnownDeviceCategory;
   notes?: string;
   expiresAt?: string;
@@ -13,7 +13,7 @@ export interface KnownDevice {
 
 export interface CreateKnownDeviceDTO {
   name: string;
-  macAddress: string;
+  fingerprintHash: string;
   category: KnownDeviceCategory;
   notes?: string;
   expiresAt?: string;

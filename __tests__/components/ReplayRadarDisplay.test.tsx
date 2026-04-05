@@ -51,11 +51,10 @@ jest.mock('react-native-gesture-handler', () => ({
 function makeBuckets() {
   const entry: BucketEntry = {
     fingerprintHash: 'fp-test',
-    macAddress: 'AA:BB:CC:DD:EE:01',
     x: 175,
     y: 100,
     threatLevel: 'high',
-    confidence: 0.8,
+    confidence: 80,
     signalType: 'cellular',
   };
 

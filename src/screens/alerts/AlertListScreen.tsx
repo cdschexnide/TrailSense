@@ -98,8 +98,7 @@ export const AlertListScreen = ({ navigation, route }: Props) => {
         (alert: Alert) =>
           alert.detectionType.toLowerCase().includes(search.toLowerCase()) ||
           alert.deviceId.toLowerCase().includes(search.toLowerCase()) ||
-          (alert.macAddress &&
-            alert.macAddress.toLowerCase().includes(search.toLowerCase()))
+          alert.fingerprintHash.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -116,7 +115,9 @@ export const AlertListScreen = ({ navigation, route }: Props) => {
       );
     }
 
-    result = result.filter((alert: Alert) => !isBlocked(alert.macAddress));
+    result = result.filter(
+      (alert: Alert) => !isBlocked(alert.fingerprintHash)
+    );
 
     return result;
   }, [
@@ -176,10 +177,10 @@ export const AlertListScreen = ({ navigation, route }: Props) => {
 
   const handleDismiss = () => {};
 
-  const handleAddToKnown = (macAddress: string) => {
+  const handleAddToKnown = (fingerprintHash: string) => {
     navigation.getParent()?.navigate('MoreTab', {
       screen: 'AddKnownDevice',
-      params: { macAddress },
+      params: { fingerprintHash },
     });
   };
 

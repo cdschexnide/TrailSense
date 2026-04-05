@@ -5,7 +5,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-001',
     name: "John's iPhone",
-    macAddress: 'A8:5E:45:2B:1F:9C',
+    fingerprintHash: 'fp-family-john',
     category: 'family',
     notes: 'Primary owner phone',
     createdAt: '2025-01-15T10:00:00Z',
@@ -14,7 +14,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-002',
     name: "Sarah's iPhone",
-    macAddress: 'B2:7F:34:8A:6D:1E',
+    fingerprintHash: 'fp-family-sarah',
     category: 'family',
     notes: 'Spouse phone',
     createdAt: '2025-01-15T10:05:00Z',
@@ -23,7 +23,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-003',
     name: 'Family iPad',
-    macAddress: 'C4:9A:02:5B:3F:7D',
+    fingerprintHash: 'fp-family-ipad',
     category: 'family',
     createdAt: '2025-01-20T14:00:00Z',
     updatedAt: '2025-01-20T14:00:00Z',
@@ -33,7 +33,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-004',
     name: 'Mike Thompson',
-    macAddress: 'D8:3A:DD:12:45:6F',
+    fingerprintHash: 'fp-guest-mike',
     category: 'guests',
     notes: 'Weekend guest - Nov 15-17',
     expiresAt: '2025-11-17T23:59:59Z',
@@ -43,7 +43,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-005',
     name: 'Emily Davis',
-    macAddress: 'E1:2B:45:AA:8C:3D',
+    fingerprintHash: 'fp-guest-emily',
     category: 'guests',
     notes: 'Holiday visitor',
     expiresAt: '2025-12-01T23:59:59Z',
@@ -53,7 +53,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-006',
     name: 'Robert Chen - Expired',
-    macAddress: 'F3:8D:12:BB:4E:9A',
+    fingerprintHash: 'fp-guest-robert',
     category: 'guests',
     notes: 'Thanksgiving weekend',
     expiresAt: '2025-11-10T23:59:59Z', // Expired
@@ -65,7 +65,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-007',
     name: 'Property Manager - Tom Wilson',
-    macAddress: 'A0:B1:C2:D3:E4:F5',
+    fingerprintHash: 'fp-service-manager',
     category: 'service',
     notes: 'Monthly property inspections',
     createdAt: '2025-02-01T09:00:00Z',
@@ -74,7 +74,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-008',
     name: 'Landscaping Crew',
-    macAddress: 'B3:C4:D5:E6:F7:08',
+    fingerprintHash: 'fp-service-landscaping',
     category: 'service',
     notes: 'Weekly lawn maintenance - Thursdays',
     createdAt: '2025-03-15T11:00:00Z',
@@ -85,7 +85,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-009',
     name: 'Wildlife Camera',
-    macAddress: '10:20:30:40:50:60',
+    fingerprintHash: 'fp-other-trailcam',
     category: 'other',
     notes: 'Trail camera with WiFi - North sector',
     createdAt: '2025-04-10T08:00:00Z',
@@ -94,7 +94,7 @@ export const mockKnownDevices: KnownDevice[] = [
   {
     id: 'known-010',
     name: 'Weather Station',
-    macAddress: '11:22:33:44:55:66',
+    fingerprintHash: 'fp-other-weather',
     category: 'other',
     notes: 'IoT weather monitoring device',
     createdAt: '2025-05-01T15:00:00Z',

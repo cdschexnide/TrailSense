@@ -39,14 +39,14 @@ function batteryLabel(battery?: number): string {
   return 'OK';
 }
 
-function rssiToZone(rssi: number): string {
-  if (rssi > -50) {
+function accuracyToZone(accuracyMeters: number): string {
+  if (accuracyMeters < 5) {
     return 'IMMEDIATE (~0-20 ft)';
   }
-  if (rssi >= -70) {
+  if (accuracyMeters < 10) {
     return 'NEAR (~20-50 ft)';
   }
-  if (rssi >= -85) {
+  if (accuracyMeters < 25) {
     return 'FAR (~50-200 ft)';
   }
   return 'EXTREME (~200+ ft)';
@@ -130,12 +130,8 @@ function buildHourlyBuckets(alerts: Alert[]): HourBucket[] {
   return hours;
 }
 
-function formatMac(macAddress: string): string {
-  const parts = macAddress.split(':');
-  if (parts.length < 4) {
-    return macAddress;
-  }
-  return [...parts.slice(0, 3), 'XX', 'XX', 'XX'].join(':');
+function formatFingerprint(fingerprintHash: string): string {
+  return fingerprintHash || 'unknown';
 }
 
 function getDeviceName(deviceId: string, devices: Device[]): string {
@@ -163,7 +159,7 @@ function buildAlertContext(
     .slice(0, 6)
     .map((alert, index) => {
       const repeatCount = filteredAlerts.filter(
-        candidate => candidate.macAddress === alert.macAddress
+        candidate => candidate.fingerprintHash === alert.fingerprintHash
       ).length;
       const repeatText =
         repeatCount > 1 ? `, repeat device seen ${repeatCount} times` : '';
@@ -174,8 +170,9 @@ function buildAlertContext(
       )}
 Time: ${formatDate(alert.timestamp)}
 Threat: ${alert.threatLevel.toUpperCase()}
-Signal: ${alert.rssi} dBm (${rssiToZone(alert.rssi)})
-MAC: ${formatMac(alert.macAddress)}
+Confidence: ${alert.confidence}% identity certainty
+Accuracy: ~${alert.accuracyMeters.toFixed(1)}m (${accuracyToZone(alert.accuracyMeters)})
+Fingerprint: ${formatFingerprint(alert.fingerprintHash)}
 Status: ${alert.isReviewed ? 'REVIEWED' : 'UNREVIEWED'}${repeatText}`;
     })
     .join('\n\n');
@@ -271,7 +268,7 @@ function buildPatternContext(alerts: Alert[], devices: Device[], filters: Intent
   }
 
   const visitsByMac = filteredAlerts.reduce<Record<string, Alert[]>>((groups, alert) => {
-    const key = alert.macAddress;
+    const key = alert.fingerprintHash;
     groups[key] = groups[key] || [];
     groups[key].push(alert);
     return groups;
@@ -289,14 +286,14 @@ function buildPatternContext(alerts: Alert[], devices: Device[], filters: Intent
 REPEAT VISITORS:
 ${repeatVisitors.length > 0
   ? repeatVisitors
-      .map(([macAddress, entries]) => {
+      .map(([fingerprintHash, entries]) => {
         const first = entries[0];
         const nighttime = entries.filter(entry => {
           const hour = new Date(entry.timestamp).getHours();
           return hour < 6;
         }).length;
         const label = nighttime >= Math.ceil(entries.length / 2) ? 'SUSPICIOUS' : 'ROUTINE';
-        return `- ${formatMac(macAddress)}: ${entries.length} detections, ${first.detectionType}, last at ${getDeviceName(first.deviceId, devices)} -> ${label}`;
+        return `- ${formatFingerprint(fingerprintHash)}: ${entries.length} detections, ${first.detectionType}, last at ${getDeviceName(first.deviceId, devices)} -> ${label}`;
       })
       .join('\n')
   : '- No repeat visitors detected'}
@@ -330,7 +327,7 @@ BUSIEST: ${busiest.label} (${busiest.count} alerts)
 QUIETEST: ${quietest.label} (${quietest.count} alerts)`;
 }
 
-export { rssiToZone, formatMac, batteryLabel, formatDate };
+export { accuracyToZone, formatFingerprint, batteryLabel, formatDate };
 
 export class FocusedContextBuilder {
   static filterAlerts = filterAlerts;
@@ -436,8 +433,8 @@ export class FocusedContextBuilder {
         const filtered = filterAlerts(alerts, filters);
         const visitsByMac = filtered.reduce<Record<string, Alert[]>>(
           (groups, alert) => {
-            groups[alert.macAddress] = groups[alert.macAddress] || [];
-            groups[alert.macAddress].push(alert);
+            groups[alert.fingerprintHash] = groups[alert.fingerprintHash] || [];
+            groups[alert.fingerprintHash].push(alert);
             return groups;
           },
           {}
@@ -446,7 +443,7 @@ export class FocusedContextBuilder {
           .filter(([, entries]) => entries.length > 1)
           .sort((a, b) => b[1].length - a[1].length)
           .slice(0, 8)
-          .map(([mac, entries]) => {
+          .map(([fingerprintHash, entries]) => {
             const nighttime = entries.filter(e => {
               const hour = new Date(e.timestamp).getHours();
               return hour < 6;
@@ -457,7 +454,7 @@ export class FocusedContextBuilder {
                 : ('ROUTINE' as const);
             const first = entries[0];
             return {
-              mac: formatMac(mac),
+              fingerprint: formatFingerprint(fingerprintHash),
               count: entries.length,
               classification,
               detectionType: first.detectionType,

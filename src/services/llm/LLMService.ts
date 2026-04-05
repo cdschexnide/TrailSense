@@ -147,7 +147,7 @@ class LLMService {
   async analyzeDevicePattern(context: DeviceContext): Promise<PatternAnalysis> {
     try {
       llmLogger.info('Analyzing device pattern', {
-        deviceId: context.device.mac_address,
+        deviceId: context.device.fingerprint_hash,
         detectionCount: context.detectionHistory.length,
       });
 
@@ -157,7 +157,7 @@ class LLMService {
       // Generate cache key from message content
       const messageContent = messages.map(m => m.content).join('\n');
       const cacheKey = responseCache.generateCacheKey(messageContent, {
-        deviceId: context.device.mac_address,
+        deviceId: context.device.fingerprint_hash,
         detectionCount: context.detectionHistory.length,
       });
 

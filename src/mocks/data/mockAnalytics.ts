@@ -1,17 +1,17 @@
 import type {
   AnalyticsData,
-  HeatmapPoint,
   DeviceFingerprint,
+  HeatmapPoint,
 } from '@/types/alert';
 import { mockAlerts } from './mockAlerts';
 import { mockDevices } from './mockDevices';
 
-// Calculate analytics from mock alerts
+const uniqueFingerprints = [...new Set(mockAlerts.map(a => a.fingerprintHash))];
+
 const calculateAnalytics = (): AnalyticsData => {
   const totalDetections = mockAlerts.length;
   const unknownDevices = mockAlerts.filter(a => !a.isFalsePositive).length;
 
-  // Daily detections for the last 30 days
   const dailyMap = new Map<string, number>();
   mockAlerts.forEach(alert => {
     const date = alert.timestamp.split('T')[0];
@@ -23,60 +23,53 @@ const calculateAnalytics = (): AnalyticsData => {
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-30);
 
-  // Detection type counts
-  const cellularCount = mockAlerts.filter(
-    a => a.detectionType === 'cellular'
-  ).length;
-  const wifiCount = mockAlerts.filter(a => a.detectionType === 'wifi').length;
-  const bluetoothCount = mockAlerts.filter(
-    a => a.detectionType === 'bluetooth'
-  ).length;
+  const detectionTypeDistribution = [
+    {
+      type: 'cellular',
+      count: mockAlerts.filter(a => a.detectionType === 'cellular').length,
+    },
+    {
+      type: 'wifi',
+      count: mockAlerts.filter(a => a.detectionType === 'wifi').length,
+    },
+    {
+      type: 'bluetooth',
+      count: mockAlerts.filter(a => a.detectionType === 'bluetooth').length,
+    },
+  ];
 
-  // Threat level counts
-  const criticalCount = mockAlerts.filter(
-    a => a.threatLevel === 'critical'
-  ).length;
-  const highCount = mockAlerts.filter(a => a.threatLevel === 'high').length;
-  const mediumCount = mockAlerts.filter(a => a.threatLevel === 'medium').length;
-  const lowCount = mockAlerts.filter(a => a.threatLevel === 'low').length;
+  const threatLevelDistribution = [
+    {
+      level: 'critical',
+      count: mockAlerts.filter(a => a.threatLevel === 'critical').length,
+    },
+    {
+      level: 'high',
+      count: mockAlerts.filter(a => a.threatLevel === 'high').length,
+    },
+    {
+      level: 'medium',
+      count: mockAlerts.filter(a => a.threatLevel === 'medium').length,
+    },
+    {
+      level: 'low',
+      count: mockAlerts.filter(a => a.threatLevel === 'low').length,
+    },
+  ];
 
-  // Hourly distribution (0-23 hours)
-  const hourlyMap = new Map<number, number>();
-  for (let i = 0; i < 24; i++) {
-    hourlyMap.set(i, 0);
-  }
-
-  mockAlerts.forEach(alert => {
-    const hour = new Date(alert.timestamp).getHours();
-    hourlyMap.set(hour, (hourlyMap.get(hour) || 0) + 1);
-  });
-
-  const hourlyDistribution = Array.from(hourlyMap.entries())
-    .map(([hour, count]) => ({ hour, count }))
-    .sort((a, b) => a.hour - b.hour);
-
-  const timestamps = mockAlerts.map(alert => alert.timestamp).sort();
   const deviceDistribution = mockDevices.map(device => ({
     deviceId: device.id,
     count: mockAlerts.filter(alert => alert.deviceId === device.id).length,
   }));
-  const detectionTypeDistribution = [
-    { type: 'cellular', count: cellularCount },
-    { type: 'wifi', count: wifiCount },
-    { type: 'bluetooth', count: bluetoothCount },
-  ];
-  const threatLevelDistribution = [
-    { level: 'critical', count: criticalCount },
-    { level: 'high', count: highCount },
-    { level: 'medium', count: mediumCount },
-    { level: 'low', count: lowCount },
-  ];
-  const topDetectedDevices = uniqueMacAddresses
-    .slice(0, 10)
-    .map(macAddress => ({
-      macAddress,
-      count: mockAlerts.filter(alert => alert.macAddress === macAddress).length,
-    }));
+
+  const hourlyDistribution = Array.from({ length: 24 }, (_, hour) => ({
+    hour,
+    count: mockAlerts.filter(
+      alert => new Date(alert.timestamp).getHours() === hour
+    ).length,
+  }));
+
+  const timestamps = mockAlerts.map(alert => alert.timestamp).sort();
 
   return {
     period: '30d',
@@ -87,26 +80,27 @@ const calculateAnalytics = (): AnalyticsData => {
     detectionTypeDistribution,
     deviceDistribution,
     dailyTrend: dailyDetections,
-    topDetectedDevices,
+    topDetectedDevices: uniqueFingerprints.slice(0, 10).map(fingerprintHash => ({
+      fingerprintHash,
+      count: mockAlerts.filter(alert => alert.fingerprintHash === fingerprintHash)
+        .length,
+    })),
     totalDetections,
     unknownDevices,
     dailyDetections,
-    cellularCount,
-    wifiCount,
-    bluetoothCount,
+    cellularCount: detectionTypeDistribution[0].count,
+    wifiCount: detectionTypeDistribution[1].count,
+    bluetoothCount: detectionTypeDistribution[2].count,
     hourlyDistribution,
-    criticalCount,
-    highCount,
-    mediumCount,
-    lowCount,
+    criticalCount: threatLevelDistribution[0].count,
+    highCount: threatLevelDistribution[1].count,
+    mediumCount: threatLevelDistribution[2].count,
+    lowCount: threatLevelDistribution[3].count,
   };
 };
 
-const uniqueMacAddresses = [...new Set(mockAlerts.map(a => a.macAddress))];
-
 export const mockAnalyticsData: AnalyticsData = calculateAnalytics();
 
-// Heatmap data - generate points around device locations
 export const mockHeatmapPoints: HeatmapPoint[] = mockAlerts
   .filter(alert => alert.location)
   .map(alert => ({
@@ -123,14 +117,15 @@ export const mockHeatmapPoints: HeatmapPoint[] = mockAlerts
     type: alert.detectionType,
   }));
 
-// Device fingerprints - track specific MAC addresses over time
-const generateDeviceFingerprint = (macAddress: string): DeviceFingerprint => {
-  const detections = mockAlerts.filter(a => a.macAddress === macAddress);
+const generateDeviceFingerprint = (
+  fingerprintHash: string
+): DeviceFingerprint => {
+  const detections = mockAlerts.filter(a => a.fingerprintHash === fingerprintHash);
 
   if (detections.length === 0) {
     return {
-      id: `fingerprint-${macAddress}`,
-      macAddress,
+      id: `fingerprint-${fingerprintHash}`,
+      fingerprintHash,
       firstSeen: new Date().toISOString(),
       lastSeen: new Date().toISOString(),
       totalVisits: 0,
@@ -148,13 +143,6 @@ const generateDeviceFingerprint = (macAddress: string): DeviceFingerprint => {
   const firstSeen = sortedDetections[0].timestamp;
   const lastSeen = sortedDetections[sortedDetections.length - 1].timestamp;
 
-  const totalDuration = detections.reduce(
-    (sum, d) => sum + (d.duration || 0),
-    0
-  );
-  const averageDuration = Math.round(totalDuration / detections.length);
-
-  // Calculate common hours
   const hourMap = new Map<number, number>();
   detections.forEach(d => {
     const hour = new Date(d.timestamp).getHours();
@@ -167,29 +155,27 @@ const generateDeviceFingerprint = (macAddress: string): DeviceFingerprint => {
     .map(([hour]) => hour);
 
   return {
-    id: `fingerprint-${macAddress}`,
-    macAddress,
+    id: `fingerprint-${fingerprintHash}`,
+    fingerprintHash,
     firstSeen,
     lastSeen,
     totalVisits: detections.length,
     detections: sortedDetections.map(d => ({
       timestamp: d.timestamp,
-      rssi: d.rssi,
+      confidence: d.confidence,
       location: d.location,
       type: d.detectionType,
     })),
-    averageDuration,
+    averageDuration: Math.max(60, Math.round(detections.length * 45)),
     commonHours,
     category: detections[0].isFalsePositive ? 'known' : 'unknown',
   };
 };
 
-// Generate fingerprints for the most frequently seen devices
-export const mockDeviceFingerprints: DeviceFingerprint[] = uniqueMacAddresses
-  .slice(0, 10) // Top 10 devices
+export const mockDeviceFingerprints: DeviceFingerprint[] = uniqueFingerprints
+  .slice(0, 10)
   .map(generateDeviceFingerprint);
 
-// Comparison data (week over week, month over month)
 export const mockComparisonData = {
   thisWeek: {
     totalDetections: 24,
@@ -228,7 +214,6 @@ export const mockComparisonData = {
   },
 };
 
-// Threat timeline data for charts
 export const mockThreatTimeline = Array.from({ length: 30 }, (_, i) => {
   const date = new Date();
   date.setDate(date.getDate() - (29 - i));
@@ -245,7 +230,6 @@ export const mockThreatTimeline = Array.from({ length: 30 }, (_, i) => {
   };
 });
 
-// Top devices by detection count
 export const mockTopDevices = mockDevices
   .map(device => ({
     deviceId: device.id,

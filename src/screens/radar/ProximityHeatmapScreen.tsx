@@ -275,12 +275,11 @@ function LiveMapContent({
 
       {selectedPosition ? (
         <FingerprintPeek
-          macAddress={selectedPosition.macAddress || ''}
           fingerprintHash={selectedPosition.fingerprintHash}
           scrubTimestamp={Date.now()}
-          onViewProfile={macAddress => {
+          onViewProfile={fingerprintHash => {
             setSelectedPosition(null);
-            navigation.navigate('DeviceFingerprint', { macAddress });
+            navigation.navigate('DeviceFingerprint', { fingerprintHash });
           }}
           onDismiss={() => setSelectedPosition(null)}
         />
@@ -298,7 +297,7 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
   const [showSatellite, setShowSatellite] = useState(true);
   const [selectedPosition, setSelectedPosition] =
     useState<TriangulatedPosition | null>(null);
-  const [peekMac, setPeekMac] = useState<string | null>(null);
+  const [peekFingerprint, setPeekFingerprint] = useState<string | null>(null);
 
   const startHour: number | undefined = route?.params?.startHour;
   const [mode, setMode] = useState<RadarMode>(
@@ -355,10 +354,10 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
       const bucket = bucketed.buckets.get(minute);
       if (bucket) entries.push(...bucket);
     }
-    // Deduplicate by macAddress, keeping latest
+    // Deduplicate by fingerprint hash, keeping latest
     const seen = new Map<string, BucketEntry>();
     for (const e of entries) {
-      if (!seen.has(e.macAddress)) seen.set(e.macAddress, e);
+      if (!seen.has(e.fingerprintHash)) seen.set(e.fingerprintHash, e);
     }
     return Array.from(seen.values());
   }, [autoPlay.minuteIndex, bucketed.buckets]);
@@ -470,7 +469,7 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
     setMode('live');
     fadeAnim.value = reduceMotion ? 1 : withTiming(1, { duration: 300 });
     autoPlayRef.current.pause();
-    setPeekMac(null);
+    setPeekFingerprint(null);
   }, [fadeAnim, reduceMotion]);
 
   const switchToReplay = useCallback(() => {
@@ -555,12 +554,12 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
           statusLabel={activeCount > 0 ? `${activeCount} ACTIVE` : 'SCANNING'}
           statusVariant={activeCount > 0 ? 'success' : 'warning'}
           rightAction={
-            alerts[0]?.macAddress ? (
+            alerts[0]?.fingerprintHash ? (
               <Button
                 buttonStyle="plain"
                 onPress={() =>
                   navigation.navigate('DeviceFingerprint', {
-                    macAddress: alerts[0].macAddress,
+                    fingerprintHash: alerts[0].fingerprintHash,
                   })
                 }
               >
@@ -671,8 +670,8 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
                   {smoothMode
                     ? trailLines.map(trail => (
                         <Mapbox.ShapeSource
-                          key={`trail-${trail.macAddress}`}
-                          id={`trail-${trail.macAddress}`}
+                          key={`trail-${trail.fingerprintHash}`}
+                          id={`trail-${trail.fingerprintHash}`}
                           lineMetrics
                           shape={{
                             type: 'Feature',
@@ -684,7 +683,7 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
                           }}
                         >
                           <Mapbox.LineLayer
-                            id={`trail-line-${trail.macAddress}`}
+                            id={`trail-line-${trail.fingerprintHash}`}
                             style={{
                               lineColor: THREAT_COLORS[trail.threatLevel],
                               lineWidth: 2.5,
@@ -712,14 +711,14 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
                     : currentReplayEntries
                   ).map((entry, i) => (
                     <DetectedDeviceMarker
-                      key={`${entry.macAddress}-${i}`}
-                      id={`replay-${entry.macAddress}-${i}`}
+                      key={`${entry.fingerprintHash}-${i}`}
+                      id={`replay-${entry.fingerprintHash}-${i}`}
                       coordinate={[entry.longitude, entry.latitude]}
                       signalType={entry.signalType}
                       confidence={entry.confidence}
                       onPress={() => {
                         autoPlay.pause();
-                        setPeekMac(entry.macAddress);
+                        setPeekFingerprint(entry.fingerprintHash);
                       }}
                     />
                   ))}
@@ -787,19 +786,18 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
             onScrub={autoPlay.setMinuteIndex}
           />
 
-          {peekMac ? (
+          {peekFingerprint ? (
             <FingerprintPeek
-              macAddress={peekMac}
-              fingerprintHash=""
+              fingerprintHash={peekFingerprint}
               scrubTimestamp={
                 bucketed.startTime + autoPlay.minuteIndex * 60_000
               }
-              onViewProfile={macAddress => {
-                setPeekMac(null);
-                navigation.navigate('DeviceFingerprint', { macAddress });
+              onViewProfile={fingerprintHash => {
+                setPeekFingerprint(null);
+                navigation.navigate('DeviceFingerprint', { fingerprintHash });
               }}
               onDismiss={() => {
-                setPeekMac(null);
+                setPeekFingerprint(null);
                 autoPlay.play();
               }}
             />

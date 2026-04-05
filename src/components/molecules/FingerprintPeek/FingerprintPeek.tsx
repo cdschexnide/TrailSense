@@ -4,11 +4,11 @@ import { Icon, Text } from '@components/atoms';
 import { FingerprintPeekProps } from '@/types/replay';
 
 export const FingerprintPeek: React.FC<FingerprintPeekProps> = ({
-  macAddress,
+  fingerprintHash,
   onViewProfile,
   onDismiss,
 }) => {
-  const shortMac = macAddress ? macAddress.substring(0, 8) : '—';
+  const shortFingerprint = fingerprintHash || '—';
 
   return (
     <>
@@ -33,7 +33,7 @@ export const FingerprintPeek: React.FC<FingerprintPeekProps> = ({
               Unknown Device
             </Text>
             <Text variant="caption1" color="secondaryLabel">
-              {shortMac}
+              {shortFingerprint}
             </Text>
           </View>
         </View>
@@ -50,10 +50,10 @@ export const FingerprintPeek: React.FC<FingerprintPeekProps> = ({
         <Pressable
           style={[
             styles.profileButton,
-            !macAddress && styles.profileButtonDisabled,
+            !fingerprintHash && styles.profileButtonDisabled,
           ]}
-          onPress={() => onViewProfile(macAddress)}
-          disabled={!macAddress}
+          onPress={() => onViewProfile(fingerprintHash)}
+          disabled={!fingerprintHash}
         >
           <Text variant="subheadline" weight="semibold" color="systemBlue">
             View Full Profile

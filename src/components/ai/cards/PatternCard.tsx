@@ -62,9 +62,9 @@ export const PatternCard: React.FC<PatternCardProps> = ({
       onFeedback={onFeedback}
     >
       {data.visitors.map((visitor, i) => (
-        <View key={visitor.mac + i} style={styles.visitorRow}>
+        <View key={visitor.fingerprint + i} style={styles.visitorRow}>
           <View style={styles.visitorHeader}>
-            <Text style={styles.mac}>{visitor.mac}</Text>
+            <Text style={styles.mac}>{visitor.fingerprint}</Text>
             <View
               style={[
                 styles.badge,

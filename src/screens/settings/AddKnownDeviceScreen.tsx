@@ -17,21 +17,17 @@ const CATEGORIES = [
 }>;
 
 export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
-  const { macAddress: initialMac, deviceId: initialDeviceId } =
+  const { fingerprintHash: initialFingerprint, deviceId: initialDeviceId } =
     route.params || {};
   const addKnownDevice = useAddKnownDevice();
 
   const [name, setName] = useState('');
-  const [macAddress, setMacAddress] = useState(initialMac || '');
+  const [fingerprintHash, setFingerprintHash] = useState(
+    initialFingerprint || ''
+  );
   const [category, setCategory] = useState<KnownDeviceCategory>('family');
   const [isTemporary, setIsTemporary] = useState(false);
   const [expiresInDays, setExpiresInDays] = useState('7');
-
-  const validateMacAddress = (mac: string): boolean => {
-    // MAC address validation: XX:XX:XX:XX:XX:XX
-    const macRegex = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/;
-    return macRegex.test(mac);
-  };
 
   const handleAdd = async () => {
     if (!name.trim()) {
@@ -39,13 +35,17 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    if (!macAddress.trim()) {
-      Alert.alert('Error', 'Please enter a MAC address');
+    if (!fingerprintHash.trim()) {
+      Alert.alert('Error', 'Please enter a Fingerprint ID');
       return;
     }
 
-    if (!validateMacAddress(macAddress)) {
-      Alert.alert('Error', 'Invalid MAC address format. Use XX:XX:XX:XX:XX:XX');
+    const fpRegex = /^[wbc]_[0-9a-f]{4,10}$/;
+    if (!fpRegex.test(fingerprintHash) && !fingerprintHash.startsWith('fp-')) {
+      Alert.alert(
+        'Error',
+        'Invalid Fingerprint ID format. Expected: w_3a7fb2e1 or similar'
+      );
       return;
     }
 
@@ -56,7 +56,7 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
 
     const knownDevice = {
       name,
-      macAddress,
+      fingerprintHash,
       category,
       expiresAt: isTemporary
         ? new Date(
@@ -68,7 +68,7 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
     try {
       await addKnownDevice.mutateAsync(knownDevice);
       logEvent(AnalyticsEvents.DEVICE_ADDED_TO_KNOWN, {
-        macAddress,
+        fingerprintHash,
         deviceId: initialDeviceId,
       });
       Alert.alert('Success', 'Device added to Known Devices', [
@@ -105,11 +105,11 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
           />
 
           <Input
-            label="MAC Address"
-            placeholder="XX:XX:XX:XX:XX:XX"
-            value={macAddress}
-            onChangeText={setMacAddress}
-            autoCapitalize="characters"
+            label="Fingerprint ID"
+            placeholder="e.g., w_3a7fb2e1"
+            value={fingerprintHash}
+            onChangeText={setFingerprintHash}
+            autoCapitalize="none"
             style={styles.input}
           />
 
@@ -156,12 +156,14 @@ export const AddKnownDeviceScreen = ({ navigation, route }: any) => {
 
         <Card style={styles.helpCard}>
           <Text variant="title3" style={styles.sectionTitle}>
-            MAC Address Format
+            Fingerprint ID Format
           </Text>
-          <Text variant="caption1">- Use format: XX:XX:XX:XX:XX:XX</Text>
-          <Text variant="caption1">- Example: A1:B2:C3:D4:E5:F6</Text>
           <Text variant="caption1">
-            - Each X represents a hexadecimal digit (0-9, A-F)
+            - Prefixes: w_ (WiFi), b_ (Bluetooth), c_ (Cellular)
+          </Text>
+          <Text variant="caption1">- Example: w_3a7fb2e1</Text>
+          <Text variant="caption1">
+            - Tip: Navigate from an alert to auto-fill this field
           </Text>
         </Card>
 

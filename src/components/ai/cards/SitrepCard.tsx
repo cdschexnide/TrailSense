@@ -7,7 +7,11 @@ import {
   tacticalTypography as t,
   tacticalSpacing as s,
 } from '@/constants/tacticalTheme';
-import { formatDate, formatMac, rssiToZone } from '@/services/llm/FocusedContextBuilder';
+import {
+  accuracyToZone,
+  formatDate,
+  formatFingerprint,
+} from '@/services/llm/FocusedContextBuilder';
 import { BriefingContainer } from './BriefingContainer';
 
 interface SitrepCardProps {
@@ -92,10 +96,11 @@ export const SitrepCard: React.FC<SitrepCardProps> = ({
         </Text>
         <View style={styles.alertMeta}>
           <Text style={styles.metaText}>
-            {alert.rssi} dBm · {rssiToZone(alert.rssi).split(' ')[0]}
+            {alert.confidence}% ·{' '}
+            {accuracyToZone(alert.accuracyMeters).split(' ')[0]}
           </Text>
           <Text style={styles.metaText}>
-            MAC: {formatMac(alert.macAddress)}
+            Fingerprint: {formatFingerprint(alert.fingerprintHash)}
           </Text>
         </View>
       </View>

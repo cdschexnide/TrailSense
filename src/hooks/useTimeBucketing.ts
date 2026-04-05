@@ -29,19 +29,17 @@ function findMatchingAlert(
   let best: Alert | undefined;
   let bestDistance = Infinity;
 
-  if (position.macAddress) {
-    for (const alert of alerts) {
-      if (alert.macAddress !== position.macAddress) {
-        continue;
-      }
+  for (const alert of alerts) {
+    if (alert.fingerprintHash !== position.fingerprintHash) {
+      continue;
+    }
 
-      const distance = Math.abs(
-        new Date(alert.timestamp).getTime() - positionTimeMs
-      );
-      if (distance <= windowMs && distance < bestDistance) {
-        best = alert;
-        bestDistance = distance;
-      }
+    const distance = Math.abs(
+      new Date(alert.timestamp).getTime() - positionTimeMs
+    );
+    if (distance <= windowMs && distance < bestDistance) {
+      best = alert;
+      bestDistance = distance;
     }
   }
 
@@ -103,7 +101,6 @@ export function useTimeBucketing({
 
       const entry: BucketEntry = {
         fingerprintHash: position.fingerprintHash,
-        macAddress: matchingAlert?.macAddress ?? position.macAddress ?? '',
         x,
         y,
         latitude: position.latitude,

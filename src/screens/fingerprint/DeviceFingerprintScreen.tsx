@@ -18,34 +18,34 @@ const DAY_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 export const DeviceFingerprintScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const { macAddress } = route.params;
+  const { fingerprintHash } = route.params;
   const { data: alerts = [] } = useAlerts();
   const { data: knownDevices = [] } = useKnownDevices();
   const { isBlocked, block, unblock } = useBlockedDevices();
 
   const pattern = useMemo(
-    () => computeVisitPattern(alerts, macAddress),
-    [alerts, macAddress]
+    () => computeVisitPattern(alerts, fingerprintHash),
+    [alerts, fingerprintHash]
   );
   const insightText = useMemo(() => generateInsightText(pattern), [pattern]);
   const deviceAlerts = useMemo(
     () =>
       alerts
-        .filter(alert => alert.macAddress === macAddress)
+        .filter(alert => alert.fingerprintHash === fingerprintHash)
         .sort(
           (a, b) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         ),
-    [alerts, macAddress]
+    [alerts, fingerprintHash]
   );
   const knownDevice = knownDevices.find(
-    device => device.macAddress === macAddress
+    device => device.fingerprintHash === fingerprintHash
   );
-  const blocked = isBlocked(macAddress);
+  const blocked = isBlocked(fingerprintHash);
 
   React.useEffect(() => {
-    logEvent(AnalyticsEvents.FINGERPRINT_VIEWED, { macAddress });
-  }, [macAddress]);
+    logEvent(AnalyticsEvents.FINGERPRINT_VIEWED, { fingerprintHash });
+  }, [fingerprintHash]);
 
   const latestAlert = deviceAlerts[0];
   const topDays = DAY_KEYS.filter(
@@ -63,24 +63,24 @@ export const DeviceFingerprintScreen = ({ navigation, route }: any) => {
   const handleAddKnownDevice = () => {
     navigation.navigate('MoreTab', {
       screen: 'AddKnownDevice',
-      params: { macAddress },
+      params: { fingerprintHash },
     });
   };
 
   const handleToggleBlock = () => {
     if (blocked) {
-      unblock(macAddress);
+      unblock(fingerprintHash);
       return;
     }
 
-    block(macAddress);
+    block(fingerprintHash);
   };
 
   return (
     <ScreenLayout
       header={{
         title: knownDevice?.name || 'Device Fingerprint',
-        subtitle: macAddress,
+        subtitle: fingerprintHash,
         showBack:
           typeof navigation.canGoBack === 'function'
             ? navigation.canGoBack()

@@ -15,8 +15,9 @@ const makeAlert = (overrides: Partial<Alert> = {}): Alert => ({
   deviceId: 'device-001',
   detectionType: 'cellular',
   threatLevel: 'high',
-  rssi: -58,
-  macAddress: 'AA:BB:CC:DD:EE:FF',
+  fingerprintHash: 'c_aabbccddeeff',
+  confidence: 85,
+  accuracyMeters: 4.2,
   isReviewed: false,
   timestamp: '2026-04-02T02:14:00Z',
   ...overrides,
@@ -42,8 +43,8 @@ describe('FocusedContextBuilder.buildStructuredData', () => {
   const alerts: Alert[] = [
     makeAlert({ id: 'a1', threatLevel: 'critical', timestamp: '2026-04-02T06:38:00Z' }),
     makeAlert({ id: 'a2', threatLevel: 'high', timestamp: '2026-04-02T05:50:00Z' }),
-    makeAlert({ id: 'a3', threatLevel: 'medium', macAddress: 'AA:BB:CC:DD:EE:FF', timestamp: '2026-04-02T03:42:00Z' }),
-    makeAlert({ id: 'a4', threatLevel: 'high', macAddress: 'AA:BB:CC:DD:EE:FF', timestamp: '2026-04-02T02:14:00Z' }),
+    makeAlert({ id: 'a3', threatLevel: 'medium', fingerprintHash: 'c_aabbccddeeff', timestamp: '2026-04-02T03:42:00Z' }),
+    makeAlert({ id: 'a4', threatLevel: 'high', fingerprintHash: 'c_aabbccddeeff', timestamp: '2026-04-02T02:14:00Z' }),
   ];
 
   const devices: Device[] = [
@@ -121,7 +122,7 @@ describe('FocusedContextBuilder.buildStructuredData', () => {
     ) as PatternData;
 
     expect(result.type).toBe('pattern_query');
-    // AA:BB:CC:DD:EE:FF appears twice → repeat visitor
+    // c_aabbccddeeff appears twice → repeat visitor
     expect(result.visitors.length).toBeGreaterThan(0);
     expect(result.visitors[0].count).toBeGreaterThanOrEqual(2);
     expect(['ROUTINE', 'SUSPICIOUS', 'UNKNOWN']).toContain(

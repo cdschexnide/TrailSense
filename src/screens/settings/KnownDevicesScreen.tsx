@@ -45,14 +45,14 @@ const CATEGORY_CONFIG: Record<KnownDeviceCategoryDisplay, CategoryConfig> = {
 
 interface KnownDeviceItemCardProps {
   name: string;
-  macAddress: string;
+  fingerprintHash: string;
   category?: KnownDevice['category'];
   onDelete: () => void;
 }
 
 const KnownDeviceItemCard = ({
   name,
-  macAddress,
+  fingerprintHash,
   category,
   onDelete,
 }: KnownDeviceItemCardProps) => {
@@ -95,7 +95,7 @@ const KnownDeviceItemCard = ({
           variant="caption1"
           style={{ color: colors.secondaryLabel, marginTop: 2 }}
         >
-          {macAddress}
+          {fingerprintHash}
         </Text>
         <View
           style={[
@@ -191,7 +191,7 @@ export const KnownDevicesScreen = ({ navigation }: KnownDevicesScreenProps) => {
 
   const handleAdd = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    navigation.navigate('AddKnownDevice');
+    (navigation as any).navigate('AddKnownDevice');
   };
 
   return (
@@ -231,7 +231,7 @@ export const KnownDevicesScreen = ({ navigation }: KnownDevicesScreenProps) => {
         renderItem={({ item }) => (
           <KnownDeviceItemCard
             name={item.name}
-            macAddress={item.macAddress}
+            fingerprintHash={item.fingerprintHash}
             category={item.category}
             onDelete={() => void handleDelete(item.id)}
           />

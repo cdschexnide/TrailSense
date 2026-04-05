@@ -4,7 +4,6 @@ export type PlaybackSpeed = 1 | 10 | 60 | 360;
 
 export interface BucketEntry {
   fingerprintHash: string;
-  macAddress: string;
   x: number;
   y: number;
   latitude: number;
@@ -32,10 +31,9 @@ export interface TimelineScrubberProps {
 }
 
 export interface FingerprintPeekProps {
-  macAddress: string;
   fingerprintHash: string;
   scrubTimestamp: number;
-  onViewProfile: (macAddress: string) => void;
+  onViewProfile: (fingerprintHash: string) => void;
   onDismiss: () => void;
 }
 

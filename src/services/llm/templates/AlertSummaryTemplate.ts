@@ -60,8 +60,10 @@ DO recommend:
 
     // Extract alert details
     const detectionType = alert.detection_type || 'unknown';
-    const rssi = alert.rssi || 0;
-    const zone = alert.zone || this.getZoneFromRSSI(rssi);
+    const confidence = alert.confidence ?? 0;
+    const accuracyMeters =
+      alert.accuracy_meters ?? alert.accuracyMeters ?? 0;
+    const zone = alert.zone || this.getZoneFromAccuracy(accuracyMeters);
     const threatLevel = alert.threat_level || 'low';
     const trend = alert.trend || 'unknown';
     const timestamp = alert.timestamp;
@@ -76,12 +78,13 @@ DO recommend:
     const userPrompt = `Summarize this security detection for a homeowner:
 
 Detection Type: ${this.formatDetectionType(detectionType)}
-Signal Strength: ${rssi} dBm
+Identity Confidence: ${confidence}%
+Position Accuracy: ${accuracyMeters}m
 Proximity Zone: ${zone}
 Threat Level: ${threatLevel.toUpperCase()}
 Movement: ${trendDescription}
 Device: ${deviceInfo}
-Time: ${this.formatDate(timestamp)}
+Time: ${this.formatDate(timestamp || new Date().toISOString())}
 
 ${relatedAlerts && relatedAlerts.length > 0 ? this.formatRelatedAlerts(relatedAlerts) : ''}
 
@@ -98,10 +101,10 @@ Provide:
   /**
    * Get proximity zone from RSSI value
    */
-  private getZoneFromRSSI(rssi: number): string {
-    if (rssi > -50) return 'IMMEDIATE (0-10 feet)';
-    if (rssi > -70) return 'NEAR (10-50 feet)';
-    if (rssi > -85) return 'FAR (50-200 feet)';
+  private getZoneFromAccuracy(accuracyMeters: number): string {
+    if (accuracyMeters < 5) return 'IMMEDIATE (0-10 feet)';
+    if (accuracyMeters < 10) return 'NEAR (10-50 feet)';
+    if (accuracyMeters < 25) return 'FAR (50-200 feet)';
     return 'EXTREME (200+ feet)';
   }
 
@@ -125,18 +128,9 @@ Provide:
    * Get device information from alert metadata
    */
   private getDeviceInfo(alert: AlertSummaryAlert): string {
-    const metadata = alert.metadata || {};
-
-    // Try to get meaningful device identifier
-    const ssid = metadata.ssid;
-    const deviceName = metadata.device_name;
-    const manufacturer = metadata.manufacturer;
-    const macAddress = alert.mac_address;
-
-    if (ssid) return `"${ssid}" (WiFi network)`;
-    if (deviceName) return `"${deviceName}"`;
-    if (manufacturer) return `${manufacturer} device`;
-    if (macAddress) return `Device ${macAddress.substring(0, 8)}...`;
+    const fingerprintHash =
+      alert.fingerprintHash || alert.fingerprint_hash;
+    if (fingerprintHash) return `Fingerprint ${fingerprintHash}`;
 
     return 'Unknown device';
   }

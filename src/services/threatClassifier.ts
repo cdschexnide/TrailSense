@@ -3,27 +3,16 @@ import { Alert, ThreatLevel } from '@types';
 export class ThreatClassifier {
   static classifyAlert(alert: Alert): ThreatLevel {
     let score = 0;
-    const seenCount = alert.seenCount ?? 0;
-
-    // Cellular-only detection (WiFi/BT disabled)
-    if (
-      alert.detectionType === 'cellular' &&
-      !alert.wifiDetected &&
-      !alert.bluetoothDetected
-    ) {
-      score += 40; // Suspicious - stealth mode
+    if (alert.detectionType === 'cellular') {
+      score += 15;
     }
-
-    // Multi-band detection
-    if (alert.multiband) {
-      score += 20; // High confidence
-    }
-
-    // Signal strength (closer = higher threat)
-    if (alert.rssi > -50) {
-      score += 30; // Very close
-    } else if (alert.rssi > -70) {
-      score += 15; // Moderately close
+    score += Math.round(alert.confidence / 4);
+    if (alert.accuracyMeters < 5) {
+      score += 30;
+    } else if (alert.accuracyMeters < 10) {
+      score += 20;
+    } else if (alert.accuracyMeters < 25) {
+      score += 10;
     }
 
     // Time of day (nighttime is higher threat)
@@ -33,15 +22,6 @@ export class ThreatClassifier {
     }
 
     // Movement pattern
-    if (alert.isStationary) {
-      score += 15; // Lurking
-    }
-
-    // Repeat visitor
-    if (seenCount > 3) {
-      score -= 30; // Likely familiar
-    }
-
     // Classify based on score
     if (score >= 70) return 'critical';
     if (score >= 50) return 'high';
@@ -58,24 +38,16 @@ export class ThreatClassifier {
   }
 
   private static isDeliveryDriver(alert: Alert): boolean {
-    const duration = alert.duration ?? 0;
-
-    // Check for quick visit pattern
-    return (
-      duration < 300 && // Less than 5 minutes
-      this.detectedBetween(alert, 9, 20)
-    ); // Business hours
+    return alert.accuracyMeters >= 10 && this.detectedBetween(alert, 9, 20);
   }
 
   private static isMailCarrier(alert: Alert): boolean {
-    // Check for regular daily pattern around mail delivery time
     const hour = new Date(alert.timestamp).getHours();
-    return hour >= 10 && hour <= 14 && (alert.seenCount ?? 0) > 5;
+    return hour >= 10 && hour <= 14 && alert.confidence >= 70;
   }
 
   private static isNeighbor(alert: Alert): boolean {
-    // Frequent visitor with longer duration
-    return (alert.seenCount ?? 0) > 10 && (alert.duration ?? 0) > 600;
+    return alert.confidence >= 85 && alert.accuracyMeters >= 25;
   }
 
   private static detectedBetween(
@@ -103,12 +75,18 @@ export class ThreatClassifier {
       };
     }
 
-    // Calculate average duration
-    const totalDuration = alerts.reduce(
-      (sum, alert) => sum + (alert.duration ?? 0),
-      0
+    const sortedAlerts = [...alerts].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
-    const averageDuration = totalDuration / alerts.length;
+    let totalDuration = 0;
+    for (let index = 1; index < sortedAlerts.length; index += 1) {
+      const previous = new Date(sortedAlerts[index - 1].timestamp).getTime();
+      const current = new Date(sortedAlerts[index].timestamp).getTime();
+      const deltaSeconds = Math.max(0, (current - previous) / 1000);
+      totalDuration += Math.min(deltaSeconds, 15 * 60);
+    }
+    const averageDuration =
+      sortedAlerts.length > 1 ? totalDuration / (sortedAlerts.length - 1) : 0;
 
     // Find common hours
     const hourCounts: Record<number, number> = {};

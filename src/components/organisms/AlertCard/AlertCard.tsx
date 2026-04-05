@@ -26,7 +26,7 @@ import { GlowContainer } from '@components/molecules/GlowContainer';
 import { useTheme } from '@hooks/useTheme';
 import { useReducedMotion } from '@hooks/useReducedMotion';
 import { formatTimestamp } from '@utils/dateUtils';
-import { interpretRSSI, getThreatColor } from '@utils/visualEffects';
+import { interpretAccuracy, getThreatColor } from '@utils/visualEffects';
 
 interface AlertCardProps {
   alert: Alert;
@@ -36,7 +36,7 @@ interface AlertCardProps {
   /** Used by parent swipeable wrapper for swipe-to-dismiss action */
   onDismiss?: (alertId: string) => void;
   /** Used by parent wrapper for add-to-known-device actions */
-  onAddToKnown?: (macAddress: string) => void;
+  onAddToKnown?: (fingerprintHash: string) => void;
   style?: ViewStyle;
   /** Index for staggered entrance animation */
   index?: number;
@@ -155,8 +155,8 @@ export const AlertCard: React.FC<AlertCardProps> = ({
   // Get detection config
   const detectionConfig = getDetectionConfig(alert.detectionType, theme);
 
-  // Get RSSI interpretation
-  const rssiInfo = interpretRSSI(alert.rssi);
+  // Derive proximity from accuracy, not identity confidence
+  const accuracyInfo = interpretAccuracy(alert.accuracyMeters);
 
   // Get threat color
   const threatColor = getThreatColor(alert.threatLevel);
@@ -218,7 +218,7 @@ export const AlertCard: React.FC<AlertCardProps> = ({
         <View style={styles.metadataRow}>
           <View style={styles.metadataLine}>
             <Text variant="caption1" tactical color="secondaryLabel">
-              {alert.rssi} dBm
+              {alert.confidence}%
             </Text>
             <Text
               variant="caption1"
@@ -230,15 +230,15 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             <View
               style={[
                 styles.proximityPill,
-                { backgroundColor: `${rssiInfo.color}20` },
+                { backgroundColor: `${accuracyInfo.color}20` },
               ]}
             >
               <Text
                 variant="caption2"
                 tactical
-                style={{ color: rssiInfo.color, fontWeight: '600' }}
+                style={{ color: accuracyInfo.color, fontWeight: '600' }}
               >
-                {rssiInfo.label}
+                {accuracyInfo.label}
               </Text>
             </View>
             <Text
@@ -251,24 +251,20 @@ export const AlertCard: React.FC<AlertCardProps> = ({
             <Text variant="caption1" color="secondaryLabel">
               {deviceName || alert.deviceId}
             </Text>
-            {alert.macAddress && (
-              <>
-                <Text
-                  variant="caption1"
-                  color="secondaryLabel"
-                  style={styles.dotSeparator}
-                >
-                  {' · '}
-                </Text>
-                <Text
-                  variant="caption1"
-                  color="secondaryLabel"
-                  style={styles.macSuffix}
-                >
-                  {alert.macAddress.slice(-5).replace(':', '').toLowerCase()}
-                </Text>
-              </>
-            )}
+            <Text
+              variant="caption1"
+              color="secondaryLabel"
+              style={styles.dotSeparator}
+            >
+              {' · '}
+            </Text>
+            <Text
+              variant="caption1"
+              color="secondaryLabel"
+              style={styles.macSuffix}
+            >
+              {alert.fingerprintHash}
+            </Text>
             {alert.metadata?.signalCount && (
               <>
                 <Text

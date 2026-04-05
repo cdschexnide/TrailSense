@@ -28,26 +28,26 @@ export type MainTabParamList = {
 
 export type HomeStackParamList = {
   PropertyCommandCenter: undefined;
-  DeviceFingerprint: { macAddress: string };
+  DeviceFingerprint: { fingerprintHash: string };
 };
 
 export type AlertsStackParamList = {
   AlertList: { filters?: AlertFilterParams } | undefined;
   AlertDetail: { alertId: string };
   AlertFilter: { filters?: AlertFilterParams } | undefined;
-  DeviceFingerprint: { macAddress: string };
+  DeviceFingerprint: { fingerprintHash: string };
 };
 
 export type RadarStackParamList = {
   LiveRadar: { startHour?: number } | undefined;
   RadarSettings: undefined;
-  DeviceFingerprint: { macAddress: string };
+  DeviceFingerprint: { fingerprintHash: string };
 };
 
 export type DevicesStackParamList = {
   DeviceList: undefined;
   DeviceDetail: { deviceId: string };
-  DeviceFingerprint: { macAddress: string };
+  DeviceFingerprint: { fingerprintHash: string };
   DeviceSettings: { id: string };
   AddDevice: undefined;
 };
@@ -73,8 +73,8 @@ export type MoreStackParamList = {
   Sensitivity: undefined;
   QuietHours: undefined;
   VacationMode: undefined;
-  AddKnownDevice: { macAddress?: string; deviceId?: string } | undefined;
-  DeviceFingerprint: { macAddress: string };
+  AddKnownDevice: { fingerprintHash?: string; deviceId?: string } | undefined;
+  DeviceFingerprint: { fingerprintHash: string };
 };
 
 export type SettingsStackParamList = {
@@ -88,7 +88,9 @@ export type SettingsStackParamList = {
   Sensitivity: undefined;
   QuietHours: undefined;
   VacationMode: undefined;
-  AddKnownDevice: { macAddress?: string; deviceId?: string } | undefined;
+  AddKnownDevice:
+    | { fingerprintHash?: string; deviceId?: string }
+    | undefined;
 };
 
 export type AIStackParamList = {

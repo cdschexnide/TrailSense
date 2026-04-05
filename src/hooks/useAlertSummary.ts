@@ -9,6 +9,8 @@ import { LLM_CONFIG } from '@/config/llmConfig';
 type SummaryAlert = Partial<Alert> & {
   id?: string;
   threat_level?: string;
+  fingerprint_hash?: string;
+  metadata?: Record<string, unknown>;
 };
 
 const getThreatLevel = (alert: SummaryAlert | null | undefined): string =>
@@ -136,7 +138,7 @@ export const useAlertSummary = (
     // Check if this threat level should auto-generate
     const shouldAutoGenerate =
       LLM_CONFIG.ALERT_SUMMARIES.AUTO_GENERATE_FOR_THREATS.includes(
-        getThreatLevel(alert).toLowerCase()
+        getThreatLevel(alert).toLowerCase() as 'high' | 'critical'
       );
 
     if (shouldAutoGenerate) {

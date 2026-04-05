@@ -12,7 +12,7 @@ interface Waypoint extends LatLng {
 }
 
 interface DevicePath {
-  macAddress: string;
+  fingerprintHash: string;
   waypoints: Waypoint[];
   threatLevel: ThreatLevel;
   signalType: DetectionType;
@@ -20,7 +20,7 @@ interface DevicePath {
 }
 
 export interface InterpolatedDevice {
-  macAddress: string;
+  fingerprintHash: string;
   latitude: number;
   longitude: number;
   threatLevel: ThreatLevel;
@@ -29,7 +29,7 @@ export interface InterpolatedDevice {
 }
 
 export interface TrailLine {
-  macAddress: string;
+  fingerprintHash: string;
   coordinates: [number, number][];
   threatLevel: ThreatLevel;
 }
@@ -63,10 +63,10 @@ function buildDevicePaths(
     }
 
     for (const entry of entries) {
-      let minuteMap = deviceMinutes.get(entry.macAddress);
+      let minuteMap = deviceMinutes.get(entry.fingerprintHash);
       if (!minuteMap) {
         minuteMap = new Map();
-        deviceMinutes.set(entry.macAddress, minuteMap);
+        deviceMinutes.set(entry.fingerprintHash, minuteMap);
       }
 
       minuteMap.set(minute, {
@@ -80,20 +80,23 @@ function buildDevicePaths(
     }
   }
 
-  return Array.from(deviceMinutes.entries()).map(([macAddress, minuteMap]) => {
-    const sortedEntries = Array.from(minuteMap.entries()).sort(
-      ([leftMinute], [rightMinute]) => leftMinute - rightMinute
-    );
-    const canonicalEntry = sortedEntries[sortedEntries.length - 1]?.[1].entry;
+  return Array.from(deviceMinutes.entries()).map(
+    ([fingerprintHash, minuteMap]) => {
+      const sortedEntries = Array.from(minuteMap.entries()).sort(
+        ([leftMinute], [rightMinute]) => leftMinute - rightMinute
+      );
+      const canonicalEntry =
+        sortedEntries[sortedEntries.length - 1]?.[1].entry;
 
-    return {
-      macAddress,
-      waypoints: sortedEntries.map(([, value]) => value.waypoint),
-      threatLevel: canonicalEntry.threatLevel,
-      signalType: canonicalEntry.signalType,
-      confidence: canonicalEntry.confidence,
-    };
-  });
+      return {
+        fingerprintHash,
+        waypoints: sortedEntries.map(([, value]) => value.waypoint),
+        threatLevel: canonicalEntry.threatLevel,
+        signalType: canonicalEntry.signalType,
+        confidence: canonicalEntry.confidence,
+      };
+    }
+  );
 }
 
 function interpolatePosition(
@@ -191,7 +194,7 @@ export function useReplayPath(
           const point = interpolatePosition(path.waypoints, effectiveTime);
 
           return {
-            macAddress: path.macAddress,
+            fingerprintHash: path.fingerprintHash,
             latitude: point.lat,
             longitude: point.lng,
             threatLevel: path.threatLevel,
@@ -211,7 +214,7 @@ export function useReplayPath(
             path.waypoints[0]?.minuteIndex <= effectiveTime
         )
         .map(path => ({
-          macAddress: path.macAddress,
+          fingerprintHash: path.fingerprintHash,
           coordinates: buildTrailCoordinates(path.waypoints, effectiveTime),
           threatLevel: path.threatLevel,
         }))

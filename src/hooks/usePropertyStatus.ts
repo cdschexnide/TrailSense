@@ -25,7 +25,7 @@ export interface PropertyStatus {
   isLoading: boolean;
   alertsError: Error | null;
   devicesError: Error | null;
-  recentVisitorMacs: string[];
+  recentVisitorFingerprints: string[];
   refetchAlerts: () => Promise<unknown>;
   refetchDevices: () => Promise<unknown>;
 }
@@ -78,9 +78,14 @@ export function usePropertyStatus(): PropertyStatus {
     const todayAlerts = allAlerts.filter(
       alert => new Date(alert.timestamp) >= localMidnight
     );
-    const uniqueMacs = new Set(todayAlerts.map(alert => alert.macAddress));
-    const visitorsToday = uniqueMacs.size;
-    const recentVisitorMacs = Array.from(uniqueMacs).slice(0, 10);
+    const uniqueFingerprints = new Set(
+      todayAlerts.map(alert => alert.fingerprintHash)
+    );
+    const visitorsToday = uniqueFingerprints.size;
+    const recentVisitorFingerprints = Array.from(uniqueFingerprints).slice(
+      0,
+      10
+    );
     const knownVisitorsToday = 0;
 
     const lastAlert = allAlerts[0];
@@ -138,7 +143,7 @@ export function usePropertyStatus(): PropertyStatus {
       allAlerts,
       allDevices,
       recentAlerts,
-      recentVisitorMacs,
+      recentVisitorFingerprints,
       threatCounts,
       isLoading: alertsLoading || devicesLoading,
       alertsError: alertsError as Error | null,

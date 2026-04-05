@@ -47,10 +47,10 @@ export const useHeatmapData = (
   });
 };
 
-export const useDeviceHistory = (macAddress: string) => {
+export const useDeviceHistory = (fingerprintHash: string) => {
   return useQuery({
-    queryKey: ['device-history', macAddress],
-    queryFn: () => analyticsApi.getDeviceHistory(macAddress),
-    enabled: !!macAddress,
+    queryKey: ['device-history', fingerprintHash],
+    queryFn: () => analyticsApi.getDeviceHistory(fingerprintHash),
+    enabled: !!fingerprintHash,
   });
 };

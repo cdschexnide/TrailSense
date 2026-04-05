@@ -251,10 +251,10 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
               { backgroundColor: colors.secondarySystemBackground },
             ]}
             onPress={() => {
-              const recentVisitor = status.recentAlerts[0]?.macAddress;
+              const recentVisitor = status.recentAlerts[0]?.fingerprintHash;
               if (recentVisitor) {
                 navigation.navigate('DeviceFingerprint', {
-                  macAddress: recentVisitor,
+                  fingerprintHash: recentVisitor,
                 });
               }
             }}
@@ -355,7 +355,7 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
         )}
 
         {/* Recent Visitors */}
-        {status.recentVisitorMacs.length > 0 && (
+        {status.recentVisitorFingerprints.length > 0 && (
           <View>
             <View style={styles.sectionHeader}>
               <Text variant="title3" weight="bold">
@@ -367,16 +367,16 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.visitorsScroll}
             >
-              {status.recentVisitorMacs.map(mac => (
+              {status.recentVisitorFingerprints.map(fingerprintHash => (
                 <Pressable
-                  key={mac}
+                  key={fingerprintHash}
                   style={[
                     styles.visitorChip,
                     { backgroundColor: colors.secondarySystemBackground },
                   ]}
                   onPress={() =>
                     navigation.navigate('DeviceFingerprint', {
-                      macAddress: mac,
+                      fingerprintHash,
                     })
                   }
                 >
@@ -387,7 +387,7 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
                     ]}
                   />
                   <Text variant="caption1" weight="semibold" numberOfLines={1}>
-                    {mac.substring(0, 8)}...
+                    {fingerprintHash}
                   </Text>
                 </Pressable>
               ))}

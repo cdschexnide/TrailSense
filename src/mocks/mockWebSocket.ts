@@ -144,18 +144,17 @@ class MockWebSocketService {
     const device =
       onlineDevices[Math.floor(Math.random() * onlineDevices.length)];
 
-    // Generate realistic RSSI based on detection type
-    const rssiRanges = {
-      cellular: [-70, -50],
-      wifi: [-85, -60],
-      bluetooth: [-90, -70],
+    const confidenceRanges = {
+      cellular: [70, 92],
+      wifi: [60, 88],
+      bluetooth: [55, 82],
     };
 
-    const [minRssi, maxRssi] = rssiRanges[detectionType];
-    const rssi = Math.floor(Math.random() * (maxRssi - minRssi + 1)) + minRssi;
-
-    // Determine if multiband detection
-    const isMultiband = Math.random() < 0.3; // 30% chance
+    const [minConfidence, maxConfidence] = confidenceRanges[detectionType];
+    const confidence =
+      Math.floor(Math.random() * (maxConfidence - minConfidence + 1)) +
+      minConfidence;
+    const accuracyMeters = Number((4 + Math.random() * 45).toFixed(1));
 
     // Generate unique ID using timestamp + counter + random component
     const uniqueId = `live-alert-${Date.now()}-${this.eventCounter}-${Math.random().toString(36).substr(2, 9)}`;
@@ -167,9 +166,9 @@ class MockWebSocketService {
       timestamp: new Date().toISOString(),
       threatLevel,
       detectionType,
-      rssi,
-      macAddress: this.generateRandomMAC(),
-      cellularStrength: detectionType === 'cellular' ? rssi : undefined,
+      fingerprintHash: this.generateRandomFingerprint(),
+      confidence,
+      accuracyMeters,
       isReviewed: false,
       isFalsePositive: false,
       location:
@@ -179,31 +178,16 @@ class MockWebSocketService {
               longitude: device.longitude + (Math.random() - 0.5) * 0.001,
             }
           : undefined,
-      wifiDetected: isMultiband || detectionType === 'wifi',
-      bluetoothDetected: isMultiband || detectionType === 'bluetooth',
-      multiband: isMultiband,
-      isStationary: Math.random() < 0.3,
-      seenCount: 1,
-      duration: Math.floor(Math.random() * 300) + 30,
-      metadata:
-        detectionType === 'wifi'
-          ? {
-              ssid: this.generateRandomSSID(),
-              vendor: this.getRandomVendor(),
-            }
-          : detectionType === 'bluetooth'
-            ? {
-                deviceName: this.generateRandomDeviceName(),
-              }
-            : {
-                band: '850MHz',
-                provider: this.getRandomProvider(),
-              },
+      metadata: {
+        source: 'positions',
+        signalCount: 1 + Math.floor(Math.random() * 4),
+        measurementCount: 3 + Math.floor(Math.random() * 4),
+      },
     };
 
     // Emit the alert event
     console.log(
-      `[MockWebSocket] 📡 Alert: ${threatLevel.toUpperCase()} ${detectionType} @ ${rssi}dBm from ${device.name}`
+      `[MockWebSocket] Alert: ${threatLevel.toUpperCase()} ${detectionType} ${confidence}% @ ~${accuracyMeters}m from ${device.name}`
     );
     this.emit('alert', alert);
   }
@@ -252,68 +236,8 @@ class MockWebSocketService {
     return items[items.length - 1];
   }
 
-  /**
-   * Generate random MAC address
-   */
-  private generateRandomMAC(): string {
-    const hexChars = '0123456789ABCDEF';
-    const segments = [];
-
-    for (let i = 0; i < 6; i++) {
-      const segment =
-        hexChars[Math.floor(Math.random() * 16)] +
-        hexChars[Math.floor(Math.random() * 16)];
-      segments.push(segment);
-    }
-
-    return segments.join(':');
-  }
-
-  /**
-   * Generate random WiFi SSID
-   */
-  private generateRandomSSID(): string {
-    const ssids = [
-      'iPhone',
-      'Samsung-Galaxy',
-      'AndroidAP',
-      'Pixel',
-      'OnePlus',
-      'DIRECT-',
-      'MyPhone',
-    ];
-    return ssids[Math.floor(Math.random() * ssids.length)];
-  }
-
-  /**
-   * Generate random device name (for Bluetooth)
-   */
-  private generateRandomDeviceName(): string {
-    const names = [
-      'AirPods Pro',
-      'Galaxy Buds',
-      'Fitbit',
-      'Apple Watch',
-      'Smartwatch',
-      'Headphones',
-    ];
-    return names[Math.floor(Math.random() * names.length)];
-  }
-
-  /**
-   * Get random device vendor
-   */
-  private getRandomVendor(): string {
-    const vendors = ['Apple Inc.', 'Samsung', 'Google', 'OnePlus', 'Xiaomi'];
-    return vendors[Math.floor(Math.random() * vendors.length)];
-  }
-
-  /**
-   * Get random cellular provider
-   */
-  private getRandomProvider(): string {
-    const providers = ['Verizon', 'AT&T', 'T-Mobile', 'Sprint'];
-    return providers[Math.floor(Math.random() * providers.length)];
+  private generateRandomFingerprint(): string {
+    return `fp-live-${Math.random().toString(36).slice(2, 10)}`;
   }
 }
 
