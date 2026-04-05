@@ -1,12 +1,10 @@
 import { useMemo } from 'react';
-import { Alert } from '@/types/alert';
 import { BucketEntry, TimeBucketedPositions } from '@/types/replay';
 import { ReplayPosition } from '@/types/triangulation';
 import { useRadarProjection } from './useRadarProjection';
 
 interface UseTimeBucketingOptions {
   positions: ReplayPosition[];
-  alerts: Alert[];
   propertyCenter: { latitude: number; longitude: number };
   canvasSize: number;
   maxRange: number;
@@ -20,53 +18,8 @@ function mapSignalType(signalType: string): BucketEntry['signalType'] {
   return 'cellular';
 }
 
-function findMatchingAlert(
-  position: ReplayPosition,
-  alerts: Alert[],
-  positionTimeMs: number
-) {
-  const windowMs = 5 * 60 * 1000;
-  let best: Alert | undefined;
-  let bestDistance = Infinity;
-
-  for (const alert of alerts) {
-    if (alert.fingerprintHash !== position.fingerprintHash) {
-      continue;
-    }
-
-    const distance = Math.abs(
-      new Date(alert.timestamp).getTime() - positionTimeMs
-    );
-    if (distance <= windowMs && distance < bestDistance) {
-      best = alert;
-      bestDistance = distance;
-    }
-  }
-
-  if (best) {
-    return best;
-  }
-
-  for (const alert of alerts) {
-    if (alert.deviceId !== position.deviceId) {
-      continue;
-    }
-
-    const distance = Math.abs(
-      new Date(alert.timestamp).getTime() - positionTimeMs
-    );
-    if (distance <= windowMs && distance < bestDistance) {
-      best = alert;
-      bestDistance = distance;
-    }
-  }
-
-  return best;
-}
-
 export function useTimeBucketing({
   positions,
-  alerts,
   propertyCenter,
   canvasSize,
   maxRange,
@@ -93,11 +46,6 @@ export function useTimeBucketing({
       const timestamp = new Date(position.observedAt);
       const minuteIndex = timestamp.getHours() * 60 + timestamp.getMinutes();
       const { x, y } = project(position.latitude, position.longitude);
-      const matchingAlert = findMatchingAlert(
-        position,
-        alerts,
-        timestamp.getTime()
-      );
 
       const entry: BucketEntry = {
         fingerprintHash: position.fingerprintHash,
@@ -105,7 +53,7 @@ export function useTimeBucketing({
         y,
         latitude: position.latitude,
         longitude: position.longitude,
-        threatLevel: matchingAlert?.threatLevel ?? 'medium',
+        threatLevel: position.threatLevel ?? 'low',
         confidence: position.confidence,
         signalType: mapSignalType(position.signalType),
       };
@@ -122,5 +70,5 @@ export function useTimeBucketing({
       startTime: firstDate.getTime(),
       buckets,
     };
-  }, [alerts, positions, project]);
+  }, [positions, project]);
 }

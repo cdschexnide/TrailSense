@@ -322,7 +322,6 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   const { data: replayData } = useReplayData(selectedDevice?.id);
   const replayPositions = replayData?.positions ?? [];
-  const replayAlerts = replayData?.alerts ?? [];
 
   const propertyCenter = {
     latitude: selectedDevice?.latitude ?? 31.530757,
@@ -331,7 +330,6 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   const bucketed = useTimeBucketing({
     positions: replayPositions,
-    alerts: replayAlerts,
     propertyCenter,
     canvasSize: 350,
     maxRange: 244,

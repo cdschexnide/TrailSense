@@ -212,12 +212,12 @@ ${sortedDevices
   .map((device, index) => {
     const battery = device.batteryPercent ?? device.battery;
     const lastSeen = formatDate(device.lastSeen || device.updatedAt);
-    const detectionCount = device.detectionCount ?? deviceAlertCounts[device.id] ?? 0;
+    const alertCount = device.alertCount ?? deviceAlertCounts[device.id] ?? 0;
     return `${index + 1}. ${device.name} - ${device.online ? 'ONLINE' : 'OFFLINE'}
 Battery: ${battery ?? 'N/A'}% (${batteryLabel(battery)})
 Signal: ${device.signalStrength || 'unknown'}
 Last seen: ${lastSeen}
-Detections: ${detectionCount}`;
+Alerts: ${alertCount}`;
   })
   .join('\n\n')}`;
 }

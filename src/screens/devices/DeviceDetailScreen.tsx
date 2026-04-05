@@ -97,7 +97,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   const signalLabel = getSignalLabel(device.signalStrength);
   // Calculate online status from lastSeen timestamp (online if seen within 5 minutes)
   const isOnline = isDeviceOnline(device.lastSeen);
-  const detectionCount = device.detectionCount || 0;
+  const alertCount = device.alertCount || 0;
 
   // Handlers
   const handleViewOnMap = () => {
@@ -150,7 +150,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   const heroSubtitle = `${isOnline ? 'Online' : 'Offline'} · Last seen ${lastSeenText}`;
 
   // Build metrics array for hero (battery removed - not measurable with 5V regulator)
-  const heroMetrics = [signalLabel, `${detectionCount} Detections`];
+  const heroMetrics = [signalLabel, `${alertCount} Alerts`];
 
   // Render Status tab content
   const renderStatusTab = () => (
@@ -293,8 +293,8 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
   // Render History tab content
   const renderHistoryTab = () => {
     // Mock data for demonstration - would come from device in real implementation
-    const todayDetections = Math.floor(detectionCount * 0.15);
-    const weekDetections = Math.floor(detectionCount * 0.4);
+    const todayDetections = Math.floor(alertCount * 0.15);
+    const weekDetections = Math.floor(alertCount * 0.4);
 
     return (
       <>
@@ -303,7 +303,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
             icon="pulse-outline"
             iconColor={colors.systemTeal}
             title="Total Detections"
-            value={String(detectionCount)}
+            value={String(alertCount)}
           />
           <GroupedListRow
             icon="today-outline"

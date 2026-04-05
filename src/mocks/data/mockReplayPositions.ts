@@ -192,6 +192,9 @@ export function generateReplayData(date?: Date): ReplayData {
           accuracyMeters,
           confidence,
           measurementCount: 4 + (step % 3),
+          presenceCertainty: confidence,
+          proximity: Math.max(0, Math.min(100, 100 - accuracyMeters * 2)),
+          threatLevel: scenario.threatLevel,
           observedAt: timestamp,
         });
 

@@ -4,7 +4,7 @@
  * Clean device card with:
  * - Name + status dot on top line
  * - Status + last seen on second line
- * - Horizontal metrics bar (signal | detections | location)
+ * - Horizontal metrics bar (signal | alerts | location)
  * - Glow effect for offline devices
  */
 
@@ -142,8 +142,8 @@ export const DeviceCard: React.FC<DeviceCardProps> = ({
   const metrics = [
     { value: capitalizeSignal(signalStrength), label: 'Signal' },
     {
-      value: (device.detectionCount || 0).toLocaleString(),
-      label: 'Detections',
+      value: (device.alertCount || 0).toLocaleString(),
+      label: 'Alerts',
     },
     {
       value: formatCoordinate(device.latitude, device.longitude),

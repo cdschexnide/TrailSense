@@ -234,7 +234,7 @@ export const mockTopDevices = mockDevices
   .map(device => ({
     deviceId: device.id,
     deviceName: device.name,
-    detectionCount: mockAlerts.filter(a => a.deviceId === device.id).length,
+    alertCount: mockAlerts.filter(a => a.deviceId === device.id).length,
     criticalCount: mockAlerts.filter(
       a => a.deviceId === device.id && a.threatLevel === 'critical'
     ).length,
@@ -245,4 +245,4 @@ export const mockTopDevices = mockDevices
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       )[0]?.timestamp,
   }))
-  .sort((a, b) => b.detectionCount - a.detectionCount);
+  .sort((a, b) => b.alertCount - a.alertCount);

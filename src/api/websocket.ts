@@ -5,7 +5,9 @@ import { Device } from '@/types/device';
 import { mockConfig } from '@/config/mockConfig';
 import { mockWebSocketService } from '@/mocks/mockWebSocket';
 
+// id is always present — backend sends { id: deviceId, ...status }
 type DeviceStatusEvent = Partial<Device> & {
+  id: string;
   friendly_name?: string;
   whitelisted?: boolean;
   metadata?: {
@@ -14,10 +16,18 @@ type DeviceStatusEvent = Partial<Device> & {
 };
 
 type PositionUpdate = {
+  id?: string;
+  fingerprintHash?: string;
+  signalType?: string;
   latitude: number;
   longitude: number;
-  timestamp?: string;
-  accuracy?: number;
+  updatedAt?: string;
+  accuracyMeters?: number;
+  confidence?: number;
+  measurementCount?: number;
+  presenceCertainty?: number | null;
+  proximity?: number | null;
+  threatLevel?: string | null;
 };
 
 type PositionsUpdatedEvent = {

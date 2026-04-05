@@ -168,12 +168,12 @@ export const useSecurityContext = (): SecurityContextData => {
               const status = d.online ? 'ONLINE' : 'OFFLINE';
               const battery = d.batteryPercent || d.battery || 'N/A';
               const signal = d.signalStrength || 'N/A';
-              const detections = d.detectionCount || 0;
+              const alerts = d.alertCount || 0;
               const location =
                 d.latitude && d.longitude
                   ? `(${d.latitude.toFixed(4)}, ${d.longitude.toFixed(4)})`
                   : '';
-              return `  - ${d.name} [${status}]: Battery ${battery}%, Signal: ${signal}, Detections: ${detections} ${location}`;
+              return `  - ${d.name} [${status}]: Battery ${battery}%, Signal: ${signal}, Alerts: ${alerts} ${location}`;
             })
             .join('\n')
         : '  No devices registered';

@@ -4,6 +4,8 @@
  * Types for triangulated device positions from ESP32 multilateration
  */
 
+import { ThreatLevel } from './alert';
+
 export type TriangulationSignalType = 'wifi' | 'bluetooth' | 'cellular';
 
 interface BasePosition {
@@ -16,6 +18,9 @@ interface BasePosition {
   accuracyMeters: number;
   confidence: number;
   measurementCount: number;
+  presenceCertainty: number | null;
+  proximity: number | null;
+  threatLevel: ThreatLevel | null;
 }
 
 export interface TriangulatedPosition extends BasePosition {

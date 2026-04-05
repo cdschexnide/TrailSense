@@ -29,7 +29,7 @@ const makeDevice = (overrides: Partial<Device> = {}): Device => ({
   online: true,
   batteryPercent: 87,
   signalStrength: 'strong',
-  detectionCount: 3,
+  alertCount: 3,
   latitude: 30.3965,
   longitude: -94.3178,
   lastSeen: '2026-04-02T09:45:00Z',

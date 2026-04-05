@@ -59,6 +59,11 @@ function generateMockPositions(
       accuracyMeters: 5 + Math.random() * 20,
       confidence: Math.round(70 + Math.random() * 30),
       measurementCount: 3 + Math.floor(Math.random() * 5),
+      presenceCertainty: Math.floor(Math.random() * 100),
+      proximity: Math.floor(Math.random() * 100),
+      threatLevel: (['low', 'medium', 'high', 'critical'] as const)[
+        Math.floor(Math.random() * 4)
+      ],
       updatedAt: new Date(Date.now() - Math.random() * 3600000).toISOString(),
     });
   }

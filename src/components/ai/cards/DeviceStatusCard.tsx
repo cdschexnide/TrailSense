@@ -49,7 +49,7 @@ export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
       <View style={styles.grid}>
         {data.devices.map(device => {
           const battery = device.batteryPercent ?? device.battery;
-          const detections = device.detectionCount ?? data.alertCounts[device.id] ?? 0;
+          const alerts = device.alertCount ?? data.alertCounts[device.id] ?? 0;
           return (
             <View key={device.id} style={styles.tile}>
               <View style={styles.nameRow}>
@@ -69,7 +69,7 @@ export const DeviceStatusCard: React.FC<DeviceStatusCardProps> = ({
               </View>
               <Text style={styles.deviceDetail}>
                 {device.online ? '' : 'OFFLINE · '}
-                BAT {battery ?? '?'}% · {detections} det
+                BAT {battery ?? '?'}% · {alerts} alerts
               </Text>
             </View>
           );
