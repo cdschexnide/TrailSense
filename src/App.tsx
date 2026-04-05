@@ -80,7 +80,7 @@ export default function App() {
           if (!mounted) {
             return;
           }
-          llmLogger.info('Initializing mock WebSocket');
+          llmLogger.info('Mock data seeded; WebSocket connects via AuthLifecycle');
         } catch (error) {
           console.error('[App] Failed to seed mock data:', error);
         } finally {
