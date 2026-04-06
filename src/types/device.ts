@@ -11,6 +11,8 @@ export interface Device {
   lastSeen?: string;
   firmwareVersion?: string;
   firmware?: string; // Legacy field
+  uptimeSeconds?: number; // Seconds since last boot, from heartbeat
+  lastBootAt?: string; // ISO 8601 timestamp of last boot
   createdAt: string;
   updatedAt: string;
 }

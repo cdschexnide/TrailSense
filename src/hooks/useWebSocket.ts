@@ -29,7 +29,7 @@ export const useWebSocket = (token: string | null) => {
 
     // Handle device status updates
     const handleDeviceStatus = (status: Partial<Device> & { id: string }) => {
-      // Update specific device in cache
+      // Patch individual device cache instantly
       queryClient.setQueryData<Device>(
         [DEVICES_QUERY_KEY, status.id],
         oldData => {
@@ -38,12 +38,10 @@ export const useWebSocket = (token: string | null) => {
         }
       );
 
-      // Update device in devices list
-      queryClient.setQueryData<Device[]>([DEVICES_QUERY_KEY], oldData => {
-        if (!oldData) return oldData;
-        return oldData.map(device =>
-          device.id === status.id ? { ...device, ...status } : device
-        );
+      // Invalidate all device queries so lists, filtered lists, and unknown
+      // devices refetch consistently after each status event.
+      queryClient.invalidateQueries({
+        queryKey: [DEVICES_QUERY_KEY],
       });
     };
 

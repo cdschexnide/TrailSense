@@ -8,12 +8,28 @@ import { mockWebSocketService } from '@/mocks/mockWebSocket';
 // id is always present — backend sends { id: deviceId, ...status }
 type DeviceStatusEvent = Partial<Device> & {
   id: string;
+  detectionCount?: number;
   friendly_name?: string;
   whitelisted?: boolean;
   metadata?: {
     device_name?: string;
   };
 };
+
+/**
+ * Normalizes backend device-status events to frontend shape.
+ * Maps `detectionCount` (backend) to `alertCount` (frontend).
+ * Always strips `detectionCount` so consumers never see it.
+ */
+export function mapDeviceStatusEvent(
+  raw: DeviceStatusEvent
+): DeviceStatusEvent {
+  const { detectionCount, ...rest } = raw;
+  if (detectionCount != null && rest.alertCount === undefined) {
+    return { ...rest, alertCount: detectionCount };
+  }
+  return rest;
+}
 
 type PositionUpdate = {
   id?: string;
@@ -76,7 +92,7 @@ class WebSocketService {
           this.emit('alert', alert);
         };
         this.mockDeviceStatusHandler = status => {
-          this.emit('device-status', status);
+          this.emit('device-status', mapDeviceStatusEvent(status));
         };
         this.mockPositionsHandler = data => {
           this.emit('positions-updated', data);
@@ -120,7 +136,7 @@ class WebSocketService {
     });
 
     this.socket.on('device-status', (status: DeviceStatusEvent) => {
-      this.emit('device-status', status);
+      this.emit('device-status', mapDeviceStatusEvent(status));
     });
 
     this.socket.on('positions-updated', (data: PositionsUpdatedEvent) => {

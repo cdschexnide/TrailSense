@@ -17,6 +17,16 @@ class MockWebSocketService {
   private deviceStatusIntervalId: NodeJS.Timeout | null = null;
   private isConnected: boolean = false;
   private eventCounter: number = 0;
+  private uptimeState = new Map(
+    mockDevices
+      .filter(device => device.uptimeSeconds != null)
+      .map(device => [device.id, device.uptimeSeconds!] as const)
+  );
+  private alertCountState = new Map(
+    mockDevices
+      .filter(device => device.alertCount != null)
+      .map(device => [device.id, device.alertCount!] as const)
+  );
 
   // Configuration
   private readonly EVENT_INTERVAL = 5000; // 5 seconds between events
@@ -190,6 +200,10 @@ class MockWebSocketService {
       `[MockWebSocket] Alert: ${threatLevel.toUpperCase()} ${detectionType} ${confidence}% @ ~${accuracyMeters}m from ${device.name}`
     );
     this.emit('alert', alert);
+
+    // Keep status pushes aligned with alert traffic over time.
+    const currentCount = this.alertCountState.get(device.id) ?? 0;
+    this.alertCountState.set(device.id, currentCount + 1);
   }
 
   /**
@@ -206,11 +220,25 @@ class MockWebSocketService {
       Math.min(100, (device.battery || 50) + batteryChange)
     );
 
+    const priorUptime =
+      this.uptimeState.get(device.id) ?? device.uptimeSeconds ?? undefined;
+    const uptimeSeconds =
+      priorUptime != null
+        ? priorUptime + Math.floor(Math.random() * 300) + 60
+        : undefined;
+
+    if (uptimeSeconds != null) {
+      this.uptimeState.set(device.id, uptimeSeconds);
+    }
+
     const statusUpdate: Partial<Device> & { id: string } = {
       id: device.id,
+      name: device.name,
       battery: newBattery,
       lastSeen: new Date().toISOString(),
       online: newBattery > 5, // Go offline if battery too low
+      alertCount: this.alertCountState.get(device.id) ?? device.alertCount,
+      ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
     };
 
     console.log(
