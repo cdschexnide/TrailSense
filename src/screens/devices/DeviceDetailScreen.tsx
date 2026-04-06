@@ -40,8 +40,11 @@ const COVERAGE_RANGES = {
 };
 
 // Signal strength helper
-const getSignalLabel = (strength: string | number | undefined): string => {
-  const strengthStr = String(strength || '').toLowerCase();
+export const getSignalLabel = (
+  strength: string | number | undefined,
+): string => {
+  if (!strength && strength !== 0) return '--';
+  const strengthStr = String(strength).toLowerCase();
   if (
     strengthStr === 'excellent' ||
     strengthStr === 'strong' ||
@@ -65,6 +68,9 @@ const getSignalLabel = (strength: string | number | undefined): string => {
 const formatRelativeTime = (dateString: string): string => {
   try {
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+      return 'Unknown';
+    }
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -78,6 +84,21 @@ const formatRelativeTime = (dateString: string): string => {
   } catch {
     return 'Unknown';
   }
+};
+
+export const formatUptime = (seconds: number): string => {
+  const uptimeSeconds = Math.max(0, Math.floor(seconds));
+
+  if (uptimeSeconds < 60) return '< 1m';
+
+  const days = Math.floor(uptimeSeconds / 86400);
+  const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+  const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+  const secs = uptimeSeconds % 60;
+
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m ${secs}s`;
 };
 
 export const DeviceDetailScreen = ({ navigation }: any) => {
@@ -166,7 +187,11 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
           icon="time-outline"
           iconColor={colors.systemOrange}
           title="Uptime"
-          value={(device as any).uptime || '24h 32m'}
+          value={
+            device.uptimeSeconds != null
+              ? formatUptime(device.uptimeSeconds)
+              : '--'
+          }
         />
       </GroupedListSection>
 
@@ -316,6 +341,14 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
             iconColor={colors.systemPurple}
             title="This Week"
             value={String(weekDetections)}
+          />
+          <GroupedListRow
+            icon="refresh-outline"
+            iconColor={colors.systemOrange}
+            title="Last Reboot"
+            value={
+              device.lastBootAt ? formatRelativeTime(device.lastBootAt) : '--'
+            }
           />
         </GroupedListSection>
 
