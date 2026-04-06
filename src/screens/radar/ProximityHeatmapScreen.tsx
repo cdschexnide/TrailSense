@@ -42,6 +42,7 @@ import { BucketEntry, RadarMode } from '@/types/replay';
 import { TriangulatedPosition } from '@/types/triangulation';
 import { isDemoOrMockMode } from '@/config/demoModeRuntime';
 import { useTheme } from '@theme/provider';
+import { isDeviceOnline } from '@utils/dateUtils';
 
 const MAPBOX_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 if (!MAPBOX_TOKEN) {
@@ -108,14 +109,14 @@ function LiveMapContent({
             style={[
               styles.statusDot,
               {
-                backgroundColor: selectedDevice?.online
+                backgroundColor: isDeviceOnline(selectedDevice?.lastSeen)
                   ? colors.systemGreen
                   : colors.systemRed,
               },
             ]}
           />
           <Text variant="subheadline" color="secondaryLabel">
-            {selectedDevice?.online ? 'Online' : 'Offline'} ·{' '}
+            {isDeviceOnline(selectedDevice?.lastSeen) ? 'Online' : 'Offline'} ·{' '}
             {formatCoordinates(deviceCoordinates)}
           </Text>
           {devices.length > 1 ? (
@@ -167,7 +168,7 @@ function LiveMapContent({
                       deviceCoordinates.longitude!,
                       deviceCoordinates.latitude!,
                     ]}
-                    isOnline={selectedDevice?.online}
+                    isOnline={isDeviceOnline(selectedDevice?.lastSeen)}
                   />
 
                   {positions.map(position => (
@@ -662,7 +663,7 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
                       deviceCoordinates.longitude!,
                       deviceCoordinates.latitude!,
                     ]}
-                    isOnline={selectedDevice?.online}
+                    isOnline={isDeviceOnline(selectedDevice?.lastSeen)}
                   />
 
                   {smoothMode
