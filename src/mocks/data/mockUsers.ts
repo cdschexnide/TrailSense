@@ -7,7 +7,7 @@ export const mockUsers: User[] = [
     name: 'John Anderson',
     role: 'admin',
     createdAt: '2025-01-15T10:00:00Z',
-    lastLogin: '2025-11-16T08:30:00Z',
+    updatedAt: '2025-11-16T08:30:00Z',
   },
   {
     id: 'user-002',
@@ -15,7 +15,7 @@ export const mockUsers: User[] = [
     name: 'Sarah Mitchell',
     role: 'user',
     createdAt: '2025-02-20T14:30:00Z',
-    lastLogin: '2025-11-15T18:45:00Z',
+    updatedAt: '2025-11-15T18:45:00Z',
   },
 ];
 
@@ -25,7 +25,6 @@ export const mockRegularUser = mockUsers[1];
 export const mockAuthTokens: AuthTokens = {
   accessToken: 'mock-access-token-' + Date.now(),
   refreshToken: 'mock-refresh-token-' + Date.now(),
-  expiresIn: 3600, // 1 hour
 };
 
 // Mock login credentials for testing

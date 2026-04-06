@@ -10,16 +10,18 @@ import { Store } from '@reduxjs/toolkit';
 import {
   mockAdminUser,
   mockAuthTokens,
-  mockAlerts,
-  mockDevices,
   mockKnownDevices,
-  mockAnalyticsData,
-  mockHeatmapPoints,
-  mockDeviceFingerprints,
   mockAppSettings,
-  PERSONA_FINGERPRINTS,
 } from '@/mocks/data';
+import { getMockAlerts, PERSONA_FINGERPRINTS } from '@/mocks/data/mockAlerts';
+import { getMockDevices } from '@/mocks/data/mockDevices';
+import {
+  getAnalyticsData,
+  getDeviceFingerprints,
+  getHeatmapPoints,
+} from '@/mocks/data/mockAnalytics';
 import { TriangulatedPosition } from '@/types/triangulation';
+import { randomFingerprint } from '@/mocks/helpers/fingerprints';
 
 // React Query keys
 const ALERTS_QUERY_KEY = 'alerts';
@@ -39,15 +41,16 @@ function generateMockPositions(
   centerLng: number
 ): { positions: TriangulatedPosition[] } {
   const positions: TriangulatedPosition[] = [];
-  // Use persona fingerprints for the first positions, then fill remaining with generated ones
+  const signalTypes = ['wifi', 'bluetooth', 'cellular'] as const;
+
   for (let i = 0; i < 8; i++) {
     const persona = PERSONA_FINGERPRINTS[i];
     const signalType = persona
       ? persona.signalType
-      : (['wifi', 'bluetooth', 'cellular'] as const)[i % 3];
+      : signalTypes[i % signalTypes.length];
     const fingerprintHash = persona
       ? persona.fingerprintHash
-      : `fp-${deviceId.toLowerCase()}-${i.toString(16).padStart(2, '0')}`;
+      : randomFingerprint(signalTypes[i % signalTypes.length]);
 
     positions.push({
       id: `pos-${deviceId}-${i}`,
@@ -89,6 +92,12 @@ export const seedMockData = async ({
   console.log('[MockData] Starting mock data seeding...');
 
   try {
+    const freshDevices = getMockDevices();
+    const freshAlerts = getMockAlerts();
+    const freshAnalytics = getAnalyticsData(freshAlerts);
+    const freshHeatmap = getHeatmapPoints(freshAlerts);
+    const freshFingerprints = getDeviceFingerprints(freshAlerts);
+
     // 1. Seed Redux Store
     console.log('[MockData] Seeding Redux store...');
 
@@ -117,24 +126,24 @@ export const seedMockData = async ({
     console.log('[MockData] Seeding React Query cache...');
 
     // Alerts
-    queryClient.setQueryData([ALERTS_QUERY_KEY, undefined], mockAlerts);
-    queryClient.setQueryData([ALERTS_QUERY_KEY], mockAlerts);
+    queryClient.setQueryData([ALERTS_QUERY_KEY, undefined], freshAlerts);
+    queryClient.setQueryData([ALERTS_QUERY_KEY], freshAlerts);
 
     // Individual alerts
-    mockAlerts.forEach(alert => {
+    freshAlerts.forEach(alert => {
       queryClient.setQueryData([ALERTS_QUERY_KEY, alert.id], alert);
     });
 
     // Devices
-    queryClient.setQueryData([DEVICES_QUERY_KEY], mockDevices);
+    queryClient.setQueryData([DEVICES_QUERY_KEY], freshDevices);
 
     // Individual devices
-    mockDevices.forEach(device => {
+    freshDevices.forEach(device => {
       queryClient.setQueryData([DEVICES_QUERY_KEY, device.id], device);
     });
 
     // Positions for each device with coordinates
-    mockDevices.forEach(device => {
+    freshDevices.forEach(device => {
       if (
         typeof device.latitude === 'number' &&
         typeof device.longitude === 'number'
@@ -161,18 +170,18 @@ export const seedMockData = async ({
     periods.forEach(period => {
       queryClient.setQueryData(
         [ANALYTICS_QUERY_KEY, period, undefined, undefined],
-        mockAnalyticsData
+        freshAnalytics
       );
     });
 
     // Heatmap data
     queryClient.setQueryData(
       [HEATMAP_QUERY_KEY, undefined, undefined],
-      mockHeatmapPoints
+      freshHeatmap
     );
 
     // Device history/fingerprints
-    mockDeviceFingerprints.forEach(fingerprint => {
+    freshFingerprints.forEach(fingerprint => {
       queryClient.setQueryData(
         [DEVICE_HISTORY_QUERY_KEY, fingerprint.fingerprintHash],
         fingerprint
@@ -184,13 +193,13 @@ export const seedMockData = async ({
 
     console.log('[MockData] ✓ Mock data seeding complete!');
     console.log('[MockData] Seeded:');
-    console.log(`  - ${mockAlerts.length} alerts`);
-    console.log(`  - ${mockDevices.length} devices`);
+    console.log(`  - ${freshAlerts.length} alerts`);
+    console.log(`  - ${freshDevices.length} devices`);
     console.log(`  - ${mockKnownDevices.length} known devices`);
     console.log(`  - Analytics data`);
-    console.log(`  - Heatmap data (${mockHeatmapPoints.length} points)`);
-    console.log(`  - ${mockDeviceFingerprints.length} device fingerprints`);
-    console.log(`  - User: ${mockAdminUser.email} (${mockAdminUser.role})`);
+    console.log(`  - Heatmap data (${freshHeatmap.length} points)`);
+    console.log(`  - ${freshFingerprints.length} device fingerprints`);
+    console.log(`  - User: ${mockAdminUser.email}`);
   } catch (error) {
     console.error('[MockData] Error seeding mock data:', error);
     throw error;

@@ -3,15 +3,16 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
-  role: 'admin' | 'user';
+  role?: 'admin' | 'user';
   createdAt: string;
+  updatedAt?: string;
   lastLogin?: string;
 }
 
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn?: number;
 }
 
 export interface LoginCredentials {

@@ -24,11 +24,17 @@ type DeviceStatusEvent = Partial<Device> & {
 export function mapDeviceStatusEvent(
   raw: DeviceStatusEvent
 ): DeviceStatusEvent {
-  const { detectionCount, ...rest } = raw;
+  const { detectionCount, battery, ...rest } = raw;
+  const normalizedBattery =
+    battery != null && rest.batteryPercent === undefined
+      ? { batteryPercent: battery }
+      : {};
+
   if (detectionCount != null && rest.alertCount === undefined) {
-    return { ...rest, alertCount: detectionCount };
+    return { ...rest, ...normalizedBattery, alertCount: detectionCount };
   }
-  return rest;
+
+  return { ...rest, ...normalizedBattery };
 }
 
 type PositionUpdate = {

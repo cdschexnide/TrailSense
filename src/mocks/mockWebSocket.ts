@@ -2,12 +2,13 @@
  * Mock WebSocket Service
  *
  * Simulates real-time WebSocket events for development and testing.
- * Generates realistic alert and device status events at configurable intervals.
+ * Generates realistic alert, device status, and positions events.
  */
 
 import { Alert, ThreatLevel, DetectionType } from '@/types/alert';
 import { Device } from '@/types/device';
-import { mockDevices } from './data/mockDevices';
+import { getMockDevices } from './data/mockDevices';
+import { randomFingerprint } from './helpers/fingerprints';
 
 type EventCallback = (data: any) => void;
 
@@ -15,22 +16,18 @@ class MockWebSocketService {
   private listeners: Map<string, Set<EventCallback>> = new Map();
   private alertIntervalId: NodeJS.Timeout | null = null;
   private deviceStatusIntervalId: NodeJS.Timeout | null = null;
+  private positionsIntervalId: NodeJS.Timeout | null = null;
   private isConnected: boolean = false;
   private eventCounter: number = 0;
-  private uptimeState = new Map(
-    mockDevices
-      .filter(device => device.uptimeSeconds != null)
-      .map(device => [device.id, device.uptimeSeconds!] as const)
-  );
-  private alertCountState = new Map(
-    mockDevices
-      .filter(device => device.alertCount != null)
-      .map(device => [device.id, device.alertCount!] as const)
-  );
+  private devices: Device[] = [];
+  private uptimeState = new Map<string, number>();
+  private alertCountState = new Map<string, number>();
+  private signalStrengthState = new Map<string, string>();
 
   // Configuration
-  private readonly EVENT_INTERVAL = 5000; // 5 seconds between events
-  private readonly DEVICE_STATUS_INTERVAL = 15000; // 15 seconds between device updates
+  private readonly EVENT_INTERVAL = 5000;
+  private readonly DEVICE_STATUS_INTERVAL = 15000;
+  private readonly POSITIONS_INTERVAL = 10000;
 
   /**
    * Simulates WebSocket connection
@@ -41,16 +38,31 @@ class MockWebSocketService {
       return;
     }
 
-    console.log('[MockWebSocket] 🎭 Connecting to mock WebSocket...');
+    this.devices = getMockDevices();
+    this.uptimeState = new Map(
+      this.devices
+        .filter(device => device.uptimeSeconds != null)
+        .map(device => [device.id, device.uptimeSeconds!] as const)
+    );
+    this.alertCountState = new Map(
+      this.devices
+        .filter(device => device.alertCount != null)
+        .map(device => [device.id, device.alertCount!] as const)
+    );
+    this.signalStrengthState = new Map(
+      this.devices
+        .filter(device => device.signalStrength != null)
+        .map(device => [device.id, device.signalStrength!] as const)
+    );
+
+    console.log('[MockWebSocket] Connecting to mock WebSocket...');
     this.isConnected = true;
 
-    // Simulate connection event
     setTimeout(() => {
-      console.log('[MockWebSocket] ✓ Connected');
+      console.log('[MockWebSocket] Connected');
       this.emit('connect', {});
     }, 500);
 
-    // Start generating events
     this.startEventGeneration();
   }
 
@@ -63,13 +75,9 @@ class MockWebSocketService {
     console.log('[MockWebSocket] Disconnecting...');
     this.isConnected = false;
 
-    // Stop event generation
     this.stopEventGeneration();
-
-    // Simulate disconnect event
     this.emit('disconnect', {});
-
-    console.log('[MockWebSocket] ✓ Disconnected');
+    console.log('[MockWebSocket] Disconnected');
   }
 
   /**
@@ -106,15 +114,17 @@ class MockWebSocketService {
    * Start generating mock events
    */
   private startEventGeneration() {
-    // Generate alert events
     this.alertIntervalId = setInterval(() => {
       this.generateMockAlert();
     }, this.EVENT_INTERVAL);
 
-    // Generate device status updates
     this.deviceStatusIntervalId = setInterval(() => {
       this.generateMockDeviceStatus();
     }, this.DEVICE_STATUS_INTERVAL);
+
+    this.positionsIntervalId = setInterval(() => {
+      this.generateMockPositionsUpdate();
+    }, this.POSITIONS_INTERVAL);
   }
 
   /**
@@ -130,6 +140,11 @@ class MockWebSocketService {
       clearInterval(this.deviceStatusIntervalId);
       this.deviceStatusIntervalId = null;
     }
+
+    if (this.positionsIntervalId) {
+      clearInterval(this.positionsIntervalId);
+      this.positionsIntervalId = null;
+    }
   }
 
   /**
@@ -141,16 +156,14 @@ class MockWebSocketService {
     const threatLevels: ThreatLevel[] = ['low', 'medium', 'high', 'critical'];
     const detectionTypes: DetectionType[] = ['cellular', 'wifi', 'bluetooth'];
 
-    // Weight threat levels to make critical/high more rare
-    const threatWeights = [40, 35, 20, 5]; // low, medium, high, critical
+    const threatWeights = [40, 35, 20, 5];
     const threatLevel = this.weightedRandom(threatLevels, threatWeights);
 
-    // Weight detection types
-    const typeWeights = [20, 50, 30]; // cellular, wifi, bluetooth
+    const typeWeights = [20, 50, 30];
     const detectionType = this.weightedRandom(detectionTypes, typeWeights);
 
-    // Pick a random online device
-    const onlineDevices = mockDevices.filter(d => d.online);
+    const onlineDevices = this.devices.filter(d => d.online);
+    if (onlineDevices.length === 0) return;
     const device =
       onlineDevices[Math.floor(Math.random() * onlineDevices.length)];
 
@@ -165,18 +178,16 @@ class MockWebSocketService {
       Math.floor(Math.random() * (maxConfidence - minConfidence + 1)) +
       minConfidence;
     const accuracyMeters = Number((4 + Math.random() * 45).toFixed(1));
-
-    // Generate unique ID using timestamp + counter + random component
+    const timestamp = new Date().toISOString();
     const uniqueId = `live-alert-${Date.now()}-${this.eventCounter}-${Math.random().toString(36).substr(2, 9)}`;
 
-    // Generate mock alert
     const alert: Alert = {
       id: uniqueId,
       deviceId: device.id,
-      timestamp: new Date().toISOString(),
+      timestamp,
       threatLevel,
       detectionType,
-      fingerprintHash: this.generateRandomFingerprint(),
+      fingerprintHash: randomFingerprint(detectionType),
       confidence,
       accuracyMeters,
       isReviewed: false,
@@ -193,15 +204,14 @@ class MockWebSocketService {
         signalCount: 1 + Math.floor(Math.random() * 4),
         measurementCount: 3 + Math.floor(Math.random() * 4),
       },
+      createdAt: timestamp,
     };
 
-    // Emit the alert event
     console.log(
       `[MockWebSocket] Alert: ${threatLevel.toUpperCase()} ${detectionType} ${confidence}% @ ~${accuracyMeters}m from ${device.name}`
     );
     this.emit('alert', alert);
 
-    // Keep status pushes aligned with alert traffic over time.
     const currentCount = this.alertCountState.get(device.id) ?? 0;
     this.alertCountState.set(device.id, currentCount + 1);
   }
@@ -210,14 +220,12 @@ class MockWebSocketService {
    * Generate mock device status update
    */
   private generateMockDeviceStatus() {
-    // Pick a random device
-    const device = mockDevices[Math.floor(Math.random() * mockDevices.length)];
+    const device = this.devices[Math.floor(Math.random() * this.devices.length)];
 
-    // Generate realistic status update
-    const batteryChange = Math.floor(Math.random() * 5) - 2; // -2 to +2
+    const batteryChange = Math.floor(Math.random() * 5) - 2;
     const newBattery = Math.max(
       0,
-      Math.min(100, (device.battery || 50) + batteryChange)
+      Math.min(100, (device.batteryPercent ?? device.battery ?? 50) + batteryChange)
     );
 
     const priorUptime =
@@ -231,20 +239,82 @@ class MockWebSocketService {
       this.uptimeState.set(device.id, uptimeSeconds);
     }
 
+    const currentSignal =
+      this.signalStrengthState.get(device.id) ?? device.signalStrength;
+    const signalLevels = ['poor', 'fair', 'good', 'excellent'];
+    let signalStrength = currentSignal;
+    if (signalStrength && Math.random() < 0.1) {
+      const idx = signalLevels.indexOf(signalStrength);
+      if (idx >= 0) {
+        const drift = Math.random() < 0.5 ? -1 : 1;
+        const nextIdx = Math.max(
+          0,
+          Math.min(signalLevels.length - 1, idx + drift)
+        );
+        signalStrength = signalLevels[nextIdx];
+        this.signalStrengthState.set(device.id, signalStrength);
+      }
+    }
+
     const statusUpdate: Partial<Device> & { id: string } = {
       id: device.id,
       name: device.name,
       battery: newBattery,
       lastSeen: new Date().toISOString(),
-      online: newBattery > 5, // Go offline if battery too low
+      online: newBattery > 5,
       alertCount: this.alertCountState.get(device.id) ?? device.alertCount,
+      signalStrength,
+      lastBootAt: device.lastBootAt,
+      latitude: device.latitude,
+      longitude: device.longitude,
       ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
     };
 
     console.log(
-      `[MockWebSocket] 🔋 Device Status: ${device.name} battery: ${newBattery}%`
+      `[MockWebSocket] Device Status: ${device.name} battery: ${newBattery}%`
     );
     this.emit('device-status', statusUpdate);
+  }
+
+  private generateMockPositionsUpdate() {
+    const onlineDevices = this.devices.filter(d => d.online);
+    if (onlineDevices.length === 0) return;
+
+    const device =
+      onlineDevices[Math.floor(Math.random() * onlineDevices.length)];
+
+    if (device.latitude === undefined || device.longitude === undefined) {
+      return;
+    }
+
+    const detectionTypes: DetectionType[] = ['wifi', 'bluetooth', 'cellular'];
+    const positionCount = 2 + Math.floor(Math.random() * 3);
+
+    const positions = Array.from({ length: positionCount }, (_, index) => {
+      const type = detectionTypes[index % detectionTypes.length];
+      const presenceCertainty = 20 + Math.floor(Math.random() * 70);
+      const proximity = 20 + Math.floor(Math.random() * 70);
+
+      return {
+        id: `pos-live-${Date.now()}-${index}`,
+        fingerprintHash: randomFingerprint(type),
+        signalType: type,
+        latitude: device.latitude! + (Math.random() - 0.5) * 0.002,
+        longitude: device.longitude! + (Math.random() - 0.5) * 0.002,
+        accuracyMeters: 5 + Math.random() * 20,
+        confidence: Math.round(60 + Math.random() * 35),
+        measurementCount: 3 + Math.floor(Math.random() * 5),
+        updatedAt: new Date().toISOString(),
+        presenceCertainty,
+        proximity,
+        threatLevel: this.deriveThreatLevel(presenceCertainty, proximity),
+      };
+    });
+
+    this.emit('positions-updated', {
+      deviceId: device.id,
+      positions,
+    });
   }
 
   /**
@@ -264,8 +334,22 @@ class MockWebSocketService {
     return items[items.length - 1];
   }
 
-  private generateRandomFingerprint(): string {
-    return `fp-live-${Math.random().toString(36).slice(2, 10)}`;
+  private deriveThreatLevel(
+    presence: number,
+    proximity: number
+  ): ThreatLevel {
+    const presenceRow = presence <= 25 ? 0 : presence <= 50 ? 1 : presence <= 75 ? 2 : 3;
+    const proximityColumn =
+      proximity <= 30 ? 0 : proximity <= 55 ? 1 : proximity <= 75 ? 2 : 3;
+
+    const matrix: ThreatLevel[][] = [
+      ['low', 'low', 'low', 'medium'],
+      ['low', 'low', 'medium', 'high'],
+      ['low', 'medium', 'high', 'critical'],
+      ['medium', 'high', 'critical', 'critical'],
+    ];
+
+    return matrix[presenceRow][proximityColumn];
   }
 }
 

@@ -1,5 +1,9 @@
 import { apiClient } from './client';
-import { AnalyticsData, HeatmapPoint, DeviceFingerprint } from '@types';
+import {
+  AnalyticsData,
+  BackendDeviceFingerprint,
+  HeatmapPoint,
+} from '@types';
 
 interface GetAnalyticsParams {
   period?: 'day' | 'week' | 'month' | 'year';
@@ -34,7 +38,9 @@ export const analyticsApi = {
     return response.data;
   },
 
-  async getDeviceHistory(fingerprintHash: string): Promise<DeviceFingerprint> {
+  async getDeviceHistory(
+    fingerprintHash: string
+  ): Promise<BackendDeviceFingerprint> {
     const response = await apiClient.get(
       `/analytics/devices/${fingerprintHash}`
     );

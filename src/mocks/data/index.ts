@@ -11,6 +11,7 @@ export {
 
 // Devices
 export {
+  getMockDevices,
   mockDevices,
   mockOnlineDevices,
   mockOfflineDevices,
@@ -18,6 +19,7 @@ export {
 
 // Alerts
 export {
+  getMockAlerts,
   mockAlerts,
   mockUnreviewedAlerts,
   mockCriticalAlerts,
@@ -42,6 +44,9 @@ export {
 
 // Analytics
 export {
+  getAnalyticsData,
+  getHeatmapPoints,
+  getDeviceFingerprints,
   mockAnalyticsData,
   mockHeatmapPoints,
   mockDeviceFingerprints,

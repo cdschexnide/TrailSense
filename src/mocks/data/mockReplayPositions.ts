@@ -3,6 +3,8 @@ import {
   ReplayPosition,
   TriangulationSignalType,
 } from '@/types/triangulation';
+import { PERSONA_FINGERPRINTS as PERSONAS } from '../helpers/fingerprints';
+import { todayAt } from '../helpers/timestamps';
 
 const PROPERTY_CENTER = { latitude: 30.396526, longitude: -94.317806 };
 const METERS_PER_DEG_LAT = 111_320;
@@ -46,9 +48,13 @@ function toLatLng(northMeters: number, eastMeters: number) {
 }
 
 function createBaseDate(date?: Date) {
-  const base = date ? new Date(date) : new Date();
-  base.setHours(0, 0, 0, 0);
-  return base;
+  if (date) {
+    const base = new Date(date);
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }
+  // Use shared timestamp helper for today at midnight
+  return new Date(todayAt(0, 0));
 }
 
 function createScenarioAlert(
@@ -81,13 +87,14 @@ function createScenarioAlert(
         confidence,
       },
     },
+    createdAt: timestamp,
   };
 }
 
 const SCENARIOS: ScenarioDefinition[] = [
   {
     deviceId: 'device-001',
-    fingerprintHash: 'fp-delivery-a1b2c3',
+    fingerprintHash: PERSONAS.delivery,
     signalType: 'cellular',
     threatLevel: 'low',
     visits: [
@@ -103,7 +110,7 @@ const SCENARIOS: ScenarioDefinition[] = [
   },
   {
     deviceId: 'device-001',
-    fingerprintHash: 'fp-visitor-d4e5f6',
+    fingerprintHash: PERSONAS.visitor,
     signalType: 'wifi',
     threatLevel: 'medium',
     visits: [
@@ -120,7 +127,7 @@ const SCENARIOS: ScenarioDefinition[] = [
   },
   {
     deviceId: 'device-001',
-    fingerprintHash: 'fp-loiterer-g7h8i9',
+    fingerprintHash: PERSONAS.loiterer,
     signalType: 'bluetooth',
     threatLevel: 'critical',
     visits: [
@@ -136,7 +143,7 @@ const SCENARIOS: ScenarioDefinition[] = [
   },
   {
     deviceId: 'device-001',
-    fingerprintHash: 'fp-vehicle-j0k1l2',
+    fingerprintHash: PERSONAS.vehicle,
     signalType: 'cellular',
     threatLevel: 'high',
     visits: [

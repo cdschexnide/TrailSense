@@ -17,6 +17,8 @@ export interface AlertMetadata {
   measurementCount?: number;
 
   // Triangulation-specific fields
+  presenceCertainty?: number;
+  proximity?: number;
   triangulatedPosition?: {
     latitude: number;
     longitude: number;
@@ -41,6 +43,7 @@ export interface Alert {
     longitude: number;
   };
   metadata?: AlertMetadata;
+  createdAt?: string;
 }
 
 export interface AlertFilters {
@@ -110,6 +113,22 @@ export interface DeviceFingerprint {
     type: string;
   }>;
   averageDuration: number;
+  commonHours: number[];
+  category: string;
+}
+
+/**
+ * Backend API response shape from GET /analytics/devices/:fingerprintHash.
+ * Separate from DeviceFingerprint, which is the app-internal domain model.
+ */
+export interface BackendDeviceFingerprint {
+  id: string;
+  fingerprintHash: string;
+  firstSeen: string;
+  lastSeen: string;
+  totalVisits: number;
+  totalSamples: number;
+  totalAlerts: number;
   commonHours: number[];
   category: string;
 }

@@ -1,8 +1,11 @@
-import { generateReplayPositions } from '@/mocks/data/mockReplayPositions';
-import { TriangulatedPosition } from '@/types/triangulation';
+import {
+  generateReplayData,
+  generateReplayPositions,
+} from '@/mocks/data/mockReplayPositions';
+import { ReplayPosition } from '@/types/triangulation';
 
 describe('generateReplayPositions', () => {
-  let positions: TriangulatedPosition[];
+  let positions: ReplayPosition[];
 
   beforeAll(() => {
     positions = generateReplayPositions();
@@ -16,7 +19,7 @@ describe('generateReplayPositions', () => {
 
   it('distributes positions across 24h', () => {
     const hours = new Set(
-      positions.map(position => new Date(position.updatedAt).getHours())
+      positions.map(position => new Date(position.observedAt).getHours())
     );
     expect(hours.size).toBeGreaterThanOrEqual(6);
   });
@@ -37,15 +40,31 @@ describe('generateReplayPositions', () => {
       expect(position.signalType).toMatch(/wifi|bluetooth|cellular/);
       expect(position.confidence).toBeGreaterThan(0);
       expect(position.confidence).toBeLessThanOrEqual(100);
-      expect(position.updatedAt).toBeDefined();
+      expect(position.observedAt).toBeDefined();
     }
   });
 
   it('loiterer scenario has ~90 positions over 45 min', () => {
     const loiterer = positions.filter(
-      position => position.fingerprintHash === 'fp-loiterer-g7h8i9'
+      position => position.fingerprintHash === 'b_a7b8c9'
     );
     expect(loiterer.length).toBeGreaterThanOrEqual(70);
     expect(loiterer.length).toBeLessThanOrEqual(110);
+  });
+});
+
+describe('replay fingerprint format', () => {
+  const data = generateReplayData();
+
+  it('all positions use backend fingerprint format', () => {
+    data.positions.forEach(position => {
+      expect(position.fingerprintHash).toMatch(/^[wcb]_[a-f0-9]+$/);
+    });
+  });
+
+  it('all alerts use backend fingerprint format', () => {
+    data.alerts.forEach(alert => {
+      expect(alert.fingerprintHash).toMatch(/^[wcb]_[a-f0-9]+$/);
+    });
   });
 });
