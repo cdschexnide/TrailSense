@@ -393,6 +393,7 @@ Remove `expiresIn` — backend token response only returns
 ### `src/types/auth.ts`
 
 - Ensure `phone`, `role`, `lastLogin` are optional (`?`) fields
+- Add optional `updatedAt?: string` field (backend returns this)
 - Ensure `AuthTokens.expiresIn` is optional
 
 ### `src/types/alert.ts`

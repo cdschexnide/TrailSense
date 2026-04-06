@@ -282,7 +282,7 @@ git commit -m "feat: add backend-format fingerprint helpers for mock data"
 - Modify: `src/types/auth.ts:1-15`
 - Modify: `src/types/alert.ts:8-26`
 
-- [ ] **Step 1: Make `role` optional and `expiresIn` optional in auth types**
+- [ ] **Step 1: Make `role` optional, add `updatedAt`, and make `expiresIn` optional in auth types**
 
 In `src/types/auth.ts`, change:
 
@@ -293,6 +293,12 @@ role: 'admin' | 'user';
 to:
 ```typescript
 role?: 'admin' | 'user';
+```
+
+And after `lastLogin?: string;` (line 8), add:
+
+```typescript
+updatedAt?: string;
 ```
 
 And change:
