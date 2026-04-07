@@ -41,7 +41,7 @@ const COVERAGE_RANGES = {
 
 // Signal strength helper
 export const getSignalLabel = (
-  strength: string | number | undefined,
+  strength: string | number | undefined
 ): string => {
   if (!strength && strength !== 0) return '--';
   const strengthStr = String(strength).toLowerCase();
@@ -125,8 +125,7 @@ export const DeviceDetailScreen = ({ navigation }: any) => {
     navigation.navigate('RadarTab', {
       screen: 'LiveRadar',
       params: {
-        focusLat: device.latitude,
-        focusLng: device.longitude,
+        deviceId: device.id,
       },
     });
   };

@@ -1,0 +1,115 @@
+<h2>How should users switch between devices?</h2>
+<p class="subtitle">The Radar screen currently shows only the first device. Users need a way to cycle through all their deployed sensors (e.g., "North Gate Sensor", "South Boundary", "East Trail Monitor").</p>
+
+<div class="cards">
+  <!-- Option A: Swipe -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a1a2e; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 16px; width: 100%;">
+        <div style="color: #555; font-size: 24px;">&larr;</div>
+        <div style="flex: 1; background: #252540; border-radius: 12px; height: 160px; display: flex; align-items: center; justify-content: center; border: 1px solid #333;">
+          <div style="text-align: center;">
+            <div style="color: #4ade80; font-size: 10px;">● ONLINE</div>
+            <div style="color: #e8e8e0; font-weight: 600; margin-top: 4px;">North Gate Sensor</div>
+            <div style="color: #888; font-size: 11px; margin-top: 4px;">🗺️ Map View</div>
+          </div>
+        </div>
+        <div style="color: #555; font-size: 24px;">&rarr;</div>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #007AFF;"></div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #444;"></div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #444;"></div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #444;"></div>
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #444;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A) Swipe Left/Right</h3>
+      <p>Horizontal swipe gesture on the map area, like swiping between pages. Page dots show position. Feels native on mobile — same gesture as Photos or onboarding screens.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Most natural mobile gesture</li><li>Full screen stays clean</li><li>Discoverable via page dots</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Conflicts with map pan gesture</li><li>Can't jump to device #4 directly</li><li>No device names visible until you land</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Dropdown -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a1a2e; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <div style="background: #252540; border-radius: 8px; padding: 10px 16px; width: 80%; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #e8e8e0; font-weight: 600;">North Gate Sensor</span>
+        </div>
+        <span style="color: #888;">▾</span>
+      </div>
+      <div style="background: #252540; border-radius: 8px; width: 80%; border: 1px solid #555; overflow: hidden;">
+        <div style="padding: 10px 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,122,255,0.15); border-left: 3px solid #007AFF;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #e8e8e0; font-size: 13px;">North Gate Sensor</span>
+          <span style="color: #007AFF; margin-left: auto; font-size: 12px;">✓</span>
+        </div>
+        <div style="padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #333;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #aaa; font-size: 13px;">South Boundary</span>
+        </div>
+        <div style="padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #333;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #aaa; font-size: 13px;">East Trail Monitor</span>
+        </div>
+        <div style="padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #333;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+          <span style="color: #666; font-size: 13px;">West Perimeter</span>
+          <span style="color: #ef4444; margin-left: auto; font-size: 10px;">OFFLINE</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B) Dropdown Picker</h3>
+      <p>Tap the device name in the status bar to open a dropdown. Shows all devices with online/offline status. Tap to select. Direct jump to any device.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>See all devices + status at once</li><li>Jump directly to any device</li><li>No gesture conflicts with map</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Extra tap to open + tap to select</li><li>Dropdown overlays the map</li><li>Less "tactile" than swiping</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Chip Bar -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a1a2e; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <div style="display: flex; gap: 6px; width: 100%; overflow: hidden; padding: 4px 0;">
+        <div style="background: #007AFF; border-radius: 16px; padding: 6px 14px; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: white; font-size: 12px; font-weight: 600;">North Gate</span>
+        </div>
+        <div style="background: #252540; border: 1px solid #444; border-radius: 16px; padding: 6px 14px; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #aaa; font-size: 12px;">South Boundary</span>
+        </div>
+        <div style="background: #252540; border: 1px solid #444; border-radius: 16px; padding: 6px 14px; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #aaa; font-size: 12px;">East Trail</span>
+        </div>
+        <div style="background: #252540; border: 1px solid #444; border-radius: 16px; padding: 6px 14px; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: #ef4444;"></div>
+          <span style="color: #666; font-size: 12px;">West Perim.</span>
+        </div>
+      </div>
+      <div style="background: #252540; border-radius: 12px; height: 140px; width: 100%; display: flex; align-items: center; justify-content: center; border: 1px solid #333;">
+        <div style="text-align: center;">
+          <div style="color: #e8e8e0; font-weight: 600;">North Gate Sensor</div>
+          <div style="color: #888; font-size: 11px; margin-top: 4px;">🗺️ Map + Range Circles</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C) Scrollable Chip Bar ⭐ Recommended</h3>
+      <p>Horizontal row of device chips below the Live Map / Replay toggle. Each chip shows device name + status dot. Tap to switch. Always visible, no extra taps needed.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>All devices visible at a glance</li><li>Single tap to switch</li><li>Online/offline status always visible</li><li>No gesture conflicts with map</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Uses ~40px vertical space</li><li>Chips truncate with many devices</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

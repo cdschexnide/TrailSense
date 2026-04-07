@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { websocketService } from '@api/websocket';
+import { isDemoOrMockMode } from '@/config/demoModeRuntime';
 import { Alert, Device } from '@types';
 import { ALERTS_QUERY_KEY } from './api/useAlerts';
 import { DEVICES_QUERY_KEY } from './api/useDevices';
@@ -15,6 +16,11 @@ export const useWebSocket = (token: string | null) => {
     // Connect WebSocket
     websocketService.connect(token);
 
+    // In mock/demo mode, skip invalidation — the mock adapter returns
+    // seeded data which would overwrite the WebSocket-appended updates,
+    // causing a visible glitch as the UI snaps back to the original state.
+    const skipInvalidation = isDemoOrMockMode();
+
     // Handle new alerts
     const handleAlert = (alert: Alert) => {
       // Add new alert to cache
@@ -23,13 +29,23 @@ export const useWebSocket = (token: string | null) => {
         return [alert, ...oldData];
       });
 
-      // Invalidate to ensure fresh data
-      queryClient.invalidateQueries({ queryKey: [ALERTS_QUERY_KEY] });
+      // Also update the unfiltered key so usePropertyStatus picks it up
+      queryClient.setQueryData<Alert[]>(
+        [ALERTS_QUERY_KEY, undefined],
+        oldData => {
+          if (!oldData) return [alert];
+          return [alert, ...oldData];
+        }
+      );
+
+      if (!skipInvalidation) {
+        queryClient.invalidateQueries({ queryKey: [ALERTS_QUERY_KEY] });
+      }
     };
 
     // Handle device status updates
     const handleDeviceStatus = (status: Partial<Device> & { id: string }) => {
-      // Patch individual device cache instantly
+      // Patch individual device cache
       queryClient.setQueryData<Device>(
         [DEVICES_QUERY_KEY, status.id],
         oldData => {
@@ -38,11 +54,19 @@ export const useWebSocket = (token: string | null) => {
         }
       );
 
-      // Invalidate all device queries so lists, filtered lists, and unknown
-      // devices refetch consistently after each status event.
-      queryClient.invalidateQueries({
-        queryKey: [DEVICES_QUERY_KEY],
+      // Patch the device list cache directly
+      queryClient.setQueryData<Device[]>([DEVICES_QUERY_KEY], oldData => {
+        if (!oldData) return oldData;
+        return oldData.map(d =>
+          d.id === status.id ? { ...d, ...status } : d
+        );
       });
+
+      if (!skipInvalidation) {
+        queryClient.invalidateQueries({
+          queryKey: [DEVICES_QUERY_KEY],
+        });
+      }
     };
 
     // Handle positions-updated event
@@ -55,11 +79,18 @@ export const useWebSocket = (token: string | null) => {
         data.deviceId,
         data.positions.length
       );
-      // Invalidate React Query cache for positions
-      // This will trigger a refetch on any component using usePositions
-      queryClient.invalidateQueries({
-        queryKey: [POSITIONS_QUERY_KEY, data.deviceId],
-      });
+
+      if (skipInvalidation) {
+        // Directly update the positions cache
+        queryClient.setQueryData(
+          [POSITIONS_QUERY_KEY, data.deviceId],
+          { positions: data.positions }
+        );
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: [POSITIONS_QUERY_KEY, data.deviceId],
+        });
+      }
     };
 
     // Subscribe to events

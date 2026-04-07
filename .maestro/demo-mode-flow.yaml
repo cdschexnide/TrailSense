@@ -1,0 +1,9 @@
+appId: com.trailsense.app
+---
+# Enter demo mode and verify the main dashboard loads
+- launchApp
+- assertVisible: "Welcome Back"
+- tapOn: "Explore Demo"
+- assertVisible:
+    text: "Home"
+    timeout: 10000

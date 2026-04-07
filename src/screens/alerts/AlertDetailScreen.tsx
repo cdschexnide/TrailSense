@@ -58,7 +58,8 @@ const getPriorityLabel = (threatLevel: ThreatLevel): string => {
   }
 };
 
-const capitalizeDetectionType = (type: string): string => {
+const capitalizeDetectionType = (type: string | undefined): string => {
+  if (!type) return '--';
   if (type === 'wifi') return 'WiFi';
   return type.charAt(0).toUpperCase() + type.slice(1);
 };
@@ -120,7 +121,7 @@ export const AlertDetailScreen = () => {
           icon="radio-outline"
           iconColor={colors.systemGreen}
           title="Estimated Accuracy"
-          value={`~${alert.accuracyMeters.toFixed(1)}m`}
+          value={alert.accuracyMeters != null ? `~${alert.accuracyMeters.toFixed(1)}m` : '--'}
         />
         <GroupedListRow
           icon="locate-outline"

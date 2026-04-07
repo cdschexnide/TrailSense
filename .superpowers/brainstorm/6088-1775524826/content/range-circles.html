@@ -1,0 +1,103 @@
+<h2>How should detection ranges appear on the map?</h2>
+<p class="subtitle">Each deployed device detects Bluetooth (~100ft), WiFi (~300ft), and Cellular (~800ft) signals. These ranges need to be visible on the Radar map so users understand their coverage.</p>
+
+<div class="cards">
+  <!-- Option A: Concentric fill circles -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a2a1a; padding: 0; height: 280px; position: relative; overflow: hidden;">
+      <!-- Satellite-ish map background -->
+      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a2a1a 0%, #1e2e1e 30%, #1a2a1a 60%, #1e2e1e 100%); opacity: 0.8;"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 40%, rgba(40,60,40,0.5) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(30,50,30,0.5) 0%, transparent 40%);"></div>
+      <!-- Cellular ring -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 240px; height: 240px; border-radius: 50%; background: rgba(239, 68, 68, 0.08); border: 1.5px solid rgba(239, 68, 68, 0.4);"></div>
+      <!-- WiFi ring -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border-radius: 50%; background: rgba(249, 158, 11, 0.12); border: 1.5px solid rgba(249, 158, 11, 0.5);"></div>
+      <!-- Bluetooth ring -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: rgba(59, 130, 246, 0.18); border: 2px solid rgba(59, 130, 246, 0.6);"></div>
+      <!-- Device dot -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: #007AFF; border: 2px solid white; z-index: 5;"></div>
+      <!-- Labels -->
+      <div style="position: absolute; right: 16px; top: 16px; display: flex; flex-direction: column; gap: 6px; z-index: 5;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: rgba(239, 68, 68, 0.4); border: 1px solid #ef4444;"></div>
+          <span style="color: #ccc; font-size: 10px;">Cellular ~800ft</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: rgba(249, 158, 11, 0.5); border: 1px solid #f59e0b;"></div>
+          <span style="color: #ccc; font-size: 10px;">WiFi ~300ft</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: rgba(59, 130, 246, 0.6); border: 1px solid #3b82f6;"></div>
+          <span style="color: #ccc; font-size: 10px;">Bluetooth ~100ft</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A) Filled Concentric Circles ⭐ Recommended</h3>
+      <p>Three semi-transparent filled circles centered on the device, matching the DeviceDetail Location tab style. Legend in the corner. Familiar pattern — same visual language already used in the app.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Consistent with DeviceDetail Location tab</li><li>Immediately clear coverage area</li><li>Works on both satellite and dark map styles</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Large cellular circle can dominate the view at close zoom</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Stroke-only rings -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a2a1a; padding: 0; height: 280px; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a2a1a 0%, #1e2e1e 30%, #1a2a1a 60%, #1e2e1e 100%); opacity: 0.8;"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 40%, rgba(40,60,40,0.5) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(30,50,30,0.5) 0%, transparent 40%);"></div>
+      <!-- Cellular ring - stroke only, dashed -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 240px; height: 240px; border-radius: 50%; border: 2px dashed rgba(239, 68, 68, 0.5);"></div>
+      <!-- WiFi ring - stroke only, dashed -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border-radius: 50%; border: 2px dashed rgba(249, 158, 11, 0.6);"></div>
+      <!-- Bluetooth ring - stroke only, solid -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; border: 2px solid rgba(59, 130, 246, 0.7);"></div>
+      <!-- Device dot -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: #007AFF; border: 2px solid white; z-index: 5;"></div>
+      <!-- Labels on rings -->
+      <div style="position: absolute; left: 50%; top: calc(50% - 122px); transform: translateX(-50%); color: rgba(239, 68, 68, 0.7); font-size: 9px; letter-spacing: 1px; z-index: 5;">CELLULAR</div>
+      <div style="position: absolute; left: 50%; top: calc(50% - 72px); transform: translateX(-50%); color: rgba(249, 158, 11, 0.8); font-size: 9px; letter-spacing: 1px; z-index: 5;">WIFI</div>
+      <div style="position: absolute; left: 50%; top: calc(50% - 32px); transform: translateX(-50%); color: rgba(59, 130, 246, 0.8); font-size: 9px; letter-spacing: 1px; z-index: 5;">BT</div>
+    </div>
+    <div class="card-body">
+      <h3>B) Stroke-Only Rings</h3>
+      <p>Dashed outline rings with no fill. Labels float on the ring edges. Cleaner look — doesn't obscure the satellite imagery underneath. More "tactical" feel.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Doesn't obscure satellite map detail</li><li>Cleaner, more tactical aesthetic</li><li>Labels right on the rings</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Harder to see coverage "area" at a glance</li><li>Dashed lines can look busy on detailed maps</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Hybrid -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #1a2a1a; padding: 0; height: 280px; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a2a1a 0%, #1e2e1e 30%, #1a2a1a 60%, #1e2e1e 100%); opacity: 0.8;"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 40%, rgba(40,60,40,0.5) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(30,50,30,0.5) 0%, transparent 40%);"></div>
+      <!-- Cellular - light fill + solid stroke -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 240px; height: 240px; border-radius: 50%; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.3);"></div>
+      <!-- WiFi - medium fill + solid stroke -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border-radius: 50%; background: rgba(249, 158, 11, 0.08); border: 1.5px solid rgba(249, 158, 11, 0.4);"></div>
+      <!-- Bluetooth - stronger fill + solid stroke -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.6);"></div>
+      <!-- Device dot -->
+      <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; border-radius: 50%; background: #007AFF; border: 2px solid white; z-index: 5;"></div>
+      <!-- Toggle -->
+      <div style="position: absolute; left: 12px; bottom: 12px; background: rgba(0,0,0,0.6); border-radius: 6px; padding: 4px 8px; display: flex; align-items: center; gap: 6px; z-index: 5;">
+        <div style="width: 28px; height: 16px; background: #4ade80; border-radius: 8px; position: relative;">
+          <div style="width: 12px; height: 12px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+        </div>
+        <span style="color: #ccc; font-size: 10px;">Ranges</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C) Gradient Fill + Toggle</h3>
+      <p>Subtle gradient fills (outer = faintest, inner = most visible) with a toggle button to show/hide ranges. Best of both worlds — coverage area is visible but can be dismissed.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>User controls visual clutter</li><li>Gradient conveys signal attenuation</li><li>Toggle remembered per session</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Extra UI element (toggle button)</li><li>More implementation work</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

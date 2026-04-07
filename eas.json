@@ -12,7 +12,11 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_USE_MOCK_API": "true",
+        "EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN": "YOUR_MAPBOX_SECRET_TOKEN"
+      }
     }
   },
   "submit": {

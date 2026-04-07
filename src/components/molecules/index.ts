@@ -2,6 +2,7 @@ export { ActivitySparkline } from './ActivitySparkline';
 export { ActivityChart } from './ActivityChart';
 export { ChartCard } from './ChartCard';
 export * from './DetailHero';
+export * from './DevicePicker';
 export * from './DetectedDeviceMarker';
 export * from './FingerprintPeek';
 export { FilterChip } from './FilterChip';

@@ -33,12 +33,44 @@ export function setMockAdapterQueryClient(qc: QueryClient | null) {
   _queryClientRef = qc;
 }
 
-// URL-to-query-key mapping for cache lookups
+// Extract trailing resource ID from a URL segment, e.g. "/alerts/alert-001" → "alert-001"
+function extractId(url: string, segment: string): string | undefined {
+  const re = new RegExp(`/${segment}/([^/?]+)`);
+  return re.exec(url)?.[1];
+}
+
+// Extract a query parameter value from a URL, e.g. "?deviceId=dev-001" → "dev-001"
+function extractQueryParam(url: string, param: string): string | undefined {
+  const re = new RegExp(`[?&]${param}=([^&]+)`);
+  return re.exec(url)?.[1];
+}
+
+// URL-to-query-key mapping for cache lookups.
+// When a URL contains a resource ID (e.g. /alerts/alert-001), the individual
+// cache entry is tried first so the adapter returns the single object rather
+// than the full collection array.
 function urlToQueryKeys(url: string): (string | undefined)[][] {
-  if (url.includes('/positions')) return [['positions']];
-  if (url.includes('/alerts')) return [['alerts', undefined], ['alerts']];
-  if (url.includes('/devices')) return [['devices']];
-  if (url.includes('/known-devices')) return [['knownDevices']];
+  if (url.includes('/known-devices')) {
+    const id = extractId(url, 'known-devices');
+    if (id) return [['knownDevices', id], ['knownDevices']];
+    return [['knownDevices']];
+  }
+  if (url.includes('/positions')) {
+    // Positions use query param ?deviceId= rather than path-based ID
+    const id = extractId(url, 'positions') || extractQueryParam(url, 'deviceId');
+    if (id) return [['positions', id], ['positions']];
+    return [['positions']];
+  }
+  if (url.includes('/alerts')) {
+    const id = extractId(url, 'alerts');
+    if (id) return [['alerts', id], ['alerts', undefined], ['alerts']];
+    return [['alerts', undefined], ['alerts']];
+  }
+  if (url.includes('/devices')) {
+    const id = extractId(url, 'devices');
+    if (id) return [['devices', id], ['devices']];
+    return [['devices']];
+  }
   return [];
 }
 

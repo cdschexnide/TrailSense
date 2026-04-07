@@ -43,6 +43,7 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
+.maestro/tests/
 
 # Build artifacts
 android/

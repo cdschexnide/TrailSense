@@ -16,12 +16,14 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 import Mapbox, { Camera, MapView } from '@rnmapbox/maps';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import { Button, Card, Icon, Text } from '@components/atoms';
+import { DevicePicker } from '@components/molecules/DevicePicker';
 import { FingerprintPeek } from '@components/molecules/FingerprintPeek';
 import { PositionListItem } from '@components/molecules/PositionListItem';
 import { DetectedDeviceMarker } from '@components/molecules/DetectedDeviceMarker';
@@ -38,6 +40,7 @@ import { useAutoPlay } from '@hooks/useAutoPlay';
 import { THREAT_COLORS, useReplayPath } from '@hooks/useReplayPath';
 import { useReducedMotion } from '@hooks/useReducedMotion';
 import { useTimeBucketing } from '@hooks/useTimeBucketing';
+import { Device } from '@/types/device';
 import { BucketEntry, RadarMode } from '@/types/replay';
 import { TriangulatedPosition } from '@/types/triangulation';
 import { isDemoOrMockMode } from '@/config/demoModeRuntime';
@@ -70,7 +73,6 @@ function LiveMapContent({
   colors,
   navigation,
   selectedDevice,
-  devices,
   hasValidLocation,
   showSatellite,
   setShowSatellite,
@@ -86,12 +88,11 @@ function LiveMapContent({
   colors: any;
   navigation: any;
   selectedDevice: any;
-  devices: any[];
   hasValidLocation: boolean;
   showSatellite: boolean;
   setShowSatellite: React.Dispatch<React.SetStateAction<boolean>>;
-  mapViewRef: React.RefObject<MapView>;
-  cameraRef: React.RefObject<Camera>;
+  mapViewRef: React.RefObject<MapView | null>;
+  cameraRef: React.RefObject<Camera | null>;
   deviceCoordinates: { latitude: number | null; longitude: number | null };
   positions: TriangulatedPosition[];
   selectedPosition: TriangulatedPosition | null;
@@ -104,32 +105,6 @@ function LiveMapContent({
   return (
     <>
       <ScrollView>
-        <View style={styles.statusSubtitle}>
-          <View
-            style={[
-              styles.statusDot,
-              {
-                backgroundColor: isDeviceOnline(selectedDevice?.lastSeen)
-                  ? colors.systemGreen
-                  : colors.systemRed,
-              },
-            ]}
-          />
-          <Text variant="subheadline" color="secondaryLabel">
-            {isDeviceOnline(selectedDevice?.lastSeen) ? 'Online' : 'Offline'} ·{' '}
-            {formatCoordinates(deviceCoordinates)}
-          </Text>
-          {devices.length > 1 ? (
-            <Text
-              variant="caption1"
-              color="tertiaryLabel"
-              style={styles.deviceIndicator}
-            >
-              1/{devices.length}
-            </Text>
-          ) : null}
-        </View>
-
         <Card variant="grouped" style={styles.heatmapCard}>
           <View style={styles.mapContainer}>
             {hasValidLocation ? (
@@ -294,7 +269,11 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
   const colors = theme.colors;
   const reduceMotion = useReducedMotion();
 
-  const [selectedDeviceIndex] = useState(0);
+  const initialDeviceId: string | undefined = route?.params?.deviceId;
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(
+    initialDeviceId
+  );
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [showSatellite, setShowSatellite] = useState(true);
   const [selectedPosition, setSelectedPosition] =
     useState<TriangulatedPosition | null>(null);
@@ -316,7 +295,10 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
 
   const { data: devices = [], isLoading: devicesLoading } = useDevices();
   const { data: alerts = [] } = useAlerts();
-  const selectedDevice = devices[selectedDeviceIndex];
+  const selectedDevice =
+    (selectedDeviceId
+      ? devices.find((device: Device) => device.id === selectedDeviceId)
+      : undefined) ?? devices[0];
 
   const { data: positionsData } = usePositions(selectedDevice?.id);
   const positions = positionsData?.positions ?? [];
@@ -431,8 +413,83 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
   ]);
 
   useEffect(() => {
-    setSelectedPosition(null);
-  }, [selectedDeviceIndex]);
+    if (!replayCameraRef.current || !selectedDevice || !hasValidLocation) {
+      return;
+    }
+
+    replayCameraRef.current.setCamera({
+      centerCoordinate: [
+        deviceCoordinates.longitude!,
+        deviceCoordinates.latitude!,
+      ],
+      zoomLevel: 16,
+      animationDuration: 500,
+    });
+  }, [
+    deviceCoordinates.latitude,
+    deviceCoordinates.longitude,
+    hasValidLocation,
+    selectedDevice,
+  ]);
+
+  const handleSelectDevice = useCallback(
+    (deviceId: string) => {
+      if (!deviceId || deviceId === selectedDevice?.id) {
+        return;
+      }
+
+      setSelectedDeviceId(deviceId);
+      setSelectedPosition(null);
+      setPeekFingerprint(null);
+      autoPlayRef.current.pause();
+      autoPlayRef.current.setMinuteIndex(0);
+    },
+    [selectedDevice?.id]
+  );
+
+  useEffect(() => {
+    if (!selectedDeviceId && devices[0]?.id) {
+      setSelectedDeviceId(devices[0].id);
+    }
+  }, [devices, selectedDeviceId]);
+
+  useEffect(() => {
+    if (!selectedDeviceId || devices.length === 0) {
+      return;
+    }
+
+    if (!devices.some((device: Device) => device.id === selectedDeviceId)) {
+      // Reset directly instead of going through handleSelectDevice,
+      // which would short-circuit if devices[0] already matches
+      // the render fallback via ?? devices[0]
+      setSelectedDeviceId(devices[0].id);
+      setSelectedPosition(null);
+      setPeekFingerprint(null);
+      autoPlayRef.current.pause();
+      autoPlayRef.current.setMinuteIndex(0);
+    }
+  }, [devices, selectedDeviceId]);
+
+  useEffect(() => {
+    const incomingDeviceId = route?.params?.deviceId;
+
+    if (
+      incomingDeviceId &&
+      devices.some((device: Device) => device.id === incomingDeviceId)
+    ) {
+      if (incomingDeviceId !== selectedDevice?.id) {
+        handleSelectDevice(incomingDeviceId);
+      }
+
+      navigation.setParams({ deviceId: undefined });
+    }
+  }, [
+    devices,
+    handleSelectDevice,
+    navigation,
+    route?.params?.deviceId,
+    selectedDevice?.id,
+  ]);
 
   const resetMapView = useCallback(() => {
     if (!cameraRef.current || !hasValidLocation) {
@@ -490,12 +547,24 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
     useCallback(() => {
       return () => {
         switchToLive();
+        setPickerOpen(false);
       };
     }, [switchToLive])
   );
 
   const activeCount =
     mode === 'live' ? positions.length : currentReplayEntries.length;
+  const selectedDeviceOnline = isDeviceOnline(selectedDevice?.lastSeen);
+  const coordinateLabel = formatCoordinates(deviceCoordinates);
+
+  const togglePicker = useCallback(() => {
+    if (devices.length <= 1) {
+      return;
+    }
+
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setPickerOpen(current => !current);
+  }, [devices.length]);
 
   if (devicesLoading) {
     return (
@@ -597,6 +666,49 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
         </Pressable>
       </View>
 
+      <Pressable
+        style={styles.statusBar}
+        onPress={devices.length > 1 ? togglePicker : undefined}
+        disabled={devices.length <= 1}
+      >
+        <View
+          style={[
+            styles.statusDot,
+            {
+              backgroundColor: selectedDeviceOnline
+                ? colors.systemGreen
+                : colors.systemRed,
+            },
+          ]}
+        />
+        <Text
+          variant="subheadline"
+          weight="semibold"
+          color={selectedDeviceOnline ? 'label' : 'secondaryLabel'}
+          style={styles.statusDeviceName}
+          numberOfLines={1}
+        >
+          {selectedDevice?.name ?? 'Unknown Device'}
+        </Text>
+        {devices.length > 1 ? (
+          <Text
+            variant="caption1"
+            color="secondaryLabel"
+            style={styles.chevron}
+          >
+            {pickerOpen ? '▴' : '▾'}
+          </Text>
+        ) : null}
+        <Text
+          variant="caption1"
+          color="secondaryLabel"
+          style={styles.coordinateText}
+          numberOfLines={1}
+        >
+          {coordinateLabel}
+        </Text>
+      </Pressable>
+
       <View style={styles.modeContainer}>
         <Animated.View
           testID="live-map-content"
@@ -607,7 +719,6 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
             colors={colors}
             navigation={navigation}
             selectedDevice={selectedDevice}
-            devices={devices}
             hasValidLocation={hasValidLocation}
             showSatellite={showSatellite}
             setShowSatellite={setShowSatellite}
@@ -802,7 +913,17 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
             />
           ) : null}
         </Animated.View>
+
       </View>
+
+      <DevicePicker
+        devices={devices}
+        selectedDeviceId={selectedDevice?.id ?? ''}
+        onSelectDevice={handleSelectDevice}
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        topOffset={140}
+      />
     </ScreenLayout>
   );
 };
@@ -843,6 +964,13 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
   },
+  statusBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
   replayMapContainer: {
     flex: 1,
     position: 'relative',
@@ -870,20 +998,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  statusSubtitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 6,
-  },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
   },
-  deviceIndicator: {
+  statusDeviceName: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  chevron: {
+    marginRight: 4,
+  },
+  coordinateText: {
     marginLeft: 'auto',
+    flexShrink: 1,
+    textAlign: 'right',
   },
   heatmapCard: {
     marginHorizontal: 16,
