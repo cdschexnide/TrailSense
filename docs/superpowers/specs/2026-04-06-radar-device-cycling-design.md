@@ -64,8 +64,11 @@ When `setSelectedDeviceId(newId)` is called:
 1. Clear `selectedPosition` to `null`
 2. Clear `peekFingerprint` to `null`
 3. Pause autoplay and reset to minute 0 (`autoPlay.pause()`, `autoPlay.setMinuteIndex(0)`)
-4. Camera flies to new device coordinates (handled by existing `useEffect` that watches `deviceCoordinates`)
-5. `usePositions(selectedDevice.id)` and `useReplayData(selectedDevice.id)` automatically refetch since their query key includes the device ID
+4. **Live Map camera**: re-centers via the existing `useEffect` that calls `cameraRef.current.setCamera()` when `deviceCoordinates` change
+5. **Replay camera**: requires an explicit `replayCameraRef.current.setCamera()` call. The replay camera uses declarative `<Camera centerCoordinate={...}>` props which may not re-trigger `flyTo` animation on prop change. Add a `useEffect` watching `deviceCoordinates` + `replayCameraRef` to imperatively drive the replay camera, mirroring the live-map camera pattern.
+6. `usePositions(selectedDevice.id)` and `useReplayData(selectedDevice.id)` automatically refetch since their query key includes the device ID
+
+**Important:** All reset logic (steps 1-5) must execute for BOTH picker-driven and route-driven (deep link) device switches. The `deviceId` param handler must call the same `handleSelectDevice` function, not just `setSelectedDeviceId`.
 
 ### Handle deviceId nav param
 
@@ -99,9 +102,8 @@ interface DevicePickerProps {
 
 ### Rendering
 
-- Absolute-positioned overlay anchored below the status bar area
-- Background: `#1c1c1e` with 1px `#333` border, 10px border-radius, shadow
-- Semi-transparent backdrop behind it (tap to dismiss)
+- The `DevicePicker` is rendered as a direct child of the `ScreenLayout` content area (same level as `FingerprintPeek`), NOT inside a small wrapper. The backdrop must use `StyleSheet.absoluteFillObject` from a full-screen parent to properly block all touches and enable "tap outside to dismiss". Follow the same pattern as `FingerprintPeek` which renders at the top level with a full-screen backdrop.
+- Dropdown panel: `#1c1c1e` with 1px `#333` border, 10px border-radius, shadow, positioned below the status bar
 - Each row:
   - Status dot: green (`systemGreen`) if online (derived from `isDeviceOnline(lastSeen)`), red (`systemRed`) if offline
   - Device name
@@ -146,7 +148,7 @@ Status bar shows device name but no chevron. Picker is not available. Functional
 User can select an offline device. Status dot shows red. If the device has no GPS coordinates, the existing "No GPS Location" empty state renders. Positions will be empty. Replay still works if historical data exists.
 
 ### Device deleted while viewing
-If the selected device disappears from the `devices` array (deleted on another client, React Query refetch removes it), fall back to `devices[0]`. Handled by the `?? devices[0]` fallback in the `selectedDevice` derivation.
+If the selected device disappears from the `devices` array (deleted on another client, React Query refetch removes it), the `?? devices[0]` render fallback shows the correct device, but `selectedDeviceId` state becomes stale. Add a reconciliation `useEffect`: when `selectedDeviceId` is set but `devices.find(d => d.id === selectedDeviceId)` returns undefined, call `handleSelectDevice(devices[0]?.id)` to reset state (clearing selection, replay, etc.).
 
 ### WebSocket listener
 The existing `useEffect` that listens for `positions-updated` events filters by `selectedDevice?.id`. This works automatically — switching devices means the listener only processes events for the currently selected device.
@@ -172,15 +174,20 @@ When switching devices in Replay mode:
 - `src/components/molecules/DevicePicker/DevicePicker.tsx` — dropdown picker component
 - `src/components/molecules/DevicePicker/index.ts` — barrel export
 
+## Mock Data Changes
+
+The mock replay data generator (`src/mocks/data/mockReplayPositions.ts`) currently hardcodes all scenarios to `device-001`. To validate device cycling in demo mode, `generateReplayData()` should accept an optional `deviceId` parameter and vary the replay scenarios (or at minimum the property center coordinates) per device. Without this, switching devices in demo/mock mode will show device-001's replay data for every device, making it impossible to verify the feature works correctly.
+
+The `useReplayData` hook in mock mode (`src/hooks/api/useReplayPositions.ts:14`) currently calls `generateReplayData()` without passing the `deviceId`. Update it to pass the device ID through.
+
 ## No Changes Needed
 
-- `usePositions` / `useReplayData` hooks (already parameterized by deviceId)
+- `usePositions` hooks (already parameterized by deviceId; mock positions are seeded per-device)
 - `TrailSenseDeviceMarker` / `DetectedDeviceMarker` components
 - `TimelineScrubber` / `useAutoPlay` / `useTimeBucketing` / `useReplayPath` hooks
 - `FingerprintPeek` / `PositionListItem` components
 - `radarStore` (Zustand)
 - `websocketService` / `useWebSocket`
-- Mock data
 
 ## Success Criteria
 

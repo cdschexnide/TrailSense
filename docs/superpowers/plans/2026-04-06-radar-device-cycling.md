@@ -417,19 +417,19 @@ const selectedDevice = selectedDeviceId
 
 - [ ] **Step 2: Add deviceId param handler useEffect**
 
-Add after the existing `startHour` param useEffect (after line 487):
+Add after the existing `startHour` param useEffect (after line 487). This must call `handleSelectDevice` (not just `setSelectedDeviceId`) so the full reset path executes — clearing selection state, pausing autoplay, resetting replay to minute 0:
 
 ```typescript
 useEffect(() => {
   const incomingDeviceId = route?.params?.deviceId;
   if (incomingDeviceId && devices.some(d => d.id === incomingDeviceId)) {
-    setSelectedDeviceId(incomingDeviceId);
+    handleSelectDevice(incomingDeviceId);
     navigation.setParams({ deviceId: undefined });
   }
-}, [route?.params?.deviceId, devices, navigation]);
+}, [route?.params?.deviceId, devices, navigation, handleSelectDevice]);
 ```
 
-- [ ] **Step 3: Update the selectedDeviceIndex useEffect to use selectedDeviceId**
+- [ ] **Step 3: Update the selectedDeviceIndex useEffect to use selectedDeviceId and add stale-ID reconciliation**
 
 Replace the useEffect at line 433-435:
 
@@ -444,6 +444,20 @@ useEffect(() => {
   setSelectedPosition(null);
   setPeekFingerprint(null);
 }, [selectedDeviceId]);
+```
+
+Add a reconciliation effect for when the selected device disappears (deleted on another client, React Query refetch removes it). Place it right after the above:
+
+```typescript
+useEffect(() => {
+  if (
+    selectedDeviceId &&
+    devices.length > 0 &&
+    !devices.some(d => d.id === selectedDeviceId)
+  ) {
+    handleSelectDevice(devices[0].id);
+  }
+}, [selectedDeviceId, devices, handleSelectDevice]);
 ```
 
 - [ ] **Step 4: Add device switch handler**
@@ -461,7 +475,34 @@ const handleSelectDevice = useCallback(
 );
 ```
 
-- [ ] **Step 5: Add imports for DevicePicker and Haptics**
+- [ ] **Step 5: Add replay camera re-center effect**
+
+The live-map camera has an imperative `useEffect` (line 405) that calls `cameraRef.current.setCamera()` on coordinate changes. The replay camera at line 649 uses declarative `<Camera centerCoordinate={...}>` props, which may not re-trigger the `flyTo` animation on prop changes after initial mount. Add an equivalent imperative effect for the replay camera.
+
+Add after the existing live-map camera `useEffect` (after line 431):
+
+```typescript
+useEffect(() => {
+  if (!replayCameraRef.current || !hasValidLocation) {
+    return;
+  }
+
+  replayCameraRef.current.setCamera({
+    centerCoordinate: [
+      deviceCoordinates.longitude!,
+      deviceCoordinates.latitude!,
+    ],
+    zoomLevel: 16,
+    animationDuration: 1000,
+  });
+}, [
+  deviceCoordinates.latitude,
+  deviceCoordinates.longitude,
+  hasValidLocation,
+]);
+```
+
+- [ ] **Step 6: Add imports for DevicePicker and Haptics**
 
 Add to imports at the top of the file:
 
@@ -517,7 +558,13 @@ In the parent `ProximityHeatmapScreen` return, add the new status bar and picker
         </Text>
       </Pressable>
 
-      <View style={styles.pickerAnchor}>
+      <View style={styles.modeContainer}>
+```
+
+Then, at the end of the `ScreenLayout` children (after the closing `</View>` of `modeContainer`, before `</ScreenLayout>`), render the `DevicePicker` at the top level — same pattern as `FingerprintPeek`. This ensures the backdrop fills the full screen and blocks all touches:
+
+```tsx
+      {pickerOpen && (
         <DevicePicker
           devices={devices}
           selectedDeviceId={selectedDevice?.id ?? ''}
@@ -525,23 +572,59 @@ In the parent `ProximityHeatmapScreen` return, add the new status bar and picker
           isOpen={pickerOpen}
           onClose={() => setPickerOpen(false)}
         />
-      </View>
-
-      <View style={styles.modeContainer}>
+      )}
+    </ScreenLayout>
 ```
 
-- [ ] **Step 7: Add pickerAnchor style**
+- [ ] **Step 7: Update DevicePicker dropdown positioning**
 
-Add to the `styles` StyleSheet:
+The `DevicePicker` component's `dropdown` style needs a `top` value that accounts for the header, segmented control, and status bar. Since it's now rendered from the full-screen level, update the `dropdown` style in `DevicePicker.tsx` to position from the top of the screen. The exact `top` value will be approximately 140-160px (header ~44px + segmented control ~40px + status bar ~36px + padding). Use a prop or calculate based on the layout:
+
+Update `DevicePicker` props to accept an optional `topOffset` number:
 
 ```typescript
-pickerAnchor: {
-  position: 'relative',
-  zIndex: 12,
-},
+interface DevicePickerProps {
+  devices: Device[];
+  selectedDeviceId: string;
+  onSelectDevice: (deviceId: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  topOffset?: number;
+}
 ```
 
-- [ ] **Step 8: Remove `devices` prop from LiveMapContent call and interface**
+Apply it in the dropdown style:
+
+```typescript
+<View style={[styles.dropdown, { borderColor: colors.separator, top: topOffset ?? 140 }]}>
+```
+
+Pass from `ProximityHeatmapScreen`:
+
+```tsx
+<DevicePicker
+  ...
+  topOffset={140}
+/>
+```
+
+- [ ] **Step 8: Update DevicePicker test for topOffset prop**
+
+In `__tests__/components/molecules/DevicePicker.test.tsx`, update the test renders to pass `topOffset={140}` (optional prop, tests still pass without it, but add it to one test for coverage):
+
+```typescript
+// In the 'renders all devices when isOpen is true' test, add:
+<DevicePicker
+  devices={devices}
+  selectedDeviceId="device-001"
+  onSelectDevice={jest.fn()}
+  isOpen={true}
+  onClose={jest.fn()}
+  topOffset={140}
+/>
+```
+
+- [ ] **Step 9: Remove `devices` prop from LiveMapContent call and interface**
 
 In the `LiveMapContent` function props interface (around line 89), remove:
 
@@ -555,15 +638,15 @@ In the `LiveMapContent` call inside the parent return (around line 609), remove:
 devices={devices}
 ```
 
-- [ ] **Step 9: Run type-check**
+- [ ] **Step 10: Run type-check**
 
 Run: `npm run type-check`
 Expected: PASS
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 11: Commit**
 
 ```bash
-git add src/screens/radar/ProximityHeatmapScreen.tsx
+git add src/screens/radar/ProximityHeatmapScreen.tsx __tests__/components/molecules/DevicePicker.test.tsx
 git commit -m "feat: integrate DevicePicker into Radar screen"
 ```
 
@@ -603,7 +686,89 @@ git commit -m "feat: pass deviceId when navigating from DeviceDetail to Radar"
 
 ---
 
-### Task 5: Manual verification and final tests
+### Task 5: Fix mock replay data to support per-device switching
+
+**Files:**
+- Modify: `src/mocks/data/mockReplayPositions.ts`
+- Modify: `src/hooks/api/useReplayPositions.ts`
+
+The mock replay data generator currently hardcodes all scenarios to `device-001` and ignores the `deviceId` parameter entirely. Without this fix, switching devices in demo mode shows device-001's replay data for every device — making it impossible to verify the feature works.
+
+- [ ] **Step 1: Update `generateReplayData` to accept deviceId**
+
+In `src/mocks/data/mockReplayPositions.ts`, update the `generateReplayData` function signature to accept an optional `deviceId` parameter. Filter the `SCENARIOS` array to only include scenarios matching the requested deviceId. If no deviceId is provided, default to `'device-001'` for backward compatibility:
+
+```typescript
+// Before:
+export function generateReplayData(): ReplayData {
+
+// After:
+export function generateReplayData(deviceId: string = 'device-001'): ReplayData {
+```
+
+Then filter scenarios by deviceId where they are consumed:
+
+```typescript
+const scenarios = SCENARIOS.filter(s => s.deviceId === deviceId);
+```
+
+If `scenarios` is empty (no scenarios defined for this device), return an empty positions array so the replay shows "no activity" — which is valid behavior for devices that haven't seen detections.
+
+- [ ] **Step 2: Add at least one scenario for device-002**
+
+Add a scenario for `device-002` (South Boundary) in the `SCENARIOS` array. Use the South Boundary's coordinates (30.3943, -94.3191) as the center. A single simple scenario is sufficient:
+
+```typescript
+{
+  deviceId: 'device-002',
+  fingerprintHash: PERSONAS.delivery,
+  signalType: 'wifi',
+  threatLevel: 'low',
+  visits: [
+    { startHour: 8, startMinute: 0, durationMinutes: 10, positionsPerMinute: 2 },
+  ],
+  pointForProgress: progress => ({
+    northMeters: -50 + progress * 40,
+    eastMeters: 12 * Math.sin(progress * Math.PI),
+    confidence: 65 + progress * 25,
+    detectionType: 'wifi',
+  }),
+},
+```
+
+Note: The `PROPERTY_CENTER` constant in the file will need to be used per-device. If `generateReplayData` already uses `PROPERTY_CENTER` as the base for position generation, update it to look up coordinates from the device's known location. Check the existing code to see how `PROPERTY_CENTER` is used in the position generation pipeline and adjust accordingly.
+
+- [ ] **Step 3: Update `useReplayData` to pass deviceId in mock mode**
+
+In `src/hooks/api/useReplayPositions.ts`, update the mock mode branch to pass deviceId:
+
+```typescript
+// Before:
+if (isDemoOrMockMode()) {
+  return generateReplayData();
+}
+
+// After:
+if (isDemoOrMockMode()) {
+  return generateReplayData(deviceId!);
+}
+```
+
+- [ ] **Step 4: Run type-check and tests**
+
+Run: `npm run type-check && npm test -- --no-coverage`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/mocks/data/mockReplayPositions.ts src/hooks/api/useReplayPositions.ts
+git commit -m "fix: mock replay data varies by deviceId for device cycling"
+```
+
+---
+
+### Task 6: Manual verification and final tests
 
 **Files:**
 - No file changes — verification only
@@ -629,13 +794,15 @@ Run: `npm start`
 
 Manual verification checklist:
 1. Open Radar tab — should show first device's Live Map (same as before)
-2. Tap device name in status bar — dropdown opens with all 5 mock devices
-3. Tap "South Boundary" — map flies to that device's GPS, detected devices update
-4. Switch to Replay — shows South Boundary's replay data, timeline resets
-5. Switch back to Live Map — still shows South Boundary
-6. Tap device name, select "West Perimeter" (offline) — status dot turns red, map shows "No GPS Location" or its last known position
-7. Navigate to Devices tab → tap a device → tap "View on Map" — Radar opens with that device pre-selected
-8. With only 1 device (mock data would need modification): status bar shows name, no chevron, not tappable
+2. Tap device name in status bar — dropdown opens with all 5 mock devices, backdrop covers full screen
+3. Tap outside the dropdown (on the map area) — dropdown dismisses
+4. Tap device name again, select "South Boundary" — map flies to South Boundary's GPS coordinates, detected devices update
+5. Switch to Replay — shows South Boundary's replay data (different from North Gate's), timeline resets to 0
+6. Switch device while in Replay — replay pauses, timeline resets, map re-centers on new device
+7. Switch back to Live Map — still shows the selected device
+8. Tap device name, select "West Perimeter" (offline) — status dot turns red, map shows "No GPS Location" or last known position
+9. Navigate to Devices tab → tap a device → tap "View on Map" — Radar opens with that device pre-selected, replay state is reset
+10. Select "East Trail Monitor" (which has no mock replay scenarios) → switch to Replay — shows empty timeline, no crashes
 
 - [ ] **Step 5: Commit any lint fixes if needed**
 
