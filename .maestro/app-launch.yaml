@@ -1,0 +1,5 @@
+appId: com.trailsense.app
+---
+# Smoke test: app launches and login screen is visible
+- launchApp
+- assertVisible: "Sign In"

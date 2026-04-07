@@ -12,7 +12,7 @@ export function useReplayData(deviceId: string | undefined) {
     queryKey: ['replayData', deviceId],
     queryFn: async () => {
       if (isDemoOrMockMode()) {
-        return generateReplayData();
+        return generateReplayData({ deviceId });
       }
 
       const now = new Date();

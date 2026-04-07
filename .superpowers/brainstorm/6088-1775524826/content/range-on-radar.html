@@ -1,0 +1,135 @@
+<h2>Adding detection ranges to the existing Radar map</h2>
+<p class="subtitle">The blue TrailSense device marker is already on the map. Detection range circles (BT ~100ft, WiFi ~300ft, Cellular ~800ft) need to appear around it — without cluttering the detected device markers.</p>
+
+<div class="split">
+  <!-- Current -->
+  <div class="mockup">
+    <div class="mockup-header">Current: No Ranges</div>
+    <div class="mockup-body" style="background: #1a2a1a; height: 400px; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a2a1a 0%, #1e2e1e 30%, #1a2a1a 60%, #1e2e1e 100%);"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(circle at 40% 55%, rgba(40,60,40,0.5) 0%, transparent 50%), radial-gradient(circle at 65% 35%, rgba(50,70,50,0.4) 0%, transparent 40%);"></div>
+
+      <!-- Status bar -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px; display: flex; align-items: center; gap: 6px; z-index: 10;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+        <span style="color: #a8a898; font-size: 11px;">Online · 30.3965, -94.3178</span>
+        <span style="color: #5a5a50; font-size: 11px; margin-left: auto;">1/5</span>
+      </div>
+
+      <!-- TrailSense device marker -->
+      <div style="position: absolute; left: 48%; top: 55%; transform: translate(-50%, -50%); z-index: 5;">
+        <div style="width: 28px; height: 28px; border-radius: 50%; background: #007AFF; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: white;"></div>
+        </div>
+      </div>
+
+      <!-- Detected devices -->
+      <div style="position: absolute; left: 35%; top: 42%; z-index: 6;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #8b5cf6; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.6); font-size: 12px;">✦</div>
+      </div>
+      <div style="position: absolute; left: 30%; top: 52%; z-index: 6;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.6); font-size: 10px;">📶</div>
+      </div>
+      <div style="position: absolute; left: 38%; top: 38%; z-index: 6;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.6); font-size: 10px;">📡</div>
+      </div>
+
+      <!-- Floating buttons -->
+      <div style="position: absolute; right: 10px; top: 40px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 14px;">🗺️</div>
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 14px;">◎</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Proposed -->
+  <div class="mockup">
+    <div class="mockup-header">Proposed: With Ranges</div>
+    <div class="mockup-body" style="background: #1a2a1a; height: 400px; position: relative; overflow: hidden;">
+      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, #1a2a1a 0%, #1e2e1e 30%, #1a2a1a 60%, #1e2e1e 100%);"></div>
+      <div style="position: absolute; inset: 0; background: radial-gradient(circle at 40% 55%, rgba(40,60,40,0.5) 0%, transparent 50%), radial-gradient(circle at 65% 35%, rgba(50,70,50,0.4) 0%, transparent 40%);"></div>
+
+      <!-- Status bar with dropdown indicator -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; padding: 8px 12px; display: flex; align-items: center; gap: 6px; z-index: 10;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+        <span style="color: #e8e8e0; font-size: 11px; font-weight: 600;">North Gate Sensor</span>
+        <span style="color: #888; font-size: 11px;">▾</span>
+        <span style="color: #5a5a50; font-size: 11px; margin-left: auto;">30.3965, -94.3178</span>
+      </div>
+
+      <!-- Cellular range circle -->
+      <div style="position: absolute; left: 48%; top: 55%; transform: translate(-50%, -50%); width: 300px; height: 300px; border-radius: 50%; background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); z-index: 2;"></div>
+      <!-- WiFi range circle -->
+      <div style="position: absolute; left: 48%; top: 55%; transform: translate(-50%, -50%); width: 170px; height: 170px; border-radius: 50%; background: rgba(249, 158, 11, 0.08); border: 1px solid rgba(249, 158, 11, 0.35); z-index: 3;"></div>
+      <!-- Bluetooth range circle -->
+      <div style="position: absolute; left: 48%; top: 55%; transform: translate(-50%, -50%); width: 72px; height: 72px; border-radius: 50%; background: rgba(59, 130, 246, 0.12); border: 1.5px solid rgba(59, 130, 246, 0.5); z-index: 4;"></div>
+
+      <!-- TrailSense device marker -->
+      <div style="position: absolute; left: 48%; top: 55%; transform: translate(-50%, -50%); z-index: 5;">
+        <div style="width: 28px; height: 28px; border-radius: 50%; background: #007AFF; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: white;"></div>
+        </div>
+      </div>
+
+      <!-- Detected devices (some inside ranges, some outside) -->
+      <div style="position: absolute; left: 35%; top: 42%; z-index: 6;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #8b5cf6; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.6); font-size: 12px;">✦</div>
+      </div>
+      <div style="position: absolute; left: 30%; top: 52%; z-index: 6;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.6); font-size: 10px;">📶</div>
+      </div>
+      <div style="position: absolute; left: 38%; top: 38%; z-index: 6;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.6); font-size: 10px;">📡</div>
+      </div>
+
+      <!-- Floating buttons -->
+      <div style="position: absolute; right: 10px; top: 40px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 14px;">🗺️</div>
+        <div style="width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 14px;">◎</div>
+      </div>
+
+      <!-- Legend -->
+      <div style="position: absolute; left: 10px; bottom: 10px; background: rgba(0,0,0,0.7); border-radius: 6px; padding: 6px 10px; display: flex; flex-direction: column; gap: 3px; z-index: 10;">
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #ef4444; background: rgba(239,68,68,0.15);"></div>
+          <span style="color: #aaa; font-size: 9px;">Cellular ~800ft</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #f59e0b; background: rgba(249,158,11,0.2);"></div>
+          <span style="color: #aaa; font-size: 9px;">WiFi ~300ft</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; border: 1px solid #3b82f6; background: rgba(59,130,246,0.25);"></div>
+          <span style="color: #aaa; font-size: 9px;">BT ~100ft</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <h3>What changes:</h3>
+  <div class="options">
+    <div class="option" data-choice="a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>This looks right</h3>
+        <p>Subtle filled circles behind the device marker + corner legend. Detected device markers render on top of the range circles. The "1/5" becomes a tappable dropdown with device name.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Ranges yes, but no legend</h3>
+        <p>The circles are self-explanatory from the colors. Skip the legend to keep the map clean.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="c" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Something different</h3>
+        <p>I'll describe what I want instead.</p>
+      </div>
+    </div>
+  </div>
+</div>

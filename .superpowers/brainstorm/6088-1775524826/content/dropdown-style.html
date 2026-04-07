@@ -1,0 +1,119 @@
+<h2>What should the device picker look like when open?</h2>
+<p class="subtitle">You tap the device name in the status bar. What happens next?</p>
+
+<div class="cards">
+  <!-- Option A: Overlay dropdown -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #111; padding: 0; height: 420px; position: relative; overflow: hidden;">
+      <!-- Phone frame -->
+      <div style="position: absolute; inset: 8px; border: 1px solid #333; border-radius: 12px; overflow: hidden; background: #111;">
+        <!-- Header -->
+        <div style="padding: 6px 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #e8e8e0; font-size: 13px; font-weight: 700; letter-spacing: 1px;">RADAR</span>
+          <span style="color: #4ade80; font-size: 11px;">● 2 ACTIVE</span>
+        </div>
+        <!-- Segmented control -->
+        <div style="margin: 0 12px 4px; display: flex; background: rgba(118,118,128,0.12); border-radius: 8px; padding: 2px;">
+          <div style="flex: 1; text-align: center; padding: 5px; border-radius: 6px; background: rgba(255,255,255,0.18); color: #e8e8e0; font-size: 11px;">Live Map</div>
+          <div style="flex: 1; text-align: center; padding: 5px; color: #888; font-size: 11px;">Replay</div>
+        </div>
+        <!-- Status bar (tapped) -->
+        <div style="padding: 6px 12px; display: flex; align-items: center; gap: 5px; background: rgba(0,122,255,0.1); border-bottom: 1px solid rgba(0,122,255,0.3);">
+          <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+          <span style="color: #e8e8e0; font-size: 11px; font-weight: 600;">North Gate Sensor</span>
+          <span style="color: #007AFF; font-size: 11px;">▴</span>
+          <span style="color: #5a5a50; font-size: 10px; margin-left: auto;">30.3965, -94.3178</span>
+        </div>
+        <!-- Dropdown overlay -->
+        <div style="position: absolute; left: 8px; right: 8px; top: 86px; background: #1c1c1e; border: 1px solid #333; border-radius: 10px; z-index: 20; box-shadow: 0 8px 32px rgba(0,0,0,0.6); overflow: hidden;">
+          <!-- Device 1 - selected -->
+          <div style="padding: 11px 14px; display: flex; align-items: center; gap: 8px; background: rgba(0,122,255,0.12); border-left: 3px solid #007AFF;">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #e8e8e0; font-size: 12px; font-weight: 500;">North Gate Sensor</span>
+            <span style="color: #007AFF; margin-left: auto; font-size: 13px;">✓</span>
+          </div>
+          <!-- Device 2 -->
+          <div style="padding: 11px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #aaa; font-size: 12px;">South Boundary</span>
+          </div>
+          <!-- Device 3 -->
+          <div style="padding: 11px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #aaa; font-size: 12px;">East Trail Monitor</span>
+          </div>
+          <!-- Device 4 - offline -->
+          <div style="padding: 11px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="color: #666; font-size: 12px;">West Perimeter</span>
+            <span style="color: #ef4444; margin-left: auto; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;">Offline</span>
+          </div>
+          <!-- Device 5 - offline -->
+          <div style="padding: 11px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="color: #666; font-size: 12px;">Cabin Approach</span>
+            <span style="color: #ef4444; margin-left: auto; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px;">Offline</span>
+          </div>
+        </div>
+        <!-- Map (dimmed behind dropdown) -->
+        <div style="height: 220px; background: linear-gradient(135deg, #1a2a1a, #1e2e1e); opacity: 0.3;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A) Overlay Dropdown ⭐ Recommended</h3>
+      <p>Dropdown floats over the map with a dimmed backdrop. Tap a device to select, dropdown closes, map transitions. Tap outside to dismiss. Lightweight, no layout shift.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Bottom sheet -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #111; padding: 0; height: 420px; position: relative; overflow: hidden;">
+      <!-- Phone frame -->
+      <div style="position: absolute; inset: 8px; border: 1px solid #333; border-radius: 12px; overflow: hidden; background: #111;">
+        <!-- Header -->
+        <div style="padding: 6px 12px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: #e8e8e0; font-size: 13px; font-weight: 700; letter-spacing: 1px;">RADAR</span>
+          <span style="color: #4ade80; font-size: 11px;">● 2 ACTIVE</span>
+        </div>
+        <!-- Map (dimmed) -->
+        <div style="height: 200px; background: linear-gradient(135deg, #1a2a1a, #1e2e1e); opacity: 0.3;"></div>
+        <!-- Bottom sheet -->
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: #1c1c1e; border-top-left-radius: 14px; border-top-right-radius: 14px; z-index: 20; box-shadow: 0 -4px 20px rgba(0,0,0,0.5);">
+          <!-- Handle -->
+          <div style="display: flex; justify-content: center; padding: 8px;">
+            <div style="width: 36px; height: 4px; border-radius: 2px; background: #555;"></div>
+          </div>
+          <div style="padding: 0 16px 6px; color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Select Device</div>
+          <!-- Devices -->
+          <div style="padding: 11px 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,122,255,0.12); border-left: 3px solid #007AFF;">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #e8e8e0; font-size: 12px; font-weight: 500;">North Gate Sensor</span>
+            <span style="color: #007AFF; margin-left: auto;">✓</span>
+          </div>
+          <div style="padding: 11px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #aaa; font-size: 12px;">South Boundary</span>
+          </div>
+          <div style="padding: 11px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #aaa; font-size: 12px;">East Trail Monitor</span>
+          </div>
+          <div style="padding: 11px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="color: #666; font-size: 12px;">West Perimeter</span>
+            <span style="color: #ef4444; margin-left: auto; font-size: 9px;">OFFLINE</span>
+          </div>
+          <div style="padding: 11px 16px 16px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444;"></div>
+            <span style="color: #666; font-size: 12px;">Cabin Approach</span>
+            <span style="color: #ef4444; margin-left: auto; font-size: 9px;">OFFLINE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B) Bottom Sheet</h3>
+      <p>iOS-style bottom sheet slides up from below. More familiar pattern but heavier, covers more of the screen, and fights with the Replay timeline scrubber for bottom space.</p>
+    </div>
+  </div>
+</div>

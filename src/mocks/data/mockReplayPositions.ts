@@ -1,15 +1,22 @@
 import { Alert, DetectionType, ThreatLevel } from '@/types/alert';
-import {
-  ReplayPosition,
-  TriangulationSignalType,
-} from '@/types/triangulation';
+import { ReplayPosition, TriangulationSignalType } from '@/types/triangulation';
 import { PERSONA_FINGERPRINTS as PERSONAS } from '../helpers/fingerprints';
 import { todayAt } from '../helpers/timestamps';
 
-const PROPERTY_CENTER = { latitude: 30.396526, longitude: -94.317806 };
+const DEVICE_CENTERS: Record<string, { latitude: number; longitude: number }> =
+  {
+    'device-001': { latitude: 30.396526, longitude: -94.317806 },
+    'device-002': { latitude: 30.394982, longitude: -94.319441 },
+    'device-003': { latitude: 30.398774, longitude: -94.315984 },
+    'device-004': { latitude: 30.395214, longitude: -94.321118 },
+    'device-005': { latitude: 30.397901, longitude: -94.313562 },
+  };
 const METERS_PER_DEG_LAT = 111_320;
-const METERS_PER_DEG_LNG =
-  111_320 * Math.cos((PROPERTY_CENTER.latitude * Math.PI) / 180);
+
+type ReplayOptions = {
+  date?: Date;
+  deviceId?: string;
+};
 
 type VisitDefinition = {
   startHour: number;
@@ -40,10 +47,24 @@ export interface ReplayData {
   alerts: Alert[];
 }
 
-function toLatLng(northMeters: number, eastMeters: number) {
+function getDeviceCenter(deviceId?: string) {
+  if (deviceId && DEVICE_CENTERS[deviceId]) {
+    return DEVICE_CENTERS[deviceId];
+  }
+
+  return DEVICE_CENTERS['device-001'];
+}
+
+function toLatLng(
+  northMeters: number,
+  eastMeters: number,
+  center: { latitude: number; longitude: number }
+) {
+  const metersPerDegLng = 111_320 * Math.cos((center.latitude * Math.PI) / 180);
+
   return {
-    latitude: PROPERTY_CENTER.latitude + northMeters / METERS_PER_DEG_LAT,
-    longitude: PROPERTY_CENTER.longitude + eastMeters / METERS_PER_DEG_LNG,
+    latitude: center.latitude + northMeters / METERS_PER_DEG_LAT,
+    longitude: center.longitude + eastMeters / metersPerDegLng,
   };
 }
 
@@ -59,6 +80,7 @@ function createBaseDate(date?: Date) {
 
 function createScenarioAlert(
   scenario: ScenarioDefinition,
+  center: { latitude: number; longitude: number },
   timestamp: string,
   index: number,
   accuracyMeters: number,
@@ -76,13 +98,13 @@ function createScenarioAlert(
     accuracyMeters,
     isReviewed: false,
     isFalsePositive: false,
-    location: { ...PROPERTY_CENTER },
+    location: { ...center },
     metadata: {
       source: 'positions',
       measurementCount: 4,
       signalCount: 2,
       triangulatedPosition: {
-        ...PROPERTY_CENTER,
+        ...center,
         accuracyMeters,
         confidence,
       },
@@ -98,8 +120,18 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'cellular',
     threatLevel: 'low',
     visits: [
-      { startHour: 10, startMinute: 15, durationMinutes: 5, positionsPerMinute: 2 },
-      { startHour: 15, startMinute: 30, durationMinutes: 5, positionsPerMinute: 2 },
+      {
+        startHour: 10,
+        startMinute: 15,
+        durationMinutes: 5,
+        positionsPerMinute: 2,
+      },
+      {
+        startHour: 15,
+        startMinute: 30,
+        durationMinutes: 5,
+        positionsPerMinute: 2,
+      },
     ],
     pointForProgress: progress => ({
       northMeters: -70 + progress * 55,
@@ -114,9 +146,24 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'wifi',
     threatLevel: 'medium',
     visits: [
-      { startHour: 8, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
-      { startHour: 12, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
-      { startHour: 18, startMinute: 0, durationMinutes: 3, positionsPerMinute: 2 },
+      {
+        startHour: 8,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionsPerMinute: 2,
+      },
+      {
+        startHour: 12,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionsPerMinute: 2,
+      },
+      {
+        startHour: 18,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionsPerMinute: 2,
+      },
     ],
     pointForProgress: progress => ({
       northMeters: 12 - progress * 6,
@@ -131,7 +178,12 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'bluetooth',
     threatLevel: 'critical',
     visits: [
-      { startHour: 1, startMinute: 30, durationMinutes: 45, positionsPerMinute: 2 },
+      {
+        startHour: 1,
+        startMinute: 30,
+        durationMinutes: 45,
+        positionsPerMinute: 2,
+      },
     ],
     pointForProgress: (progress, minuteProgress) => ({
       northMeters: 98 + Math.sin(progress * Math.PI * 3) * 8,
@@ -147,7 +199,12 @@ const SCENARIOS: ScenarioDefinition[] = [
     signalType: 'cellular',
     threatLevel: 'high',
     visits: [
-      { startHour: 7, startMinute: 45, durationMinutes: 2, positionsPerMinute: 4 },
+      {
+        startHour: 7,
+        startMinute: 45,
+        durationMinutes: 2,
+        positionsPerMinute: 4,
+      },
     ],
     pointForProgress: progress => ({
       northMeters: -20 + progress * 6,
@@ -156,15 +213,60 @@ const SCENARIOS: ScenarioDefinition[] = [
       detectionType: 'cellular',
     }),
   },
+  {
+    deviceId: 'device-002',
+    fingerprintHash: PERSONAS.delivery,
+    signalType: 'wifi',
+    threatLevel: 'low',
+    visits: [
+      {
+        startHour: 8,
+        startMinute: 0,
+        durationMinutes: 10,
+        positionsPerMinute: 2,
+      },
+    ],
+    pointForProgress: progress => ({
+      northMeters: -50 + progress * 40,
+      eastMeters: 12 * Math.sin(progress * Math.PI),
+      confidence: 65 + progress * 25,
+      detectionType: 'wifi',
+    }),
+  },
+  {
+    deviceId: 'device-002',
+    fingerprintHash: PERSONAS.loiterer,
+    signalType: 'bluetooth',
+    threatLevel: 'high',
+    visits: [
+      {
+        startHour: 22,
+        startMinute: 15,
+        durationMinutes: 20,
+        positionsPerMinute: 2,
+      },
+    ],
+    pointForProgress: (progress, minuteProgress) => ({
+      northMeters: 30 + Math.sin(progress * Math.PI * 2) * 15,
+      eastMeters: -40 + progress * 60,
+      confidence: 80 - Math.abs(minuteProgress - 0.5) * 10,
+      detectionType: 'bluetooth',
+    }),
+  },
 ];
 
-export function generateReplayData(date?: Date): ReplayData {
+export function generateReplayData(options: ReplayOptions = {}): ReplayData {
   const positions: ReplayPosition[] = [];
   const alerts: Alert[] = [];
-  const baseDate = createBaseDate(date);
+  const baseDate = createBaseDate(options.date);
+  const scenarios = options.deviceId
+    ? SCENARIOS.filter(scenario => scenario.deviceId === options.deviceId)
+    : SCENARIOS;
   let alertIndex = 0;
 
-  for (const scenario of SCENARIOS) {
+  for (const scenario of scenarios) {
+    const center = getDeviceCenter(scenario.deviceId);
+
     for (const visit of scenario.visits) {
       const visitStart = new Date(baseDate);
       visitStart.setHours(visit.startHour, visit.startMinute, 0, 0);
@@ -184,9 +286,11 @@ export function generateReplayData(date?: Date): ReplayData {
         const minuteProgress =
           (step % visit.positionsPerMinute) / visit.positionsPerMinute;
         const point = scenario.pointForProgress(visitProgress, minuteProgress);
-        const coords = toLatLng(point.northMeters, point.eastMeters);
+        const coords = toLatLng(point.northMeters, point.eastMeters, center);
         const accuracyMeters = 10 + (step % 5) * 2;
-        const confidence = Math.round(Math.min(99, Math.max(55, point.confidence)));
+        const confidence = Math.round(
+          Math.min(99, Math.max(55, point.confidence))
+        );
         const timestamp = positionTime.toISOString();
 
         positions.push({
@@ -208,6 +312,7 @@ export function generateReplayData(date?: Date): ReplayData {
         alerts.push(
           createScenarioAlert(
             scenario,
+            center,
             timestamp,
             alertIndex++,
             accuracyMeters,
@@ -224,8 +329,10 @@ export function generateReplayData(date?: Date): ReplayData {
   return { positions, alerts };
 }
 
-export function generateReplayPositions(date?: Date): ReplayPosition[] {
-  return generateReplayData(date).positions;
+export function generateReplayPositions(
+  options: ReplayOptions = {}
+): ReplayPosition[] {
+  return generateReplayData(options).positions;
 }
 
 export const mockReplayData = generateReplayData();

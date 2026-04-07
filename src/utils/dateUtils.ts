@@ -7,9 +7,10 @@ import { format, formatDistanceToNow, parseISO } from 'date-fns';
  * @returns Formatted date string
  */
 export const formatTimestamp = (
-  timestamp: string,
+  timestamp: string | undefined | null,
   formatString: string = 'MMM d, yyyy h:mm a'
 ): string => {
+  if (!timestamp) return '--';
   try {
     const date = parseISO(timestamp);
     return format(date, formatString);

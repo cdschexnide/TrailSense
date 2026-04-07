@@ -24,13 +24,18 @@ describe('generateReplayPositions', () => {
     expect(hours.size).toBeGreaterThanOrEqual(6);
   });
 
-  it('all positions have valid lat/lng near property center', () => {
+  it('all positions have valid lat/lng within deployed device bounds', () => {
     for (const position of positions) {
-      expect(position.latitude).toBeGreaterThan(30.394);
-      expect(position.latitude).toBeLessThan(30.398);
-      expect(position.longitude).toBeGreaterThan(-94.321);
-      expect(position.longitude).toBeLessThan(-94.313);
+      expect(position.latitude).toBeGreaterThan(30.392);
+      expect(position.latitude).toBeLessThan(30.399);
+      expect(position.longitude).toBeGreaterThan(-94.323);
+      expect(position.longitude).toBeLessThan(-94.312);
     }
+  });
+
+  it('only seeded devices expose replay history', () => {
+    const deviceIds = new Set(positions.map(position => position.deviceId));
+    expect(Array.from(deviceIds).sort()).toEqual(['device-001', 'device-002']);
   });
 
   it('all positions have required fields', () => {
@@ -44,12 +49,13 @@ describe('generateReplayPositions', () => {
     }
   });
 
-  it('loiterer scenario has ~90 positions over 45 min', () => {
+  it('loiterer scenario has ~90 positions for device-001 (45 min) plus ~40 for device-002 (20 min)', () => {
     const loiterer = positions.filter(
       position => position.fingerprintHash === 'b_a7b8c9'
     );
-    expect(loiterer.length).toBeGreaterThanOrEqual(70);
-    expect(loiterer.length).toBeLessThanOrEqual(110);
+    // device-001: 45 min * 2/min = 90, device-002: 20 min * 2/min = 40
+    expect(loiterer.length).toBeGreaterThanOrEqual(110);
+    expect(loiterer.length).toBeLessThanOrEqual(150);
   });
 });
 

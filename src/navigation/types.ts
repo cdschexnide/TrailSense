@@ -39,7 +39,7 @@ export type AlertsStackParamList = {
 };
 
 export type RadarStackParamList = {
-  LiveRadar: { startHour?: number } | undefined;
+  LiveRadar: { startHour?: number; deviceId?: string } | undefined;
   RadarSettings: undefined;
   DeviceFingerprint: { fingerprintHash: string };
 };
@@ -88,9 +88,7 @@ export type SettingsStackParamList = {
   Sensitivity: undefined;
   QuietHours: undefined;
   VacationMode: undefined;
-  AddKnownDevice:
-    | { fingerprintHash?: string; deviceId?: string }
-    | undefined;
+  AddKnownDevice: { fingerprintHash?: string; deviceId?: string } | undefined;
 };
 
 export type AIStackParamList = {

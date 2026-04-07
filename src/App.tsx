@@ -56,6 +56,12 @@ export default function App() {
         DEMO_MODE: getIsMockMode(),
       });
 
+      // Enable LLM mock mode in demo/mock builds so AI tab works
+      // without the ExecuTorch native module
+      if (getIsMockMode() || isDemoMode()) {
+        featureFlagsManager.enableMockMode();
+      }
+
       logMockStatus();
       llmLogger.info('LLM using configured on-device model runtime');
 

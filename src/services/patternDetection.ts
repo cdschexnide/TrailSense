@@ -147,7 +147,8 @@ function formatHour(hour: number): string {
   return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
 }
 
-function formatDate(timestamp: string): string {
+function formatDate(timestamp: string | undefined | null): string {
+  if (!timestamp) return '--';
   try {
     return new Date(timestamp).toLocaleDateString('en-US', {
       month: 'short',

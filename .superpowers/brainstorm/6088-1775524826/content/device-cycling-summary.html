@@ -1,0 +1,90 @@
+<h2>Device Cycling on the Radar Screen</h2>
+<p class="subtitle">Make the existing Live Map + Replay views work for each deployed device, with a dropdown picker to switch between them.</p>
+
+<div class="section">
+  <h3>What changes</h3>
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+
+    <!-- Change 1 -->
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="background: #007AFF; color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">1</span>
+        <strong style="color: #e8e8e0;">Status bar becomes a dropdown picker</strong>
+      </div>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div style="flex: 1;">
+          <div class="label">BEFORE</div>
+          <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #a8a898; font-size: 12px;">Online · 30.3965, -94.3178</span>
+            <span style="color: #5a5a50; font-size: 12px; margin-left: auto;">1/5</span>
+          </div>
+        </div>
+        <div style="color: #555; font-size: 20px;">→</div>
+        <div style="flex: 1;">
+          <div class="label">AFTER</div>
+          <div style="background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 6px; margin-top: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80;"></div>
+            <span style="color: #e8e8e0; font-size: 12px; font-weight: 600;">North Gate Sensor</span>
+            <span style="color: #666; font-size: 12px;">▾</span>
+            <span style="color: #5a5a50; font-size: 11px; margin-left: auto;">30.3965, -94.3178</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change 2 -->
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="background: #007AFF; color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">2</span>
+        <strong style="color: #e8e8e0;">Switching devices re-centers + reloads data</strong>
+      </div>
+      <ul style="color: #aaa; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Camera flies to the new device's GPS coordinates</li>
+        <li>Live Map loads that device's <code style="background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px;">usePositions(deviceId)</code> — its detected devices</li>
+        <li>Replay loads that device's <code style="background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px;">useReplayData(deviceId)</code> — its history</li>
+        <li>TrailSense marker moves to the new device's location</li>
+        <li>Detected devices list updates to show the new device's detections</li>
+        <li>Timeline scrubber resets (new device = new history)</li>
+        <li>Selected position / FingerprintPeek clears</li>
+      </ul>
+    </div>
+
+    <!-- Change 3 -->
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="background: #007AFF; color: white; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">3</span>
+        <strong style="color: #e8e8e0;">Everything else stays exactly the same</strong>
+      </div>
+      <ul style="color: #aaa; font-size: 13px; margin: 0; padding-left: 20px; line-height: 1.8;">
+        <li>Same map (Mapbox satellite)</li>
+        <li>Same device marker (blue pulsing dot)</li>
+        <li>Same detected device markers (WiFi/BT/Cellular colored circles)</li>
+        <li>Same floating controls (satellite toggle, locate)</li>
+        <li>Same Replay mode with timeline scrubber, trail lines, interpolation</li>
+        <li>Same FingerprintPeek on marker tap</li>
+        <li>No new visual elements. No range circles. No legend.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <div class="options">
+    <div class="option" data-choice="a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Yes, this is what I want</h3>
+        <p>Dropdown picker to switch devices, each device gets its own Live Map + Replay view with its own data. No new visual elements.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Close, but I want to adjust something</h3>
+        <p>I'll describe what needs changing.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -18,6 +18,7 @@ import {
 } from '@components/organisms/TacticalHeader';
 import {
   usePropertyStatus,
+  PropertyStatus,
   PropertyStatusLevel,
 } from '@hooks/usePropertyStatus';
 import { useReducedMotion } from '@hooks/useReducedMotion';
@@ -47,6 +48,41 @@ const HEADER_STATUS_MAP: Record<
   warning: { label: 'ELEVATED', variant: 'warning' },
   clear: { label: 'SECURE', variant: 'success' },
 };
+
+function getAIInsightMessage(status: PropertyStatus): string {
+  const { threatCounts, activeAlertCount, visitorsToday, devicesOffline } =
+    status;
+
+  if (threatCounts.critical > 0) {
+    return `${threatCounts.critical} critical threat${threatCounts.critical === 1 ? '' : 's'} detected. Tap for AI threat assessment.`;
+  }
+
+  if (threatCounts.high > 0) {
+    return `${threatCounts.high} high-priority alert${threatCounts.high === 1 ? '' : 's'} active. Tap for analysis.`;
+  }
+
+  if (devicesOffline > 0 && activeAlertCount > 0) {
+    return `${devicesOffline} sensor${devicesOffline === 1 ? '' : 's'} offline with ${activeAlertCount} unreviewed alert${activeAlertCount === 1 ? '' : 's'}. Tap for situation report.`;
+  }
+
+  if (devicesOffline > 0) {
+    return `${devicesOffline} sensor${devicesOffline === 1 ? '' : 's'} offline. Tap for diagnostics.`;
+  }
+
+  if (visitorsToday > 0 && activeAlertCount > 0) {
+    return `${visitorsToday} visitor${visitorsToday === 1 ? '' : 's'} detected today, ${activeAlertCount} unreviewed. Tap for pattern analysis.`;
+  }
+
+  if (visitorsToday > 0) {
+    return `${visitorsToday} visitor${visitorsToday === 1 ? '' : 's'} detected today. Tap for pattern analysis.`;
+  }
+
+  if (activeAlertCount > 0) {
+    return `${activeAlertCount} unreviewed alert${activeAlertCount === 1 ? '' : 's'}. Tap for AI summary.`;
+  }
+
+  return 'No active threats. Tap for property status report.';
+}
 
 export const PropertyCommandCenter = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -406,7 +442,7 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
               },
             ]}
             onPress={() =>
-              navigation.navigate('MoreTab', { screen: 'TrailSenseAI' })
+              navigation.navigate('AITab', { screen: 'TrailSenseAI' })
             }
           >
             <View style={styles.insightHeader}>
@@ -415,13 +451,7 @@ export const PropertyCommandCenter = ({ navigation }: any) => {
               </Text>
             </View>
             <Text variant="subheadline" color="label">
-              {status.visitorsToday > 0
-                ? `${status.visitorsToday} device${
-                    status.visitorsToday === 1 ? '' : 's'
-                  } detected today. Tap for pattern analysis.`
-                : `${status.activeAlertCount} unreviewed alert${
-                    status.activeAlertCount === 1 ? '' : 's'
-                  } need attention.`}
+              {getAIInsightMessage(status)}
             </Text>
           </Pressable>
         )}
