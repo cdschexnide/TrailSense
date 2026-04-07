@@ -692,31 +692,213 @@ git commit -m "feat: pass deviceId when navigating from DeviceDetail to Radar"
 - Modify: `src/mocks/data/mockReplayPositions.ts`
 - Modify: `src/hooks/api/useReplayPositions.ts`
 
-The mock replay data generator currently hardcodes all scenarios to `device-001` and ignores the `deviceId` parameter entirely. Without this fix, switching devices in demo mode shows device-001's replay data for every device — making it impossible to verify the feature works.
+The mock replay data generator currently hardcodes all scenarios to `device-001` and uses a global `PROPERTY_CENTER` constant. Four functions depend on it: `toLatLng` (line 43), `METERS_PER_DEG_LNG` (line 11), `createScenarioAlert` (line 79, 85), and the position generation loop (line 187 via `toLatLng`). The `generateReplayData` signature is `(date?: Date)` and `generateReplayPositions` wraps it with the same signature (line 227). Both need updating without breaking each other.
 
-- [ ] **Step 1: Update `generateReplayData` to accept deviceId**
+- [ ] **Step 1: Change `generateReplayData` signature to an options object**
 
-In `src/mocks/data/mockReplayPositions.ts`, update the `generateReplayData` function signature to accept an optional `deviceId` parameter. Filter the `SCENARIOS` array to only include scenarios matching the requested deviceId. If no deviceId is provided, default to `'device-001'` for backward compatibility:
+The current signature is `generateReplayData(date?: Date)`. Changing the first param to `deviceId` would break `generateReplayPositions(date?: Date)` which passes `date` through. Use an options object instead.
+
+In `src/mocks/data/mockReplayPositions.ts`, replace the global `PROPERTY_CENTER` constant and the function signatures:
+
+```typescript
+// Remove the global PROPERTY_CENTER constant (line 9):
+// const PROPERTY_CENTER = { latitude: 30.396526, longitude: -94.317806 };
+
+// Replace with a device center lookup:
+const DEVICE_CENTERS: Record<string, { latitude: number; longitude: number }> = {
+  'device-001': { latitude: 30.396526, longitude: -94.317806 },
+  'device-002': { latitude: 30.3943, longitude: -94.3191 },
+  'device-003': { latitude: 30.397, longitude: -94.3155 },
+  'device-004': { latitude: 30.3958, longitude: -94.3205 },
+  'device-005': { latitude: 30.3988, longitude: -94.3162 },
+};
+
+const DEFAULT_CENTER = DEVICE_CENTERS['device-001'];
+
+function getDeviceCenter(deviceId?: string): { latitude: number; longitude: number } {
+  if (!deviceId) return DEFAULT_CENTER;
+  return DEVICE_CENTERS[deviceId] ?? DEFAULT_CENTER;
+}
+```
+
+- [ ] **Step 2: Thread center through `toLatLng`, `METERS_PER_DEG_LNG`, and `createScenarioAlert`**
+
+`METERS_PER_DEG_LNG` depends on latitude. Since all devices are within ~0.005 degrees of each other, the cosine factor is nearly identical. Keep it computed from a fixed reference latitude to avoid complexity:
+
+```typescript
+const METERS_PER_DEG_LAT = 111_320;
+// Use fixed reference latitude — devices are close enough that this is accurate
+const METERS_PER_DEG_LNG =
+  111_320 * Math.cos((30.396526 * Math.PI) / 180);
+```
+
+Update `toLatLng` to accept a center parameter:
+
+```typescript
+function toLatLng(
+  northMeters: number,
+  eastMeters: number,
+  center: { latitude: number; longitude: number }
+) {
+  return {
+    latitude: center.latitude + northMeters / METERS_PER_DEG_LAT,
+    longitude: center.longitude + eastMeters / METERS_PER_DEG_LNG,
+  };
+}
+```
+
+Update `createScenarioAlert` to accept a center parameter. Replace the two references to `PROPERTY_CENTER` (lines 79 and 85) with the `center` parameter:
+
+```typescript
+function createScenarioAlert(
+  scenario: ScenarioDefinition,
+  timestamp: string,
+  index: number,
+  accuracyMeters: number,
+  confidence: number,
+  center: { latitude: number; longitude: number }
+): Alert {
+  return {
+    id: `replay-alert-${scenario.fingerprintHash}-${index}`,
+    deviceId: scenario.deviceId,
+    timestamp,
+    threatLevel: scenario.threatLevel,
+    detectionType:
+      scenario.signalType === 'bluetooth' ? 'bluetooth' : scenario.signalType,
+    fingerprintHash: scenario.fingerprintHash,
+    confidence,
+    accuracyMeters,
+    isReviewed: false,
+    isFalsePositive: false,
+    location: { ...center },
+    metadata: {
+      source: 'positions',
+      measurementCount: 4,
+      signalCount: 2,
+      triangulatedPosition: {
+        ...center,
+        accuracyMeters,
+        confidence,
+      },
+    },
+    createdAt: timestamp,
+  };
+}
+```
+
+- [ ] **Step 3: Update `generateReplayData` to accept options and filter by deviceId**
+
+Replace the function signature and add device filtering:
+
+```typescript
+interface ReplayDataOptions {
+  date?: Date;
+  deviceId?: string;
+}
+
+export function generateReplayData(options?: ReplayDataOptions): ReplayData {
+  const { date, deviceId } = options ?? {};
+  const center = getDeviceCenter(deviceId);
+  const positions: ReplayPosition[] = [];
+  const alerts: Alert[] = [];
+  const baseDate = createBaseDate(date);
+  let alertIndex = 0;
+
+  const scenarios = deviceId
+    ? SCENARIOS.filter(s => s.deviceId === deviceId)
+    : SCENARIOS;
+
+  for (const scenario of scenarios) {
+    for (const visit of scenario.visits) {
+      const visitStart = new Date(baseDate);
+      visitStart.setHours(visit.startHour, visit.startMinute, 0, 0);
+
+      const totalPositions = visit.durationMinutes * visit.positionsPerMinute;
+
+      for (let step = 0; step < totalPositions; step++) {
+        const positionTime = new Date(visitStart);
+        positionTime.setSeconds(
+          Math.floor((step * 60) / visit.positionsPerMinute),
+          (step % visit.positionsPerMinute) *
+            Math.floor(60 / visit.positionsPerMinute)
+        );
+
+        const visitProgress =
+          totalPositions <= 1 ? 0 : step / (totalPositions - 1);
+        const minuteProgress =
+          (step % visit.positionsPerMinute) / visit.positionsPerMinute;
+        const point = scenario.pointForProgress(visitProgress, minuteProgress);
+        const coords = toLatLng(point.northMeters, point.eastMeters, center);
+        const accuracyMeters = 10 + (step % 5) * 2;
+        const confidence = Math.round(Math.min(99, Math.max(55, point.confidence)));
+        const timestamp = positionTime.toISOString();
+
+        positions.push({
+          id: `replay-${scenario.fingerprintHash}-${visit.startHour}-${visit.startMinute}-${step}`,
+          deviceId: scenario.deviceId,
+          fingerprintHash: scenario.fingerprintHash,
+          signalType: scenario.signalType,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracyMeters,
+          confidence,
+          measurementCount: 4 + (step % 3),
+          presenceCertainty: confidence,
+          proximity: Math.max(0, Math.min(100, 100 - accuracyMeters * 2)),
+          threatLevel: scenario.threatLevel,
+          observedAt: timestamp,
+        });
+
+        alerts.push(
+          createScenarioAlert(
+            scenario,
+            timestamp,
+            alertIndex++,
+            accuracyMeters,
+            confidence,
+            center
+          )
+        );
+      }
+    }
+  }
+
+  positions.sort((a, b) => a.observedAt.localeCompare(b.observedAt));
+  alerts.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+  return { positions, alerts };
+}
+```
+
+- [ ] **Step 4: Update `generateReplayPositions` to pass through the options object**
 
 ```typescript
 // Before:
-export function generateReplayData(): ReplayData {
+export function generateReplayPositions(date?: Date): ReplayPosition[] {
+  return generateReplayData(date).positions;
+}
 
 // After:
-export function generateReplayData(deviceId: string = 'device-001'): ReplayData {
+export function generateReplayPositions(options?: ReplayDataOptions): ReplayPosition[] {
+  return generateReplayData(options).positions;
+}
 ```
 
-Then filter scenarios by deviceId where they are consumed:
+- [ ] **Step 5: Update callers of `generateReplayPositions(date)` if any**
+
+Run: `grep -rn 'generateReplayPositions\|generateReplayData' src/ __tests__/`
+
+Check for any callers passing a `Date` argument directly. If found, wrap in the options object: `generateReplayData({ date: someDate })`. The bottom of the file has:
 
 ```typescript
-const scenarios = SCENARIOS.filter(s => s.deviceId === deviceId);
+export const mockReplayData = generateReplayData();
 ```
 
-If `scenarios` is empty (no scenarios defined for this device), return an empty positions array so the replay shows "no activity" — which is valid behavior for devices that haven't seen detections.
+This still works — `options` defaults to `undefined`, `deviceId` defaults to `undefined`, and the `scenarios` filter falls back to all scenarios. No change needed here.
 
-- [ ] **Step 2: Add at least one scenario for device-002**
+- [ ] **Step 6: Add a scenario for device-002 (South Boundary)**
 
-Add a scenario for `device-002` (South Boundary) in the `SCENARIOS` array. Use the South Boundary's coordinates (30.3943, -94.3191) as the center. A single simple scenario is sufficient:
+Add to the `SCENARIOS` array after the existing device-001 scenarios:
 
 ```typescript
 {
@@ -734,13 +916,28 @@ Add a scenario for `device-002` (South Boundary) in the `SCENARIOS` array. Use t
     detectionType: 'wifi',
   }),
 },
+{
+  deviceId: 'device-002',
+  fingerprintHash: PERSONAS.loiterer,
+  signalType: 'bluetooth',
+  threatLevel: 'high',
+  visits: [
+    { startHour: 22, startMinute: 15, durationMinutes: 20, positionsPerMinute: 2 },
+  ],
+  pointForProgress: (progress, minuteProgress) => ({
+    northMeters: 30 + Math.sin(progress * Math.PI * 2) * 15,
+    eastMeters: -40 + progress * 60,
+    confidence: 80 - Math.abs(minuteProgress - 0.5) * 10,
+    detectionType: 'bluetooth',
+  }),
+},
 ```
 
-Note: The `PROPERTY_CENTER` constant in the file will need to be used per-device. If `generateReplayData` already uses `PROPERTY_CENTER` as the base for position generation, update it to look up coordinates from the device's known location. Check the existing code to see how `PROPERTY_CENTER` is used in the position generation pipeline and adjust accordingly.
+Devices 003-005 intentionally have no scenarios — switching to them in Replay shows an empty timeline, which is valid and tests the empty-state path.
 
-- [ ] **Step 3: Update `useReplayData` to pass deviceId in mock mode**
+- [ ] **Step 7: Update `useReplayData` to pass deviceId in mock mode**
 
-In `src/hooks/api/useReplayPositions.ts`, update the mock mode branch to pass deviceId:
+In `src/hooks/api/useReplayPositions.ts`, update the mock mode branch:
 
 ```typescript
 // Before:
@@ -750,16 +947,16 @@ if (isDemoOrMockMode()) {
 
 // After:
 if (isDemoOrMockMode()) {
-  return generateReplayData(deviceId!);
+  return generateReplayData({ deviceId: deviceId! });
 }
 ```
 
-- [ ] **Step 4: Run type-check and tests**
+- [ ] **Step 8: Run type-check and tests**
 
 Run: `npm run type-check && npm test -- --no-coverage`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add src/mocks/data/mockReplayPositions.ts src/hooks/api/useReplayPositions.ts

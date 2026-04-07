@@ -72,16 +72,16 @@ When `setSelectedDeviceId(newId)` is called:
 
 ### Handle deviceId nav param
 
-Add a `useEffect` to respond to incoming `deviceId` param (same pattern as the existing `startHour` param):
+Add a `useEffect` to respond to incoming `deviceId` param (same pattern as the existing `startHour` param). This must call `handleSelectDevice` (not just `setSelectedDeviceId`) so the full reset path executes:
 
 ```typescript
 useEffect(() => {
   const incomingDeviceId = route?.params?.deviceId;
   if (incomingDeviceId && devices.some(d => d.id === incomingDeviceId)) {
-    setSelectedDeviceId(incomingDeviceId);
+    handleSelectDevice(incomingDeviceId);
     navigation.setParams({ deviceId: undefined });
   }
-}, [route?.params?.deviceId, devices, navigation]);
+}, [route?.params?.deviceId, devices, navigation, handleSelectDevice]);
 ```
 
 ## DevicePicker Component
@@ -176,9 +176,18 @@ When switching devices in Replay mode:
 
 ## Mock Data Changes
 
-The mock replay data generator (`src/mocks/data/mockReplayPositions.ts`) currently hardcodes all scenarios to `device-001`. To validate device cycling in demo mode, `generateReplayData()` should accept an optional `deviceId` parameter and vary the replay scenarios (or at minimum the property center coordinates) per device. Without this, switching devices in demo/mock mode will show device-001's replay data for every device, making it impossible to verify the feature works correctly.
+The mock replay data generator (`src/mocks/data/mockReplayPositions.ts`) has three problems:
 
-The `useReplayData` hook in mock mode (`src/hooks/api/useReplayPositions.ts:14`) currently calls `generateReplayData()` without passing the `deviceId`. Update it to pass the device ID through.
+1. All scenarios are hardcoded to `device-001` — no replay data exists for other devices
+2. `PROPERTY_CENTER` is a global constant used by `toLatLng()`, `createScenarioAlert()`, and `METERS_PER_DEG_LNG` — positions for all devices would cluster around device-001's location
+3. `generateReplayData(date?: Date)` doesn't accept a `deviceId` parameter, and `generateReplayPositions(date?: Date)` wraps it with the same signature
+
+Changes required:
+- Replace global `PROPERTY_CENTER` with a `DEVICE_CENTERS` lookup map and `getDeviceCenter(deviceId)` helper. Thread the center through `toLatLng()` and `createScenarioAlert()` as a parameter.
+- Change `generateReplayData` signature to accept an options object `{ date?: Date; deviceId?: string }` instead of `date?: Date`. This avoids breaking the parameter contract — a `Date` can never be confused with a `string`.
+- Update `generateReplayPositions` to accept the same options object.
+- Add replay scenarios for `device-002` (South Boundary). Devices 003-005 intentionally have no scenarios to test the empty-state path.
+- Update `useReplayData` mock mode branch to pass `{ deviceId }` through.
 
 ## No Changes Needed
 
