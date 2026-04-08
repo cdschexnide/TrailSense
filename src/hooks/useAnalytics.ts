@@ -8,6 +8,16 @@ export interface UseAnalyticsOptions {
   endDate?: Date;
 }
 
+export interface AnalyticsComparisonResponse {
+  current: AnalyticsData;
+  comparison: AnalyticsData;
+  percentageChange: {
+    totalDetections: number;
+    unknownDevices: number;
+    avgResponseTime: number;
+  };
+}
+
 export const useAnalytics = (options: UseAnalyticsOptions = {}) => {
   const { period = 'week', startDate, endDate } = options;
 
@@ -52,5 +62,23 @@ export const useDeviceHistory = (fingerprintHash: string) => {
     queryKey: ['device-history', fingerprintHash],
     queryFn: () => analyticsApi.getDeviceHistory(fingerprintHash),
     enabled: !!fingerprintHash,
+  });
+};
+
+export const useComparison = (
+  options: {
+    period?: 'day' | 'week' | 'month';
+    compareWith?: 'previous' | 'lastYear';
+    enabled?: boolean;
+  } = {}
+) => {
+  const { period = 'week', compareWith = 'previous', enabled = true } = options;
+
+  return useQuery<AnalyticsComparisonResponse>({
+    queryKey: ['analytics-comparison', period, compareWith],
+    queryFn: () => analyticsApi.getComparison({ period, compareWith }),
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
+    enabled,
   });
 };

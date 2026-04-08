@@ -1,0 +1,112 @@
+<h2>Severity Filter — 3 Approaches</h2>
+<p class="subtitle">The current horizontal chip row overflows on small screens. Here are 3 alternatives — all handle 4 fixed severity levels with counts.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>2×2 Grid of Chips</h3>
+      <p>Wrap the 4 chips into a 2-column, 2-row grid. Each chip stretches to fill half the screen width. Always visible, never overflows. Counts stay inline.</p>
+
+      <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:6px; max-width:360px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#ef4444;display:inline-block;"></span>
+          <span style="color:#ef4444;font-weight:600;">16</span> CRITICAL
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#f59e0b;display:inline-block;"></span>
+          <span style="color:#f59e0b;font-weight:600;">16</span> HIGH
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#fbbf24;display:inline-block;"></span>
+          <span style="color:#fbbf24;font-weight:600;">22</span> MEDIUM
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#4ade80;display:inline-block;"></span>
+          <span style="color:#4ade80;font-weight:600;">22</span> LOW
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="pros-cons" style="font-size:12px;">
+          <div class="pros"><h4>Pros</h4><ul><li>All options always visible</li><li>Tappable on any screen size</li><li>Minimal layout change from current</li><li>Naturally supports multi-select</li></ul></div>
+          <div class="cons"><h4>Cons</h4><ul><li>Takes more vertical space (~2 rows)</li><li>Might feel heavy above the list</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Segmented Control (Equal-Width Buttons)</h3>
+      <p>A single row of 4 equal-width segments that always fills the screen. Labels shorten to fit: just the colored dot + count, with a short label below or abbreviated (C / H / M / L). Works like iOS segmented controls.</p>
+
+      <div style="margin-top:12px; display:flex; max-width:360px; border:1px solid #444; border-radius:8px; overflow:hidden;">
+        <div style="flex:1;text-align:center;padding:8px 4px;background:rgba(251,191,36,0.12);border-right:1px solid #444;">
+          <div style="font-size:11px;color:#ef4444;font-weight:700;">● 16</div>
+          <div style="font-size:9px;color:#ccc;margin-top:2px;">CRIT</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:8px 4px;border-right:1px solid #444;">
+          <div style="font-size:11px;color:#f59e0b;font-weight:700;">● 16</div>
+          <div style="font-size:9px;color:#888;margin-top:2px;">HIGH</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:8px 4px;border-right:1px solid #444;">
+          <div style="font-size:11px;color:#fbbf24;font-weight:700;">● 22</div>
+          <div style="font-size:9px;color:#888;margin-top:2px;">MED</div>
+        </div>
+        <div style="flex:1;text-align:center;padding:8px 4px;">
+          <div style="font-size:11px;color:#4ade80;font-weight:700;">● 22</div>
+          <div style="font-size:9px;color:#888;margin-top:2px;">LOW</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="pros-cons" style="font-size:12px;">
+          <div class="pros"><h4>Pros</h4><ul><li>Single row — compact vertical footprint</li><li>Always fits, no overflow possible</li><li>Familiar native pattern</li></ul></div>
+          <div class="cons"><h4>Cons</h4><ul><li>Labels must be abbreviated</li><li>Segmented controls are traditionally single-select</li><li>Smaller tap targets than chips</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Responsive Chips with flexWrap</h3>
+      <p>Keep the current chip design but set <code>flexWrap: 'wrap'</code> on the container. On wide screens all 4 fit in one row. On narrow screens or with large fonts, chips wrap to a second row naturally. No abbreviation needed.</p>
+
+      <div style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; max-width:240px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#ef4444;display:inline-block;"></span>
+          <span style="color:#ef4444;font-weight:600;">16</span> CRITICAL
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#f59e0b;display:inline-block;"></span>
+          <span style="color:#f59e0b;font-weight:600;">16</span> HIGH
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#fbbf24;display:inline-block;"></span>
+          <span style="color:#fbbf24;font-weight:600;">22</span> MEDIUM
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #444;border-radius:8px;background:#1a1a14;font-size:13px;color:#ccc;">
+          <span style="width:6px;height:6px;border-radius:3px;background:#4ade80;display:inline-block;"></span>
+          <span style="color:#4ade80;font-weight:600;">22</span> LOW
+        </div>
+      </div>
+      <p style="font-size:11px;color:#888;margin-top:4px;">↑ Simulated narrow screen — chips wrap naturally</p>
+
+      <div style="margin-top:10px;">
+        <div class="pros-cons" style="font-size:12px;">
+          <div class="pros"><h4>Pros</h4><ul><li>Smallest code change — just add flexWrap</li><li>Full labels always shown</li><li>Graceful on all screen sizes</li><li>Multi-select friendly</li></ul></div>
+          <div class="cons"><h4>Cons</h4><ul><li>Row count varies by device — less predictable layout</li><li>Could feel less "designed" than a grid</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;padding:12px;border:1px solid #333;border-radius:8px;background:#1a1a14;">
+  <h3>💡 Recommendation: Option A (2×2 Grid)</h3>
+  <p style="color:#ccc;font-size:13px;">It gives the most consistent, predictable layout across all screen sizes while keeping full labels and counts visible. The extra vertical space is minimal (one more row of chips), and for a security app where quickly scanning severity levels matters, having all 4 equally prominent is a plus. It also naturally supports multi-select if you want it later.</p>
+</div>

@@ -1,0 +1,85 @@
+<h2>Analytics Redesign: Three Approaches</h2>
+<p class="subtitle">Same 4-tab structure (Overview, Signals, Devices, Patterns) — different content philosophy</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Raw Data Forward</h3>
+      <p>Surface the rich device telemetry directly — RSSI distributions, burst timing histograms, noise floor trends, confidence score breakdowns, proximity zone charts. Technical and detailed across all tabs. Think "Grafana for property security."</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Maximizes the value of device data investment</li>
+            <li>Power users get full visibility into sensor performance</li>
+            <li>Unique differentiator — no competitor shows this level of RF detail</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Overwhelming for non-technical users</li>
+            <li>Lots of charts that require RF knowledge to interpret</li>
+            <li>"What does burst interval variance mean for my security?"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Insight-Driven</h3>
+      <p>Translate device data into security-meaningful insights — "3 new devices appeared this week", "Activity spiked 40% on Tuesday nights", "Device w_a3f has visited 12 times, always between 2-4 AM." Raw metrics hidden, conclusions surfaced.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Immediately actionable — tells you what matters</li>
+            <li>Accessible to any property owner, not just RF engineers</li>
+            <li>Feels like a smart security product, not a spectrum analyzer</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Wastes the rich data — users can't explore or verify</li>
+            <li>Hides the "why" behind conclusions</li>
+            <li>Less differentiated — any app can show summary cards</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Layered: Insights Up Top, Data Underneath</h3>
+      <p><strong>Overview tab</strong> is insight-driven — key metrics, anomalies, period comparison, "what changed." <strong>Signals/Devices/Patterns tabs</strong> go deep — RSSI distributions, proximity breakdowns, device behavior timelines, temporal heatmaps. The Overview tells you what to care about; the other tabs let you explore why.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Casual users get value from Overview without going deeper</li>
+            <li>Power users can drill into the full signal data</li>
+            <li>Overview insights can link directly to the relevant deep tab</li>
+            <li>Best of both worlds — accessible AND technically rich</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Most to design and implement (4 distinct tab experiences)</li>
+            <li>Needs thoughtful information hierarchy to avoid redundancy between Overview and detail tabs</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top: 12px; padding: 8px 12px; background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 14px;">
+        <strong>⟶ Recommended.</strong> Matches how the app already works — Home screen gives you the quick picture, Alerts/Radar/Devices let you go deep. Same principle applied to analytics.
+      </p>
+    </div>
+  </div>
+</div>

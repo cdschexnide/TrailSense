@@ -1,0 +1,349 @@
+<h2>Patterns Tab Design</h2>
+<p class="subtitle">Temporal patterns and anomaly detection — when activity happens, how it clusters, what's unusual.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Patterns Tab — Dark Theme Mockup</div>
+  <div class="mockup-body" style="background: #111; color: #e5e5e5; font-family: -apple-system, system-ui, sans-serif; padding: 20px; max-width: 390px; margin: 0 auto;">
+
+    <!-- Time Range Picker -->
+    <div style="display: flex; background: #1a1a1a; border-radius: 10px; padding: 3px; margin-bottom: 20px;">
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">24h</div>
+      <div style="flex:1; text-align:center; padding: 8px; background: #f59e0b; color: #000; border-radius: 8px; font-size: 13px; font-weight: 600;">7d</div>
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">30d</div>
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">1y</div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div style="display: flex; border-bottom: 1px solid #333; margin-bottom: 20px;">
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Overview</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Signals</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #f59e0b; border-bottom: 2px solid #f59e0b; font-size: 13px; font-weight: 600;">Patterns</div>
+    </div>
+
+    <!-- Section 1: Activity Heatmap (Hour × Day grid) -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Activity Heatmap</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Detections by hour and day of week</div>
+      <!-- Day labels on left -->
+      <div style="display: grid; grid-template-columns: 32px repeat(12, 1fr); gap: 2px; font-size: 9px;">
+        <!-- Header row: hours -->
+        <div></div>
+        <div style="color: #666; text-align: center;">12a</div>
+        <div style="color: #666; text-align: center;">2a</div>
+        <div style="color: #666; text-align: center;">4a</div>
+        <div style="color: #666; text-align: center;">6a</div>
+        <div style="color: #666; text-align: center;">8a</div>
+        <div style="color: #666; text-align: center;">10a</div>
+        <div style="color: #666; text-align: center;">12p</div>
+        <div style="color: #666; text-align: center;">2p</div>
+        <div style="color: #666; text-align: center;">4p</div>
+        <div style="color: #666; text-align: center;">6p</div>
+        <div style="color: #666; text-align: center;">8p</div>
+        <div style="color: #666; text-align: center;">10p</div>
+
+        <!-- Mon -->
+        <div style="color: #888; display:flex; align-items:center;">Mon</div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.05); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.0); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.35); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.4); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+
+        <!-- Tue -->
+        <div style="color: #888; display:flex; align-items:center;">Tue</div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.7); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.8); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.35); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+
+        <!-- Wed -->
+        <div style="color: #888; display:flex; align-items:center;">Wed</div>
+        <div style="background: rgba(245,158,11,0.05); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.05); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.0); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.4); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.5); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.45); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.55); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.4); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+
+        <!-- Thu -->
+        <div style="color: #888; display:flex; align-items:center;">Thu</div>
+        <div style="background: rgba(245,158,11,0.05); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.05); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.35); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.45); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.35); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+
+        <!-- Fri -->
+        <div style="color: #888; display:flex; align-items:center;">Fri</div>
+        <div style="background: rgba(245,158,11,0.05); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.0); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.0); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.6); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.75); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.5); height: 22px; border-radius: 3px;"></div>
+
+        <!-- Sat -->
+        <div style="color: #888; display:flex; align-items:center;">Sat</div>
+        <div style="background: rgba(245,158,11,0.4); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.4); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.5); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.6); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.9); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,1.0); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.65); height: 22px; border-radius: 3px;"></div>
+
+        <!-- Sun -->
+        <div style="color: #888; display:flex; align-items:center;">Sun</div>
+        <div style="background: rgba(245,158,11,0.35); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.25); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.15); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.3); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.2); height: 22px; border-radius: 3px;"></div>
+        <div style="background: rgba(245,158,11,0.1); height: 22px; border-radius: 3px;"></div>
+      </div>
+      <!-- Legend -->
+      <div style="display: flex; align-items: center; gap: 4px; margin-top: 12px; justify-content: center;">
+        <span style="font-size: 10px; color: #666;">Less</span>
+        <div style="width: 16px; height: 10px; background: rgba(245,158,11,0.1); border-radius: 2px;"></div>
+        <div style="width: 16px; height: 10px; background: rgba(245,158,11,0.3); border-radius: 2px;"></div>
+        <div style="width: 16px; height: 10px; background: rgba(245,158,11,0.55); border-radius: 2px;"></div>
+        <div style="width: 16px; height: 10px; background: rgba(245,158,11,0.8); border-radius: 2px;"></div>
+        <div style="width: 16px; height: 10px; background: rgba(245,158,11,1.0); border-radius: 2px;"></div>
+        <span style="font-size: 10px; color: #666;">More</span>
+      </div>
+    </div>
+
+    <!-- Section 2: Hourly Distribution -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Hourly Distribution</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <svg viewBox="0 0 320 100" style="width: 100%; height: 100px;">
+        <!-- Bars for 24 hours -->
+        <rect x="2" y="82" width="10" height="8" rx="2" fill="rgba(245,158,11,0.3)"/>
+        <rect x="15" y="78" width="10" height="12" rx="2" fill="rgba(245,158,11,0.35)"/>
+        <rect x="28" y="70" width="10" height="20" rx="2" fill="rgba(245,158,11,0.5)"/>
+        <rect x="41" y="65" width="10" height="25" rx="2" fill="rgba(245,158,11,0.55)"/>
+        <rect x="54" y="80" width="10" height="10" rx="2" fill="rgba(245,158,11,0.25)"/>
+        <rect x="67" y="85" width="10" height="5" rx="2" fill="rgba(245,158,11,0.15)"/>
+        <rect x="80" y="75" width="10" height="15" rx="2" fill="rgba(245,158,11,0.4)"/>
+        <rect x="93" y="60" width="10" height="30" rx="2" fill="rgba(245,158,11,0.6)"/>
+        <rect x="106" y="50" width="10" height="40" rx="2" fill="rgba(245,158,11,0.7)"/>
+        <rect x="119" y="55" width="10" height="35" rx="2" fill="rgba(245,158,11,0.65)"/>
+        <rect x="132" y="45" width="10" height="45" rx="2" fill="rgba(245,158,11,0.75)"/>
+        <rect x="145" y="40" width="10" height="50" rx="2" fill="rgba(245,158,11,0.8)"/>
+        <rect x="158" y="35" width="10" height="55" rx="2" fill="#f59e0b"/>
+        <rect x="171" y="42" width="10" height="48" rx="2" fill="rgba(245,158,11,0.78)"/>
+        <rect x="184" y="50" width="10" height="40" rx="2" fill="rgba(245,158,11,0.7)"/>
+        <rect x="197" y="55" width="10" height="35" rx="2" fill="rgba(245,158,11,0.65)"/>
+        <rect x="210" y="48" width="10" height="42" rx="2" fill="rgba(245,158,11,0.72)"/>
+        <rect x="223" y="38" width="10" height="52" rx="2" fill="rgba(245,158,11,0.85)"/>
+        <rect x="236" y="25" width="10" height="65" rx="2" fill="rgba(245,158,11,0.95)"/>
+        <rect x="249" y="15" width="10" height="75" rx="2" fill="#f59e0b"/>
+        <rect x="262" y="10" width="10" height="80" rx="2" fill="#f59e0b"/>
+        <rect x="275" y="20" width="10" height="70" rx="2" fill="rgba(245,158,11,0.9)"/>
+        <rect x="288" y="40" width="10" height="50" rx="2" fill="rgba(245,158,11,0.8)"/>
+        <rect x="301" y="60" width="10" height="30" rx="2" fill="rgba(245,158,11,0.55)"/>
+      </svg>
+      <div style="display: flex; justify-content: space-between; margin-top: 4px; padding: 0 2px;">
+        <span style="font-size: 9px; color: #666;">12 AM</span>
+        <span style="font-size: 9px; color: #666;">6 AM</span>
+        <span style="font-size: 9px; color: #666;">12 PM</span>
+        <span style="font-size: 9px; color: #666;">6 PM</span>
+        <span style="font-size: 9px; color: #666;">11 PM</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+        <div style="font-size: 11px; color: #888;">Peak hour: <span style="color: #f59e0b; font-weight: 600;">8–9 PM</span></div>
+        <div style="font-size: 11px; color: #888;">Quietest: <span style="color: #4ade80; font-weight: 600;">5–6 AM</span></div>
+      </div>
+    </div>
+
+    <!-- Section 3: Day of Week -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Day of Week</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="display: flex; gap: 6px; align-items: flex-end; height: 80px; margin-bottom: 8px;">
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #888;">18</span>
+          <div style="width: 100%; height: 45px; background: rgba(245,158,11,0.5); border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #888;">Mon</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #888;">22</span>
+          <div style="width: 100%; height: 55px; background: rgba(245,158,11,0.65); border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #888;">Tue</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #888;">20</span>
+          <div style="width: 100%; height: 50px; background: rgba(245,158,11,0.55); border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #888;">Wed</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #888;">16</span>
+          <div style="width: 100%; height: 40px; background: rgba(245,158,11,0.45); border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #888;">Thu</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #888;">24</span>
+          <div style="width: 100%; height: 60px; background: rgba(245,158,11,0.7); border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #888;">Fri</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #ef4444;">31</span>
+          <div style="width: 100%; height: 78px; background: #f59e0b; border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #f59e0b; font-weight:600;">Sat</span>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">
+          <span style="font-size: 10px; color: #888;">11</span>
+          <div style="width: 100%; height: 28px; background: rgba(245,158,11,0.3); border-radius: 6px;"></div>
+          <span style="font-size: 10px; color: #888;">Sun</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Nighttime Activity -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Nighttime Activity (10 PM – 6 AM)</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+        <div style="flex: 1; text-align: center;">
+          <div style="font-size: 28px; font-weight: 700; color: #ef4444;">38</div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">Night detections</div>
+        </div>
+        <div style="flex: 1; text-align: center;">
+          <div style="font-size: 28px; font-weight: 700; color: #fff;">27<span style="font-size:16px; color:#888;">%</span></div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">of all activity</div>
+        </div>
+      </div>
+      <!-- Nighttime trend mini-chart -->
+      <svg viewBox="0 0 320 60" style="width: 100%; height: 60px;">
+        <line x1="0" y1="30" x2="320" y2="30" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <!-- Area fill -->
+        <path d="M0,45 L46,40 L91,25 L137,30 L183,15 L228,20 L274,35 L320,42 L320,60 L0,60 Z" fill="rgba(239,68,68,0.15)"/>
+        <!-- Line -->
+        <polyline points="0,45 46,40 91,25 137,30 183,15 228,20 274,35 320,42" fill="none" stroke="#ef4444" stroke-width="2"/>
+        <!-- Dots -->
+        <circle cx="0" cy="45" r="3" fill="#ef4444"/>
+        <circle cx="46" cy="40" r="3" fill="#ef4444"/>
+        <circle cx="91" cy="25" r="3" fill="#ef4444"/>
+        <circle cx="137" cy="30" r="3" fill="#ef4444"/>
+        <circle cx="183" cy="15" r="3" fill="#ef4444"/>
+        <circle cx="228" cy="20" r="3" fill="#ef4444"/>
+        <circle cx="274" cy="35" r="3" fill="#ef4444"/>
+      </svg>
+      <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+        <span style="font-size: 9px; color: #666;">Mon</span>
+        <span style="font-size: 9px; color: #666;">Tue</span>
+        <span style="font-size: 9px; color: #666;">Wed</span>
+        <span style="font-size: 9px; color: #666;">Thu</span>
+        <span style="font-size: 9px; color: #666;">Fri</span>
+        <span style="font-size: 9px; color: #666;">Sat</span>
+        <span style="font-size: 9px; color: #666;">Sun</span>
+      </div>
+    </div>
+
+    <!-- Section 5: Anomaly Detection -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Anomalies</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
+      <div style="padding: 14px 16px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 12px;">
+        <div style="width: 32px; height: 32px; background: rgba(239,68,68,0.15); border-radius: 8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%;"></div>
+        </div>
+        <div>
+          <div style="font-size: 14px; color: #e5e5e5; font-weight: 500;">Unusual Tuesday 2 AM spike</div>
+          <div style="font-size: 12px; color: #888; margin-top: 2px;">3.2× above normal for this time slot</div>
+        </div>
+      </div>
+      <div style="padding: 14px 16px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 12px;">
+        <div style="width: 32px; height: 32px; background: rgba(245,158,11,0.15); border-radius: 8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 50%;"></div>
+        </div>
+        <div>
+          <div style="font-size: 14px; color: #e5e5e5; font-weight: 500;">Saturday evening pattern shift</div>
+          <div style="font-size: 12px; color: #888; margin-top: 2px;">Activity started 2 hours earlier than usual</div>
+        </div>
+      </div>
+      <div style="padding: 14px 16px; display: flex; align-items: center; gap: 12px;">
+        <div style="width: 32px; height: 32px; background: rgba(96,165,250,0.15); border-radius: 8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+          <div style="width: 12px; height: 12px; background: #60a5fa; border-radius: 50%;"></div>
+        </div>
+        <div>
+          <div style="font-size: 14px; color: #e5e5e5; font-weight: 500;">Wednesday quiet period gap</div>
+          <div style="font-size: 12px; color: #888; margin-top: 2px;">Zero detections 8 AM–2 PM (normally 4–6/hr)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Per-Sensor Activity Comparison -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Activity by Sensor</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px;">
+      <svg viewBox="0 0 320 80" style="width: 100%; height: 80px;">
+        <!-- North Gate line -->
+        <polyline points="0,50 46,42 91,35 137,40 183,30 228,25 274,32 320,28" fill="none" stroke="#f59e0b" stroke-width="2"/>
+        <!-- South Perimeter line -->
+        <polyline points="0,55 46,52 91,48 137,50 183,45 228,42 274,46 320,44" fill="none" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6,3"/>
+        <!-- East Fence line -->
+        <polyline points="0,65 46,62 91,60 137,63 183,58 228,55 274,60 320,57" fill="none" stroke="#4ade80" stroke-width="2" stroke-dasharray="2,4"/>
+      </svg>
+      <div style="display: flex; gap: 16px; margin-top: 8px; justify-content: center;">
+        <div style="font-size: 11px; color: #f59e0b;">— North Gate</div>
+        <div style="font-size: 11px; color: #60a5fa;">– – South Perim.</div>
+        <div style="font-size: 11px; color: #4ade80;">· · East Fence</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <h3>Patterns Tab Sections</h3>
+  <ol style="color: #ccc; line-height: 1.8;">
+    <li><strong>Activity Heatmap (hour × day-of-week grid)</strong> — GitHub-contributions-style heatmap showing detection density per 2-hour block across the week. Instantly reveals: "Saturday nights are hot, Sunday mornings are dead." Custom-built component since no chart library does this well.</li>
+    <li><strong>Hourly Distribution (24-bar chart)</strong> — Total detections bucketed by hour of day. Shows peak and quietest hours. Answers: "What time of day should I pay most attention?"</li>
+    <li><strong>Day of Week (bar chart)</strong> — Total detections per day of week. Busiest day highlighted. Answers: "Which days see the most activity?"</li>
+    <li><strong>Nighttime Activity (isolated view)</strong> — Detections between 10 PM–6 AM only, with count, percentage of total, and trend line. Security-relevant since nighttime activity is inherently more suspicious. Uses the device's time-of-day threat scoring (+20 points for 22:00–06:00).</li>
+    <li><strong>Anomalies (auto-detected list)</strong> — Statistically unusual patterns: spikes above normal baseline, unexpected quiet periods, timing shifts. Computed by comparing current period against historical averages. Each anomaly shows magnitude ("3.2× above normal").</li>
+    <li><strong>Activity by Sensor (multi-line trend)</strong> — Per-sensor detection rate over time. Answers: "Is one sensor seeing more traffic than others? Did something change?"</li>
+  </ol>
+</div>
