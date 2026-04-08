@@ -2851,9 +2851,15 @@ function buildActivityReportPdf(
       .map(s => `<tr><td>${day.date}</td><td>${s.deviceName}</td><td style="text-align:right">${s.count}</td></tr>`)
   ).join('');
 
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayOfWeekRows = (analytics.dayOfWeekDistribution || [])
+    .map(d => `<tr><td>${dayNames[d.day] || d.day}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
   return pdfWrap(title, period, analytics, `
     <h2>Daily Trend</h2><table>${dailyRows}</table>
     <h2>Hourly Distribution</h2><table>${hourlyRows}</table>
+    ${dayOfWeekRows ? `<h2>Day of Week</h2><table>${dayOfWeekRows}</table>` : ''}
     <h2>Nighttime Activity</h2>
     <div class="metrics">
       <div class="metric"><div class="metric-value">${analytics.nighttimeActivity.percentOfTotal}%</div><div class="metric-label">Nighttime</div></div>
@@ -2891,6 +2897,20 @@ function buildSignalAnalysisPdf(
     modalitySections.push(`<h3>Cellular</h3><p>${c.count} detections · ${c.avgPeakDbm} dBm peak · ${c.avgBurstDurationMs}ms burst</p>`);
   }
 
+  // Signal strength trend table filtered by detection types
+  const trendHeaders = ['Date'];
+  if (config.detectionTypes.includes('wifi')) trendHeaders.push('WiFi RSSI');
+  if (config.detectionTypes.includes('bluetooth')) trendHeaders.push('BLE RSSI');
+  if (config.detectionTypes.includes('cellular')) trendHeaders.push('Cellular RSSI');
+  const trendHeaderRow = `<tr>${trendHeaders.map(h => `<td><strong>${h}</strong></td>`).join('')}</tr>`;
+  const trendDataRows = analytics.rssiTrend.map(point => {
+    const cells = [`<td>${point.date}</td>`];
+    if (config.detectionTypes.includes('wifi')) cells.push(`<td style="text-align:right">${point.wifiAvgRssi ?? '—'}</td>`);
+    if (config.detectionTypes.includes('bluetooth')) cells.push(`<td style="text-align:right">${point.bleAvgRssi ?? '—'}</td>`);
+    if (config.detectionTypes.includes('cellular')) cells.push(`<td style="text-align:right">${point.cellularAvgRssi ?? '—'}</td>`);
+    return `<tr>${cells.join('')}</tr>`;
+  }).join('');
+
   return pdfWrap(title, period, analytics, `
     <div class="metrics">
       <div class="metric"><div class="metric-value">${analytics.medianRssi} dBm</div><div class="metric-label">Median RSSI</div></div>
@@ -2903,7 +2923,9 @@ function buildSignalAnalysisPdf(
     <div class="metrics">
       <div class="metric"><div class="metric-value">${analytics.crossModalStats.wifiBleLinks}</div><div class="metric-label">WiFi↔BLE Links</div></div>
       <div class="metric"><div class="metric-value">${Math.round(analytics.crossModalStats.avgLinkConfidence)}%</div><div class="metric-label">Link Confidence</div></div>
+      <div class="metric"><div class="metric-value">${analytics.crossModalStats.phantomMerges}</div><div class="metric-label">Phantom Merges</div></div>
     </div>
+    ${trendDataRows ? `<h2>Signal Strength Trend</h2><table>${trendHeaderRow}${trendDataRows}</table>` : ''}
   `);
 }
 ```

@@ -63,7 +63,7 @@ When `savedReportId` is provided, loads the saved config from Redux and pre-fill
 
 2. **Time Range Picker** — Period pill bar matching DashboardScreen: 24h, 7d, 30d, 1y. No custom date range — `useAnalytics` defaults a missing period to `'week'` and accepts `Date` objects (not strings) for dates, so custom ranges would require hook/API changes. Deferred to a future iteration.
 
-3. **Filters Section** — Collapsible grouped list:
+3. **Filters Section** — Collapsible grouped list. Not every filter affects every template (see Filter Application table above). All filters are shown for all templates to maintain a consistent builder UI; inactive filters simply have no effect on the rendered output.
    - **Threat Levels** — Multi-select FilterChips: Critical, High, Medium, Low. All selected by default.
    - **Detection Types** — Multi-select FilterChips: WiFi, Bluetooth, Cellular. All selected by default.
    - **Devices** — Multi-select list of TrailSense sensor names from `useDevices()`. All selected by default.
@@ -86,37 +86,40 @@ The optional `savedReportId` is forwarded from ReportBuilderScreen so that Repor
 
 **Data fetching:** Calls `useAnalytics({ period: config.period })` and `useComparison()` with the config's period (disabled when period is `'year'`).
 
-**Filter application:** Analytics data is pre-aggregated by the API. The config's `threatLevels`, `detectionTypes`, and `deviceIds` filters act as **visibility controls** on the rendered report — they determine which items appear in distribution charts, which modality cards render, and which sensors show in per-device trends. They do not re-query or re-aggregate the underlying data. **Headline metrics (total detections, unique devices, avg confidence, closest approach) always show property-wide numbers.** Filtered sections are labeled "Filtered View" to distinguish them from property-wide stats.
+**Filter application:** Analytics data is pre-aggregated by the API. Filters act as **visibility controls** — they hide sections, not re-aggregate data. **Headline metrics always show property-wide numbers.** Filtered sections are labeled accordingly. Not every filter applies to every template:
+
+| Filter | Security Summary | Activity Report | Signal Analysis |
+|--------|:---:|:---:|:---:|
+| Threat Levels | Threat distribution chart | — | — |
+| Detection Types | Detection type chart | — | Modality cards, signal trend |
+| Devices | Per-sensor section | Per-sensor trend | — |
 
 **Layout:**
 
 1. **Header** — Back button, template name as title, "Export" button (right action)
 
-2. **Report Content** — Scrollable, rendered by template-specific organism component:
+2. **Report Content** — Scrollable, rendered by template-specific organism component. **PDF export mirrors the same sections** — every section shown in the preview appears in the exported PDF as an HTML table/metric equivalent.
 
    **SecuritySummaryReport:**
-   - Report title + date range subtitle
-   - 4 StatCards: total detections, unique devices, avg confidence, closest approach (with comparison deltas)
-   - Threat level distribution BarChart
-   - Detection type breakdown BarChart
-   - Top 5 detected devices list (fingerprint hash truncated, visit count, threat level badge)
-   - Period comparison callout card
+   - 4 StatCards: total detections, unique devices, avg confidence, closest approach (property-wide)
+   - Threat level distribution BarChart (filtered by `threatLevels`)
+   - Detection type breakdown BarChart (filtered by `detectionTypes`)
+   - Top 5 detected devices list (fingerprint hash truncated, visit count)
+   - Detections by sensor section (filtered by `deviceIds`)
 
    **ActivityReportReport:**
-   - Report title + date range subtitle
-   - Daily trend line chart (StackedAreaChart or MultiLineChart)
-   - Hourly distribution BarChart with peak/quiet hours highlighted
+   - Daily trend BarChart
+   - Hourly distribution BarChart (nighttime hours highlighted)
    - Day-of-week distribution BarChart
-   - Nighttime activity card (percentage + count + trend MultiLineChart)
-   - Anomaly list (spikes, quiet gaps, timing shifts with severity indicators)
+   - Nighttime activity StatCards (percentage + count)
+   - Activity by sensor section (filtered by `deviceIds`, last 7 days of `perSensorTrend`)
 
    **SignalAnalysisReport:**
-   - Report title + date range subtitle
-   - RSSI distribution BarChart with median/peak callouts
-   - Proximity zone breakdown (ProximityZoneVisual)
-   - Modality cards (WiFi, BLE, Cellular with template-specific metrics via ModalityCard)
-   - Cross-modal correlation stats card
-   - Signal strength trend MultiLineChart (3 lines: WiFi, BLE, Cellular)
+   - RSSI distribution BarChart with median/peak StatCards
+   - Proximity zone distribution BarChart
+   - Modality cards via ModalityCard component (filtered by `detectionTypes`)
+   - Cross-modal correlation StatCards (WiFi↔BLE links, link confidence, phantom merges)
+   - Signal strength trend table by date (filtered by `detectionTypes`, from `rssiTrend`)
 
 3. **Export Action Sheet** (triggered by header Export button):
    - "Share as PDF" — generates PDF via `expo-print`, opens share sheet via `expo-sharing` (user can save to Files from the share sheet)
