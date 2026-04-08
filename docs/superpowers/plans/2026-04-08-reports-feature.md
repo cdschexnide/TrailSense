@@ -2578,6 +2578,24 @@ describe('reportExport', () => {
       expect(html).not.toContain('<h3>Bluetooth</h3>');
       expect(html).not.toContain('<h3>Cellular</h3>');
     });
+
+    it('activity PDF includes day of week section', () => {
+      const config = { ...baseConfig, template: 'activity-report' as const };
+      const html = buildPdfHtml(mockAnalyticsData, config);
+      expect(html).toContain('Day of Week');
+    });
+
+    it('signal PDF includes phantom merges and signal trend', () => {
+      const config = { ...baseConfig, template: 'signal-analysis' as const };
+      const html = buildPdfHtml(mockAnalyticsData, config);
+      expect(html).toContain('Phantom Merges');
+      expect(html).toContain('Signal Strength Trend');
+    });
+
+    it('security PDF includes per-sensor section', () => {
+      const html = buildPdfHtml(mockAnalyticsData, baseConfig);
+      expect(html).toContain('Detections by Sensor');
+    });
   });
 });
 ```
