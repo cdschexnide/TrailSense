@@ -45,7 +45,7 @@ Replaces the existing placeholder at `src/screens/analytics/ReportsScreen.tsx`.
 **Section 3 — Saved Reports:**
 - List of `SavedReportRow` items from Redux store
 - Each row: custom name, template type badge (small colored pill), last generated date
-- Swipe-to-delete gesture using existing `SwipeableRow` + `createSwipeActions` pattern (from `KnownDeviceItem`)
+- Inline delete action via existing `SwipeableRow` + `createSwipeActions` pattern (from `KnownDeviceItem`). Note: `SwipeableRow` renders action buttons beside the row, not a gesture-based swipe.
 - Tapping navigates to `ReportBuilderScreen` with saved filters loaded
 - Empty state: "No saved reports yet. Generate a report and save it for quick access."
 
