@@ -61,7 +61,7 @@ When `savedReportId` is provided, loads the saved config from Redux and pre-fill
 
 1. **Header** — Back button, template name as title, "Save" plain button (right action)
 
-2. **Time Range Picker** — Period pill bar matching DashboardScreen: 24h, 7d, 30d, 1y, Custom. "Custom" reveals start/end date pickers (native date picker via `@react-native-community/datetimepicker` already in the project).
+2. **Time Range Picker** — Period pill bar matching DashboardScreen: 24h, 7d, 30d, 1y. No custom date range — `useAnalytics` defaults a missing period to `'week'` and accepts `Date` objects (not strings) for dates, so custom ranges would require hook/API changes. Deferred to a future iteration.
 
 3. **Filters Section** — Collapsible grouped list:
    - **Threat Levels** — Multi-select FilterChips: Critical, High, Medium, Low. All selected by default.
@@ -70,7 +70,9 @@ When `savedReportId` is provided, loads the saved config from Redux and pre-fill
 
 4. **Generate Button** — Full-width primary Button: "Generate Report". Assembles `ReportConfig` and navigates to `ReportPreviewScreen`.
 
-**Save flow:** Tapping "Save" opens a bottom sheet with a text input for report name. On confirm, dispatches `addSavedReport()` to Redux. If editing an existing saved report, dispatches `updateSavedReport()` instead.
+**Save flow:** Tapping "Save" opens `Alert.prompt` (iOS) or a simple modal with TextInput (Android) for the report name. On confirm, dispatches `addSavedReport()` to Redux. If editing an existing saved report, dispatches `updateSavedReport()` instead.
+
+**Device initialization:** The devices list comes from `useDevices()` which loads asynchronously. When devices data arrives and `deviceIds` is still empty (new report, not loading from saved config), all device IDs are selected via a `useEffect`.
 
 **Local state only:** All filter selections are `useState` — not Zustand or Redux. The assembled `ReportConfig` is passed to ReportPreviewScreen via navigation params.
 
@@ -78,11 +80,13 @@ When `savedReportId` is provided, loads the saved config from Redux and pre-fill
 
 Renders the full report and provides export options.
 
-**Navigation params:** `{ config: ReportConfig }`
+**Navigation params:** `{ config: ReportConfig; savedReportId?: string }`
 
-**Data fetching:** When `config.period` is `'custom'`, calls `useAnalytics({ startDate: config.startDate, endDate: config.endDate })` omitting the period param. Otherwise calls `useAnalytics({ period: config.period })`. Calls `useComparison()` with the config's period (disabled for custom ranges since there's no "previous custom range").
+The optional `savedReportId` is forwarded from ReportBuilderScreen so that ReportPreviewScreen can dispatch `updateLastGenerated` when a report is successfully rendered.
 
-**Filter application:** Analytics data is pre-aggregated by the API. The config's `threatLevels`, `detectionTypes`, and `deviceIds` filters act as **visibility controls** on the rendered report — they determine which items appear in distribution charts, which modality cards render, and which sensors show in per-device trends. They do not re-query or re-aggregate the underlying data.
+**Data fetching:** Calls `useAnalytics({ period: config.period })` and `useComparison()` with the config's period (disabled when period is `'year'`).
+
+**Filter application:** Analytics data is pre-aggregated by the API. The config's `threatLevels`, `detectionTypes`, and `deviceIds` filters act as **visibility controls** on the rendered report — they determine which items appear in distribution charts, which modality cards render, and which sensors show in per-device trends. They do not re-query or re-aggregate the underlying data. **Headline metrics (total detections, unique devices, avg confidence, closest approach) always show property-wide numbers.** Filtered sections are labeled "Filtered View" to distinguish them from property-wide stats.
 
 **Layout:**
 
@@ -115,9 +119,8 @@ Renders the full report and provides export options.
    - Signal strength trend MultiLineChart (3 lines: WiFi, BLE, Cellular)
 
 3. **Export Action Sheet** (triggered by header Export button):
-   - "Share as PDF" — generates PDF via `expo-print`, opens share sheet via `expo-sharing`
-   - "Share as CSV" — writes CSV to temp file, opens share sheet
-   - "Save to Files" — saves PDF to document directory via `expo-file-system`, confirms with toast
+   - "Share as PDF" — generates PDF via `expo-print`, opens share sheet via `expo-sharing` (user can save to Files from the share sheet)
+   - "Share as CSV" — writes CSV to temp file, opens share sheet via `expo-sharing`
 
 ### 4. BriefScreen
 
@@ -145,10 +148,12 @@ LLM-powered intelligence brief with executive summary and structured findings.
 
 **LLM integration:**
 - New `BriefTemplate` class extending `PromptTemplate` in `src/services/llm/templates/`
+- New `generateBrief()` method added to `LLMService` (follows the same pattern as `generateAlertSummary()` and `analyzeDevicePattern()`)
 - Input: AnalyticsData + ComparisonData, serialized with truncation per base class
-- Output parsed into `{ summary: string, findings: Finding[] }` by ResponseProcessor
+- LLM output is `SUMMARY:\n...\nFINDINGS:\n[json]` — parsed by a new `parseBriefResponse()` private method in LLMService into `{ summary: string, findings: Finding[] }`
 - Respects feature flags: `LLM_ENABLED`, `LLM_MOCK_MODE`
-- **Fallback when LLM disabled:** No narrative summary section. Findings generated purely from `generateInsights()` service. Cards still render with same severity/title/description format.
+- BriefScreen checks `FEATURE_FLAGS.LLM_ENABLED`: when true, calls `llmService.generateBrief()`; when false, uses deterministic fallback
+- **Fallback when LLM disabled:** Summary is a structured text built from analytics metrics (total detections, threat distribution, nighttime %, comparison delta). Findings generated from `generateInsights()` service. Both sections render — the summary is just deterministic rather than LLM-generated.
 
 ## Types
 
@@ -159,9 +164,7 @@ export type ReportTemplate = 'security-summary' | 'activity-report' | 'signal-an
 
 export interface ReportConfig {
   template: ReportTemplate;
-  period: 'day' | 'week' | 'month' | 'year' | 'custom';
-  startDate?: string; // ISO string, only for custom period
-  endDate?: string;   // ISO string, only for custom period
+  period: 'day' | 'week' | 'month' | 'year';
   threatLevels: ThreatLevel[];
   detectionTypes: DetectionType[];
   deviceIds: string[];
@@ -209,7 +212,7 @@ Add to `MoreStackParamList` and `AnalyticsStackParamList` in `src/navigation/typ
 
 ```typescript
 ReportBuilder: { template: ReportTemplate; savedReportId?: string };
-ReportPreview: { config: ReportConfig };
+ReportPreview: { config: ReportConfig; savedReportId?: string };
 Brief: undefined;
 ```
 
@@ -231,11 +234,10 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
   - Signal Analysis: date, rssi_median, rssi_peak, proximity_zone, modality, confidence_tier
 - File naming: `TrailSense_{TemplateName}_{Period}_{Date}.csv`
 
-**Share/Save flow:**
+**Share flow:**
 1. User taps "Export" in header
-2. Action sheet: "Share as PDF", "Share as CSV", "Save to Files"
-3. Share: generate file to temp directory, open `expo-sharing` share sheet
-4. Save: write to `expo-file-system` document directory, confirm with toast
+2. Action sheet: "Share as PDF", "Share as CSV"
+3. Generate file to temp directory, open `expo-sharing` share sheet (user can save to Files, AirDrop, email, etc. from the system share sheet)
 
 ## New Components
 

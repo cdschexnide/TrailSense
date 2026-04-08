@@ -106,9 +106,7 @@ export type ReportTemplate =
 
 export interface ReportConfig {
   template: ReportTemplate;
-  period: 'day' | 'week' | 'month' | 'year' | 'custom';
-  startDate?: string;
-  endDate?: string;
+  period: 'day' | 'week' | 'month' | 'year';
   threatLevels: ThreatLevel[];
   detectionTypes: DetectionType[];
   deviceIds: string[];
@@ -415,7 +413,7 @@ export type AnalyticsStackParamList = {
   Heatmap: undefined;
   Reports: undefined;
   ReportBuilder: { template: ReportTemplate; savedReportId?: string };
-  ReportPreview: { config: ReportConfig };
+  ReportPreview: { config: ReportConfig; savedReportId?: string };
   Brief: undefined;
 };
 ```
@@ -423,7 +421,7 @@ export type AnalyticsStackParamList = {
 Add the same three entries to `MoreStackParamList` (after the existing `Reports: undefined;` line):
 ```typescript
   ReportBuilder: { template: ReportTemplate; savedReportId?: string };
-  ReportPreview: { config: ReportConfig };
+  ReportPreview: { config: ReportConfig; savedReportId?: string };
   Brief: undefined;
 ```
 
@@ -1391,11 +1389,10 @@ Replace the placeholder `src/screens/analytics/ReportBuilderScreen.tsx`:
 
 ```typescript
 // src/screens/analytics/ReportBuilderScreen.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
-  TextInput,
   Alert,
   Pressable,
 } from 'react-native';
@@ -1472,6 +1469,7 @@ export const ReportBuilderScreen = ({
   const colors = theme.colors;
   const dispatch = useAppDispatch();
   const { data: devices = [] } = useDevices();
+  const initializedDevices = useRef(false);
 
   const savedReport = useAppSelector(state =>
     savedReportId
@@ -1482,7 +1480,7 @@ export const ReportBuilderScreen = ({
   );
 
   const [period, setPeriod] = useState<Period>(
-    (savedReport?.config.period as Period) || 'week'
+    savedReport?.config.period || 'week'
   );
   const [threatLevels, setThreatLevels] = useState<ThreatLevel[]>(
     savedReport?.config.threatLevels || [...ALL_THREAT_LEVELS]
@@ -1491,8 +1489,20 @@ export const ReportBuilderScreen = ({
     savedReport?.config.detectionTypes || [...ALL_DETECTION_TYPES]
   );
   const [deviceIds, setDeviceIds] = useState<string[]>(
-    savedReport?.config.deviceIds || devices.map(d => d.id)
+    savedReport?.config.deviceIds || []
   );
+
+  // Select all devices by default once they load (new reports only)
+  useEffect(() => {
+    if (
+      devices.length > 0 &&
+      !initializedDevices.current &&
+      !savedReportId
+    ) {
+      initializedDevices.current = true;
+      setDeviceIds(devices.map(d => d.id));
+    }
+  }, [devices, savedReportId]);
 
   const templateInfo = REPORT_TEMPLATES[template];
 
@@ -1532,6 +1542,7 @@ export const ReportBuilderScreen = ({
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     (navigation as any).navigate('ReportPreview', {
       config: buildConfig(),
+      savedReportId,
     });
   };
 
@@ -1834,18 +1845,22 @@ export const SecuritySummaryReport: React.FC<SecuritySummaryReportProps> = ({
             : '#8B5CF6',
     }));
 
-  const filteredTotal = threatData.reduce((sum, d) => sum + d.value, 0);
-
   const pctChange = comparison?.percentageChange?.totalDetections;
+  const changeObj = pctChange != null
+    ? {
+        value: `${pctChange > 0 ? '+' : ''}${Math.round(pctChange)}%`,
+        trend: (pctChange > 0 ? 'negative' : pctChange < 0 ? 'positive' : 'neutral') as 'positive' | 'negative' | 'neutral',
+      }
+    : undefined;
 
   return (
     <View style={styles.container}>
-      <ReportSection title="Key Metrics">
+      <ReportSection title="Property-Wide Metrics">
         <View style={styles.statGrid}>
           <StatCard
             title="Detections"
-            value={String(filteredTotal)}
-            change={pctChange != null ? `${pctChange > 0 ? '+' : ''}${Math.round(pctChange)}%` : undefined}
+            value={String(analytics.totalAlerts)}
+            change={changeObj}
             style={styles.statCard}
           />
           <StatCard
@@ -2532,7 +2547,7 @@ Replace the placeholder `src/screens/analytics/ReportPreviewScreen.tsx`:
 
 ```typescript
 // src/screens/analytics/ReportPreviewScreen.tsx
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, StyleSheet, ActionSheetIOS, Platform, Alert } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -2543,6 +2558,8 @@ import { ScreenLayout, LoadingState, ErrorState } from '@components/templates';
 import { Text } from '@components/atoms/Text';
 import { useAnalytics, useComparison } from '@hooks/useAnalytics';
 import { useTheme } from '@hooks/useTheme';
+import { useAppDispatch } from '@store/index';
+import { updateLastGenerated } from '@store/slices/savedReportsSlice';
 import { REPORT_TEMPLATES } from '@/types/report';
 import {
   SecuritySummaryReport,
@@ -2566,54 +2583,59 @@ type PreviewScreenProps =
   | NativeStackScreenProps<MoreStackParamList, 'ReportPreview'>;
 
 export const ReportPreviewScreen = ({
-  navigation,
   route,
 }: PreviewScreenProps) => {
-  const { config } = route.params;
+  const { config, savedReportId } = route.params;
   const { theme } = useTheme();
   const colors = theme.colors;
+  const dispatch = useAppDispatch();
   const templateInfo = REPORT_TEMPLATES[config.template];
-
-  const analyticsParams =
-    config.period === 'custom'
-      ? { startDate: config.startDate, endDate: config.endDate }
-      : { period: config.period as 'day' | 'week' | 'month' | 'year' };
 
   const {
     data: analytics,
     isLoading,
     isError,
     refetch,
-  } = useAnalytics(analyticsParams);
+  } = useAnalytics({ period: config.period });
 
   const { data: comparison } = useComparison({
     period:
-      config.period === 'year' || config.period === 'custom'
+      config.period === 'year'
         ? 'month'
-        : (config.period as 'day' | 'week' | 'month'),
-    enabled: config.period !== 'year' && config.period !== 'custom',
+        : config.period,
+    enabled: config.period !== 'year',
   });
+
+  // Update lastGeneratedAt for saved reports
+  useEffect(() => {
+    if (analytics && savedReportId) {
+      dispatch(
+        updateLastGenerated({
+          id: savedReportId,
+          timestamp: new Date().toISOString(),
+        })
+      );
+    }
+  }, [analytics, savedReportId, dispatch]);
 
   const handleExport = useCallback(async () => {
     if (!analytics) return;
 
-    const options = ['Share as PDF', 'Share as CSV', 'Save to Files', 'Cancel'];
+    const options = ['Share as PDF', 'Share as CSV', 'Cancel'];
 
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
-        { options, cancelButtonIndex: 3 },
+        { options, cancelButtonIndex: 2 },
         async (index: number) => {
           await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           if (index === 0) await sharePdf();
           else if (index === 1) await shareCsv();
-          else if (index === 2) await saveToFiles();
         }
       );
     } else {
       Alert.alert('Export Report', 'Choose export format', [
         { text: 'Share as PDF', onPress: sharePdf },
         { text: 'Share as CSV', onPress: shareCsv },
-        { text: 'Save to Files', onPress: saveToFiles },
         { text: 'Cancel', style: 'cancel' },
       ]);
     }
@@ -2633,15 +2655,6 @@ export const ReportPreviewScreen = ({
       const path = `${RNFS.CachesDirectoryPath}/${filename}`;
       await RNFS.writeFile(path, csv, 'utf8');
       await Sharing.shareAsync(path, { mimeType: 'text/csv' });
-    }
-
-    async function saveToFiles() {
-      const html = buildPdfHtml(analytics!, config);
-      const { uri } = await Print.printToFileAsync({ html });
-      const filename = getReportFilename(config, 'pdf');
-      const dest = `${RNFS.DocumentDirectoryPath}/${filename}`;
-      await RNFS.moveFile(uri, dest);
-      Alert.alert('Saved', `Report saved as ${filename}`);
     }
   }, [analytics, config]);
 
@@ -2838,17 +2851,93 @@ Add to `src/services/llm/templates/index.ts`:
 export { BriefTemplate } from './BriefTemplate';
 ```
 
-- [ ] **Step 3: Verify types compile**
+- [ ] **Step 3: Wire generateBrief into LLMService**
+
+In `src/services/llm/LLMService.ts`, add imports at the top:
+```typescript
+import { BriefTemplate } from './templates';
+import type { Finding } from '@/types/report';
+import type { AnalyticsData } from '@/types/alert';
+```
+
+Add a new template instance in the class:
+```typescript
+private briefTemplate = new BriefTemplate();
+```
+
+Add the `generateBrief` method (after the existing `chat` method, before `generate`):
+```typescript
+  /**
+   * Generate intelligence brief from analytics data
+   */
+  async generateBrief(context: {
+    analytics: AnalyticsData;
+    comparisonAnalytics?: AnalyticsData | null;
+  }): Promise<{ summary: string; findings: Finding[] }> {
+    try {
+      llmLogger.info('Generating intelligence brief');
+
+      const messages = this.briefTemplate.buildPrompt(context);
+
+      const response = await this.generate({
+        messages,
+        context,
+        options: {
+          maxTokens: 1024,
+          temperature: 0.3,
+        },
+      });
+
+      return this.parseBriefResponse(response.text);
+    } catch (error) {
+      llmLogger.error('Failed to generate brief', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Parse brief response from LLM into structured format
+   */
+  private parseBriefResponse(text: string): {
+    summary: string;
+    findings: Finding[];
+  } {
+    let summary = '';
+    let findings: Finding[] = [];
+
+    const summaryMatch = text.match(/SUMMARY:\s*([\s\S]*?)(?=FINDINGS:|$)/i);
+    if (summaryMatch) {
+      summary = summaryMatch[1].trim();
+    }
+
+    const findingsMatch = text.match(/FINDINGS:\s*(\[[\s\S]*\])/i);
+    if (findingsMatch) {
+      try {
+        findings = JSON.parse(findingsMatch[1]);
+      } catch {
+        llmLogger.warn('Failed to parse findings JSON, using empty array');
+      }
+    }
+
+    if (!summary) {
+      summary = text.trim();
+    }
+
+    return { summary, findings };
+  }
+```
+
+- [ ] **Step 4: Verify types compile**
 
 ```bash
 npm run type-check
 ```
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/services/llm/templates/BriefTemplate.ts src/services/llm/templates/index.ts
-git commit -m "feat: add BriefTemplate LLM prompt for intelligence brief generation"
+git add src/services/llm/templates/BriefTemplate.ts src/services/llm/templates/index.ts src/services/llm/LLMService.ts
+git commit -m "feat: add BriefTemplate and generateBrief() to LLMService"
 ```
 
 ---
@@ -2887,12 +2976,13 @@ import {
 import {
   ScreenLayout,
   LoadingState,
-  ErrorState,
 } from '@components/templates';
 import { useTheme } from '@hooks/useTheme';
 import { useAnalytics, useComparison } from '@hooks/useAnalytics';
 import { useDevices } from '@hooks/useDevices';
 import { generateInsights } from '@services/analyticsInsights';
+import { llmService } from '@services/llm';
+import { FEATURE_FLAGS } from '@/config/featureFlags';
 import type { Finding, IntelligenceBrief } from '@/types/report';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type {
@@ -2927,26 +3017,19 @@ export const BriefScreen = ({ navigation }: BriefScreenProps) => {
   });
   const { data: devices = [] } = useDevices();
 
-  const handleGenerate = useCallback(async () => {
-    if (!analytics) return;
-    setGenerating(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    // Fallback: generate findings from existing insights service
-    // LLM integration can be added later when LLM_ENABLED flag is on
-    const insights = generateInsights(analytics, comparison, devices);
+  const buildDeterministicBrief = useCallback((): IntelligenceBrief => {
+    const insights = generateInsights(analytics!, comparison, devices);
     const findings: Finding[] = insights.map(insight => ({
       title: insight.title,
       description: insight.subtitle,
       severity: insight.severity,
     }));
 
-    // Build a structured summary from analytics data
-    const totalAlerts = analytics.totalAlerts;
-    const uniqueDevices = analytics.uniqueDevices;
-    const confidence = Math.round(analytics.avgConfidence);
-    const nightPct = analytics.nighttimeActivity.percentOfTotal;
-    const threatDist = analytics.threatLevelDistribution;
+    const totalAlerts = analytics!.totalAlerts;
+    const uniqueDevices = analytics!.uniqueDevices;
+    const confidence = Math.round(analytics!.avgConfidence);
+    const nightPct = analytics!.nighttimeActivity.percentOfTotal;
+    const threatDist = analytics!.threatLevelDistribution;
     const criticalCount =
       threatDist.find(d => d.level === 'critical')?.count || 0;
     const highCount =
@@ -2959,27 +3042,55 @@ export const BriefScreen = ({ navigation }: BriefScreenProps) => {
     }
 
     if (nightPct > 20) {
-      summary += `\n\nNotably, ${nightPct}% of all detections occurred during nighttime hours (10 PM - 6 AM), with ${analytics.nighttimeActivity.count} after-dark detections recorded. This elevated nighttime activity warrants attention.`;
+      summary += `\n\nNotably, ${nightPct}% of all detections occurred during nighttime hours (10 PM - 6 AM), with ${analytics!.nighttimeActivity.count} after-dark detections recorded. This elevated nighttime activity warrants attention.`;
     }
 
     if (comparison?.current && comparison?.comparison) {
       const prevTotal = comparison.comparison.totalAlerts;
-      const change = totalAlerts - prevTotal;
       const pct =
         prevTotal > 0
           ? Math.round(((totalAlerts - prevTotal) / prevTotal) * 100)
           : 0;
-      summary += `\n\nCompared to the previous period, detection volume ${change >= 0 ? 'increased' : 'decreased'} by ${Math.abs(pct)}% (${prevTotal} → ${totalAlerts}).`;
+      summary += `\n\nCompared to the previous period, detection volume ${totalAlerts >= prevTotal ? 'increased' : 'decreased'} by ${Math.abs(pct)}% (${prevTotal} → ${totalAlerts}).`;
     }
 
-    setBrief({
+    return {
       summary,
       findings,
       generatedAt: new Date().toISOString(),
       period,
-    });
-    setGenerating(false);
+    };
   }, [analytics, comparison, devices, period]);
+
+  const handleGenerate = useCallback(async () => {
+    if (!analytics) return;
+    setGenerating(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    try {
+      if (FEATURE_FLAGS.LLM_ENABLED) {
+        // LLM path: generate brief via LLMService
+        const result = await llmService.generateBrief({
+          analytics,
+          comparisonAnalytics: comparison?.comparison,
+        });
+        setBrief({
+          summary: result.summary,
+          findings: result.findings,
+          generatedAt: new Date().toISOString(),
+          period,
+        });
+      } else {
+        // Deterministic fallback: structured summary from analytics data
+        setBrief(buildDeterministicBrief());
+      }
+    } catch {
+      // On LLM failure, fall back to deterministic brief
+      setBrief(buildDeterministicBrief());
+    } finally {
+      setGenerating(false);
+    }
+  }, [analytics, comparison, devices, period, buildDeterministicBrief]);
 
   const handleExport = useCallback(async () => {
     if (!brief) return;
