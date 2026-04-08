@@ -1,0 +1,7 @@
+{"type":"server-started","port":49907,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:49907","screen_dir":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/content","state_dir":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/state"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/content/approaches.html"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/content/overview-tab.html"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/content/signals-tab.html"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/content/devices-tab.html"}
+{"type":"screen-added","file":"/Users/codyschexnider/Documents/Project/TrailSense/.superpowers/brainstorm/93332-1775607818/content/patterns-tab.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,293 @@
+<h2>Signals Tab Design</h2>
+<p class="subtitle">Deep dive into signal-level analytics — RSSI, proximity, confidence, and per-modality breakdowns.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Signals Tab — Dark Theme Mockup</div>
+  <div class="mockup-body" style="background: #111; color: #e5e5e5; font-family: -apple-system, system-ui, sans-serif; padding: 20px; max-width: 390px; margin: 0 auto;">
+
+    <!-- Time Range Picker -->
+    <div style="display: flex; background: #1a1a1a; border-radius: 10px; padding: 3px; margin-bottom: 20px;">
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">24h</div>
+      <div style="flex:1; text-align:center; padding: 8px; background: #f59e0b; color: #000; border-radius: 8px; font-size: 13px; font-weight: 600;">7d</div>
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">30d</div>
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">1y</div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div style="display: flex; border-bottom: 1px solid #333; margin-bottom: 20px;">
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Overview</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #f59e0b; border-bottom: 2px solid #f59e0b; font-size: 13px; font-weight: 600;">Signals</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Devices</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Patterns</div>
+    </div>
+
+    <!-- Section 1: Signal Strength Distribution -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Signal Strength Distribution</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="font-size: 12px; color: #888; margin-bottom: 12px;">RSSI across all detections (dBm)</div>
+      <!-- Histogram bars -->
+      <svg viewBox="0 0 320 120" style="width: 100%; height: 120px;">
+        <!-- Y grid -->
+        <line x1="30" y1="10" x2="320" y2="10" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="30" y1="40" x2="320" y2="40" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="30" y1="70" x2="320" y2="70" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <!-- Y labels -->
+        <text x="0" y="14" fill="#666" font-size="9">30</text>
+        <text x="0" y="44" fill="#666" font-size="9">20</text>
+        <text x="0" y="74" fill="#666" font-size="9">10</text>
+        <text x="6" y="104" fill="#666" font-size="9">0</text>
+        <!-- Bars: -90 to -20 dBm in 10dBm buckets -->
+        <rect x="38" y="88" width="34" height="12" rx="2" fill="rgba(96,165,250,0.3)"/>
+        <rect x="78" y="72" width="34" height="28" rx="2" fill="rgba(96,165,250,0.4)"/>
+        <rect x="118" y="42" width="34" height="58" rx="2" fill="rgba(96,165,250,0.6)"/>
+        <rect x="158" y="14" width="34" height="86" rx="2" fill="#60a5fa"/>
+        <rect x="198" y="30" width="34" height="70" rx="2" fill="rgba(96,165,250,0.7)"/>
+        <rect x="238" y="58" width="34" height="42" rx="2" fill="rgba(96,165,250,0.5)"/>
+        <rect x="278" y="82" width="34" height="18" rx="2" fill="rgba(96,165,250,0.3)"/>
+        <!-- X labels -->
+        <text x="42" y="115" fill="#666" font-size="8">-90</text>
+        <text x="82" y="115" fill="#666" font-size="8">-80</text>
+        <text x="122" y="115" fill="#666" font-size="8">-70</text>
+        <text x="162" y="115" fill="#666" font-size="8">-60</text>
+        <text x="202" y="115" fill="#666" font-size="8">-50</text>
+        <text x="242" y="115" fill="#666" font-size="8">-40</text>
+        <text x="282" y="115" fill="#666" font-size="8">-30</text>
+      </svg>
+      <div style="display: flex; justify-content: space-between; margin-top: 8px; padding: 0 4px;">
+        <div style="font-size: 11px; color: #888;">Median: <span style="color: #60a5fa; font-weight: 600;">-58 dBm</span></div>
+        <div style="font-size: 11px; color: #888;">Peak: <span style="color: #60a5fa; font-weight: 600;">-32 dBm</span></div>
+      </div>
+    </div>
+
+    <!-- Section 2: Proximity Zones -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Proximity Zone Breakdown</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <!-- Concentric zones visualization -->
+      <div style="position: relative; height: 160px; display: flex; align-items: center; justify-content: center;">
+        <!-- Extreme ring -->
+        <div style="position: absolute; width: 280px; height: 150px; border: 1px solid rgba(74,222,128,0.2); border-radius: 50%; display:flex; align-items:flex-start; justify-content:flex-end; padding: 4px 8px;">
+          <span style="font-size: 10px; color: #4ade80;">EXTREME</span>
+        </div>
+        <!-- Far ring -->
+        <div style="position: absolute; width: 210px; height: 115px; border: 1px solid rgba(251,191,36,0.3); border-radius: 50%; display:flex; align-items:flex-start; justify-content:flex-end; padding: 4px 8px;">
+          <span style="font-size: 10px; color: #fbbf24;">FAR</span>
+        </div>
+        <!-- Near ring -->
+        <div style="position: absolute; width: 140px; height: 80px; border: 1px solid rgba(245,158,11,0.4); border-radius: 50%; display:flex; align-items:flex-start; justify-content:flex-end; padding: 2px 6px;">
+          <span style="font-size: 10px; color: #f59e0b;">NEAR</span>
+        </div>
+        <!-- Immediate ring -->
+        <div style="position: absolute; width: 70px; height: 45px; border: 1px solid rgba(239,68,68,0.5); border-radius: 50%; background: rgba(239,68,68,0.08);">
+        </div>
+        <span style="font-size: 10px; color: #ef4444; position: absolute;">IMMED</span>
+      </div>
+      <!-- Zone counts -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
+        <div style="text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #ef4444;">8</div>
+          <div style="font-size: 10px; color: #888;">Immediate</div>
+          <div style="font-size: 10px; color: #666;">&lt;5m</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #f59e0b;">27</div>
+          <div style="font-size: 10px; color: #888;">Near</div>
+          <div style="font-size: 10px; color: #666;">5–15m</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #fbbf24;">64</div>
+          <div style="font-size: 10px; color: #888;">Far</div>
+          <div style="font-size: 10px; color: #666;">15–50m</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #4ade80;">43</div>
+          <div style="font-size: 10px; color: #888;">Extreme</div>
+          <div style="font-size: 10px; color: #666;">&gt;50m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Confidence Distribution -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Detection Confidence</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <!-- Confidence gauge-style bars -->
+      <div style="margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">High (75–100%)</span>
+          <span style="font-size: 12px; color: #4ade80; font-weight: 600;">47</span>
+        </div>
+        <div style="height: 6px; background: #2a2a2a; border-radius: 3px;">
+          <div style="height: 6px; width: 65%; background: #4ade80; border-radius: 3px;"></div>
+        </div>
+      </div>
+      <div style="margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">Medium (50–74%)</span>
+          <span style="font-size: 12px; color: #fbbf24; font-weight: 600;">58</span>
+        </div>
+        <div style="height: 6px; background: #2a2a2a; border-radius: 3px;">
+          <div style="height: 6px; width: 80%; background: #fbbf24; border-radius: 3px;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">Low (0–49%)</span>
+          <span style="font-size: 12px; color: #ef4444; font-weight: 600;">37</span>
+        </div>
+        <div style="height: 6px; background: #2a2a2a; border-radius: 3px;">
+          <div style="height: 6px; width: 52%; background: #ef4444; border-radius: 3px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Per-Modality Deep Dive -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Signal Modality Breakdown</div>
+
+    <!-- WiFi Card -->
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <div style="width: 28px; height: 28px; background: rgba(96,165,250,0.15); border-radius: 7px; display:flex; align-items:center; justify-content:center; font-size: 14px;">📶</div>
+        <div style="font-size: 15px; font-weight: 600; color: #60a5fa;">WiFi</div>
+        <div style="margin-left: auto; font-size: 22px; font-weight: 700; color: #fff;">64</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #60a5fa;">7</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Channels</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #60a5fa;">82%</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Probe Req</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #60a5fa;">4</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">MAC Merges</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLE Card -->
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <div style="width: 28px; height: 28px; background: rgba(45,212,191,0.15); border-radius: 7px; display:flex; align-items:center; justify-content:center; font-size: 14px;">📡</div>
+        <div style="font-size: 15px; font-weight: 600; color: #2dd4bf;">Bluetooth LE</div>
+        <div style="margin-left: auto; font-size: 22px; font-weight: 700; color: #fff;">43</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #2dd4bf;">68%</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Phones</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #2dd4bf;">41%</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Apple</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #2dd4bf;">12%</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Beacons</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cellular Card -->
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <div style="width: 28px; height: 28px; background: rgba(167,139,250,0.15); border-radius: 7px; display:flex; align-items:center; justify-content:center; font-size: 14px;">📱</div>
+        <div style="font-size: 15px; font-weight: 600; color: #a78bfa;">Cellular</div>
+        <div style="margin-left: auto; font-size: 22px; font-weight: 700; color: #fff;">35</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #a78bfa;">-62</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Avg dBm</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #a78bfa;">84ms</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Avg Burst</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 16px; font-weight: 700; color: #a78bfa;">-78</div>
+          <div style="font-size: 10px; color: #888; margin-top: 2px;">Noise Floor</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Cross-Modal Correlations -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Cross-Modal Correlations</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <div style="font-size: 12px; color: #888; margin-bottom: 14px;">Devices detected across multiple signal types</div>
+      <!-- Venn-style visualization -->
+      <div style="position: relative; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+        <div style="position: absolute; left: 60px; width: 100px; height: 100px; border: 2px solid rgba(96,165,250,0.4); border-radius: 50%; background: rgba(96,165,250,0.06); display:flex; align-items:center; justify-content:center;">
+          <span style="font-size: 10px; color: #60a5fa; position: absolute; left: 8px;">WiFi</span>
+        </div>
+        <div style="position: absolute; right: 60px; width: 100px; height: 100px; border: 2px solid rgba(45,212,191,0.4); border-radius: 50%; background: rgba(45,212,191,0.06); display:flex; align-items:center; justify-content:center;">
+          <span style="font-size: 10px; color: #2dd4bf; position: absolute; right: 8px;">BLE</span>
+        </div>
+        <!-- Overlap count -->
+        <div style="position: absolute; z-index: 2; background: rgba(255,255,255,0.1); border-radius: 8px; padding: 4px 10px;">
+          <span style="font-size: 18px; font-weight: 700; color: #fff;">12</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 18px; font-weight: 700; color: #fff;">12</div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">WiFi↔BLE Links</div>
+          <div style="font-size: 11px; color: #666;">Avg confidence: 76%</div>
+        </div>
+        <div style="background: #222; border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 18px; font-weight: 700; color: #fff;">4</div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">Phantom Merges</div>
+          <div style="font-size: 11px; color: #666;">MAC rotations caught</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Signal Strength Over Time -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Signal Strength Trend</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px;">
+      <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Average RSSI per day (closer to 0 = stronger)</div>
+      <svg viewBox="0 0 320 100" style="width: 100%; height: 100px;">
+        <!-- Grid -->
+        <line x1="30" y1="10" x2="320" y2="10" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="30" y1="35" x2="320" y2="35" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="30" y1="60" x2="320" y2="60" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="30" y1="85" x2="320" y2="85" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <!-- Y labels (inverted: -30 at top, -90 at bottom) -->
+        <text x="0" y="14" fill="#666" font-size="9">-30</text>
+        <text x="0" y="39" fill="#666" font-size="9">-50</text>
+        <text x="0" y="64" fill="#666" font-size="9">-70</text>
+        <text x="0" y="89" fill="#666" font-size="9">-90</text>
+        <!-- WiFi line -->
+        <polyline points="40,55 80,50 120,58 160,45 200,52 240,48 280,42 320,50" fill="none" stroke="#60a5fa" stroke-width="2"/>
+        <!-- BLE line -->
+        <polyline points="40,62 80,58 120,65 160,55 200,60 240,56 280,50 320,58" fill="none" stroke="#2dd4bf" stroke-width="2" stroke-dasharray="6,3"/>
+        <!-- Cellular line -->
+        <polyline points="40,45 80,40 120,48 160,35 200,42 240,38 280,32 320,40" fill="none" stroke="#a78bfa" stroke-width="2" stroke-dasharray="2,4"/>
+      </svg>
+      <div style="display: flex; gap: 16px; margin-top: 8px; justify-content: center;">
+        <div style="font-size: 11px; color: #60a5fa;">— WiFi</div>
+        <div style="font-size: 11px; color: #2dd4bf;">– – BLE</div>
+        <div style="font-size: 11px; color: #a78bfa;">· · Cellular</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <h3>Signals Tab Sections</h3>
+  <ol style="color: #ccc; line-height: 1.8;">
+    <li><strong>Signal Strength Distribution (histogram)</strong> — RSSI distribution across all detections. Shows where most signals land in the -90 to -20 dBm range, with median and peak callouts. Answers: "How close are devices typically getting?"</li>
+    <li><strong>Proximity Zone Breakdown</strong> — Concentric zone visualization showing detection counts per zone (Immediate &lt;5m, Near 5–15m, Far 15–50m, Extreme &gt;50m). Directly from the device's zone classification.</li>
+    <li><strong>Detection Confidence</strong> — Distribution of the device's confidence scores (0–100%). High/Medium/Low buckets with progress bars. Answers: "How reliable are my detections?"</li>
+    <li><strong>Signal Modality Breakdown</strong> — Per-type cards (WiFi, BLE, Cellular) each showing 3 key metrics unique to that modality:
+      <ul style="margin-top: 4px;">
+        <li><strong>WiFi:</strong> Channels active, Probe request %, Phantom MAC merges</li>
+        <li><strong>BLE:</strong> Phone %, Apple/Google %, Beacon %</li>
+        <li><strong>Cellular:</strong> Avg power dBm, Avg burst duration, Noise floor</li>
+      </ul>
+    </li>
+    <li><strong>Cross-Modal Correlations</strong> — WiFi↔BLE device links found by the V2 detection engine, plus phantom MAC merges (MAC rotation detection). Shows how many "unique persons" were identified across modalities.</li>
+    <li><strong>Signal Strength Trend</strong> — Multi-line chart showing average RSSI per modality over time. Answers: "Are devices getting closer over the period?"</li>
+  </ol>
+</div>

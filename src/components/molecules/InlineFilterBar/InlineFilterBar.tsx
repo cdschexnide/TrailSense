@@ -1,13 +1,15 @@
 /**
  * InlineFilterBar Component
  *
- * Horizontal row of FilterChips for quick filtering.
+ * 2x2 grid of FilterChips for quick filtering.
  * Supports single selection with clear option.
  */
 
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { FilterChip } from '../FilterChip';
+
+const GAP = 6;
 
 interface FilterOption {
   key: string;
@@ -42,6 +44,7 @@ export const InlineFilterBar: React.FC<InlineFilterBarProps> = ({
           color={option.color}
           isSelected={selectedKey === option.key}
           onPress={() => handlePress(option.key)}
+          style={styles.chip}
         />
       ))}
     </View>
@@ -51,9 +54,14 @@ export const InlineFilterBar: React.FC<InlineFilterBarProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    gap: 6,
+    gap: GAP,
+  },
+  chip: {
+    // Half the row minus half the gap so two chips fit per row
+    width: `${50 - GAP / 2}%`,
   },
 });
 

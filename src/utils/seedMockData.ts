@@ -21,6 +21,7 @@ import {
   getHeatmapPoints,
 } from '@/mocks/data/mockAnalytics';
 import { TriangulatedPosition } from '@/types/triangulation';
+import type { AnalyticsData } from '@/types/alert';
 import { randomFingerprint } from '@/mocks/helpers/fingerprints';
 
 // React Query keys
@@ -172,6 +173,53 @@ export const seedMockData = async ({
         [ANALYTICS_QUERY_KEY, period, undefined, undefined],
         freshAnalytics
       );
+    });
+
+    const shiftedHourly = freshAnalytics.hourlyDayOfWeekDistribution.map(
+      entry => ({
+        ...entry,
+        count:
+          entry.hour >= 0 && entry.hour <= 5
+            ? Math.round(entry.count * 0.5)
+            : entry.hour >= 10 && entry.hour <= 16
+              ? Math.round(entry.count * 1.5)
+              : entry.count,
+      })
+    );
+    const shiftedHourlyDist = (freshAnalytics.hourlyDistribution ?? []).map(
+      h => ({
+        ...h,
+        count:
+          h.hour >= 20 && h.hour <= 21
+            ? Math.round(h.count * 0.3)
+            : h.hour >= 17 && h.hour <= 18
+              ? Math.round(h.count * 2)
+              : h.count,
+      })
+    );
+    const previousAnalytics: AnalyticsData = {
+      ...freshAnalytics,
+      totalAlerts: Math.round(freshAnalytics.totalAlerts * 0.85),
+      totalDetections: Math.round((freshAnalytics.totalDetections ?? 0) * 0.85),
+      unknownDevices: Math.round((freshAnalytics.unknownDevices ?? 0) * 0.8),
+      uniqueDevices: Math.max(1, Math.round(freshAnalytics.uniqueDevices * 0.75)),
+      avgConfidence: Math.round(freshAnalytics.avgConfidence * 1.15),
+      closestApproachMeters: Math.round(
+        freshAnalytics.closestApproachMeters * 1.3
+      ),
+      hourlyDayOfWeekDistribution: shiftedHourly,
+      hourlyDistribution: shiftedHourlyDist,
+    };
+    (['day', 'week', 'month'] as const).forEach(period => {
+      queryClient.setQueryData(['analytics-comparison', period, 'previous'], {
+        current: freshAnalytics,
+        comparison: previousAnalytics,
+        percentageChange: {
+          totalDetections: 18,
+          unknownDevices: 35,
+          avgResponseTime: -5,
+        },
+      });
     });
 
     // Heatmap data

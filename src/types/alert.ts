@@ -76,6 +76,84 @@ export interface AnalyticsData {
   deviceDistribution: Array<{ deviceId: string; count: number }>;
   dailyTrend: Array<{ date: string; count: number }>;
   topDetectedDevices: Array<{ fingerprintHash: string; count: number }>;
+  rssiDistribution: Array<{
+    bucketMin: number;
+    bucketMax: number;
+    count: number;
+  }>;
+  medianRssi: number;
+  peakRssi: number;
+  proximityZoneDistribution: Array<{
+    zone: 'immediate' | 'near' | 'far' | 'extreme';
+    count: number;
+  }>;
+  confidenceDistribution: Array<{
+    tier: 'high' | 'medium' | 'low';
+    count: number;
+  }>;
+  modalityBreakdown: {
+    wifi: {
+      count: number;
+      channelsActive: number;
+      probeRequestPercent: number;
+    };
+    ble: {
+      count: number;
+      phonePercent: number;
+      applePercent: number;
+      beaconPercent: number;
+    };
+    cellular: {
+      count: number;
+      avgPeakDbm: number;
+      avgBurstDurationMs: number;
+      avgNoiseFloorDbm: number;
+    };
+  };
+  crossModalStats: {
+    wifiBleLinks: number;
+    avgLinkConfidence: number;
+    phantomMerges: number;
+  };
+  rssiTrend: Array<{
+    date: string;
+    wifiAvgRssi: number | null;
+    bleAvgRssi: number | null;
+    cellularAvgRssi: number | null;
+  }>;
+  hourlyDayOfWeekDistribution: Array<{
+    dayOfWeek: number;
+    hour: number;
+    count: number;
+    date: string;
+  }>;
+  dayOfWeekDistribution: Array<{
+    day: number;
+    count: number;
+  }>;
+  nighttimeActivity: {
+    count: number;
+    percentOfTotal: number;
+    trend: Array<{ date: string; count: number }>;
+  };
+  perSensorTrend: Array<{
+    date: string;
+    sensors: Array<{
+      deviceId: string;
+      deviceName: string;
+      count: number;
+    }>;
+  }>;
+  threatTimeline: Array<{
+    date: string;
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  }>;
+  uniqueDevices: number;
+  avgConfidence: number;
+  closestApproachMeters: number;
   // Legacy fields for backward compatibility
   totalDetections?: number;
   unknownDevices?: number;

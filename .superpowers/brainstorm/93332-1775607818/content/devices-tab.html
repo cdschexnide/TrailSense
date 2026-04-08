@@ -1,0 +1,307 @@
+<h2>Devices Tab Design</h2>
+<p class="subtitle">Analytics about detected devices (fingerprints) — who's showing up, how often, and what are they.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Devices Tab — Dark Theme Mockup</div>
+  <div class="mockup-body" style="background: #111; color: #e5e5e5; font-family: -apple-system, system-ui, sans-serif; padding: 20px; max-width: 390px; margin: 0 auto;">
+
+    <!-- Time Range Picker -->
+    <div style="display: flex; background: #1a1a1a; border-radius: 10px; padding: 3px; margin-bottom: 20px;">
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">24h</div>
+      <div style="flex:1; text-align:center; padding: 8px; background: #f59e0b; color: #000; border-radius: 8px; font-size: 13px; font-weight: 600;">7d</div>
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">30d</div>
+      <div style="flex:1; text-align:center; padding: 8px; color: #888; font-size: 13px;">1y</div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div style="display: flex; border-bottom: 1px solid #333; margin-bottom: 20px;">
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Overview</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Signals</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #f59e0b; border-bottom: 2px solid #f59e0b; font-size: 13px; font-weight: 600;">Devices</div>
+      <div style="flex:1; text-align:center; padding: 10px 0 8px; color: #666; font-size: 13px;">Patterns</div>
+    </div>
+
+    <!-- Section 1: Device Summary Cards -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Device Summary</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px;">
+      <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; text-align: center;">
+        <div style="font-size: 24px; font-weight: 700; color: #fff;">23</div>
+        <div style="font-size: 11px; color: #888; margin-top: 4px;">Total Unique</div>
+      </div>
+      <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; text-align: center;">
+        <div style="font-size: 24px; font-weight: 700; color: #4ade80;">5</div>
+        <div style="font-size: 11px; color: #888; margin-top: 4px;">Known</div>
+      </div>
+      <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; text-align: center;">
+        <div style="font-size: 24px; font-weight: 700; color: #ef4444;">18</div>
+        <div style="font-size: 11px; color: #888; margin-top: 4px;">Unknown</div>
+      </div>
+    </div>
+
+    <!-- Section 2: New vs Returning -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">New vs Returning</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <!-- Stacked bar per day -->
+      <svg viewBox="0 0 320 110" style="width: 100%; height: 110px;">
+        <!-- Y grid -->
+        <line x1="25" y1="10" x2="320" y2="10" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="25" y1="35" x2="320" y2="35" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="25" y1="60" x2="320" y2="60" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="25" y1="85" x2="320" y2="85" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <text x="0" y="14" fill="#666" font-size="9">12</text>
+        <text x="4" y="39" fill="#666" font-size="9">8</text>
+        <text x="4" y="64" fill="#666" font-size="9">4</text>
+        <text x="4" y="89" fill="#666" font-size="9">0</text>
+
+        <!-- Mon: 3 new + 5 returning = 8 -->
+        <rect x="35" y="35" width="30" height="50" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <rect x="35" y="35" width="30" height="19" rx="3" fill="#f59e0b"/>
+        <!-- Tue: 1 new + 7 returning = 8 -->
+        <rect x="78" y="35" width="30" height="50" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <rect x="78" y="35" width="30" height="6" rx="3" fill="#f59e0b"/>
+        <!-- Wed: 5 new + 6 returning = 11 -->
+        <rect x="121" y="16" width="30" height="69" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <rect x="121" y="16" width="30" height="31" rx="3" fill="#f59e0b"/>
+        <!-- Thu: 2 new + 4 returning = 6 -->
+        <rect x="164" y="47" width="30" height="38" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <rect x="164" y="47" width="30" height="13" rx="3" fill="#f59e0b"/>
+        <!-- Fri: 0 new + 3 returning = 3 -->
+        <rect x="207" y="66" width="30" height="19" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <!-- Sat: 4 new + 5 returning = 9 -->
+        <rect x="250" y="29" width="30" height="56" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <rect x="250" y="29" width="30" height="25" rx="3" fill="#f59e0b"/>
+        <!-- Sun: 1 new + 2 returning = 3 -->
+        <rect x="293" y="66" width="30" height="19" rx="3" fill="rgba(96,165,250,0.6)"/>
+        <rect x="293" y="66" width="30" height="6" rx="3" fill="#f59e0b"/>
+
+        <!-- X labels -->
+        <text x="39" y="102" fill="#666" font-size="9">Mon</text>
+        <text x="83" y="102" fill="#666" font-size="9">Tue</text>
+        <text x="124" y="102" fill="#666" font-size="9">Wed</text>
+        <text x="168" y="102" fill="#666" font-size="9">Thu</text>
+        <text x="214" y="102" fill="#666" font-size="9">Fri</text>
+        <text x="256" y="102" fill="#666" font-size="9">Sat</text>
+        <text x="298" y="102" fill="#666" font-size="9">Sun</text>
+      </svg>
+      <div style="display: flex; gap: 16px; margin-top: 8px; justify-content: center;">
+        <div style="font-size: 11px;"><span style="display:inline-block;width:8px;height:8px;background:#f59e0b;border-radius:2px;margin-right:4px;"></span><span style="color:#888;">New</span></div>
+        <div style="font-size: 11px;"><span style="display:inline-block;width:8px;height:8px;background:rgba(96,165,250,0.6);border-radius:2px;margin-right:4px;"></span><span style="color:#888;">Returning</span></div>
+      </div>
+    </div>
+
+    <!-- Section 3: Repeat Visitors -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Repeat Visitors</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden; margin-bottom: 24px;">
+      <!-- Device 1 -->
+      <div style="padding: 14px 16px; border-bottom: 1px solid #2a2a2a;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 8px; height: 8px; background: #60a5fa; border-radius: 50%;"></div>
+            <span style="font-size: 14px; font-weight: 600; font-family: monospace; color: #e5e5e5;">w_a3f291</span>
+            <span style="font-size: 10px; background: rgba(239,68,68,0.15); color: #ef4444; padding: 2px 6px; border-radius: 4px;">critical</span>
+          </div>
+          <span style="font-size: 13px; font-weight: 600; color: #fff;">12 visits</span>
+        </div>
+        <div style="display: flex; gap: 16px; font-size: 11px; color: #888;">
+          <span>First: Mar 28</span>
+          <span>Last: Apr 6</span>
+          <span>Hours: 2–4 AM</span>
+        </div>
+        <!-- Mini visit sparkline -->
+        <div style="display: flex; gap: 3px; margin-top: 8px; align-items: flex-end; height: 20px;">
+          <div style="flex:1; background: rgba(239,68,68,0.4); height: 8px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(239,68,68,0.6); height: 14px; border-radius: 2px;"></div>
+          <div style="flex:1; background: transparent; height: 0px;"></div>
+          <div style="flex:1; background: rgba(239,68,68,0.8); height: 18px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(239,68,68,0.5); height: 10px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(239,68,68,0.3); height: 6px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(239,68,68,0.9); height: 20px; border-radius: 2px;"></div>
+        </div>
+      </div>
+      <!-- Device 2 -->
+      <div style="padding: 14px 16px; border-bottom: 1px solid #2a2a2a;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 8px; height: 8px; background: #2dd4bf; border-radius: 50%;"></div>
+            <span style="font-size: 14px; font-weight: 600; font-family: monospace; color: #e5e5e5;">b_7e21c4</span>
+            <span style="font-size: 10px; background: rgba(245,158,11,0.15); color: #f59e0b; padding: 2px 6px; border-radius: 4px;">high</span>
+          </div>
+          <span style="font-size: 13px; font-weight: 600; color: #fff;">8 visits</span>
+        </div>
+        <div style="display: flex; gap: 16px; font-size: 11px; color: #888;">
+          <span>First: Apr 1</span>
+          <span>Last: Apr 7</span>
+          <span>Hours: 6–8 PM</span>
+        </div>
+        <div style="display: flex; gap: 3px; margin-top: 8px; align-items: flex-end; height: 20px;">
+          <div style="flex:1; background: rgba(245,158,11,0.5); height: 10px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(245,158,11,0.7); height: 16px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(245,158,11,0.4); height: 8px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(245,158,11,0.6); height: 12px; border-radius: 2px;"></div>
+          <div style="flex:1; background: transparent; height: 0px;"></div>
+          <div style="flex:1; background: rgba(245,158,11,0.8); height: 18px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(245,158,11,0.5); height: 10px; border-radius: 2px;"></div>
+        </div>
+      </div>
+      <!-- Device 3 -->
+      <div style="padding: 14px 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 8px; height: 8px; background: #a78bfa; border-radius: 50%;"></div>
+            <span style="font-size: 14px; font-weight: 600; font-family: monospace; color: #e5e5e5;">c_19bd08</span>
+            <span style="font-size: 10px; background: rgba(251,191,36,0.15); color: #fbbf24; padding: 2px 6px; border-radius: 4px;">medium</span>
+          </div>
+          <span style="font-size: 13px; font-weight: 600; color: #fff;">6 visits</span>
+        </div>
+        <div style="display: flex; gap: 16px; font-size: 11px; color: #888;">
+          <span>First: Mar 31</span>
+          <span>Last: Apr 5</span>
+          <span>Hours: 11 AM–1 PM</span>
+        </div>
+        <div style="display: flex; gap: 3px; margin-top: 8px; align-items: flex-end; height: 20px;">
+          <div style="flex:1; background: rgba(251,191,36,0.6); height: 12px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(251,191,36,0.4); height: 8px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(251,191,36,0.7); height: 16px; border-radius: 2px;"></div>
+          <div style="flex:1; background: transparent; height: 0px;"></div>
+          <div style="flex:1; background: rgba(251,191,36,0.5); height: 10px; border-radius: 2px;"></div>
+          <div style="flex:1; background: rgba(251,191,36,0.3); height: 6px; border-radius: 2px;"></div>
+          <div style="flex:1; background: transparent; height: 0px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Device Categories -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Device Categories</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <!-- Horizontal bar chart -->
+      <div style="margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">📱 Phones</span>
+          <span style="font-size: 12px; color: #888;">14 <span style="color:#666;">(61%)</span></span>
+        </div>
+        <div style="height: 8px; background: #2a2a2a; border-radius: 4px;">
+          <div style="height: 8px; width: 61%; background: linear-gradient(90deg, #60a5fa, #818cf8); border-radius: 4px;"></div>
+        </div>
+      </div>
+      <div style="margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">❓ Unknown</span>
+          <span style="font-size: 12px; color: #888;">5 <span style="color:#666;">(22%)</span></span>
+        </div>
+        <div style="height: 8px; background: #2a2a2a; border-radius: 4px;">
+          <div style="height: 8px; width: 22%; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 4px;"></div>
+        </div>
+      </div>
+      <div style="margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">📍 Beacons</span>
+          <span style="font-size: 12px; color: #888;">2 <span style="color:#666;">(9%)</span></span>
+        </div>
+        <div style="height: 8px; background: #2a2a2a; border-radius: 4px;">
+          <div style="height: 8px; width: 9%; background: linear-gradient(90deg, #2dd4bf, #4ade80); border-radius: 4px;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span style="font-size: 12px; color: #e5e5e5;">💻 Other</span>
+          <span style="font-size: 12px; color: #888;">2 <span style="color:#666;">(9%)</span></span>
+        </div>
+        <div style="height: 8px; background: #2a2a2a; border-radius: 4px;">
+          <div style="height: 8px; width: 9%; background: linear-gradient(90deg, #888, #666); border-radius: 4px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Per-Sensor Detection Comparison -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Detections by Sensor</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <!-- Grouped bar chart -->
+      <svg viewBox="0 0 320 120" style="width: 100%; height: 120px;">
+        <line x1="0" y1="10" x2="320" y2="10" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="0" y1="40" x2="320" y2="40" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+        <line x1="0" y1="70" x2="320" y2="70" stroke="#2a2a2a" stroke-width="0.5" stroke-dasharray="3"/>
+
+        <!-- Sensor 1: North Gate -->
+        <rect x="20" y="20" width="22" height="80" rx="3" fill="#60a5fa"/>
+        <rect x="44" y="40" width="22" height="60" rx="3" fill="#2dd4bf"/>
+        <rect x="68" y="55" width="22" height="45" rx="3" fill="#a78bfa"/>
+
+        <!-- Sensor 2: South Perimeter -->
+        <rect x="120" y="30" width="22" height="70" rx="3" fill="#60a5fa"/>
+        <rect x="144" y="50" width="22" height="50" rx="3" fill="#2dd4bf"/>
+        <rect x="168" y="35" width="22" height="65" rx="3" fill="#a78bfa"/>
+
+        <!-- Sensor 3: East Fence -->
+        <rect x="220" y="60" width="22" height="40" rx="3" fill="#60a5fa"/>
+        <rect x="244" y="65" width="22" height="35" rx="3" fill="#2dd4bf"/>
+        <rect x="268" y="75" width="22" height="25" rx="3" fill="#a78bfa"/>
+
+        <!-- X labels -->
+        <text x="30" y="115" fill="#888" font-size="9" text-anchor="middle">North Gate</text>
+        <text x="150" y="115" fill="#888" font-size="9" text-anchor="middle">South Perim.</text>
+        <text x="255" y="115" fill="#888" font-size="9" text-anchor="middle">East Fence</text>
+      </svg>
+      <div style="display: flex; gap: 16px; margin-top: 4px; justify-content: center;">
+        <div style="font-size: 11px;"><span style="display:inline-block;width:8px;height:8px;background:#60a5fa;border-radius:2px;margin-right:4px;"></span><span style="color:#888;">WiFi</span></div>
+        <div style="font-size: 11px;"><span style="display:inline-block;width:8px;height:8px;background:#2dd4bf;border-radius:2px;margin-right:4px;"></span><span style="color:#888;">BLE</span></div>
+        <div style="font-size: 11px;"><span style="display:inline-block;width:8px;height:8px;background:#a78bfa;border-radius:2px;margin-right:4px;"></span><span style="color:#888;">Cellular</span></div>
+      </div>
+    </div>
+
+    <!-- Section 6: Known Device Activity -->
+    <div style="font-size: 11px; color: #888; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;">Known Device Activity</div>
+    <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden;">
+      <div style="padding: 14px 16px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-size: 14px; font-weight: 500;">Mom's iPhone</div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">Family · Last seen today 3:12 PM</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 16px; font-weight: 600; color: #4ade80;">18</div>
+          <div style="font-size: 10px; color: #888;">visits</div>
+        </div>
+      </div>
+      <div style="padding: 14px 16px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-size: 14px; font-weight: 500;">UPS Driver</div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">Service · Last seen Apr 5 11:23 AM</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 16px; font-weight: 600; color: #4ade80;">5</div>
+          <div style="font-size: 10px; color: #888;">visits</div>
+        </div>
+      </div>
+      <div style="padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div style="font-size: 14px; font-weight: 500;">Neighbor's Dog Tracker</div>
+          <div style="font-size: 11px; color: #888; margin-top: 2px;">Other · Last seen Apr 7 7:45 AM</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 16px; font-weight: 600; color: #4ade80;">31</div>
+          <div style="font-size: 10px; color: #888;">visits</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <h3>Devices Tab Sections</h3>
+  <ol style="color: #ccc; line-height: 1.8;">
+    <li><strong>Device Summary (3-up cards)</strong> — Total unique fingerprints, Known (whitelisted), and Unknown. Quick ratio of identified vs unidentified devices in the period.</li>
+    <li><strong>New vs Returning (stacked bar chart)</strong> — Per-day breakdown showing first-time vs previously-seen devices. Answers: "Am I seeing the same devices or new ones?" Spike in new devices = worth investigating.</li>
+    <li><strong>Repeat Visitors (ranked list)</strong> — Top fingerprints by visit count, each showing:
+      <ul style="margin-top: 4px;">
+        <li>Fingerprint hash with signal type dot (WiFi blue, BLE teal, Cellular purple)</li>
+        <li>Threat level badge</li>
+        <li>First/last seen dates and common hours</li>
+        <li>Mini sparkline showing visit frequency over the period</li>
+      </ul>
+      Tappable to navigate to full device fingerprint detail.
+    </li>
+    <li><strong>Device Categories (horizontal bars)</strong> — Breakdown by inferred device type: Phones, Unknown, Beacons, Other. Derived from BLE manufacturer data (Apple/Google detection), advertising patterns, and device name heuristics.</li>
+    <li><strong>Detections by Sensor (grouped bar chart)</strong> — Per-sensor comparison of WiFi/BLE/Cellular detection counts. Answers: "Which sensor is seeing the most activity? Is one sensor underperforming?"</li>
+    <li><strong>Known Device Activity (list)</strong> — Whitelisted devices with friendly names, categories, last seen time, and visit count. Answers: "Is my family's regular pattern normal? Did the delivery driver come this week?"</li>
+  </ol>
+</div>

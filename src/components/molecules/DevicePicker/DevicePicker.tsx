@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     minHeight: 52,
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
     backgroundColor: 'transparent',
   },

@@ -7,7 +7,13 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms';
 import { useTheme } from '@hooks/useTheme';
@@ -18,6 +24,7 @@ interface FilterChipProps {
   color: string;
   isSelected?: boolean;
   onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const FilterChip: React.FC<FilterChipProps> = ({
@@ -26,6 +33,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
   color,
   isSelected = false,
   onPress,
+  style,
 }) => {
   const { theme } = useTheme();
   const colors = theme.colors;
@@ -50,6 +58,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({
           borderColor: isSelected ? colors.brandAccent : colors.separator,
         },
         pressed && styles.pressed,
+        style,
       ]}
     >
       <View style={[styles.dot, { backgroundColor: color }]} />
