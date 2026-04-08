@@ -2954,7 +2954,7 @@ function buildSignalAnalysisPdf(
 npx jest __tests__/services/reportExport.test.ts --no-coverage
 ```
 
-Expected: All 5 tests PASS.
+Expected: All 11 tests PASS.
 
 - [ ] **Step 5: Commit**
 
