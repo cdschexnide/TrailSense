@@ -230,11 +230,11 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
 - File naming: `TrailSense_{TemplateName}_{Period}_{Date}.pdf`
 
 **CSV generation:**
-- CSV string built in-memory from analytics data
-- Columns vary by template:
-  - Security Summary: date, total_detections, unique_devices, threat_level, detection_type
-  - Activity Report: date, hour, day_of_week, count, nighttime_flag, anomaly_type
-  - Signal Analysis: date, rssi_median, rssi_peak, proximity_zone, modality, confidence_tier
+- CSV string built in-memory from analytics data, sectioned with blank-line separators
+- Sections vary by template:
+  - **Security Summary:** summary metrics row (date, total_detections, unique_devices, avg_confidence, closest_approach_m), threat_level/count (filtered), detection_type/count (filtered)
+  - **Activity Report:** daily trend (date, count), hourly distribution (hour, count), day_of_week distribution (day, count), nighttime stats (nighttime_count, nighttime_percent), per-sensor trend (date, device_id, device_name, count — filtered by `deviceIds`)
+  - **Signal Analysis:** RSSI summary (rssi_median, rssi_peak), RSSI buckets (rssi_bucket_min, rssi_bucket_max, count), proximity zones (proximity_zone, count), confidence tiers (confidence_tier, count), modality rows (modality, count, metric_1, metric_2 — filtered by `detectionTypes`), RSSI trend (date + per-modality avg RSSI columns — filtered by `detectionTypes`)
 - File naming: `TrailSense_{TemplateName}_{Period}_{Date}.csv`
 
 **Share flow:**
