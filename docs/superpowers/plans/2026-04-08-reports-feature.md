@@ -199,6 +199,7 @@ import reducer, {
   updateSavedReport,
   deleteSavedReport,
   updateLastGenerated,
+  setLastBriefGeneratedAt,
 } from '@store/slices/savedReportsSlice';
 import type { SavedReport, ReportConfig } from '@/types/report';
 
@@ -273,6 +274,15 @@ describe('savedReportsSlice', () => {
     );
     expect(state.reports[0].name).toBe('My Report');
   });
+
+  it('should set lastBriefGeneratedAt', () => {
+    const timestamp = '2026-04-08T14:00:00.000Z';
+    const state = reducer(
+      initialState,
+      setLastBriefGeneratedAt(timestamp)
+    );
+    expect(state.lastBriefGeneratedAt).toBe(timestamp);
+  });
 });
 ```
 
@@ -293,6 +303,7 @@ import type { SavedReport } from '@/types/report';
 
 export interface SavedReportsState {
   reports: SavedReport[];
+  lastBriefGeneratedAt?: string;
 }
 
 const initialState: SavedReportsState = {
@@ -330,6 +341,12 @@ const savedReportsSlice = createSlice({
         report.lastGeneratedAt = action.payload.timestamp;
       }
     },
+    setLastBriefGeneratedAt: (
+      state,
+      action: PayloadAction<string>
+    ) => {
+      state.lastBriefGeneratedAt = action.payload;
+    },
   },
 });
 
@@ -338,6 +355,7 @@ export const {
   updateSavedReport,
   deleteSavedReport,
   updateLastGenerated,
+  setLastBriefGeneratedAt,
 } = savedReportsSlice.actions;
 
 export default savedReportsSlice.reducer;
@@ -678,6 +696,10 @@ import { Pressable, View, StyleSheet } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
 import { Icon } from '@components/atoms/Icon';
+import {
+  SwipeableRow,
+  createSwipeActions,
+} from '@components/molecules/SwipeableRow';
 import { useTheme } from '@hooks/useTheme';
 import { REPORT_TEMPLATES } from '@/types/report';
 import type { ReportTemplate } from '@/types/report';
@@ -707,15 +729,11 @@ export const SavedReportRow: React.FC<SavedReportRowProps> = ({
   const colors = theme.colors;
   const badgeColor = TEMPLATE_BADGE_COLORS[template];
   const templateName = REPORT_TEMPLATES[template].name;
+  const swipeActions = createSwipeActions(colors);
 
   const handlePress = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
-  };
-
-  const handleDelete = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onDelete();
   };
 
   const formattedDate = lastGeneratedAt
@@ -726,40 +744,41 @@ export const SavedReportRow: React.FC<SavedReportRowProps> = ({
     : 'Never generated';
 
   return (
-    <Pressable
-      onPress={handlePress}
-      onLongPress={handleDelete}
-      accessibilityRole="button"
-      accessibilityLabel={`${name}, ${templateName}, ${formattedDate}`}
-      accessibilityHint="Long press to delete"
-      style={({ pressed }) => [
-        styles.container,
-        { backgroundColor: colors.systemGray6 },
-        pressed && styles.pressed,
-      ]}
-    >
-      <View style={styles.content}>
-        <View style={styles.titleRow}>
-          <Text variant="body" style={{ color: colors.label, flex: 1 }}>
-            {name}
-          </Text>
-          <View
-            style={[styles.badge, { backgroundColor: `${badgeColor}20` }]}
-          >
-            <Text
-              variant="caption2"
-              style={{ color: badgeColor, fontSize: 10 }}
-            >
-              {templateName}
+    <SwipeableRow rightActions={[swipeActions.delete(onDelete)]}>
+      <Pressable
+        onPress={handlePress}
+        accessibilityRole="button"
+        accessibilityLabel={`${name}, ${templateName}, ${formattedDate}`}
+        accessibilityHint="Swipe left to delete"
+        style={({ pressed }) => [
+          styles.container,
+          { backgroundColor: colors.systemGray6 },
+          pressed && styles.pressed,
+        ]}
+      >
+        <View style={styles.content}>
+          <View style={styles.titleRow}>
+            <Text variant="body" style={{ color: colors.label, flex: 1 }}>
+              {name}
             </Text>
+            <View
+              style={[styles.badge, { backgroundColor: `${badgeColor}20` }]}
+            >
+              <Text
+                variant="caption2"
+                style={{ color: badgeColor, fontSize: 10 }}
+              >
+                {templateName}
+              </Text>
+            </View>
           </View>
+          <Text variant="footnote" color="secondaryLabel">
+            {formattedDate}
+          </Text>
         </View>
-        <Text variant="footnote" color="secondaryLabel">
-          {formattedDate}
-        </Text>
-      </View>
-      <Icon name="chevron-forward" size={18} color={colors.tertiaryLabel} />
-    </Pressable>
+        <Icon name="chevron-forward" size={18} color={colors.tertiaryLabel} />
+      </Pressable>
+    </SwipeableRow>
   );
 };
 
@@ -1213,6 +1232,7 @@ import { useAppSelector, useAppDispatch } from '@store/index';
 import { deleteSavedReport } from '@store/slices/savedReportsSlice';
 import { REPORT_TEMPLATES } from '@/types/report';
 import type { ReportTemplate } from '@/types/report';
+import type { SavedReportsState } from '@store/slices/savedReportsSlice';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type {
   AnalyticsStackParamList,
@@ -1229,6 +1249,9 @@ export const ReportsScreen = ({ navigation }: ReportsScreenProps) => {
   const dispatch = useAppDispatch();
   const savedReports = useAppSelector(
     state => state.savedReports.reports
+  );
+  const lastBriefGeneratedAt = useAppSelector(
+    state => (state.savedReports as SavedReportsState).lastBriefGeneratedAt
   );
 
   const navigateTo = (screen: string, params?: object) => {
@@ -1278,7 +1301,11 @@ export const ReportsScreen = ({ navigation }: ReportsScreenProps) => {
             icon="sparkles-outline"
             iconColor={colors.systemIndigo}
             title="Intelligence Brief"
-            subtitle="Generate an AI-powered security briefing"
+            subtitle={
+              lastBriefGeneratedAt
+                ? `Last generated ${new Date(lastBriefGeneratedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`
+                : 'Generate an AI-powered security briefing'
+            }
             showChevron
             onPress={() => navigateTo('Brief')}
           />
@@ -1395,6 +1422,9 @@ import {
   StyleSheet,
   Alert,
   Pressable,
+  Platform,
+  Modal,
+  TextInput,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Text } from '@components/atoms/Text';
@@ -1546,41 +1576,55 @@ export const ReportBuilderScreen = ({
     });
   };
 
+  const [saveModalVisible, setSaveModalVisible] = useState(false);
+  const [saveNameInput, setSaveNameInput] = useState(
+    savedReport?.name || ''
+  );
+
   const handleSave = () => {
-    Alert.prompt(
-      'Save Report',
-      'Enter a name for this report configuration:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Save',
-          onPress: (name?: string) => {
-            if (!name?.trim()) return;
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            if (savedReportId && savedReport) {
-              dispatch(
-                updateSavedReport({
-                  id: savedReportId,
-                  name: name.trim(),
-                  config: buildConfig(),
-                })
-              );
-            } else {
-              dispatch(
-                addSavedReport({
-                  id: `report-${Date.now()}`,
-                  name: name.trim(),
-                  config: buildConfig(),
-                  createdAt: new Date().toISOString(),
-                })
-              );
-            }
+    if (Platform.OS === 'ios') {
+      Alert.prompt(
+        'Save Report',
+        'Enter a name for this report configuration:',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Save',
+            onPress: (name?: string) => {
+              if (!name?.trim()) return;
+              doSave(name.trim());
+            },
           },
-        },
-      ],
-      'plain-text',
-      savedReport?.name || ''
-    );
+        ],
+        'plain-text',
+        savedReport?.name || ''
+      );
+    } else {
+      setSaveNameInput(savedReport?.name || '');
+      setSaveModalVisible(true);
+    }
+  };
+
+  const doSave = (name: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (savedReportId && savedReport) {
+      dispatch(
+        updateSavedReport({
+          id: savedReportId,
+          name,
+          config: buildConfig(),
+        })
+      );
+    } else {
+      dispatch(
+        addSavedReport({
+          id: `report-${Date.now()}`,
+          name,
+          config: buildConfig(),
+          createdAt: new Date().toISOString(),
+        })
+      );
+    }
   };
 
   return (
@@ -1721,6 +1765,62 @@ export const ReportBuilderScreen = ({
           Generate Report
         </Button>
       </View>
+
+      {/* Android save modal (Alert.prompt is iOS-only) */}
+      {Platform.OS !== 'ios' && (
+        <Modal
+          visible={saveModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSaveModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View
+              style={[
+                styles.modalContent,
+                { backgroundColor: colors.systemGray6 },
+              ]}
+            >
+              <Text variant="headline" weight="semibold" style={{ color: colors.label }}>
+                Save Report
+              </Text>
+              <TextInput
+                value={saveNameInput}
+                onChangeText={setSaveNameInput}
+                placeholder="Report name"
+                placeholderTextColor={colors.tertiaryLabel}
+                style={[
+                  styles.modalInput,
+                  {
+                    color: colors.label,
+                    borderColor: colors.separator,
+                    backgroundColor: colors.background,
+                  },
+                ]}
+                autoFocus
+              />
+              <View style={styles.modalButtons}>
+                <Button
+                  buttonStyle="plain"
+                  onPress={() => setSaveModalVisible(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onPress={() => {
+                    if (saveNameInput.trim()) {
+                      doSave(saveNameInput.trim());
+                      setSaveModalVisible(false);
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </ScreenLayout>
   );
 };
@@ -1759,6 +1859,31 @@ const styles = StyleSheet.create({
   },
   generateButton: {
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  modalContent: {
+    width: '100%',
+    borderRadius: 14,
+    padding: 20,
+    gap: 16,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
   },
 });
 ```
@@ -1934,6 +2059,23 @@ export const SecuritySummaryReport: React.FC<SecuritySummaryReportProps> = ({
           ))}
         </ReportSection>
       )}
+
+      {analytics.deviceDistribution.length > 0 && (
+        <ReportSection title="Detections by Sensor" subtitle="Filtered by selected sensors">
+          {analytics.deviceDistribution
+            .filter(d => config.deviceIds.includes(d.deviceId))
+            .map(d => (
+              <View key={d.deviceId} style={styles.deviceRow}>
+                <Text variant="body" style={{ color: colors.label, flex: 1 }}>
+                  {d.deviceId}
+                </Text>
+                <Text variant="caption1" tactical color="secondaryLabel">
+                  {d.count} detections
+                </Text>
+              </View>
+            ))}
+        </ReportSection>
+      )}
     </View>
   );
 };
@@ -1966,9 +2108,7 @@ const styles = StyleSheet.create({
 import React from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
-import { Text } from '@components/atoms/Text';
 import { StatCard, ReportSection } from '@components/molecules';
-import { MultiLineChart } from '@components/organisms/charts/MultiLineChart';
 import { useTheme } from '@hooks/useTheme';
 import type { AnalyticsData } from '@/types/alert';
 import type { ReportConfig } from '@/types/report';
@@ -2073,6 +2213,31 @@ export const ActivityReportReport: React.FC<ActivityReportReportProps> = ({
           <StatCard title="Night Detections" value={String(nightCount)} style={styles.statCard} />
         </View>
       </ReportSection>
+
+      {analytics.perSensorTrend.length > 0 && (
+        <ReportSection title="Activity by Sensor" subtitle="Filtered by selected sensors">
+          {analytics.perSensorTrend
+            .slice(-7)
+            .map(day => {
+              const filteredSensors = day.sensors.filter(s =>
+                config.deviceIds.includes(s.deviceId)
+              );
+              if (filteredSensors.length === 0) return null;
+              return (
+                <View key={day.date} style={styles.sensorDay}>
+                  <StatCard
+                    title={day.date}
+                    value={String(
+                      filteredSensors.reduce((sum, s) => sum + s.count, 0)
+                    )}
+                    style={styles.statCard}
+                  />
+                </View>
+              );
+            })
+            .filter(Boolean)}
+        </ReportSection>
+      )}
     </View>
   );
 };
@@ -2089,6 +2254,9 @@ const styles = StyleSheet.create({
   statCard: {
     minWidth: '47%',
   },
+  sensorDay: {
+    flexDirection: 'row',
+  },
 });
 ```
 
@@ -2101,6 +2269,7 @@ import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { Text } from '@components/atoms/Text';
 import { StatCard, ReportSection } from '@components/molecules';
+import { ModalityCard } from '@components/molecules/ModalityCard/ModalityCard';
 import { useTheme } from '@hooks/useTheme';
 import type { AnalyticsData } from '@/types/alert';
 import type { ReportConfig } from '@/types/report';
@@ -2960,7 +3129,6 @@ import {
   Pressable,
   ActionSheetIOS,
   Platform,
-  Alert,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import * as Print from 'expo-print';
@@ -2980,6 +3148,8 @@ import {
 import { useTheme } from '@hooks/useTheme';
 import { useAnalytics, useComparison } from '@hooks/useAnalytics';
 import { useDevices } from '@hooks/useDevices';
+import { useAppDispatch } from '@store/index';
+import { setLastBriefGeneratedAt } from '@store/slices/savedReportsSlice';
 import { generateInsights } from '@services/analyticsInsights';
 import { llmService } from '@services/llm';
 import { FEATURE_FLAGS } from '@/config/featureFlags';
@@ -3003,9 +3173,10 @@ type BriefScreenProps =
   | NativeStackScreenProps<AnalyticsStackParamList, 'Brief'>
   | NativeStackScreenProps<MoreStackParamList, 'Brief'>;
 
-export const BriefScreen = ({ navigation }: BriefScreenProps) => {
+export const BriefScreen = (_props: BriefScreenProps) => {
   const { theme } = useTheme();
   const colors = theme.colors;
+  const dispatch = useAppDispatch();
   const [period, setPeriod] = useState<Period>('week');
   const [brief, setBrief] = useState<IntelligenceBrief | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -3074,19 +3245,25 @@ export const BriefScreen = ({ navigation }: BriefScreenProps) => {
           analytics,
           comparisonAnalytics: comparison?.comparison,
         });
+        const generatedAt = new Date().toISOString();
         setBrief({
           summary: result.summary,
           findings: result.findings,
-          generatedAt: new Date().toISOString(),
+          generatedAt,
           period,
         });
+        dispatch(setLastBriefGeneratedAt(generatedAt));
       } else {
         // Deterministic fallback: structured summary from analytics data
-        setBrief(buildDeterministicBrief());
+        const fallback = buildDeterministicBrief();
+        setBrief(fallback);
+        dispatch(setLastBriefGeneratedAt(fallback.generatedAt));
       }
     } catch {
       // On LLM failure, fall back to deterministic brief
-      setBrief(buildDeterministicBrief());
+      const fallback = buildDeterministicBrief();
+      setBrief(fallback);
+      dispatch(setLastBriefGeneratedAt(fallback.generatedAt));
     } finally {
       setGenerating(false);
     }

@@ -45,7 +45,7 @@ Replaces the existing placeholder at `src/screens/analytics/ReportsScreen.tsx`.
 **Section 3 — Saved Reports:**
 - List of `SavedReportRow` items from Redux store
 - Each row: custom name, template type badge (small colored pill), last generated date
-- Swipe-to-delete gesture
+- Swipe-to-delete gesture using existing `SwipeableRow` + `createSwipeActions` pattern (from `KnownDeviceItem`)
 - Tapping navigates to `ReportBuilderScreen` with saved filters loaded
 - Empty state: "No saved reports yet. Generate a report and save it for quick access."
 
@@ -198,8 +198,8 @@ export interface Finding {
 Follows the existing three-layer pattern:
 
 **Redux Persist** — New `savedReportsSlice` at `src/store/slices/savedReportsSlice.ts`:
-- State: `{ reports: SavedReport[] }`
-- Actions: `addSavedReport`, `updateSavedReport`, `deleteSavedReport`, `updateLastGenerated`
+- State: `{ reports: SavedReport[]; lastBriefGeneratedAt?: string }`
+- Actions: `addSavedReport`, `updateSavedReport`, `deleteSavedReport`, `updateLastGenerated`, `setLastBriefGeneratedAt`
 - Added to persist whitelist alongside auth, settings, blockedDevices
 
 **React Query** — No new hooks. ReportPreviewScreen and BriefScreen use existing `useAnalytics()` and `useComparison()` with the config's period/dates.
