@@ -37,7 +37,9 @@ xcodebuild archive \
   -workspace ios/TrailSense.xcworkspace \
   -scheme TrailSense \
   -destination "generic/platform=iOS" \
-  -archivePath "$ARCHIVE_PATH"
+  -archivePath "$ARCHIVE_PATH" \
+  DEVELOPMENT_TEAM=QATL26RGAU \
+  CODE_SIGN_STYLE=Automatic
 
 # --- Verify build number ---
 ARCHIVED_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$ARCHIVE_PATH/Info.plist")
