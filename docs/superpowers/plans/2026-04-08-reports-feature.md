@@ -749,7 +749,7 @@ export const SavedReportRow: React.FC<SavedReportRowProps> = ({
         onPress={handlePress}
         accessibilityRole="button"
         accessibilityLabel={`${name}, ${templateName}, ${formattedDate}`}
-        accessibilityHint="Swipe left to delete"
+        accessibilityHint="Delete action available"
         style={({ pressed }) => [
           styles.container,
           { backgroundColor: colors.systemGray6 },
@@ -2354,36 +2354,46 @@ export const SignalAnalysisReport: React.FC<SignalAnalysisReportProps> = ({
       )}
 
       <ReportSection title="Modality Breakdown">
-        {config.detectionTypes.includes('wifi') && (
-          <View style={styles.modalityRow}>
-            <Text variant="subheadline" weight="semibold" style={{ color: '#3B82F6' }}>
-              WiFi
-            </Text>
-            <Text variant="footnote" color="secondaryLabel">
-              {wifi.count} detections · {wifi.channelsActive} channels · {wifi.probeRequestPercent}% probe requests
-            </Text>
-          </View>
-        )}
-        {config.detectionTypes.includes('bluetooth') && (
-          <View style={styles.modalityRow}>
-            <Text variant="subheadline" weight="semibold" style={{ color: '#8B5CF6' }}>
-              Bluetooth
-            </Text>
-            <Text variant="footnote" color="secondaryLabel">
-              {ble.count} detections · {ble.phonePercent}% phones · {ble.applePercent}% Apple · {ble.beaconPercent}% beacons
-            </Text>
-          </View>
-        )}
-        {config.detectionTypes.includes('cellular') && (
-          <View style={styles.modalityRow}>
-            <Text variant="subheadline" weight="semibold" style={{ color: '#EF4444' }}>
-              Cellular
-            </Text>
-            <Text variant="footnote" color="secondaryLabel">
-              {cellular.count} detections · {cellular.avgPeakDbm} dBm peak · {cellular.avgBurstDurationMs}ms burst
-            </Text>
-          </View>
-        )}
+        <View style={styles.modalityCards}>
+          {config.detectionTypes.includes('wifi') && (
+            <ModalityCard
+              title="WiFi"
+              icon="wifi-outline"
+              color="#3B82F6"
+              count={wifi.count}
+              metrics={[
+                { label: 'Channels Active', value: String(wifi.channelsActive) },
+                { label: 'Probe Requests', value: `${wifi.probeRequestPercent}%` },
+              ]}
+            />
+          )}
+          {config.detectionTypes.includes('bluetooth') && (
+            <ModalityCard
+              title="Bluetooth"
+              icon="bluetooth-outline"
+              color="#8B5CF6"
+              count={ble.count}
+              metrics={[
+                { label: 'Phones', value: `${ble.phonePercent}%` },
+                { label: 'Apple', value: `${ble.applePercent}%` },
+                { label: 'Beacons', value: `${ble.beaconPercent}%` },
+              ]}
+            />
+          )}
+          {config.detectionTypes.includes('cellular') && (
+            <ModalityCard
+              title="Cellular"
+              icon="cellular-outline"
+              color="#EF4444"
+              count={cellular.count}
+              metrics={[
+                { label: 'Peak dBm', value: String(cellular.avgPeakDbm) },
+                { label: 'Burst Duration', value: `${cellular.avgBurstDurationMs}ms` },
+                { label: 'Noise Floor', value: `${cellular.avgNoiseFloorDbm} dBm` },
+              ]}
+            />
+          )}
+        </View>
       </ReportSection>
 
       <ReportSection title="Cross-Modal Correlation">
@@ -2393,6 +2403,36 @@ export const SignalAnalysisReport: React.FC<SignalAnalysisReportProps> = ({
           <StatCard title="Phantom Merges" value={String(crossModalStats.phantomMerges)} style={styles.statCard} />
         </View>
       </ReportSection>
+
+      {analytics.rssiTrend.length > 0 && (
+        <ReportSection title="Signal Strength Trend">
+          <Text variant="footnote" color="secondaryLabel" style={{ marginBottom: 8 }}>
+            Average RSSI by modality over time (lower = weaker)
+          </Text>
+          {analytics.rssiTrend.slice(-7).map(point => (
+            <View key={point.date} style={styles.trendRow}>
+              <Text variant="caption1" tactical color="secondaryLabel" style={{ width: 60 }}>
+                {point.date.slice(5)}
+              </Text>
+              {config.detectionTypes.includes('wifi') && (
+                <Text variant="caption1" style={{ color: '#3B82F6', width: 70 }}>
+                  WiFi: {point.wifiAvgRssi ?? '—'}
+                </Text>
+              )}
+              {config.detectionTypes.includes('bluetooth') && (
+                <Text variant="caption1" style={{ color: '#8B5CF6', width: 70 }}>
+                  BLE: {point.bleAvgRssi ?? '—'}
+                </Text>
+              )}
+              {config.detectionTypes.includes('cellular') && (
+                <Text variant="caption1" style={{ color: '#EF4444', width: 70 }}>
+                  Cell: {point.cellularAvgRssi ?? '—'}
+                </Text>
+              )}
+            </View>
+          ))}
+        </ReportSection>
+      )}
     </View>
   );
 };
@@ -2409,9 +2449,14 @@ const styles = StyleSheet.create({
   statCard: {
     minWidth: '47%',
   },
-  modalityRow: {
-    gap: 4,
+  modalityCards: {
+    gap: 12,
+  },
+  trendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 4,
+    gap: 8,
   },
 });
 ```
@@ -2498,15 +2543,40 @@ describe('reportExport', () => {
   });
 
   describe('buildPdfHtml', () => {
-    it('returns valid HTML string', () => {
+    it('returns valid HTML for security-summary', () => {
       const html = buildPdfHtml(mockAnalyticsData, baseConfig);
       expect(html).toContain('<!DOCTYPE html>');
       expect(html).toContain('Security Summary');
+      expect(html).toContain('Threat Levels');
+      expect(html).toContain('Detections by Sensor');
     });
 
-    it('includes date range', () => {
-      const html = buildPdfHtml(mockAnalyticsData, baseConfig);
-      expect(html).toContain(mockAnalyticsData.period);
+    it('returns template-specific HTML for activity-report', () => {
+      const config = { ...baseConfig, template: 'activity-report' as const };
+      const html = buildPdfHtml(mockAnalyticsData, config);
+      expect(html).toContain('Activity Report');
+      expect(html).toContain('Daily Trend');
+      expect(html).toContain('Nighttime Activity');
+    });
+
+    it('returns template-specific HTML for signal-analysis', () => {
+      const config = { ...baseConfig, template: 'signal-analysis' as const };
+      const html = buildPdfHtml(mockAnalyticsData, config);
+      expect(html).toContain('Signal Analysis');
+      expect(html).toContain('RSSI Distribution');
+      expect(html).toContain('Modality Breakdown');
+    });
+
+    it('filters modality sections by detectionTypes', () => {
+      const config = {
+        ...baseConfig,
+        template: 'signal-analysis' as const,
+        detectionTypes: ['wifi' as const],
+      };
+      const html = buildPdfHtml(mockAnalyticsData, config);
+      expect(html).toContain('WiFi');
+      expect(html).not.toContain('<h3>Bluetooth</h3>');
+      expect(html).not.toContain('<h3>Cellular</h3>');
     });
   });
 });
@@ -2559,9 +2629,9 @@ export function buildCsvString(
     case 'security-summary':
       return buildSecuritySummaryCsv(analytics, config);
     case 'activity-report':
-      return buildActivityReportCsv(analytics);
+      return buildActivityReportCsv(analytics, config);
     case 'signal-analysis':
-      return buildSignalAnalysisCsv(analytics);
+      return buildSignalAnalysisCsv(analytics, config);
   }
 }
 
@@ -2586,7 +2656,10 @@ function buildSecuritySummaryCsv(
   return rows.join('\n');
 }
 
-function buildActivityReportCsv(analytics: AnalyticsData): string {
+function buildActivityReportCsv(
+  analytics: AnalyticsData,
+  config: ReportConfig
+): string {
   const rows: string[] = [
     'date,count',
     ...analytics.dailyTrend.map(d => `${d.date},${d.count}`),
@@ -2604,10 +2677,25 @@ function buildActivityReportCsv(analytics: AnalyticsData): string {
     'nighttime_count,nighttime_percent',
     `${analytics.nighttimeActivity.count},${analytics.nighttimeActivity.percentOfTotal}`,
   ];
+
+  if (analytics.perSensorTrend.length > 0) {
+    rows.push('', 'date,device_id,device_name,count');
+    analytics.perSensorTrend.forEach(day => {
+      day.sensors
+        .filter(s => config.deviceIds.includes(s.deviceId))
+        .forEach(s => {
+          rows.push(`${day.date},${s.deviceId},${s.deviceName},${s.count}`);
+        });
+    });
+  }
+
   return rows.join('\n');
 }
 
-function buildSignalAnalysisCsv(analytics: AnalyticsData): string {
+function buildSignalAnalysisCsv(
+  analytics: AnalyticsData,
+  config: ReportConfig
+): string {
   const rows: string[] = [
     'rssi_median,rssi_peak',
     `${analytics.medianRssi},${analytics.peakRssi}`,
@@ -2627,37 +2715,42 @@ function buildSignalAnalysisCsv(analytics: AnalyticsData): string {
       d => `${d.tier},${d.count}`
     ),
   ];
+
+  // Modality breakdown filtered by selected detection types
+  rows.push('', 'modality,count,metric_1,metric_2');
+  if (config.detectionTypes.includes('wifi')) {
+    const w = analytics.modalityBreakdown.wifi;
+    rows.push(`wifi,${w.count},channels_active:${w.channelsActive},probe_request_pct:${w.probeRequestPercent}`);
+  }
+  if (config.detectionTypes.includes('bluetooth')) {
+    const b = analytics.modalityBreakdown.ble;
+    rows.push(`bluetooth,${b.count},phone_pct:${b.phonePercent},apple_pct:${b.applePercent}`);
+  }
+  if (config.detectionTypes.includes('cellular')) {
+    const c = analytics.modalityBreakdown.cellular;
+    rows.push(`cellular,${c.count},peak_dbm:${c.avgPeakDbm},burst_ms:${c.avgBurstDurationMs}`);
+  }
+
+  // Signal strength trend filtered by detection types
+  if (analytics.rssiTrend.length > 0) {
+    const trendHeaders = ['date'];
+    if (config.detectionTypes.includes('wifi')) trendHeaders.push('wifi_avg_rssi');
+    if (config.detectionTypes.includes('bluetooth')) trendHeaders.push('ble_avg_rssi');
+    if (config.detectionTypes.includes('cellular')) trendHeaders.push('cellular_avg_rssi');
+    rows.push('', trendHeaders.join(','));
+    analytics.rssiTrend.forEach(point => {
+      const values = [point.date];
+      if (config.detectionTypes.includes('wifi')) values.push(String(point.wifiAvgRssi ?? ''));
+      if (config.detectionTypes.includes('bluetooth')) values.push(String(point.bleAvgRssi ?? ''));
+      if (config.detectionTypes.includes('cellular')) values.push(String(point.cellularAvgRssi ?? ''));
+      rows.push(values.join(','));
+    });
+  }
+
   return rows.join('\n');
 }
 
-export function buildPdfHtml(
-  analytics: AnalyticsData,
-  config: ReportConfig
-): string {
-  const templateInfo = REPORT_TEMPLATES[config.template];
-  const period = PERIOD_LABELS[config.period] || config.period;
-
-  const threatRows = analytics.threatLevelDistribution
-    .filter(d => config.threatLevels.includes(d.level as any))
-    .map(
-      d =>
-        `<tr><td>${d.level}</td><td style="text-align:right">${d.count}</td></tr>`
-    )
-    .join('');
-
-  const detectionRows = analytics.detectionTypeDistribution
-    .filter(d => config.detectionTypes.includes(d.type as any))
-    .map(
-      d =>
-        `<tr><td>${d.type}</td><td style="text-align:right">${d.count}</td></tr>`
-    )
-    .join('');
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<style>
+const PDF_STYLES = `
   body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 24px; color: #1a1a1a; }
   h1 { font-size: 22px; margin-bottom: 4px; }
   h2 { font-size: 16px; margin-top: 24px; color: #555; }
@@ -2668,23 +2761,150 @@ export function buildPdfHtml(
   .metric-label { font-size: 11px; color: #888; text-transform: uppercase; }
   table { width: 100%; border-collapse: collapse; margin: 8px 0; }
   td { padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 13px; }
-</style>
-</head>
+  .section-label { font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 4px; }
+`;
+
+function pdfWrap(title: string, period: string, analytics: AnalyticsData, body: string): string {
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>${PDF_STYLES}</style></head>
 <body>
-  <h1>${templateInfo.name}</h1>
-  <div class="subtitle">Period: ${period} · ${analytics.period} · ${analytics.startDate} to ${analytics.endDate}</div>
-  <div class="metrics">
-    <div class="metric"><div class="metric-value">${analytics.totalAlerts}</div><div class="metric-label">Detections</div></div>
-    <div class="metric"><div class="metric-value">${analytics.uniqueDevices}</div><div class="metric-label">Unique Devices</div></div>
-    <div class="metric"><div class="metric-value">${Math.round(analytics.avgConfidence)}%</div><div class="metric-label">Avg Confidence</div></div>
-    <div class="metric"><div class="metric-value">${Math.round(analytics.closestApproachMeters)}m</div><div class="metric-label">Closest Approach</div></div>
-  </div>
-  <h2>Threat Levels</h2>
-  <table>${threatRows}</table>
-  <h2>Detection Types</h2>
-  <table>${detectionRows}</table>
-</body>
-</html>`;
+  <h1>${title}</h1>
+  <div class="subtitle">Period: ${period} · ${analytics.startDate} to ${analytics.endDate}</div>
+  ${body}
+</body></html>`;
+}
+
+export function buildPdfHtml(
+  analytics: AnalyticsData,
+  config: ReportConfig
+): string {
+  const templateInfo = REPORT_TEMPLATES[config.template];
+  const period = PERIOD_LABELS[config.period] || config.period;
+
+  switch (config.template) {
+    case 'security-summary':
+      return buildSecuritySummaryPdf(analytics, config, templateInfo.name, period);
+    case 'activity-report':
+      return buildActivityReportPdf(analytics, config, templateInfo.name, period);
+    case 'signal-analysis':
+      return buildSignalAnalysisPdf(analytics, config, templateInfo.name, period);
+  }
+}
+
+function buildSecuritySummaryPdf(
+  analytics: AnalyticsData,
+  config: ReportConfig,
+  title: string,
+  period: string
+): string {
+  const threatRows = analytics.threatLevelDistribution
+    .filter(d => config.threatLevels.includes(d.level as any))
+    .map(d => `<tr><td>${d.level}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const detectionRows = analytics.detectionTypeDistribution
+    .filter(d => config.detectionTypes.includes(d.type as any))
+    .map(d => `<tr><td>${d.type}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const deviceRows = analytics.deviceDistribution
+    .filter(d => config.deviceIds.includes(d.deviceId))
+    .map(d => `<tr><td>${d.deviceId}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const topDeviceRows = analytics.topDetectedDevices.slice(0, 5)
+    .map((d, i) => `<tr><td>${i + 1}</td><td>${d.fingerprintHash.slice(0, 12)}...</td><td style="text-align:right">${d.count} visits</td></tr>`)
+    .join('');
+
+  return pdfWrap(title, period, analytics, `
+    <div class="section-label">Property-Wide Metrics</div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value">${analytics.totalAlerts}</div><div class="metric-label">Detections</div></div>
+      <div class="metric"><div class="metric-value">${analytics.uniqueDevices}</div><div class="metric-label">Unique Devices</div></div>
+      <div class="metric"><div class="metric-value">${Math.round(analytics.avgConfidence)}%</div><div class="metric-label">Avg Confidence</div></div>
+      <div class="metric"><div class="metric-value">${Math.round(analytics.closestApproachMeters)}m</div><div class="metric-label">Closest Approach</div></div>
+    </div>
+    <h2>Threat Levels</h2><table>${threatRows}</table>
+    <h2>Detection Types</h2><table>${detectionRows}</table>
+    <h2>Top Detected Devices</h2><table>${topDeviceRows}</table>
+    ${deviceRows ? `<h2>Detections by Sensor</h2><div class="section-label">Filtered by selected sensors</div><table>${deviceRows}</table>` : ''}
+  `);
+}
+
+function buildActivityReportPdf(
+  analytics: AnalyticsData,
+  config: ReportConfig,
+  title: string,
+  period: string
+): string {
+  const dailyRows = analytics.dailyTrend
+    .map(d => `<tr><td>${d.date}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const hourlyRows = (analytics.hourlyDistribution || [])
+    .map(d => `<tr><td>${d.hour}:00</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const sensorRows = analytics.perSensorTrend.slice(-7).flatMap(day =>
+    day.sensors
+      .filter(s => config.deviceIds.includes(s.deviceId))
+      .map(s => `<tr><td>${day.date}</td><td>${s.deviceName}</td><td style="text-align:right">${s.count}</td></tr>`)
+  ).join('');
+
+  return pdfWrap(title, period, analytics, `
+    <h2>Daily Trend</h2><table>${dailyRows}</table>
+    <h2>Hourly Distribution</h2><table>${hourlyRows}</table>
+    <h2>Nighttime Activity</h2>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value">${analytics.nighttimeActivity.percentOfTotal}%</div><div class="metric-label">Nighttime</div></div>
+      <div class="metric"><div class="metric-value">${analytics.nighttimeActivity.count}</div><div class="metric-label">Night Detections</div></div>
+    </div>
+    ${sensorRows ? `<h2>Activity by Sensor</h2><div class="section-label">Filtered by selected sensors</div><table>${sensorRows}</table>` : ''}
+  `);
+}
+
+function buildSignalAnalysisPdf(
+  analytics: AnalyticsData,
+  config: ReportConfig,
+  title: string,
+  period: string
+): string {
+  const rssiRows = analytics.rssiDistribution
+    .map(d => `<tr><td>${d.bucketMin} to ${d.bucketMax} dBm</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const proximityRows = analytics.proximityZoneDistribution
+    .map(d => `<tr><td>${d.zone}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .join('');
+
+  const modalitySections: string[] = [];
+  if (config.detectionTypes.includes('wifi')) {
+    const w = analytics.modalityBreakdown.wifi;
+    modalitySections.push(`<h3>WiFi</h3><p>${w.count} detections · ${w.channelsActive} channels · ${w.probeRequestPercent}% probe requests</p>`);
+  }
+  if (config.detectionTypes.includes('bluetooth')) {
+    const b = analytics.modalityBreakdown.ble;
+    modalitySections.push(`<h3>Bluetooth</h3><p>${b.count} detections · ${b.phonePercent}% phones · ${b.applePercent}% Apple · ${b.beaconPercent}% beacons</p>`);
+  }
+  if (config.detectionTypes.includes('cellular')) {
+    const c = analytics.modalityBreakdown.cellular;
+    modalitySections.push(`<h3>Cellular</h3><p>${c.count} detections · ${c.avgPeakDbm} dBm peak · ${c.avgBurstDurationMs}ms burst</p>`);
+  }
+
+  return pdfWrap(title, period, analytics, `
+    <div class="metrics">
+      <div class="metric"><div class="metric-value">${analytics.medianRssi} dBm</div><div class="metric-label">Median RSSI</div></div>
+      <div class="metric"><div class="metric-value">${analytics.peakRssi} dBm</div><div class="metric-label">Peak RSSI</div></div>
+    </div>
+    <h2>RSSI Distribution</h2><table>${rssiRows}</table>
+    <h2>Proximity Zones</h2><table>${proximityRows}</table>
+    <h2>Modality Breakdown</h2>${modalitySections.join('')}
+    <h2>Cross-Modal Correlation</h2>
+    <div class="metrics">
+      <div class="metric"><div class="metric-value">${analytics.crossModalStats.wifiBleLinks}</div><div class="metric-label">WiFi↔BLE Links</div></div>
+      <div class="metric"><div class="metric-value">${Math.round(analytics.crossModalStats.avgLinkConfidence)}%</div><div class="metric-label">Link Confidence</div></div>
+    </div>
+  `);
 }
 ```
 
