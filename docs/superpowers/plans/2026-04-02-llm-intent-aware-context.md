@@ -15,30 +15,33 @@
 ## File Structure
 
 ### New Files
-| File | Responsibility |
-|---|---|
-| `src/services/llm/IntentClassifier.ts` | Classify user message into intent + extract filters |
-| `src/services/llm/FocusedContextBuilder.ts` | Build intent-specific context strings from raw alert/device data |
-| `src/services/llm/ResponseProcessor.ts` | 3-stage post-processing: clean, hallucination check, length enforcement |
-| `__tests__/services/llm/IntentClassifier.test.ts` | Tests for intent classification and filter extraction |
-| `__tests__/services/llm/FocusedContextBuilder.test.ts` | Tests for each context builder |
-| `__tests__/services/llm/ResponseProcessor.test.ts` | Tests for post-processing pipeline |
+
+| File                                                   | Responsibility                                                          |
+| ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `src/services/llm/IntentClassifier.ts`                 | Classify user message into intent + extract filters                     |
+| `src/services/llm/FocusedContextBuilder.ts`            | Build intent-specific context strings from raw alert/device data        |
+| `src/services/llm/ResponseProcessor.ts`                | 3-stage post-processing: clean, hallucination check, length enforcement |
+| `__tests__/services/llm/IntentClassifier.test.ts`      | Tests for intent classification and filter extraction                   |
+| `__tests__/services/llm/FocusedContextBuilder.test.ts` | Tests for each context builder                                          |
+| `__tests__/services/llm/ResponseProcessor.test.ts`     | Tests for post-processing pipeline                                      |
 
 ### Modified Files
-| File | Changes |
-|---|---|
-| `src/types/llm.ts` | Add `ChatContext`, `ClassifiedIntent`, `IntentFilters` types; add `intent` to `ChatResponse` |
-| `src/services/llm/templates/ConversationalTemplate.ts` | New system prompt, intent-aware `buildPrompt`, remove dead question methods |
-| `src/services/llm/LLMService.ts` | Rewrite `chat()` to orchestrate intent → context → prompt → generate → process |
-| `src/services/llm/AIProvider.tsx` | Update `chat` wrapper and `AIContextType` to use `ChatContext` instead of `ConversationContext` |
-| `src/screens/ai/AIAssistantScreen.tsx` | Pass raw alerts/devices instead of pre-built securityContext |
-| `src/services/llm/index.ts` | Export new modules, update re-exported types |
+
+| File                                                   | Changes                                                                                         |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `src/types/llm.ts`                                     | Add `ChatContext`, `ClassifiedIntent`, `IntentFilters` types; add `intent` to `ChatResponse`    |
+| `src/services/llm/templates/ConversationalTemplate.ts` | New system prompt, intent-aware `buildPrompt`, remove dead question methods                     |
+| `src/services/llm/LLMService.ts`                       | Rewrite `chat()` to orchestrate intent → context → prompt → generate → process                  |
+| `src/services/llm/AIProvider.tsx`                      | Update `chat` wrapper and `AIContextType` to use `ChatContext` instead of `ConversationContext` |
+| `src/screens/ai/AIAssistantScreen.tsx`                 | Pass raw alerts/devices instead of pre-built securityContext                                    |
+| `src/services/llm/index.ts`                            | Export new modules, update re-exported types                                                    |
 
 ---
 
 ### Task 1: Add New Types to `src/types/llm.ts`
 
 **Files:**
+
 - Modify: `src/types/llm.ts`
 
 - [ ] **Step 1: Add intent and chat context types**
@@ -113,6 +116,7 @@ git commit -m "feat(llm): add intent classification and chat context types"
 ### Task 2: IntentClassifier
 
 **Files:**
+
 - Create: `src/services/llm/IntentClassifier.ts`
 - Create: `__tests__/services/llm/IntentClassifier.test.ts`
 
@@ -148,14 +152,20 @@ const mockDevices: Device[] = [
 describe('IntentClassifier', () => {
   describe('intent detection', () => {
     it('classifies alert queries', () => {
-      const result = IntentClassifier.classify('Tell me about the critical alerts', mockDevices);
+      const result = IntentClassifier.classify(
+        'Tell me about the critical alerts',
+        mockDevices
+      );
       expect(result.intent).toBe('alert_query');
       expect(result.filters.threatLevel).toBe('critical');
       expect(result.confidence).toBeGreaterThan(0.5);
     });
 
     it('classifies device queries', () => {
-      const result = IntentClassifier.classify('Are any sensors offline?', mockDevices);
+      const result = IntentClassifier.classify(
+        'Are any sensors offline?',
+        mockDevices
+      );
       expect(result.intent).toBe('device_query');
       expect(result.filters.online).toBe(false);
     });
@@ -166,13 +176,19 @@ describe('IntentClassifier', () => {
     });
 
     it('classifies pattern queries', () => {
-      const result = IntentClassifier.classify('Any suspicious activity this week?', mockDevices);
+      const result = IntentClassifier.classify(
+        'Any suspicious activity this week?',
+        mockDevices
+      );
       expect(result.intent).toBe('pattern_query');
       expect(result.filters.timeRange).toBe('7d');
     });
 
     it('classifies time queries', () => {
-      const result = IntentClassifier.classify('When is it usually quietest?', mockDevices);
+      const result = IntentClassifier.classify(
+        'When is it usually quietest?',
+        mockDevices
+      );
       expect(result.intent).toBe('time_query');
     });
 
@@ -190,49 +206,76 @@ describe('IntentClassifier', () => {
 
   describe('filter extraction', () => {
     it('extracts threat level from message', () => {
-      const result = IntentClassifier.classify('Show me high threat detections', mockDevices);
+      const result = IntentClassifier.classify(
+        'Show me high threat detections',
+        mockDevices
+      );
       expect(result.filters.threatLevel).toBe('high');
     });
 
     it('extracts detection type', () => {
-      const result = IntentClassifier.classify('How many WiFi detections today?', mockDevices);
+      const result = IntentClassifier.classify(
+        'How many WiFi detections today?',
+        mockDevices
+      );
       expect(result.filters.detectionType).toBe('wifi');
       expect(result.filters.timeRange).toBe('24h');
     });
 
     it('extracts device name - full match', () => {
-      const result = IntentClassifier.classify('How is the North Gate Sensor doing?', mockDevices);
+      const result = IntentClassifier.classify(
+        'How is the North Gate Sensor doing?',
+        mockDevices
+      );
       expect(result.intent).toBe('device_query');
       expect(result.filters.deviceName).toBe('North Gate Sensor');
     });
 
     it('extracts device name - partial match', () => {
-      const result = IntentClassifier.classify('What about north gate?', mockDevices);
+      const result = IntentClassifier.classify(
+        'What about north gate?',
+        mockDevices
+      );
       expect(result.filters.deviceName).toBe('North Gate Sensor');
     });
 
     it('extracts unreviewed filter', () => {
-      const result = IntentClassifier.classify('Show me unreviewed alerts', mockDevices);
+      const result = IntentClassifier.classify(
+        'Show me unreviewed alerts',
+        mockDevices
+      );
       expect(result.filters.isReviewed).toBe(false);
     });
 
     it('extracts time range - today', () => {
-      const result = IntentClassifier.classify('What happened today?', mockDevices);
+      const result = IntentClassifier.classify(
+        'What happened today?',
+        mockDevices
+      );
       expect(result.filters.timeRange).toBe('24h');
     });
 
     it('extracts time range - this week', () => {
-      const result = IntentClassifier.classify('Activity this week', mockDevices);
+      const result = IntentClassifier.classify(
+        'Activity this week',
+        mockDevices
+      );
       expect(result.filters.timeRange).toBe('7d');
     });
 
     it('extracts bluetooth detection type', () => {
-      const result = IntentClassifier.classify('Any bluetooth detections?', mockDevices);
+      const result = IntentClassifier.classify(
+        'Any bluetooth detections?',
+        mockDevices
+      );
       expect(result.filters.detectionType).toBe('bluetooth');
     });
 
     it('extracts cellular detection type', () => {
-      const result = IntentClassifier.classify('Show cellular alerts', mockDevices);
+      const result = IntentClassifier.classify(
+        'Show cellular alerts',
+        mockDevices
+      );
       expect(result.filters.detectionType).toBe('cellular');
     });
   });
@@ -339,14 +382,20 @@ const INTENT_RULES: IntentRule[] = [
   },
 ];
 
-const THREAT_LEVEL_PATTERNS: Array<{ pattern: RegExp; value: 'critical' | 'high' | 'medium' | 'low' }> = [
+const THREAT_LEVEL_PATTERNS: Array<{
+  pattern: RegExp;
+  value: 'critical' | 'high' | 'medium' | 'low';
+}> = [
   { pattern: /\bcritical\b/i, value: 'critical' },
   { pattern: /\bhigh\b/i, value: 'high' },
   { pattern: /\bmedium\b/i, value: 'medium' },
   { pattern: /\blow\b/i, value: 'low' },
 ];
 
-const DETECTION_TYPE_PATTERNS: Array<{ pattern: RegExp; value: 'wifi' | 'bluetooth' | 'cellular' }> = [
+const DETECTION_TYPE_PATTERNS: Array<{
+  pattern: RegExp;
+  value: 'wifi' | 'bluetooth' | 'cellular';
+}> = [
   { pattern: /\bwi-?fi\b/i, value: 'wifi' },
   { pattern: /\bblue-?tooth\b|ble\b/i, value: 'bluetooth' },
   { pattern: /\bcellular\b/i, value: 'cellular' },
@@ -414,7 +463,10 @@ export class IntentClassifier {
     };
   }
 
-  private static extractFilters(message: string, devices: Device[]): IntentFilters {
+  private static extractFilters(
+    message: string,
+    devices: Device[]
+  ): IntentFilters {
     const filters: IntentFilters = {};
 
     // Threat level
@@ -464,7 +516,10 @@ export class IntentClassifier {
     return filters;
   }
 
-  private static matchDeviceName(message: string, devices: Device[]): string | undefined {
+  private static matchDeviceName(
+    message: string,
+    devices: Device[]
+  ): string | undefined {
     const messageLower = message.toLowerCase();
 
     // 1. Try exact full-name match first
@@ -483,8 +538,13 @@ export class IntentClassifier {
         w => !['sensor', 'monitor', 'device', 'unit', 'the', 'a'].includes(w)
       );
       // Require at least one significant word match
-      const matchCount = significantWords.filter(w => messageLower.includes(w)).length;
-      if (matchCount > 0 && matchCount >= Math.min(significantWords.length, 2)) {
+      const matchCount = significantWords.filter(w =>
+        messageLower.includes(w)
+      ).length;
+      if (
+        matchCount > 0 &&
+        matchCount >= Math.min(significantWords.length, 2)
+      ) {
         return device.name;
       }
     }
@@ -511,6 +571,7 @@ git commit -m "feat(llm): add IntentClassifier with regex-based intent detection
 ### Task 3: FocusedContextBuilder
 
 **Files:**
+
 - Create: `src/services/llm/FocusedContextBuilder.ts`
 - Create: `__tests__/services/llm/FocusedContextBuilder.test.ts`
 
@@ -860,14 +921,17 @@ function filterAlerts(alerts: Alert[], filters: IntentFilters): Alert[] {
 
   if (filters.timeRange) {
     const now = Date.now();
-    const cutoff = filters.timeRange === '24h'
-      ? now - 24 * 60 * 60 * 1000
-      : now - 7 * 24 * 60 * 60 * 1000;
+    const cutoff =
+      filters.timeRange === '24h'
+        ? now - 24 * 60 * 60 * 1000
+        : now - 7 * 24 * 60 * 60 * 1000;
     filtered = filtered.filter(a => new Date(a.timestamp).getTime() >= cutoff);
   }
 
   // Sort by timestamp descending (most recent first)
-  filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  filtered.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
 
   return filtered;
 }
@@ -914,7 +978,10 @@ export class FocusedContextBuilder {
     // Count MAC address occurrences for repeat detection
     const macCounts = new Map<string, number>();
     for (const alert of filtered) {
-      macCounts.set(alert.macAddress, (macCounts.get(alert.macAddress) ?? 0) + 1);
+      macCounts.set(
+        alert.macAddress,
+        (macCounts.get(alert.macAddress) ?? 0) + 1
+      );
     }
 
     const header = `${filtered.length} ${levelLabel === 'all' ? '' : levelLabel + ' '}alerts${filters.timeRange ? ` in the last ${filters.timeRange === '24h' ? '24 hours' : '7 days'}` : ''}. Most recent:`;
@@ -925,14 +992,16 @@ export class FocusedContextBuilder {
       const deviceName = getDeviceName(alert.deviceId, devices);
       const reviewed = alert.isReviewed ? 'Reviewed' : 'UNREVIEWED';
       const macCount = macCounts.get(alert.macAddress) ?? 1;
-      const repeatNote = macCount > 1 ? ` (seen ${macCount} times in results)` : '';
+      const repeatNote =
+        macCount > 1 ? ` (seen ${macCount} times in results)` : '';
 
       const notes: string[] = [];
       if (alert.metadata?.band) notes.push(alert.metadata.band);
       if (alert.metadata?.ssid) notes.push(`SSID: ${alert.metadata.ssid}`);
       if (alert.metadata?.deviceName) notes.push(alert.metadata.deviceName);
       if (alert.isStationary) notes.push('stationary');
-      if (alert.duration) notes.push(`${Math.round(alert.duration / 60)} min duration`);
+      if (alert.duration)
+        notes.push(`${Math.round(alert.duration / 60)} min duration`);
       const hour = new Date(alert.timestamp).getHours();
       if (hour >= 22 || hour <= 6) notes.push('nighttime');
 
@@ -943,7 +1012,9 @@ export class FocusedContextBuilder {
         `   MAC: ${alert.macAddress}${repeatNote}`,
         `   Status: ${reviewed}`,
         notes.length > 0 ? `   Notes: ${notes.join(', ')}` : '',
-      ].filter(Boolean).join('\n');
+      ]
+        .filter(Boolean)
+        .join('\n');
     });
 
     return `${header}\n\n${alertLines.join('\n\n')}`;
@@ -1010,12 +1081,18 @@ export class FocusedContextBuilder {
     return sections.join('\n');
   }
 
-  private static buildStatusContext(alerts: Alert[], devices: Device[]): string {
+  private static buildStatusContext(
+    alerts: Alert[],
+    devices: Device[]
+  ): string {
     const now = new Date();
     const oneDayAgo = now.getTime() - 24 * 60 * 60 * 1000;
 
     const threatCounts: Record<ThreatLevel, number> = {
-      critical: 0, high: 0, medium: 0, low: 0,
+      critical: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
     };
     let unreviewedCount = 0;
     let last24hCount = 0;
@@ -1033,33 +1110,48 @@ export class FocusedContextBuilder {
     }
 
     const offlineDevices = devices.filter(d => !d.online);
-    const lowBatteryDevices = devices.filter(d => (d.batteryPercent ?? d.battery ?? 100) < 20);
+    const lowBatteryDevices = devices.filter(
+      d => (d.batteryPercent ?? d.battery ?? 100) < 20
+    );
 
     // Build top concerns
     const concerns: string[] = [];
     if (offlineDevices.length > 0) {
       const names = offlineDevices.map(d => d.name).join(', ');
-      concerns.push(`${offlineDevices.length} sensor${offlineDevices.length > 1 ? 's' : ''} offline (${names})`);
+      concerns.push(
+        `${offlineDevices.length} sensor${offlineDevices.length > 1 ? 's' : ''} offline (${names})`
+      );
     }
     if (lowBatteryDevices.length > 0) {
-      const names = lowBatteryDevices.map(d => `${d.name} at ${d.batteryPercent ?? d.battery}%`).join(', ');
+      const names = lowBatteryDevices
+        .map(d => `${d.name} at ${d.batteryPercent ?? d.battery}%`)
+        .join(', ');
       concerns.push(`Low battery: ${names}`);
     }
     if (threatCounts.critical > 0) {
-      concerns.push(`${threatCounts.critical} critical alert${threatCounts.critical > 1 ? 's' : ''}, ${unreviewedCount} unreviewed total`);
+      concerns.push(
+        `${threatCounts.critical} critical alert${threatCounts.critical > 1 ? 's' : ''}, ${unreviewedCount} unreviewed total`
+      );
     }
     if (threatCounts.critical === 0 && unreviewedCount > 0) {
-      concerns.push(`${unreviewedCount} unreviewed alert${unreviewedCount > 1 ? 's' : ''}`);
+      concerns.push(
+        `${unreviewedCount} unreviewed alert${unreviewedCount > 1 ? 's' : ''}`
+      );
     }
 
     // Find most recent critical
     const recentCritical = [...alerts]
       .filter(a => a.threatLevel === 'critical')
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )[0];
 
     if (recentCritical) {
       const deviceName = getDeviceName(recentCritical.deviceId, devices);
-      concerns.push(`Most recent critical: ${recentCritical.detectionType} at ${deviceName}, ${formatTime(recentCritical.timestamp)}`);
+      concerns.push(
+        `Most recent critical: ${recentCritical.detectionType} at ${deviceName}, ${formatTime(recentCritical.timestamp)}`
+      );
     }
 
     const onlineCount = devices.filter(d => d.online).length;
@@ -1091,7 +1183,12 @@ export class FocusedContextBuilder {
       : alerts;
 
     // Always use explicit rolling-window labels, never "today"/"this week"
-    const timeLabel = filters.timeRange === '24h' ? 'last 24 hours' : filters.timeRange === '7d' ? 'last 7 days' : 'all time';
+    const timeLabel =
+      filters.timeRange === '24h'
+        ? 'last 24 hours'
+        : filters.timeRange === '7d'
+          ? 'last 7 days'
+          : 'all time';
 
     // Group by MAC address
     const macGroups = new Map<string, Alert[]>();
@@ -1102,7 +1199,9 @@ export class FocusedContextBuilder {
     }
 
     // Sort groups by count descending
-    const sortedGroups = [...macGroups.entries()].sort((a, b) => b[1].length - a[1].length);
+    const sortedGroups = [...macGroups.entries()].sort(
+      (a, b) => b[1].length - a[1].length
+    );
 
     const parts: string[] = [`DETECTION PATTERNS (${timeLabel}):`];
 
@@ -1118,16 +1217,23 @@ export class FocusedContextBuilder {
       for (const [mac, macAlerts] of repeats.slice(0, 5)) {
         const hours = macAlerts.map(a => new Date(a.timestamp).getHours());
         const nightCount = hours.filter(h => h >= 22 || h <= 6).length;
-        const types = [...new Set(macAlerts.map(a => a.detectionType))].join(', ');
-        const allNight = nightCount === macAlerts.length && macAlerts.length > 1;
+        const types = [...new Set(macAlerts.map(a => a.detectionType))].join(
+          ', '
+        );
+        const allNight =
+          nightCount === macAlerts.length && macAlerts.length > 1;
         const label = allNight ? 'SUSPICIOUS' : 'ROUTINE';
 
         const timeDesc = allNight
           ? `all nighttime (${Math.min(...hours) > 12 ? Math.min(...hours) - 12 : Math.min(...hours)}-${Math.max(...hours) > 12 ? Math.max(...hours) - 12 : Math.max(...hours)} AM)`
           : `various times`;
 
-        parts.push(`- MAC ${mac}: ${macAlerts.length} detections, ${timeDesc}, ${types}`);
-        parts.push(`  → ${label}: ${allNight ? 'irregular schedule, nighttime' : 'multiple visits detected'}`);
+        parts.push(
+          `- MAC ${mac}: ${macAlerts.length} detections, ${timeDesc}, ${types}`
+        );
+        parts.push(
+          `  → ${label}: ${allNight ? 'irregular schedule, nighttime' : 'multiple visits detected'}`
+        );
       }
     }
 
@@ -1137,38 +1243,67 @@ export class FocusedContextBuilder {
       hourCounts[new Date(alert.timestamp).getHours()]++;
     }
 
-    const nightTotal = hourCounts.slice(0, 6).reduce((s, c) => s + c, 0) + hourCounts.slice(22).reduce((s, c) => s + c, 0);
+    const nightTotal =
+      hourCounts.slice(0, 6).reduce((s, c) => s + c, 0) +
+      hourCounts.slice(22).reduce((s, c) => s + c, 0);
     const dayTotal = hourCounts.slice(6, 22).reduce((s, c) => s + c, 0);
-    const nightPct = filtered.length > 0 ? Math.round((nightTotal / filtered.length) * 100) : 0;
+    const nightPct =
+      filtered.length > 0
+        ? Math.round((nightTotal / filtered.length) * 100)
+        : 0;
 
     parts.push('\nHOURLY DISTRIBUTION:');
-    parts.push(`  12AM-6AM: ${nightTotal} alerts (${nightPct}%)${nightPct > 25 ? ' ← above average for nighttime' : ''}`);
-    parts.push(`  6AM-12PM: ${hourCounts.slice(6, 12).reduce((s, c) => s + c, 0)} alerts`);
-    parts.push(`  12PM-6PM: ${hourCounts.slice(12, 18).reduce((s, c) => s + c, 0)} alerts`);
-    parts.push(`  6PM-12AM: ${hourCounts.slice(18, 22).reduce((s, c) => s + c, 0) + hourCounts.slice(22).reduce((s, c) => s + c, 0)} alerts`);
+    parts.push(
+      `  12AM-6AM: ${nightTotal} alerts (${nightPct}%)${nightPct > 25 ? ' ← above average for nighttime' : ''}`
+    );
+    parts.push(
+      `  6AM-12PM: ${hourCounts.slice(6, 12).reduce((s, c) => s + c, 0)} alerts`
+    );
+    parts.push(
+      `  12PM-6PM: ${hourCounts.slice(12, 18).reduce((s, c) => s + c, 0)} alerts`
+    );
+    parts.push(
+      `  6PM-12AM: ${hourCounts.slice(18, 22).reduce((s, c) => s + c, 0) + hourCounts.slice(22).reduce((s, c) => s + c, 0)} alerts`
+    );
 
     // Anomalies
     const newMacs = sortedGroups.filter(([, a]) => {
-      const firstSeen = Math.min(...a.map(al => new Date(al.timestamp).getTime()));
+      const firstSeen = Math.min(
+        ...a.map(al => new Date(al.timestamp).getTime())
+      );
       return Date.now() - firstSeen < 48 * 60 * 60 * 1000 && a.length >= 2;
     });
 
     if (newMacs.length > 0 || nightPct > 25) {
       parts.push('\nANOMALIES:');
       if (nightPct > 25) {
-        parts.push(`- Nighttime activity accounts for ${nightPct}% of detections — higher than typical`);
+        parts.push(
+          `- Nighttime activity accounts for ${nightPct}% of detections — higher than typical`
+        );
       }
       for (const [mac, a] of newMacs) {
-        parts.push(`- New device (MAC ${mac}) seen ${a.length} times in 48 hours`);
+        parts.push(
+          `- New device (MAC ${mac}) seen ${a.length} times in 48 hours`
+        );
       }
     }
 
     return parts.join('\n');
   }
 
-  private static buildTimeContext(alerts: Alert[], filters: IntentFilters): string {
-    const filtered = filters.timeRange ? filterAlerts(alerts, { timeRange: filters.timeRange }) : alerts;
-    const timeLabel = filters.timeRange === '24h' ? 'last 24 hours' : filters.timeRange === '7d' ? 'last 7 days' : 'all time';
+  private static buildTimeContext(
+    alerts: Alert[],
+    filters: IntentFilters
+  ): string {
+    const filtered = filters.timeRange
+      ? filterAlerts(alerts, { timeRange: filters.timeRange })
+      : alerts;
+    const timeLabel =
+      filters.timeRange === '24h'
+        ? 'last 24 hours'
+        : filters.timeRange === '7d'
+          ? 'last 7 days'
+          : 'all time';
 
     const hourCounts = new Array(24).fill(0);
     const weekdayCounts = new Array(7).fill(0);
@@ -1203,8 +1338,12 @@ export class FocusedContextBuilder {
       parts.push(`  ${row.join('    ')}`);
     }
 
-    parts.push(`\nBUSIEST: ${formatHour(busiestHour)} (${hourCounts[busiestHour]} alerts)`);
-    parts.push(`QUIETEST: ${formatHour(quietestHour)} (${hourCounts[quietestHour]} alerts)`);
+    parts.push(
+      `\nBUSIEST: ${formatHour(busiestHour)} (${hourCounts[busiestHour]} alerts)`
+    );
+    parts.push(
+      `QUIETEST: ${formatHour(quietestHour)} (${hourCounts[quietestHour]} alerts)`
+    );
 
     // Weekday vs weekend
     const weekdayTotal = weekdayCounts.slice(1, 6).reduce((s, c) => s + c, 0);
@@ -1214,8 +1353,12 @@ export class FocusedContextBuilder {
 
     if (filtered.length > 0) {
       parts.push(`\nWEEKDAY vs WEEKEND:`);
-      parts.push(`  Weekdays: ${weekdayTotal} total (avg ${(weekdayTotal / weekdayCount).toFixed(1)}/day)`);
-      parts.push(`  Weekends: ${weekendTotal} total (avg ${(weekendTotal / weekendCount).toFixed(1)}/day)`);
+      parts.push(
+        `  Weekdays: ${weekdayTotal} total (avg ${(weekdayTotal / weekdayCount).toFixed(1)}/day)`
+      );
+      parts.push(
+        `  Weekends: ${weekendTotal} total (avg ${(weekendTotal / weekendCount).toFixed(1)}/day)`
+      );
     }
 
     return parts.join('\n');
@@ -1252,6 +1395,7 @@ git commit -m "feat(llm): add FocusedContextBuilder with intent-specific context
 ### Task 4: ResponseProcessor
 
 **Files:**
+
 - Create: `src/services/llm/ResponseProcessor.ts`
 - Create: `__tests__/services/llm/ResponseProcessor.test.ts`
 
@@ -1313,7 +1457,10 @@ describe('ResponseProcessor', () => {
     it('strips "Based on the provided information" preamble', () => {
       const result = ResponseProcessor.process(
         "Based on the provided information, I've analyzed your alerts. You have 2 alerts.",
-        'alert_query', {}, mockAlerts, mockDevices
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).not.toMatch(/^Based on/i);
       expect(result).toContain('2 alerts');
@@ -1322,15 +1469,21 @@ describe('ResponseProcessor', () => {
     it('strips "According to the system" preamble', () => {
       const result = ResponseProcessor.process(
         "According to the system's current data, there are 2 devices.",
-        'device_query', {}, mockAlerts, mockDevices
+        'device_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).not.toMatch(/^According/i);
     });
 
     it('strips filler closings', () => {
       const result = ResponseProcessor.process(
-        'You have 1 critical alert. Is there anything else you\'d like to know?',
-        'alert_query', {}, mockAlerts, mockDevices
+        "You have 1 critical alert. Is there anything else you'd like to know?",
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).not.toContain('anything else');
     });
@@ -1338,7 +1491,10 @@ describe('ResponseProcessor', () => {
     it('strips "taking necessary precautions" sentences', () => {
       const result = ResponseProcessor.process(
         'You have 1 critical alert. I recommend taking necessary precautions to ensure your safety.',
-        'alert_query', {}, mockAlerts, mockDevices
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).not.toContain('precautions');
     });
@@ -1346,7 +1502,10 @@ describe('ResponseProcessor', () => {
     it('strips "Considering the context of rural" sentences', () => {
       const result = ResponseProcessor.process(
         'You have 1 alert. Considering the context of rural properties, this is normal.',
-        'alert_query', {}, mockAlerts, mockDevices
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).not.toContain('rural');
     });
@@ -1354,7 +1513,10 @@ describe('ResponseProcessor', () => {
     it('trims to last complete sentence', () => {
       const result = ResponseProcessor.process(
         'You have 1 alert. The alert is critical. This means that the',
-        'alert_query', {}, mockAlerts, mockDevices
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).toMatch(/\.$/);
       expect(result).not.toContain('This means that the');
@@ -1365,7 +1527,10 @@ describe('ResponseProcessor', () => {
     it('catches "device list is empty" when devices exist', () => {
       const result = ResponseProcessor.process(
         'Your device list appears to be empty.',
-        'device_query', {}, mockAlerts, mockDevices
+        'device_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       // Should be replaced with a data-driven fallback
       expect(result).toContain('North Gate Sensor');
@@ -1375,7 +1540,10 @@ describe('ResponseProcessor', () => {
     it('catches "no critical alerts" when critical alerts exist', () => {
       const result = ResponseProcessor.process(
         "You don't have any critical alerts.",
-        'alert_query', { threatLevel: 'critical' }, mockAlerts, mockDevices
+        'alert_query',
+        { threatLevel: 'critical' },
+        mockAlerts,
+        mockDevices
       );
       // Should be replaced with a fallback listing the critical alert
       expect(result).toContain('critical');
@@ -1385,16 +1553,23 @@ describe('ResponseProcessor', () => {
     it('catches "everything looks normal" when critical alerts exist', () => {
       const result = ResponseProcessor.process(
         'Everything looks normal on your property.',
-        'status_overview', {}, mockAlerts, mockDevices
+        'status_overview',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).toContain('critical');
     });
 
     it('does not flag valid responses', () => {
-      const validResponse = 'You have 1 critical alert: cellular detection at North Gate Sensor.';
+      const validResponse =
+        'You have 1 critical alert: cellular detection at North Gate Sensor.';
       const result = ResponseProcessor.process(
         validResponse,
-        'alert_query', {}, mockAlerts, mockDevices
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).toContain('1 critical alert');
     });
@@ -1403,16 +1578,25 @@ describe('ResponseProcessor', () => {
       // No medium alerts in mockAlerts — "no medium alerts" is correct
       const result = ResponseProcessor.process(
         'No medium alerts found.',
-        'alert_query', { threatLevel: 'medium' }, mockAlerts, mockDevices
+        'alert_query',
+        { threatLevel: 'medium' },
+        mockAlerts,
+        mockDevices
       );
       expect(result).toBe('No medium alerts found.');
     });
 
     it('does not flag "no offline sensors" when all sensors are online', () => {
-      const allOnline: Device[] = mockDevices.map(d => ({ ...d, online: true }));
+      const allOnline: Device[] = mockDevices.map(d => ({
+        ...d,
+        online: true,
+      }));
       const result = ResponseProcessor.process(
         'No offline sensors.',
-        'device_query', { online: false }, mockAlerts, allOnline
+        'device_query',
+        { online: false },
+        mockAlerts,
+        allOnline
       );
       expect(result).toBe('No offline sensors.');
     });
@@ -1420,10 +1604,14 @@ describe('ResponseProcessor', () => {
 
   describe('Stage 3: length enforcement', () => {
     it('truncates responses over 150 words to last complete sentence', () => {
-      const longResponse = Array(160).fill('word').join(' ') + '. Final sentence.';
+      const longResponse =
+        Array(160).fill('word').join(' ') + '. Final sentence.';
       const result = ResponseProcessor.process(
         longResponse,
-        'status_overview', {}, mockAlerts, mockDevices
+        'status_overview',
+        {},
+        mockAlerts,
+        mockDevices
       );
       const wordCount = result.split(/\s+/).length;
       expect(wordCount).toBeLessThanOrEqual(155); // some tolerance for sentence boundary
@@ -1433,7 +1621,10 @@ describe('ResponseProcessor', () => {
       const shortResponse = 'You have 1 critical alert.';
       const result = ResponseProcessor.process(
         shortResponse,
-        'alert_query', {}, mockAlerts, mockDevices
+        'alert_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result).toBe(shortResponse);
     });
@@ -1443,7 +1634,10 @@ describe('ResponseProcessor', () => {
     it('returns fallback for empty response', () => {
       const result = ResponseProcessor.process(
         '',
-        'alert_query', { threatLevel: 'critical' }, mockAlerts, mockDevices
+        'alert_query',
+        { threatLevel: 'critical' },
+        mockAlerts,
+        mockDevices
       );
       expect(result.length).toBeGreaterThan(0);
       expect(result).toContain('critical');
@@ -1452,7 +1646,10 @@ describe('ResponseProcessor', () => {
     it('returns fallback for whitespace-only response', () => {
       const result = ResponseProcessor.process(
         '   \n  ',
-        'device_query', {}, mockAlerts, mockDevices
+        'device_query',
+        {},
+        mockAlerts,
+        mockDevices
       );
       expect(result.length).toBeGreaterThan(0);
     });
@@ -1647,16 +1844,21 @@ export class ResponseProcessor {
       filtered = filtered.filter(a => a.threatLevel === filters.threatLevel);
     }
     if (filters.detectionType) {
-      filtered = filtered.filter(a => a.detectionType === filters.detectionType);
+      filtered = filtered.filter(
+        a => a.detectionType === filters.detectionType
+      );
     }
     if (filters.isReviewed !== undefined) {
       filtered = filtered.filter(a => a.isReviewed === filters.isReviewed);
     }
     if (filters.timeRange) {
-      const cutoff = filters.timeRange === '24h'
-        ? Date.now() - 24 * 60 * 60 * 1000
-        : Date.now() - 7 * 24 * 60 * 60 * 1000;
-      filtered = filtered.filter(a => new Date(a.timestamp).getTime() >= cutoff);
+      const cutoff =
+        filters.timeRange === '24h'
+          ? Date.now() - 24 * 60 * 60 * 1000
+          : Date.now() - 7 * 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(
+        a => new Date(a.timestamp).getTime() >= cutoff
+      );
     }
 
     if (filtered.length === 0) return false;
@@ -1664,8 +1866,13 @@ export class ResponseProcessor {
     return NEGATION_PATTERNS.some(p => p.test(response));
   }
 
-  private static detectStatusHallucination(response: string, alerts: Alert[]): boolean {
-    const hasCritical = alerts.some(a => a.threatLevel === 'critical' || a.threatLevel === 'high');
+  private static detectStatusHallucination(
+    response: string,
+    alerts: Alert[]
+  ): boolean {
+    const hasCritical = alerts.some(
+      a => a.threatLevel === 'critical' || a.threatLevel === 'high'
+    );
     if (!hasCritical) return false;
     // Model claims everything is normal when critical/high alerts exist
     return NORMAL_PATTERNS.some(p => p.test(response));
@@ -1702,23 +1909,31 @@ export class ResponseProcessor {
     }
   }
 
-  private static buildAlertFallback(alerts: Alert[], filters: IntentFilters): string {
+  private static buildAlertFallback(
+    alerts: Alert[],
+    filters: IntentFilters
+  ): string {
     // Apply ALL filters, matching what FocusedContextBuilder does
     let filtered = [...alerts];
     if (filters.threatLevel) {
       filtered = filtered.filter(a => a.threatLevel === filters.threatLevel);
     }
     if (filters.detectionType) {
-      filtered = filtered.filter(a => a.detectionType === filters.detectionType);
+      filtered = filtered.filter(
+        a => a.detectionType === filters.detectionType
+      );
     }
     if (filters.isReviewed !== undefined) {
       filtered = filtered.filter(a => a.isReviewed === filters.isReviewed);
     }
     if (filters.timeRange) {
-      const cutoff = filters.timeRange === '24h'
-        ? Date.now() - 24 * 60 * 60 * 1000
-        : Date.now() - 7 * 24 * 60 * 60 * 1000;
-      filtered = filtered.filter(a => new Date(a.timestamp).getTime() >= cutoff);
+      const cutoff =
+        filters.timeRange === '24h'
+          ? Date.now() - 24 * 60 * 60 * 1000
+          : Date.now() - 7 * 24 * 60 * 60 * 1000;
+      filtered = filtered.filter(
+        a => new Date(a.timestamp).getTime() >= cutoff
+      );
     }
 
     if (filtered.length === 0) {
@@ -1731,13 +1946,18 @@ export class ResponseProcessor {
     }
 
     const sorted = [...filtered].sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 
     const label = filters.threatLevel ?? 'total';
     const lines = sorted.slice(0, 5).map((a, i) => {
       const time = new Date(a.timestamp).toLocaleString('en-US', {
-        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
       });
       return `${i + 1}. ${a.detectionType} detection, ${time} — signal ${a.rssi} dBm, MAC ${a.macAddress}`;
     });
@@ -1745,7 +1965,10 @@ export class ResponseProcessor {
     return `${filtered.length} ${label} alerts. Most recent:\n${lines.join('\n')}`;
   }
 
-  private static buildDeviceFallback(devices: Device[], filters: IntentFilters): string {
+  private static buildDeviceFallback(
+    devices: Device[],
+    filters: IntentFilters
+  ): string {
     if (devices.length === 0) return 'No sensors registered.';
 
     // Apply filters matching what FocusedContextBuilder does
@@ -1762,17 +1985,25 @@ export class ResponseProcessor {
     if (filtered.length === 0) {
       if (filters.online === false) return 'No offline sensors.';
       if (filters.online === true) return 'No online sensors.';
-      if (filters.deviceName) return `No sensor named "${filters.deviceName}" found.`;
+      if (filters.deviceName)
+        return `No sensor named "${filters.deviceName}" found.`;
       return 'No sensors found matching your criteria.';
     }
 
     const online = filtered.filter(d => d.online);
     const offline = filtered.filter(d => !d.online);
 
-    const lines: string[] = [`${filtered.length} sensors: ${online.length} online, ${offline.length} offline.`];
+    const lines: string[] = [
+      `${filtered.length} sensors: ${online.length} online, ${offline.length} offline.`,
+    ];
 
     if (offline.length > 0) {
-      lines.push('Offline: ' + offline.map(d => `${d.name} (battery ${d.batteryPercent ?? 'N/A'}%)`).join(', '));
+      lines.push(
+        'Offline: ' +
+          offline
+            .map(d => `${d.name} (battery ${d.batteryPercent ?? 'N/A'}%)`)
+            .join(', ')
+      );
     }
     if (online.length > 0) {
       lines.push('Online: ' + online.map(d => d.name).join(', '));
@@ -1781,7 +2012,10 @@ export class ResponseProcessor {
     return lines.join('\n');
   }
 
-  private static buildStatusFallback(alerts: Alert[], devices: Device[]): string {
+  private static buildStatusFallback(
+    alerts: Alert[],
+    devices: Device[]
+  ): string {
     const critical = alerts.filter(a => a.threatLevel === 'critical').length;
     const high = alerts.filter(a => a.threatLevel === 'high').length;
     const offline = devices.filter(d => !d.online);
@@ -1793,7 +2027,9 @@ export class ResponseProcessor {
     if (high > 0) parts.push(`${high} high alerts`);
     if (unreviewed > 0) parts.push(`${unreviewed} unreviewed`);
     if (offline.length > 0) {
-      parts.push(`${offline.length} sensor${offline.length > 1 ? 's' : ''} offline (${offline.map(d => d.name).join(', ')})`);
+      parts.push(
+        `${offline.length} sensor${offline.length > 1 ? 's' : ''} offline (${offline.map(d => d.name).join(', ')})`
+      );
     }
 
     if (parts.length === 0) {
@@ -1803,7 +2039,10 @@ export class ResponseProcessor {
     return parts.join('. ') + `.`;
   }
 
-  private static buildGenericFallback(alerts: Alert[], devices: Device[]): string {
+  private static buildGenericFallback(
+    alerts: Alert[],
+    devices: Device[]
+  ): string {
     return `${alerts.length} alerts in system, ${devices.filter(d => d.online).length}/${devices.length} sensors online.`;
   }
 }
@@ -1826,6 +2065,7 @@ git commit -m "feat(llm): add ResponseProcessor with preamble stripping, halluci
 ### Task 5: Rewrite ConversationalTemplate
 
 **Files:**
+
 - Modify: `src/services/llm/templates/ConversationalTemplate.ts`
 
 - [ ] **Step 1: Rewrite ConversationalTemplate**
@@ -1834,7 +2074,11 @@ Replace the entire contents of `src/services/llm/templates/ConversationalTemplat
 
 ```typescript
 import { PromptTemplate } from './PromptTemplate';
-import type { ChatMessage, IntentType, Message as PromptMessage } from '@/types/llm';
+import type {
+  ChatMessage,
+  IntentType,
+  Message as PromptMessage,
+} from '@/types/llm';
 
 /**
  * Intent-specific user prompt instruction suffixes.
@@ -1849,10 +2093,8 @@ const INTENT_INSTRUCTIONS: Record<IntentType, string> = {
     'Start with the most urgent issue. Then summarize alert counts and device health. Keep it brief.',
   pattern_query:
     'Describe the pattern you see in the data. Mention specific MAC addresses, times, and frequencies. Flag anything unusual.',
-  time_query:
-    'Answer using specific hours and counts from the data.',
-  help:
-    'Answer briefly. If the question is about security data, say what specific question to ask.',
+  time_query: 'Answer using specific hours and counts from the data.',
+  help: 'Answer briefly. If the question is about security data, say what specific question to ask.',
 };
 
 const SYSTEM_PROMPT = `You are TrailSense AI. You answer questions about property security sensor data.
@@ -1941,6 +2183,7 @@ git commit -m "refactor(llm): rewrite ConversationalTemplate with intent-aware p
 ### Task 6: Rewrite LLMService.chat()
 
 **Files:**
+
 - Modify: `src/services/llm/LLMService.ts`
 
 - [ ] **Step 1: Update imports and chat method**
@@ -2053,6 +2296,7 @@ git commit -m "refactor(llm): rewrite chat() to use intent-aware pipeline with c
 ### Task 7: Update AIAssistantScreen
 
 **Files:**
+
 - Modify: `src/screens/ai/AIAssistantScreen.tsx`
 
 - [ ] **Step 1: Add useAlerts and useDevices imports**
@@ -2069,19 +2313,19 @@ import { useDevices } from '@hooks/api/useDevices';
 Inside the `AIAssistantScreen` component, after the existing `useSecurityContext()` call, add the raw data hooks:
 
 ```typescript
-  // Raw data for LLM pipeline (intent-aware context building)
-  const { data: alerts = [] } = useAlerts({});
-  const { data: devices = [] } = useDevices();
+// Raw data for LLM pipeline (intent-aware context building)
+const { data: alerts = [] } = useAlerts({});
+const { data: devices = [] } = useDevices();
 ```
 
 Then update the `handleSendMessage` function. Replace the `llmService.chat()` call inside the try block:
 
 ```typescript
-        const chatResponse = await llmService.chat({
-          messages: [...messages.filter(m => m.role !== 'system'), userMessage],
-          rawAlerts: alerts,
-          rawDevices: devices,
-        });
+const chatResponse = await llmService.chat({
+  messages: [...messages.filter(m => m.role !== 'system'), userMessage],
+  rawAlerts: alerts,
+  rawDevices: devices,
+});
 ```
 
 This replaces the old call that passed `securityContext: { recentAlerts, deviceStatus, contextString }`.
@@ -2105,6 +2349,7 @@ git commit -m "refactor(llm): pass raw alerts/devices to chat pipeline instead o
 The `AIProvider.tsx` exposes a `chat` method via the `useAI()` hook that still uses the old `ConversationContext` type. This must be migrated to `ChatContext` so the public API is internally consistent.
 
 **Files:**
+
 - Modify: `src/services/llm/AIProvider.tsx`
 
 - [ ] **Step 1: Update imports**
@@ -2128,7 +2373,7 @@ import {
 Change the `chat` method signature in the `AIContextType` interface:
 
 ```typescript
-  chat: (context: ChatContext) => Promise<ChatResponse>;
+chat: (context: ChatContext) => Promise<ChatResponse>;
 ```
 
 - [ ] **Step 3: Update the chat callback**
@@ -2136,15 +2381,15 @@ Change the `chat` method signature in the `AIContextType` interface:
 Replace the `chat` callback implementation:
 
 ```typescript
-  const chat = useCallback(
-    async (context: ChatContext): Promise<ChatResponse> => {
-      if (!isReady) {
-        await enableAI();
-      }
-      return llmService.chat(context);
-    },
-    [isReady, enableAI]
-  );
+const chat = useCallback(
+  async (context: ChatContext): Promise<ChatResponse> => {
+    if (!isReady) {
+      await enableAI();
+    }
+    return llmService.chat(context);
+  },
+  [isReady, enableAI]
+);
 ```
 
 - [ ] **Step 4: Run type-check**
@@ -2164,6 +2409,7 @@ git commit -m "refactor(llm): migrate AIProvider chat API from ConversationConte
 ### Task 9: Update Exports
 
 **Files:**
+
 - Modify: `src/services/llm/index.ts`
 
 - [ ] **Step 1: Add new module exports**
@@ -2208,6 +2454,7 @@ git commit -m "chore(llm): export IntentClassifier, FocusedContextBuilder, Respo
 The existing `mockModeFlow.test.tsx` calls `llmService.chat()` with the old `ConversationContext` shape (`securityContext: { recentAlerts, deviceStatus }`). It needs to be updated to the new `ChatContext` shape (`rawAlerts, rawDevices`). The test also asserts that the raw mock response is returned verbatim, but now `ResponseProcessor` will clean/transform the response, so the assertion needs to account for post-processing.
 
 **Files:**
+
 - Modify: `__tests__/services/llm/mockModeFlow.test.tsx`
 
 - [ ] **Step 1: Update the chat call and assertion**
@@ -2215,23 +2462,23 @@ The existing `mockModeFlow.test.tsx` calls `llmService.chat()` with the old `Con
 In `__tests__/services/llm/mockModeFlow.test.tsx`, find the test `'uses mock inference for chat without loading the native model'` and replace the `llmService.chat()` call and assertion:
 
 ```typescript
-    const response = await llmService.chat({
-      messages: [
-        {
-          role: 'user',
-          content: 'What happened overnight?',
-          timestamp: Date.now(),
-        },
-      ],
-      rawAlerts: [],
-      rawDevices: [],
-    });
+const response = await llmService.chat({
+  messages: [
+    {
+      role: 'user',
+      content: 'What happened overnight?',
+      timestamp: Date.now(),
+    },
+  ],
+  rawAlerts: [],
+  rawDevices: [],
+});
 
-    // ResponseProcessor may transform the mock response, but we should
-    // still get a non-empty response and the inference engine should be called
-    expect(response.message.length).toBeGreaterThan(0);
-    expect(loadModelSpy).not.toHaveBeenCalled();
-    expect(inferenceSpy).toHaveBeenCalledTimes(1);
+// ResponseProcessor may transform the mock response, but we should
+// still get a non-empty response and the inference engine should be called
+expect(response.message.length).toBeGreaterThan(0);
+expect(loadModelSpy).not.toHaveBeenCalled();
+expect(inferenceSpy).toHaveBeenCalledTimes(1);
 ```
 
 - [ ] **Step 2: Run the test to verify it passes**

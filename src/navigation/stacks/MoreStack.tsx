@@ -3,8 +3,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MoreStackParamList } from '@navigation/types';
 import { MoreMenuScreen } from '@screens/more';
 import {
+  BriefScreen,
   DashboardScreen,
   HeatmapScreen,
+  ReportBuilderScreen,
+  ReportPreviewScreen,
   ReportsScreen,
 } from '@screens/analytics';
 import { DeviceFingerprintScreen } from '@screens/fingerprint';
@@ -35,6 +38,9 @@ export const MoreStack = () => {
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Heatmap" component={HeatmapScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
+      <Stack.Screen name="ReportBuilder" component={ReportBuilderScreen} />
+      <Stack.Screen name="ReportPreview" component={ReportPreviewScreen} />
+      <Stack.Screen name="Brief" component={BriefScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="KnownDevices" component={KnownDevicesScreen} />

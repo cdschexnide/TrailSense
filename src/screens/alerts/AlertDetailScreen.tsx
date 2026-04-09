@@ -121,7 +121,11 @@ export const AlertDetailScreen = () => {
           icon="radio-outline"
           iconColor={colors.systemGreen}
           title="Estimated Accuracy"
-          value={alert.accuracyMeters != null ? `~${alert.accuracyMeters.toFixed(1)}m` : '--'}
+          value={
+            alert.accuracyMeters != null
+              ? `~${alert.accuracyMeters.toFixed(1)}m`
+              : '--'
+          }
         />
         <GroupedListRow
           icon="locate-outline"

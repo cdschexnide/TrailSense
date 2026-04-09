@@ -44,17 +44,20 @@
 ## Implementation Changes
 
 ### Remove:
+
 1. `VARIANT_GRADIENTS` constant - no longer needed
 2. `accentLine` View and `LinearGradient` - remove entirely
 3. `actionPill` wrapper and its background styling
 4. `variant` prop - no longer affects styling
 
 ### Simplify:
+
 1. Right actions render directly without pill wrapper
 2. Remove gradient import if no longer used elsewhere
 3. Clean up unused styles
 
 ### Keep:
+
 1. Scroll animations for large title collapse
 2. Back button functionality
 3. Subtitle support
@@ -66,9 +69,7 @@
 
 ```typescript
 // Remove these styles:
-- accentLine
-- accentGradient
-- actionPill
+-accentLine - accentGradient - actionPill;
 
 // Update these:
 rightActionsContainer: {
@@ -85,6 +86,7 @@ largeTitleContent: {
 ## Affected Screens
 
 All screens using Header component will automatically get the new style:
+
 - AlertsListScreen
 - DeviceListScreen
 - AnalyticsDashboard

@@ -35,10 +35,7 @@ export function cellularFingerprint(hash: string): string {
   return fingerprintForType('cellular', hash);
 }
 
-export function fingerprintForType(
-  type: DetectionType,
-  hash: string
-): string {
+export function fingerprintForType(type: DetectionType, hash: string): string {
   return `${FINGERPRINT_PREFIX[type]}${hash}`;
 }
 

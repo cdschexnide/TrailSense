@@ -7,6 +7,7 @@ This is the **fastest path** to get your on-device LLM working.
 ## ✅ What's Already Done (85%)
 
 All code is implemented:
+
 - ✅ Full service layer with model loading, inference, and caching
 - ✅ React components and hooks ready to use
 - ✅ Feature flags and configuration
@@ -19,6 +20,7 @@ All code is implemented:
 ### Step 1: Get the Model (2-4 hours)
 
 1. **Install Python dependencies:**
+
 ```bash
 python3 -m venv ~/llm-env
 source ~/llm-env/bin/activate
@@ -26,6 +28,7 @@ pip install torch transformers executorch sentencepiece accelerate huggingface_h
 ```
 
 2. **Download & Convert Model:**
+
 ```bash
 # Login to Hugging Face
 huggingface-cli login
@@ -40,6 +43,7 @@ python3 convert_gemma3n.py
 ```
 
 3. **Copy to Android assets:**
+
 ```bash
 mkdir -p android/app/src/main/assets
 
@@ -75,6 +79,7 @@ featureFlagsManager.enableLLMForDev();
 Add these 3 sections to `src/screens/alerts/AlertDetailScreen.tsx`:
 
 **1. Imports:**
+
 ```typescript
 import { useAlertSummary } from '@hooks/useAlertSummary';
 import { AlertSummaryCard } from '@components/organisms/AlertSummaryCard';
@@ -82,6 +87,7 @@ import { FEATURE_FLAGS } from '@/config/featureFlags';
 ```
 
 **2. Use the hook:**
+
 ```typescript
 const {
   summary,
@@ -93,6 +99,7 @@ const {
 ```
 
 **3. Add to render (after AlertCard):**
+
 ```typescript
 {FEATURE_FLAGS.LLM_ALERT_SUMMARIES && (
   <>
@@ -123,6 +130,7 @@ See `LLM_INTEGRATION_GUIDE.md` for complete code examples.
 ### Step 4: Test (1 hour)
 
 1. **Build app:**
+
 ```bash
 npm run android
 ```
@@ -145,11 +153,13 @@ npm run android
 ## 🎯 Expected Results
 
 **Mock Mode:**
+
 - Instant response (500-1500ms)
 - Generic but realistic summaries
 - Perfect for UI/UX testing
 
 **Real Model:**
+
 - First load: 5-15 seconds
 - Subsequent loads: 2-5 seconds (cached)
 - Inference: 1-3 seconds per summary
@@ -160,21 +170,25 @@ npm run android
 ## 🐛 Troubleshooting
 
 ### Model won't load
+
 - Check files are in `android/app/src/main/assets/`
 - Check file sizes: model ~2GB, tokenizer ~512KB
 - Check Android logs: `adb logcat | grep LLM`
 
 ### "Model not found" error
+
 - Verify `MODEL_STRATEGY: 'bundled'` in `llmConfig.ts`
 - Check paths in `modelDownloader.ts` logs
 - Ensure `RNFS.MainBundlePath` is accessible
 
 ### Inference timeout
+
 - Model may be too large for device
 - Try on device with 6GB+ RAM
 - Check logs for OOM errors
 
 ### App crashes
+
 - Model file may be corrupted
 - Re-download and re-convert
 - Test on physical device (not emulator)
@@ -208,6 +222,7 @@ Then follow Step 3 above. You'll see the full UI flow with mock AI responses!
 ## 🎉 Summary
 
 **Total Time to Full Implementation:**
+
 - Model conversion: 2-4 hours (one-time)
 - Code integration: 30 minutes (already 85% done)
 - Testing: 1 hour

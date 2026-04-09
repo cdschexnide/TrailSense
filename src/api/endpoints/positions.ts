@@ -5,7 +5,10 @@
  */
 
 import { apiClient } from '../client';
-import { ReplayPosition, TriangulatedPosition } from '../../types/triangulation';
+import {
+  ReplayPosition,
+  TriangulatedPosition,
+} from '../../types/triangulation';
 
 export interface PositionsResponse {
   positions: TriangulatedPosition[];

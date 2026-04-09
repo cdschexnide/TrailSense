@@ -62,9 +62,8 @@ function generateProximityZones(alerts: Alert[]) {
     },
     {
       zone: 'far' as const,
-      count: alerts.filter(
-        a => a.accuracyMeters >= 15 && a.accuracyMeters < 50
-      ).length,
+      count: alerts.filter(a => a.accuracyMeters >= 15 && a.accuracyMeters < 50)
+        .length,
     },
     {
       zone: 'extreme' as const,
@@ -330,9 +329,8 @@ export function getAnalyticsData(alerts: Alert[]): AnalyticsData {
 
   const hourlyDistribution = Array.from({ length: 24 }, (_, hour) => ({
     hour,
-    count: alerts.filter(
-      alert => new Date(alert.timestamp).getHours() === hour
-    ).length,
+    count: alerts.filter(alert => new Date(alert.timestamp).getHours() === hour)
+      .length,
   }));
 
   const timestamps = alerts.map(alert => alert.timestamp).sort();
@@ -396,19 +394,21 @@ export function getAnalyticsData(alerts: Alert[]): AnalyticsData {
 export const mockAnalyticsData: AnalyticsData = getAnalyticsData(mockAlerts);
 
 export function getHeatmapPoints(alerts: Alert[]): HeatmapPoint[] {
-  return alerts.filter(alert => alert.location).map(alert => ({
-    latitude: alert.location!.latitude,
-    longitude: alert.location!.longitude,
-    weight:
-      alert.threatLevel === 'critical'
-        ? 4
-        : alert.threatLevel === 'high'
-          ? 3
-          : alert.threatLevel === 'medium'
-            ? 2
-            : 1,
-    type: alert.detectionType,
-  }));
+  return alerts
+    .filter(alert => alert.location)
+    .map(alert => ({
+      latitude: alert.location!.latitude,
+      longitude: alert.location!.longitude,
+      weight:
+        alert.threatLevel === 'critical'
+          ? 4
+          : alert.threatLevel === 'high'
+            ? 3
+            : alert.threatLevel === 'medium'
+              ? 2
+              : 1,
+      type: alert.detectionType,
+    }));
 }
 
 export const mockHeatmapPoints: HeatmapPoint[] = getHeatmapPoints(mockAlerts);

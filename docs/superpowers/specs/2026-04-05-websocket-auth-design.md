@@ -69,14 +69,14 @@ backend ingestion pipeline
 
 ## Lifecycle Behaviour
 
-| State | Token value | WebSocket |
-|---|---|---|
-| App launch, not logged in | `null` | No connection — `useWebSocket` returns early |
-| After login | `accessToken` string | Connected with JWT |
-| Token refresh (`setCredentials`) | New `accessToken` string | Old socket disconnected, new socket connected |
-| Logout | `null` (after `logout.fulfilled`) | Disconnected by `authSlice` cleanup AND hook cleanup (both are safe — `disconnect()` is idempotent) |
-| Demo/mock mode | `mockAuthTokens.accessToken` (set by `seedMockData`) | `useWebSocket(token)` connects; previously `App.tsx` also called `connect()` first — those calls are removed as part of this change |
-| App resume | Rehydrated `accessToken` (via `PersistGate`) | `useWebSocket(token)` connects after `PersistGate` finishes rehydration |
+| State                            | Token value                                          | WebSocket                                                                                                                           |
+| -------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| App launch, not logged in        | `null`                                               | No connection — `useWebSocket` returns early                                                                                        |
+| After login                      | `accessToken` string                                 | Connected with JWT                                                                                                                  |
+| Token refresh (`setCredentials`) | New `accessToken` string                             | Old socket disconnected, new socket connected                                                                                       |
+| Logout                           | `null` (after `logout.fulfilled`)                    | Disconnected by `authSlice` cleanup AND hook cleanup (both are safe — `disconnect()` is idempotent)                                 |
+| Demo/mock mode                   | `mockAuthTokens.accessToken` (set by `seedMockData`) | `useWebSocket(token)` connects; previously `App.tsx` also called `connect()` first — those calls are removed as part of this change |
+| App resume                       | Rehydrated `accessToken` (via `PersistGate`)         | `useWebSocket(token)` connects after `PersistGate` finishes rehydration                                                             |
 
 ## Disconnect Call Sites
 

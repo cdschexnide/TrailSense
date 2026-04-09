@@ -10,27 +10,28 @@
 
 ## Autoplan Decisions Incorporated
 
-| Decision | Source | Task |
-|----------|--------|------|
-| Whitelist rename as isolated atomic commit | Design D15, Eng E13 | Task 1 |
-| Delete duplicate broken hook (src/hooks/useWhitelist.ts) | Codex Eng #5 | Task 1 |
-| New Redux slices: knownDevices is unnecessary (data in React Query), blockedDevices needed | Eng E1 | Task 3 |
-| Add blockedDevices to Redux Persist whitelist | Eng E1 | Task 3 |
-| Block device is UI-only suppression; push still arrives | Codex Eng #2 | Task 3 |
-| MAC hashes use HMAC with per-user key | Eng E8 | Deferred (no key source exists yet; document as TODO) |
-| Pattern detection extends existing deviceFingerprinting.ts | Codex review finding #1 | Task 4 |
-| AI Insight fallback templates (pattern-based text) | Design doc | Task 5 |
-| Auto-suggestion banner at 10+ visits (on Home/Fingerprint, not push) | Design doc | Task 7 |
-| Replace DeviceHistoryScreen with DeviceFingerprintScreen | Codex review finding #7 | Task 5 |
-| Wire fingerprint into AlertsStack and RadarStack too | Codex review finding #2 | Task 6 |
-| Fix ScreenLayout prop: showBack not showBackButton | Codex review finding #4 | Task 5 |
-| blockedDevices needs separate persistReducer wrapping | Codex review finding #3 | Task 2 |
-| Block toast should NOT claim grey radar dot (no radar code modified) | Codex review finding #5 | Task 3 |
-| Deep link path rename: settings/whitelist → settings/known-devices (old path stops working, no redirect) | Design doc | Task 1 |
+| Decision                                                                                                 | Source                  | Task                                                  |
+| -------------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------- |
+| Whitelist rename as isolated atomic commit                                                               | Design D15, Eng E13     | Task 1                                                |
+| Delete duplicate broken hook (src/hooks/useWhitelist.ts)                                                 | Codex Eng #5            | Task 1                                                |
+| New Redux slices: knownDevices is unnecessary (data in React Query), blockedDevices needed               | Eng E1                  | Task 3                                                |
+| Add blockedDevices to Redux Persist whitelist                                                            | Eng E1                  | Task 3                                                |
+| Block device is UI-only suppression; push still arrives                                                  | Codex Eng #2            | Task 3                                                |
+| MAC hashes use HMAC with per-user key                                                                    | Eng E8                  | Deferred (no key source exists yet; document as TODO) |
+| Pattern detection extends existing deviceFingerprinting.ts                                               | Codex review finding #1 | Task 4                                                |
+| AI Insight fallback templates (pattern-based text)                                                       | Design doc              | Task 5                                                |
+| Auto-suggestion banner at 10+ visits (on Home/Fingerprint, not push)                                     | Design doc              | Task 7                                                |
+| Replace DeviceHistoryScreen with DeviceFingerprintScreen                                                 | Codex review finding #7 | Task 5                                                |
+| Wire fingerprint into AlertsStack and RadarStack too                                                     | Codex review finding #2 | Task 6                                                |
+| Fix ScreenLayout prop: showBack not showBackButton                                                       | Codex review finding #4 | Task 5                                                |
+| blockedDevices needs separate persistReducer wrapping                                                    | Codex review finding #3 | Task 2                                                |
+| Block toast should NOT claim grey radar dot (no radar code modified)                                     | Codex review finding #5 | Task 3                                                |
+| Deep link path rename: settings/whitelist → settings/known-devices (old path stops working, no redirect) | Design doc              | Task 1                                                |
 
 ## Important Note: Two Duplicate Whitelist Hook Files
 
 The codebase has TWO whitelist hook files:
+
 - `src/hooks/useWhitelist.ts` — **BROKEN**. Imports `WhitelistFilters` and `AddWhitelistPayload` which don't exist in `api/endpoints/whitelist.ts`. **However, `src/screens/settings/WhitelistScreen.tsx:14` imports from this path.** So deletion must be paired with repairing that import to point at the working hook.
 - `src/hooks/api/useWhitelist.ts` — **WORKING**. Uses correct types.
 
@@ -39,6 +40,7 @@ Task 1 repairs the WhitelistScreen import, deletes the broken hook, and renames 
 ## Existing Fingerprint Infrastructure (DO NOT DUPLICATE)
 
 The codebase already has server-backed fingerprint/history plumbing:
+
 - `src/services/deviceFingerprinting.ts` — `DeviceFingerprintingService` with `trackDevice`, `getDeviceHistory`, pattern computation
 - `src/api/analytics.ts:37` — `getDeviceHistory(macAddress)` API endpoint returning `DeviceFingerprint`
 - `src/hooks/useAnalytics.ts` — `useDeviceHistory(macAddress)` hook
@@ -59,24 +61,29 @@ The codebase already has server-backed fingerprint/history plumbing:
 **Files to rename/modify (complete list):**
 
 **Types:**
+
 - Rename: `src/types/whitelist.ts` → `src/types/knownDevice.ts`
 - Modify: `src/types/index.ts`
 
 **API endpoints (keep API path as `/whitelist` for backend compat, rename only the TS exports):**
+
 - Rename: `src/api/endpoints/whitelist.ts` → `src/api/endpoints/knownDevices.ts`
 - Modify: `src/api/endpoints/index.ts`
 
 **Hooks:**
+
 - Delete: `src/hooks/useWhitelist.ts` (broken duplicate)
 - Rename: `src/hooks/api/useWhitelist.ts` → `src/hooks/api/useKnownDevices.ts`
 - Modify: `src/hooks/api/index.ts`
 
 **Mock data:**
+
 - Rename: `src/mocks/data/mockWhitelist.ts` → `src/mocks/data/mockKnownDevices.ts`
 - Modify: `src/mocks/data/index.ts`
 - Modify: `src/utils/seedMockData.ts`
 
 **Screens:**
+
 - Rename: `src/screens/settings/WhitelistScreen.tsx` → `src/screens/settings/KnownDevicesScreen.tsx`
 - Rename: `src/screens/settings/AddWhitelistScreen.tsx` → `src/screens/settings/AddKnownDeviceScreen.tsx`
 - Modify: `src/screens/settings/index.ts`
@@ -85,19 +92,23 @@ The codebase already has server-backed fingerprint/history plumbing:
 - Modify: `src/screens/alerts/AlertDetailScreen.tsx` (whitelist action reference)
 
 **Components:**
+
 - Rename: `src/components/molecules/WhitelistItem/WhitelistItem.tsx` → keep file but rename component to `KnownDeviceItem`
 - Modify: `src/components/molecules/WhitelistItem/index.ts`
 
 **Navigation:**
+
 - Modify: `src/navigation/types.ts` (Whitelist → KnownDevices, AddWhitelist → AddKnownDevice)
 - Modify: `src/navigation/stacks/SettingsStack.tsx`
 - Modify: `src/navigation/stacks/MoreStack.tsx`
 - Modify: `src/navigation/linking.ts` (rename route path from `settings/whitelist` to `settings/known-devices`; old path stops working)
 
 **Tests:**
+
 - Rename: `__tests__/hooks/useWhitelist.test.tsx` → `__tests__/hooks/useKnownDevices.test.tsx`
 
 **LLM templates (UI strings only, keep internal logic stable):**
+
 - Modify: `src/services/llm/templates/ConversationalTemplate.ts` (change "whitelist" user-facing strings)
 - Modify: `src/services/llm/templates/PatternAnalysisTemplate.ts`
 - Modify: `src/services/llm/templates/AlertSummaryTemplate.ts`
@@ -156,7 +167,10 @@ export const knownDevicesApi = {
     const { data } = await apiClient.post('/whitelist', entry);
     return data;
   },
-  updateKnownDevice: async (id: string, updates: Partial<KnownDevice>): Promise<KnownDevice> => {
+  updateKnownDevice: async (
+    id: string,
+    updates: Partial<KnownDevice>
+  ): Promise<KnownDevice> => {
     const { data } = await apiClient.patch(`/whitelist/${id}`, updates);
     return data;
   },
@@ -173,10 +187,13 @@ Update `src/api/endpoints/index.ts`: replace `export * from './whitelist'` with 
 `src/screens/settings/WhitelistScreen.tsx:14` imports from `@hooks/useWhitelist` (the broken duplicate). Before deleting that file, update this import to point at the working API hook:
 
 In `WhitelistScreen.tsx` (which you're about to rename to `KnownDevicesScreen.tsx`), change:
+
 ```typescript
 import { useWhitelist } from '@hooks/useWhitelist';
 ```
+
 to:
+
 ```typescript
 import { useKnownDevices } from '@hooks/api/useKnownDevices';
 ```
@@ -211,7 +228,8 @@ export const useKnownDevice = (id: string) => {
 export const useAddKnownDevice = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (entry: CreateKnownDeviceDTO) => knownDevicesApi.addKnownDevice(entry),
+    mutationFn: (entry: CreateKnownDeviceDTO) =>
+      knownDevicesApi.addKnownDevice(entry),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [KNOWN_DEVICES_QUERY_KEY] });
     },
@@ -221,10 +239,18 @@ export const useAddKnownDevice = () => {
 export const useUpdateKnownDevice = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<KnownDevice> }) =>
-      knownDevicesApi.updateKnownDevice(id, updates),
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Partial<KnownDevice>;
+    }) => knownDevicesApi.updateKnownDevice(id, updates),
     onSuccess: (data, variables) => {
-      queryClient.setQueryData<KnownDevice>([KNOWN_DEVICES_QUERY_KEY, variables.id], data);
+      queryClient.setQueryData<KnownDevice>(
+        [KNOWN_DEVICES_QUERY_KEY, variables.id],
+        data
+      );
       queryClient.invalidateQueries({ queryKey: [KNOWN_DEVICES_QUERY_KEY] });
     },
   });
@@ -254,6 +280,7 @@ Update `src/utils/seedMockData.ts`: replace `WHITELIST_QUERY_KEY` with `'knownDe
 **Step 5: Rename screens**
 
 Rename `src/screens/settings/WhitelistScreen.tsx` → `src/screens/settings/KnownDevicesScreen.tsx`. Update:
+
 - Component name: `WhitelistScreen` → `KnownDevicesScreen`
 - Import: `useWhitelist` → `useKnownDevices` from `@hooks/api/useKnownDevices`
 - All UI strings: "Whitelist" → "Known Devices", "whitelisted" → "known"
@@ -311,6 +338,7 @@ Deleted broken duplicate hook (src/hooks/useWhitelist.ts)."
 ### Task 2: blockedDevices Redux Slice
 
 **Files:**
+
 - Create: `src/store/slices/blockedDevicesSlice.ts`
 - Modify: `src/store/index.ts`
 
@@ -424,6 +452,7 @@ git commit -m "feat(store): add blockedDevices Redux slice with persistence"
 ### Task 3: useBlockedDevices Hook + Alert Filtering
 
 **Files:**
+
 - Create: `src/hooks/useBlockedDevices.ts`
 - Modify: `src/screens/alerts/AlertListScreen.tsx`
 
@@ -433,10 +462,7 @@ git commit -m "feat(store): add blockedDevices Redux slice with persistence"
 // src/hooks/useBlockedDevices.ts
 import { useCallback } from 'react';
 import { useAppSelector, useAppDispatch } from '@store/index';
-import {
-  blockDevice,
-  unblockDevice,
-} from '@store/slices/blockedDevicesSlice';
+import { blockDevice, unblockDevice } from '@store/slices/blockedDevicesSlice';
 import { useToast } from '@components/templates';
 import { logEvent, AnalyticsEvents } from '@services/analyticsEvents';
 
@@ -456,7 +482,10 @@ export function useBlockedDevices() {
     (macAddress: string, reason?: string) => {
       dispatch(blockDevice({ macAddress, reason }));
       logEvent(AnalyticsEvents.DEVICE_BLOCKED, { macAddress });
-      showToast('Device blocked. Alerts from this device are now hidden.', 'info');
+      showToast(
+        'Device blocked. Alerts from this device are now hidden.',
+        'info'
+      );
     },
     [dispatch, showToast]
   );
@@ -501,6 +530,7 @@ git commit -m "feat(hooks): add useBlockedDevices with alert filtering"
 ### Task 4: Extend Pattern Detection in Existing Service
 
 **Files:**
+
 - Modify: `src/services/deviceFingerprinting.ts` (add pattern computation methods)
 - Create: `src/services/patternDetection.ts` (pure functions only, consumed by the existing service)
 
@@ -539,7 +569,10 @@ export function computeVisitPattern(
 ): VisitPattern {
   const deviceAlerts = allAlerts
     .filter(a => a.macAddress === macAddress)
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
 
   if (deviceAlerts.length === 0) {
     return {
@@ -578,7 +611,11 @@ export function computeVisitPattern(
       clusterEnd = sortedHours[i];
       clusterCount++;
     } else {
-      clusters.push({ start: clusterStart, end: clusterEnd, count: clusterCount });
+      clusters.push({
+        start: clusterStart,
+        end: clusterEnd,
+        count: clusterCount,
+      });
       clusterStart = sortedHours[i];
       clusterEnd = sortedHours[i];
       clusterCount = 1;
@@ -678,6 +715,7 @@ git commit -m "feat(services): add client-side pattern detection with visit anal
 ### Task 5: DeviceFingerprintScreen (REPLACES DeviceHistoryScreen)
 
 **Files:**
+
 - Create: `src/screens/fingerprint/DeviceFingerprintScreen.tsx`
 - Create: `src/screens/fingerprint/index.ts`
 - Delete: `src/screens/devices/DeviceHistoryScreen.tsx` (replaced by this screen)
@@ -1077,6 +1115,7 @@ git commit -m "feat(fingerprint): add DeviceFingerprintScreen with visit pattern
 ### Task 6: Wire Fingerprint Screen into ALL Navigation Stacks
 
 **Files:**
+
 - Modify: `src/navigation/types.ts`
 - Modify: `src/navigation/stacks/HomeStack.tsx`
 - Modify: `src/navigation/stacks/MoreStack.tsx`
@@ -1094,6 +1133,7 @@ git commit -m "feat(fingerprint): add DeviceFingerprintScreen with visit pattern
 In `src/navigation/types.ts`:
 
 Add `DeviceFingerprint: { macAddress: string }` to ALL stack param lists that need it:
+
 - `HomeStackParamList`
 - `AlertsStackParamList`
 - `DevicesStackParamList` (replace `DeviceHistory: { id: string }` with `DeviceFingerprint: { macAddress: string }`)
@@ -1101,6 +1141,7 @@ Add `DeviceFingerprint: { macAddress: string }` to ALL stack param lists that ne
 - `MoreStackParamList`
 
 Also update `AddKnownDevice` (was `AddWhitelist`) to accept optional params:
+
 ```typescript
 AddKnownDevice: { macAddress?: string } | undefined;
 ```
@@ -1161,6 +1202,7 @@ git commit -m "feat(nav): wire DeviceFingerprintScreen into all stacks with aler
 ### Task 7: Wire Fingerprint into Home Screen (Visitor Chips Placeholder)
 
 **Files:**
+
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
 - Modify: `src/hooks/usePropertyStatus.ts`
 
@@ -1192,32 +1234,45 @@ The `uniqueMacs` Set already exists in the hook (computed from `todayAlerts` at 
 In `PropertyCommandCenter.tsx`, add a visitors section after the stats row that lets users tap to view fingerprints:
 
 ```tsx
-{/* Recent Visitors */}
-{status.recentVisitorMacs.length > 0 && (
-  <View>
-    <View style={styles.sectionHeader}>
-      <Text variant="title3" weight="bold">Recent Visitors</Text>
+{
+  /* Recent Visitors */
+}
+{
+  status.recentVisitorMacs.length > 0 && (
+    <View>
+      <View style={styles.sectionHeader}>
+        <Text variant="title3" weight="bold">
+          Recent Visitors
+        </Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.visitorsScroll}
+      >
+        {status.recentVisitorMacs.map(mac => (
+          <Pressable
+            key={mac}
+            style={[
+              styles.visitorChip,
+              { backgroundColor: colors.secondarySystemBackground },
+            ]}
+            onPress={() =>
+              navigation.navigate('DeviceFingerprint', { macAddress: mac })
+            }
+          >
+            <View
+              style={[styles.visitorDot, { backgroundColor: colors.systemRed }]}
+            />
+            <Text variant="caption1" weight="semibold" numberOfLines={1}>
+              {mac.substring(0, 8)}...
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
     </View>
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.visitorsScroll}
-    >
-      {status.recentVisitorMacs.map(mac => (
-        <Pressable
-          key={mac}
-          style={[styles.visitorChip, { backgroundColor: colors.secondarySystemBackground }]}
-          onPress={() => navigation.navigate('DeviceFingerprint', { macAddress: mac })}
-        >
-          <View style={[styles.visitorDot, { backgroundColor: colors.systemRed }]} />
-          <Text variant="caption1" weight="semibold" numberOfLines={1}>
-            {mac.substring(0, 8)}...
-          </Text>
-        </Pressable>
-      ))}
-    </ScrollView>
-  </View>
-)}
+  );
+}
 ```
 
 Add styles for `visitorsScroll`, `visitorChip`, `visitorDot`.
@@ -1263,19 +1318,19 @@ git commit -m "fix: resolve lint and type errors from device fingerprints workst
 
 ## Summary of Deliverables
 
-| Component | Type | Path |
-|-----------|------|------|
-| Known Device types | Type rename | `src/types/knownDevice.ts` |
-| Known Devices API | API rename | `src/api/endpoints/knownDevices.ts` |
-| useKnownDevices | Hook rename | `src/hooks/api/useKnownDevices.ts` |
-| KnownDevicesScreen | Screen rename | `src/screens/settings/KnownDevicesScreen.tsx` |
-| AddKnownDeviceScreen | Screen rename | `src/screens/settings/AddKnownDeviceScreen.tsx` |
-| blockedDevicesSlice | Redux slice | `src/store/slices/blockedDevicesSlice.ts` |
-| useBlockedDevices | Hook | `src/hooks/useBlockedDevices.ts` |
-| patternDetection | Service | `src/services/patternDetection.ts` |
-| DeviceFingerprintScreen | Screen | `src/screens/fingerprint/DeviceFingerprintScreen.tsx` |
-| Navigation updates | Nav mod | `types.ts`, `HomeStack.tsx`, `MoreStack.tsx`, `linking.ts` |
-| Visitor section on Home | Screen mod | `PropertyCommandCenter.tsx` |
-| Mock data rename | Mock mod | `src/mocks/data/mockKnownDevices.ts` |
+| Component               | Type          | Path                                                       |
+| ----------------------- | ------------- | ---------------------------------------------------------- |
+| Known Device types      | Type rename   | `src/types/knownDevice.ts`                                 |
+| Known Devices API       | API rename    | `src/api/endpoints/knownDevices.ts`                        |
+| useKnownDevices         | Hook rename   | `src/hooks/api/useKnownDevices.ts`                         |
+| KnownDevicesScreen      | Screen rename | `src/screens/settings/KnownDevicesScreen.tsx`              |
+| AddKnownDeviceScreen    | Screen rename | `src/screens/settings/AddKnownDeviceScreen.tsx`            |
+| blockedDevicesSlice     | Redux slice   | `src/store/slices/blockedDevicesSlice.ts`                  |
+| useBlockedDevices       | Hook          | `src/hooks/useBlockedDevices.ts`                           |
+| patternDetection        | Service       | `src/services/patternDetection.ts`                         |
+| DeviceFingerprintScreen | Screen        | `src/screens/fingerprint/DeviceFingerprintScreen.tsx`      |
+| Navigation updates      | Nav mod       | `types.ts`, `HomeStack.tsx`, `MoreStack.tsx`, `linking.ts` |
+| Visitor section on Home | Screen mod    | `PropertyCommandCenter.tsx`                                |
+| Mock data rename        | Mock mod      | `src/mocks/data/mockKnownDevices.ts`                       |
 
 **8 tasks, ~8 commits, estimated ~2-3 sessions with Claude Code.**

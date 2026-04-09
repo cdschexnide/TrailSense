@@ -7,6 +7,7 @@ This guide documents the API changes for all atom components and provides patter
 ## Completed Components
 
 ### ✅ Atom Components (All 5 Updated)
+
 - Button
 - Text
 - Icon
@@ -14,6 +15,7 @@ This guide documents the API changes for all atom components and provides patter
 - Input
 
 ### ✅ Example Implementations
+
 - LoginScreen (complete example)
 - ListItem (molecule)
 - WhitelistItem (molecule)
@@ -24,16 +26,13 @@ This guide documents the API changes for all atom components and provides patter
 ### Button Component
 
 **OLD API:**
+
 ```tsx
-<Button
-  title="Sign In"
-  variant="primary"
-  size="base"
-  onPress={handlePress}
-/>
+<Button title="Sign In" variant="primary" size="base" onPress={handlePress} />
 ```
 
 **NEW API:**
+
 ```tsx
 <Button
   buttonStyle="filled"
@@ -47,6 +46,7 @@ This guide documents the API changes for all atom components and provides patter
 ```
 
 **Migration Mapping:**
+
 - `title` prop → use `children` instead
 - `variant="primary"` → `buttonStyle="filled" role="default"`
 - `variant="secondary"` → `buttonStyle="tinted"`
@@ -60,6 +60,7 @@ This guide documents the API changes for all atom components and provides patter
 ### Text Component
 
 **OLD API:**
+
 ```tsx
 <Text variant="h1" color="primary">
   Title
@@ -67,6 +68,7 @@ This guide documents the API changes for all atom components and provides patter
 ```
 
 **NEW API:**
+
 ```tsx
 <Text variant="largeTitle" color="label" weight="bold">
   Title
@@ -74,6 +76,7 @@ This guide documents the API changes for all atom components and provides patter
 ```
 
 **Variant Migration:**
+
 - `h1` → `largeTitle`
 - `h2` → `title1`
 - `h3` → `title2`
@@ -84,6 +87,7 @@ This guide documents the API changes for all atom components and provides patter
 - `overline` → `caption2` with `weight="semibold"`
 
 **Color Migration:**
+
 - `primary` → `label`
 - `secondary` → `secondaryLabel`
 - `disabled` → `quaternaryLabel`
@@ -95,16 +99,19 @@ This guide documents the API changes for all atom components and provides patter
 ### Icon Component
 
 **OLD API:**
+
 ```tsx
 <Icon name="heart" size="base" color="#FF0000" />
 ```
 
 **NEW API:**
+
 ```tsx
 <Icon name="heart" size="base" color="systemRed" />
 ```
 
 **Size Migration:**
+
 - `xs` → `xs` (20pt)
 - `sm` → `sm` (22pt)
 - `base` → `base` (24pt)
@@ -113,17 +120,20 @@ This guide documents the API changes for all atom components and provides patter
 - `2xl` → `xl` or use number `40`
 
 **Color Migration:**
+
 - Use semantic colors: `label`, `secondaryLabel`, `systemBlue`, etc.
 - Or use custom colors directly
 
 ### Badge Component
 
 **OLD API:**
+
 ```tsx
 <Badge label="Critical" variant="threat-critical" size="base" />
 ```
 
 **NEW API:**
+
 ```tsx
 <Badge variant="critical" size="base">
   Critical
@@ -131,6 +141,7 @@ This guide documents the API changes for all atom components and provides patter
 ```
 
 **Changes:**
+
 - `label` prop → use `children` instead
 - Variant names simplified:
   - `threat-low` → `low`
@@ -145,6 +156,7 @@ This guide documents the API changes for all atom components and provides patter
 ### Input Component
 
 **OLD API:**
+
 ```tsx
 <Input
   label="Email"
@@ -155,6 +167,7 @@ This guide documents the API changes for all atom components and provides patter
 ```
 
 **NEW API (Enhanced):**
+
 ```tsx
 <Input
   label="Email"
@@ -168,6 +181,7 @@ This guide documents the API changes for all atom components and provides patter
 ```
 
 **New Props:**
+
 - `textContentType` - iOS autofill hints
 - `returnKeyType` - keyboard return key
 - `clearButtonMode` - when to show clear button
@@ -176,12 +190,14 @@ This guide documents the API changes for all atom components and provides patter
 ## Theme Hook Changes
 
 **OLD:**
+
 ```tsx
 const { theme, isDark } = useTheme();
 const colors = isDark ? theme.colors.dark : theme.colors.light;
 ```
 
 **NEW:**
+
 ```tsx
 const { theme, colorScheme } = useTheme();
 const colors = theme.colors;
@@ -193,12 +209,15 @@ const isDark = colorScheme === 'dark';
 ## Common Patterns
 
 ### Pattern 1: Updating Auth Screens
+
 See `src/screens/auth/LoginScreen.tsx` for complete example.
 
 ### Pattern 2: Updating List Items
+
 See `src/components/molecules/ListItem/ListItem.tsx` for pattern.
 
 ### Pattern 3: Updating Cards with Badges
+
 See `src/components/molecules/WhitelistItem/WhitelistItem.tsx` for pattern.
 
 ## Remaining Files to Update
@@ -206,16 +225,19 @@ See `src/components/molecules/WhitelistItem/WhitelistItem.tsx` for pattern.
 Based on type check, the following files still need updates:
 
 ### Organism Components (3 files)
+
 - `src/components/organisms/AlertCard/AlertCard.tsx`
 - `src/components/organisms/DeviceCard/DeviceCard.tsx`
 - `src/components/organisms/Header/Header.tsx`
 
 ### Template Components (3 files)
+
 - `src/components/templates/EmptyState/EmptyState.tsx`
 - `src/components/templates/ErrorState/ErrorState.tsx`
 - `src/components/templates/LoadingState/LoadingState.tsx`
 
 ### Screen Components (~15 files)
+
 - `src/screens/alerts/AlertDetailScreen.tsx`
 - `src/screens/alerts/AlertFilterScreen.tsx`
 - `src/screens/devices/DeviceDetailScreen.tsx`
@@ -229,6 +251,7 @@ Based on type check, the following files still need updates:
 ## Quick Fix Commands
 
 ### Find all Button usage with old API:
+
 ```bash
 grep -r "title=" src/ | grep Button
 grep -r 'variant="primary"' src/
@@ -236,6 +259,7 @@ grep -r 'size="sm"' src/ | grep Button
 ```
 
 ### Find all Text usage with old variants:
+
 ```bash
 grep -r 'variant="h[0-9]"' src/
 grep -r 'variant="caption"' src/
@@ -243,6 +267,7 @@ grep -r 'color="primary"' src/ | grep Text
 ```
 
 ### Find all Badge usage with label prop:
+
 ```bash
 grep -r '<Badge label=' src/
 ```

@@ -85,8 +85,7 @@ function buildDevicePaths(
       const sortedEntries = Array.from(minuteMap.entries()).sort(
         ([leftMinute], [rightMinute]) => leftMinute - rightMinute
       );
-      const canonicalEntry =
-        sortedEntries[sortedEntries.length - 1]?.[1].entry;
+      const canonicalEntry = sortedEntries[sortedEntries.length - 1]?.[1].entry;
 
       return {
         fingerprintHash,

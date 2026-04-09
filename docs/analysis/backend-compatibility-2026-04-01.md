@@ -260,12 +260,14 @@ Required backend modification:
 Missing or incomplete active surfaces:
 
 1. `POST /auth/refresh`
+
 - Frontend expects it in auth interceptors:
   - `src/services/authService.ts:31-37`
 - Backend routes do not define it:
   - `src/routes/index.ts:23-188`
 
 2. `GET/POST/PATCH/DELETE /whitelist*`
+
 - Frontend Known Devices uses these now:
   - `src/api/endpoints/knownDevices.ts:4-33`
   - `src/screens/fingerprint/DeviceFingerprintScreen.tsx:21-23`
@@ -275,18 +277,21 @@ Missing or incomplete active surfaces:
   - `src/routes/index.ts:23-188`
 
 3. `GET/PUT /settings/vacation-mode`
+
 - Vacation Mode screen calls these today:
   - `src/api/settings.ts:32-47`
   - `src/screens/settings/VacationModeScreen.tsx`
 - Backend does not implement them.
 
 4. `POST /api/devices`
+
 - Frontend endpoint exists:
   - `src/api/endpoints/devices.ts:15-18`
 - Backend route is missing:
   - `src/routes/index.ts:113-135`
 
 5. `POST /devices/fcm-token`
+
 - Notification registration expects it:
   - `src/services/notificationService.ts:22-25`
 - Backend route is missing.
@@ -580,10 +585,12 @@ Recommended change:
 These are not backend modifications, but they matter for rollout planning.
 
 1. Real WebSocket lifecycle is still incomplete on the frontend
+
 - In real API mode, `App.tsx` logs that WebSocket will connect after authentication, but no global real socket connection is started there.
 - Backend fixes alone will not make live alerts appear if the frontend never mounts the real connection path.
 
 2. Some settings/device screens are still partially UI-only
+
 - Example: Add Device and several profile/security actions still contain placeholder behavior.
 - Backend routes can be prepared now, but some screens still need frontend wiring.
 

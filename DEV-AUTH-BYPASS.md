@@ -8,10 +8,11 @@
 ## What Was Changed
 
 ### 1. Auth Screen Bypass Enabled
+
 **File**: `src/navigation/RootNavigator.tsx`
 
 ```typescript
-const SKIP_AUTH_FOR_TESTING = true;  // ✅ Enabled
+const SKIP_AUTH_FOR_TESTING = true; // ✅ Enabled
 ```
 
 This skips the login/register screen and goes straight to the main app.
@@ -19,6 +20,7 @@ This skips the login/register screen and goes straight to the main app.
 ---
 
 ### 2. Auto-Login on App Startup
+
 **File**: `src/App.tsx`
 
 Added automatic login with test credentials when app starts:
@@ -27,11 +29,14 @@ Added automatic login with test credentials when app starts:
 // DEVELOPMENT BYPASS: Auto-login for testing
 if (__DEV__) {
   console.log('[App] DEV MODE: Auto-logging in with test credentials...');
-  store.dispatch(loginAction({
-    email: 'test@trailsense.com',
-    password: 'password123'
-  }))
-    .then((response) => {
+  store
+    .dispatch(
+      loginAction({
+        email: 'test@trailsense.com',
+        password: 'password123',
+      })
+    )
+    .then(response => {
       console.log('[App] DEV MODE: Auto-login successful!');
       websocketService.connect(response.token);
     });
@@ -71,6 +76,7 @@ When you start the app in development mode (`__DEV__ = true`):
 ## Test Credentials
 
 The app automatically logs in as:
+
 ```
 Email: test@trailsense.com
 Password: password123
@@ -91,6 +97,7 @@ This user has access to all 50 seeded alerts in the database.
 5. **Real-time updates** - WebSocket connected
 
 ### Backend Logs:
+
 ```
 [2025-11-26T...] POST /auth/login
 [Auth] User logged in: test@trailsense.com
@@ -105,13 +112,17 @@ This user has access to all 50 seeded alerts in the database.
 When you're ready to test real authentication or deploy:
 
 ### Step 1: Disable Auth Bypass
+
 **File**: `src/navigation/RootNavigator.tsx`
+
 ```typescript
-const SKIP_AUTH_FOR_TESTING = false;  // Disable bypass
+const SKIP_AUTH_FOR_TESTING = false; // Disable bypass
 ```
 
 ### Step 2: Remove Auto-Login
+
 **File**: `src/App.tsx`
+
 ```typescript
 // Comment out or remove the auto-login code:
 // if (__DEV__) {
@@ -126,11 +137,13 @@ const SKIP_AUTH_FOR_TESTING = false;  // Disable bypass
 ### If You Still See 401 Errors:
 
 **Check console for:**
+
 ```
 ERROR [App] DEV MODE: Auto-login failed: ...
 ```
 
 **Possible causes:**
+
 1. Backend not running (check http://192.168.12.63:3000/health)
 2. Test user doesn't exist (run `npm run seed` in backend)
 3. Wrong credentials (check TESTING-GUIDE.md for valid users)
@@ -138,6 +151,7 @@ ERROR [App] DEV MODE: Auto-login failed: ...
 ### If Auto-Login Succeeds But Still 401:
 
 Token might not be stored correctly. Check:
+
 ```
 LOG [API Request] GET /alerts
 ```

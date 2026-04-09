@@ -24,12 +24,13 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 
 - [x] **Use semantic background colors:**
   ```typescript
-  backgroundColor: colors.systemBackground  // Not hardcoded white/black
+  backgroundColor: colors.systemBackground; // Not hardcoded white/black
   ```
 
 #### Add Large Title Support
 
 - [x] **Add largeTitle prop:**
+
   ```typescript
   interface ScreenLayoutProps {
     children: React.ReactNode;
@@ -39,7 +40,7 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
       showBack?: boolean;
       onBackPress?: () => void;
       rightActions?: React.ReactNode;
-      largeTitle?: boolean;  // NEW
+      largeTitle?: boolean; // NEW
     };
     scrollable?: boolean;
     keyboardAvoiding?: boolean;
@@ -115,7 +116,7 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 - [x] **Update EmptyStateProps:**
   ```typescript
   interface EmptyStateProps {
-    icon?: string;  // Ionicon name
+    icon?: string; // Ionicon name
     title: string;
     message?: string;
     actionLabel?: string;
@@ -215,9 +216,9 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 - [x] **Update ErrorStateProps:**
   ```typescript
   interface ErrorStateProps {
-    title?: string;  // Default: "Something went wrong"
+    title?: string; // Default: "Something went wrong"
     message?: string;
-    retryLabel?: string;  // Default: "Try Again"
+    retryLabel?: string; // Default: "Try Again"
     onRetry?: () => void;
     style?: ViewStyle;
   }
@@ -242,6 +243,7 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 - [x] Add largeTitle where appropriate (main screens)
 
 **Key files:**
+
 - [x] All screen files that use ScreenLayout
 - [x] Most screens in src/screens/
 
@@ -252,6 +254,7 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 - [x] Update action button handlers
 
 **Key files:**
+
 - [x] AlertListScreen (when no alerts)
 - [x] DeviceListScreen (when no devices)
 - [x] Any other screens with empty states
@@ -262,6 +265,7 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 - [x] Verify usage is correct
 
 **Key files:**
+
 - [x] Screens with loading states
 - [x] Usually used conditionally
 
@@ -272,6 +276,7 @@ This phase updates template components (ScreenLayout, EmptyState, LoadingState, 
 - [x] Verify error messages
 
 **Key files:**
+
 - [x] Screens with error handling
 - [x] API call error states
 

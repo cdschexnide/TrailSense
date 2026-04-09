@@ -17,6 +17,7 @@
 ### Task 1: Rewrite colors.ts to tactical-only palette
 
 **Files:**
+
 - Modify: `src/constants/colors.ts` (entire file rewrite)
 
 **Step 1: Replace the Colors export with a single tactical palette**
@@ -67,15 +68,15 @@ export const Colors = {
     // Tactical Semantic Colors
     // ======================
 
-    systemBlue: '#fbbf24',    // Amber replaces blue as primary action color
-    systemGreen: '#4ade80',   // Tactical green
-    systemOrange: '#f59e0b',  // Tactical amber-orange
-    systemRed: '#ef4444',     // Tactical red
-    systemYellow: '#fbbf24',  // Tactical amber
-    systemPurple: '#a78bfa',  // Muted purple for detection type
-    systemPink: '#f472b6',    // Muted pink
-    systemTeal: '#2dd4bf',    // Muted teal
-    systemIndigo: '#818cf8',  // Muted indigo
+    systemBlue: '#fbbf24', // Amber replaces blue as primary action color
+    systemGreen: '#4ade80', // Tactical green
+    systemOrange: '#f59e0b', // Tactical amber-orange
+    systemRed: '#ef4444', // Tactical red
+    systemYellow: '#fbbf24', // Tactical amber
+    systemPurple: '#a78bfa', // Muted purple for detection type
+    systemPink: '#f472b6', // Muted pink
+    systemTeal: '#2dd4bf', // Muted teal
+    systemIndigo: '#818cf8', // Muted indigo
 
     // ======================
     // Tactical Gray Scale
@@ -248,6 +249,7 @@ git commit -m "refactor: replace dual color palette with tactical-only dark them
 ### Task 2: Add tactical typography tokens
 
 **Files:**
+
 - Modify: `src/constants/typography.ts`
 - Modify: `src/constants/tacticalTheme.ts`
 
@@ -365,11 +367,13 @@ export type TacticalTextStyleVariant = keyof typeof TacticalTextStyles;
 ```
 
 Also add the `Platform` import at the top of the file if not present:
+
 ```typescript
 import { Platform } from 'react-native';
 ```
 
 And export `TacticalTextStyles` alongside `Typography`:
+
 ```typescript
 export { TacticalTextStyles };
 ```
@@ -460,6 +464,7 @@ git commit -m "feat: add tactical typography tokens to shared constants"
 ### Task 3: Update spacing constants for card tiers
 
 **Files:**
+
 - Modify: `src/constants/spacing.ts`
 
 **Step 1: Add card tier spacing to the Layout object**
@@ -510,6 +515,7 @@ git commit -m "feat: add card tier spacing constants"
 ### Task 4: Simplify theme provider to dark-only
 
 **Files:**
+
 - Modify: `src/theme/provider.tsx`
 - Modify: `src/theme/types.ts`
 - Delete: `src/theme/light.ts`
@@ -519,7 +525,13 @@ git commit -m "feat: add card tier spacing constants"
 **Step 1: Rewrite theme/types.ts**
 
 ```typescript
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants/index';
+import {
+  Colors,
+  Typography,
+  Spacing,
+  BorderRadius,
+  Shadows,
+} from '@constants/index';
 import { TacticalTextStyles } from '@constants/typography';
 
 export type ColorScheme = 'dark';
@@ -539,7 +551,13 @@ export interface Theme {
 
 ```typescript
 import { Theme } from './types';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@constants/index';
+import {
+  Colors,
+  Typography,
+  Spacing,
+  BorderRadius,
+  Shadows,
+} from '@constants/index';
 import { TacticalTextStyles } from '@constants/typography';
 
 export const darkTheme: Theme = {
@@ -558,6 +576,7 @@ export const darkTheme: Theme = {
 Delete `src/theme/light.ts`.
 
 Rewrite `src/theme/themes.ts`:
+
 ```typescript
 export { darkTheme } from './dark';
 // Light theme removed — app is dark-only
@@ -644,6 +663,7 @@ git commit -m "refactor: simplify theme to dark-only with tactical typography"
 ### Task 5: Remove ThemeScreen, theme toggle, and theme routes
 
 **Files:**
+
 - Delete: `src/screens/settings/ThemeScreen.tsx`
 - Modify: `src/screens/settings/SettingsScreen.tsx`
 - Modify: `src/screens/settings/index.ts` (remove ThemeScreen export)
@@ -658,6 +678,7 @@ Delete `src/screens/settings/ThemeScreen.tsx` entirely. This screen models `'lig
 **Step 2: Remove ThemeScreen export from settings index**
 
 In `src/screens/settings/index.ts`, remove the line:
+
 ```typescript
 export { ThemeScreen } from './ThemeScreen';
 ```
@@ -665,18 +686,21 @@ export { ThemeScreen } from './ThemeScreen';
 **Step 3: Remove Theme route from MoreStack**
 
 In `src/navigation/stacks/MoreStack.tsx`:
+
 - Remove `ThemeScreen` from the imports (line 16)
 - Remove `<Stack.Screen name="Theme" component={ThemeScreen} />` (line 46)
 
 **Step 4: Remove Theme route from SettingsStack**
 
 In `src/navigation/stacks/SettingsStack.tsx`:
+
 - Remove `ThemeScreen` from the imports (line 9)
 - Remove `<Stack.Screen name="Theme" component={ThemeScreen} />` (line 35)
 
 **Step 5: Remove the Appearance section from SettingsScreen**
 
 In `src/screens/settings/SettingsScreen.tsx`:
+
 - Find the GroupedListSection with label "APPEARANCE" (or "Appearance") that contains the Theme toggle row and remove the entire section (around lines 230-250)
 - Remove the `themePreference` state and `loadThemePreference` effect (around lines 47-64)
 - Remove the `AsyncStorage` import if no longer needed by other code in this file
@@ -705,6 +729,7 @@ git commit -m "refactor: remove ThemeScreen and theme routes (dark-only app)"
 ### Task 6: Add tier system to Card component
 
 **Files:**
+
 - Modify: `src/components/molecules/Card/Card.tsx`
 
 **Step 1: Write the failing test**
@@ -1036,6 +1061,7 @@ git commit -m "feat: add tier system to Card component (briefing/data/surface)"
 ### Task 7: Create TacticalHeader component
 
 **Files:**
+
 - Create: `src/components/organisms/TacticalHeader/TacticalHeader.tsx`
 - Create: `src/components/organisms/TacticalHeader/index.ts`
 - Modify: `src/components/organisms/index.ts` (add export)
@@ -1141,6 +1167,7 @@ const styles = StyleSheet.create({
 ```
 
 Create `src/components/organisms/TacticalHeader/index.ts`:
+
 ```typescript
 export { TacticalHeader } from './TacticalHeader';
 export type { StatusVariant } from './TacticalHeader';
@@ -1149,6 +1176,7 @@ export type { StatusVariant } from './TacticalHeader';
 **Step 2: Add export to organisms/index.ts**
 
 Add to `src/components/organisms/index.ts`:
+
 ```typescript
 export * from './TacticalHeader';
 ```
@@ -1170,9 +1198,11 @@ git commit -m "feat: create TacticalHeader component with status indicators"
 ### Task 8: Restyle tab bar with tactical treatment
 
 **Files:**
+
 - Modify: `src/navigation/MainNavigator.tsx`
 
 **Context:** Status data for tab dots must use the correct hooks:
+
 - **Alert counts:** `useAlerts()` from `@hooks/api/useAlerts` returns `{ data: Alert[] }`. Filter by `threatLevel` and `!isReviewed` for critical count.
 - **Device offline count:** `useDevices()` from `@hooks/api/useDevices` returns `{ data: Device[] }`. The `Device` type has `online: boolean` field, BUT screens also use `isDeviceOnline(device.lastSeen)` from `@utils/dateUtils`. Use `isDeviceOnline(d.lastSeen)` for consistency with the rest of the app.
 - **Do NOT use `useAlertSummary`** — that hook takes a single `Alert` and generates an LLM summary. It is not an aggregate count hook.
@@ -1353,6 +1383,7 @@ git commit -m "feat: restyle tab bar with tactical theme and status dots"
 ### Task 9: Update Text component with tactical variant
 
 **Files:**
+
 - Modify: `src/components/atoms/Text/Text.tsx`
 
 **Step 1: Add 'tactical' as a TextVariant option**
@@ -1360,25 +1391,28 @@ git commit -m "feat: restyle tab bar with tactical theme and status dots"
 Add a new prop `tactical` (boolean) that applies monospace + uppercase + letter-spacing:
 
 In the `TextProps` interface, add:
+
 ```typescript
   /** Apply tactical monospace styling (uppercase, letter-spacing) */
   tactical?: boolean;
 ```
 
 In the component's style computation, add after the existing weight/align logic:
+
 ```typescript
-  const tacticalStyle = tactical
-    ? {
-        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-        textTransform: 'uppercase' as const,
-        letterSpacing: 0.5,
-      }
-    : {};
+const tacticalStyle = tactical
+  ? {
+      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+      textTransform: 'uppercase' as const,
+      letterSpacing: 0.5,
+    }
+  : {};
 ```
 
 Add `Platform` to the react-native import if not present.
 
 Apply it in the style array:
+
 ```typescript
   <RNText
     style={[baseStyle, colorStyle, weightStyle, alignStyle, tacticalStyle, style]}
@@ -1403,6 +1437,7 @@ git commit -m "feat: add tactical prop to Text component"
 ### Task 10: Update Button component with tactical styling
 
 **Files:**
+
 - Modify: `src/components/atoms/Button/Button.tsx`
 
 **Step 1: Update the filled button style**
@@ -1436,11 +1471,13 @@ git commit -m "feat: update Button to tactical amber styling"
 ### Task 11: Update Input component with tactical styling
 
 **Files:**
+
 - Modify: `src/components/atoms/Input/Input.tsx`
 
 **Step 1: Update input styling**
 
 Key changes:
+
 - Border color: Change from gray to `#2a2a1a` (tactical border)
 - Focus border color: Change from blue/systemBlue to `#fbbf24` (amber)
 - Background: Change from secondary system background to `#1a1a14` (surface)
@@ -1448,6 +1485,7 @@ Key changes:
 - Focus glow: Change from blue glow to amber glow `rgba(251, 191, 36, 0.15)`
 
 Find the border color logic (focused/error states) and update:
+
 - Normal border: `#2a2a1a`
 - Focused border: `#fbbf24`
 - Error border: `#ef4444` (stays red)
@@ -1455,6 +1493,7 @@ Find the border color logic (focused/error states) and update:
 - Disabled background: `#141410`
 
 Find the label style and add monospace:
+
 ```typescript
 fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
 textTransform: 'uppercase',
@@ -1479,11 +1518,13 @@ git commit -m "feat: update Input to tactical styling with amber focus"
 ### Task 12: Update Badge component with tactical styling
 
 **Files:**
+
 - Modify: `src/components/atoms/Badge/Badge.tsx`
 
 **Step 1: Update badge to use monospace + tactical colors**
 
 Key changes:
+
 - Font: Change to monospace
 - Text transform: uppercase
 - Letter spacing: +1pt
@@ -1491,6 +1532,7 @@ Key changes:
 - Background colors: Use tactical severity backgrounds (`#3a1a1a`, `#3a2a1a`, etc.)
 
 Update the color mapping function to use tactical colors:
+
 ```typescript
 const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
   critical: { bg: '#3a1a1a', text: '#f87171' },
@@ -1502,6 +1544,7 @@ const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
 ```
 
 Add monospace to the text style:
+
 ```typescript
 fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
 textTransform: 'uppercase',
@@ -1525,6 +1568,7 @@ git commit -m "feat: update Badge to tactical monospace styling"
 ### Task 13: Update SearchBar, FilterChip, TabSegment
 
 **Files:**
+
 - Modify: `src/components/molecules/SearchBar/SearchBar.tsx`
 - Modify: `src/components/molecules/FilterChip/FilterChip.tsx`
 - Modify: `src/components/molecules/TabSegment/TabSegment.tsx`
@@ -1532,6 +1576,7 @@ git commit -m "feat: update Badge to tactical monospace styling"
 **Step 1: Update SearchBar**
 
 Key changes:
+
 - Background: `#1a1a14` (surface)
 - Border: Add 1px `#2a2a1a`
 - Placeholder text: monospace, "SEARCH..." uppercase
@@ -1542,6 +1587,7 @@ Key changes:
 **Step 2: Update FilterChip**
 
 Key changes:
+
 - Background: transparent
 - Border: 1px `#2a2a1a`
 - Border radius: 8
@@ -1552,6 +1598,7 @@ Key changes:
 **Step 3: Update TabSegment**
 
 Key changes:
+
 - Container background: `#1a1a14` (surface)
 - Container border: 1px `#2a2a1a`
 - Active tab: `#fbbf24` background fill
@@ -1577,11 +1624,13 @@ git commit -m "feat: update SearchBar, FilterChip, TabSegment to tactical stylin
 ### Task 14: Redesign Home screen
 
 **Files:**
+
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
 
 **Step 1: Replace header with TacticalHeader**
 
 Import `TacticalHeader` and replace the "My Property" large title with:
+
 ```typescript
 <TacticalHeader
   title="HOME"
@@ -1641,6 +1690,7 @@ git commit -m "feat: redesign Home screen with tactical command center layout"
 ### Task 15: Redesign Alerts list screen
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertListScreen.tsx`
 - Modify: `src/components/organisms/HeaderHero/AlertsHeaderHero.tsx`
 - Modify: `src/components/organisms/AlertCard/AlertCard.tsx`
@@ -1663,6 +1713,7 @@ Update the InlineFilterBar/FilterChip styling to use tactical chips (already don
 **Step 3: Update AlertCard to tactical Data card style**
 
 Key changes to AlertCard:
+
 - Remove iOS card radius (16px → 10px)
 - Background: `#1a1a14` (surface)
 - Border: 1px `#2a2a1a`
@@ -1693,6 +1744,7 @@ git commit -m "feat: redesign Alerts screen with tactical styling"
 ### Task 16: Redesign Alert detail screen
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertDetailScreen.tsx`
 
 **Step 1: Apply Briefing card to main content**
@@ -1728,6 +1780,7 @@ git commit -m "feat: redesign Alert detail screen with briefing card layout"
 ### Task 17: Redesign Devices list screen
 
 **Files:**
+
 - Modify: `src/screens/devices/DeviceListScreen.tsx`
 - Modify: `src/components/organisms/DeviceCard/DeviceCard.tsx`
 - Modify: `src/components/organisms/HeaderHero/DevicesHeaderHero.tsx`
@@ -1748,6 +1801,7 @@ Style the Add button as amber-bordered tactical button.
 **Step 2: Update DevicesHeaderHero as Briefing card**
 
 Replace the simple status card with a Briefing card:
+
 ```typescript
 <Card tier="briefing" headerLabel="FLEET STATUS">
   {/* Offline warning if any */}
@@ -1758,6 +1812,7 @@ Replace the simple status card with a Briefing card:
 **Step 3: Update DeviceCard to tactical Data card style**
 
 Key changes:
+
 - Background: `#1a1a14`
 - Border: 1px `#2a2a1a`, radius 10
 - Status-colored left border (green/red, 2px)
@@ -1784,6 +1839,7 @@ git commit -m "feat: redesign Devices screen with tactical styling"
 ### Task 18: Redesign Device detail screen
 
 **Files:**
+
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx`
 
 **Step 1: Apply tactical styling**
@@ -1812,6 +1868,7 @@ git commit -m "feat: redesign Device detail screen with tactical layout"
 ### Task 19: Redesign Radar screen
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Replace header with TacticalHeader**
@@ -1853,6 +1910,7 @@ git commit -m "feat: redesign Radar screen with tactical styling"
 ### Task 20: Redesign Settings and More screens
 
 **Files:**
+
 - Modify: `src/screens/settings/SettingsScreen.tsx`
 - Modify: `src/screens/more/MoreMenuScreen.tsx`
 - Modify: `src/components/molecules/GroupedListSection/GroupedListSection.tsx` (if exists)
@@ -1869,6 +1927,7 @@ No status indicator for utility screens.
 **Step 2: Update GroupedListSection labels**
 
 Change section header labels to monospace uppercase styling:
+
 ```typescript
 fontFamily: MONO_FONT,
 fontSize: 10,
@@ -1923,6 +1982,7 @@ git commit -m "feat: redesign Settings and More screens with tactical styling"
 ### Task 21: Redesign Auth screens (Login, Register, ForgotPassword)
 
 **Files:**
+
 - Modify: `src/screens/auth/LoginScreen.tsx`
 - Modify: `src/screens/auth/RegisterScreen.tsx`
 - Modify: `src/screens/auth/ForgotPasswordScreen.tsx`
@@ -1962,6 +2022,7 @@ If LinearGradient was only used for button gradient, remove it.
 **Step 7: Update RegisterScreen**
 
 Apply the same cinematic tactical styling as LoginScreen:
+
 - Same dark background with amber orbs
 - Monospace uppercase title "CREATE ACCOUNT" (22pt bold, +2pt letter-spacing)
 - System font subtitle
@@ -1973,6 +2034,7 @@ Apply the same cinematic tactical styling as LoginScreen:
 **Step 8: Update ForgotPasswordScreen**
 
 Apply the same cinematic tactical styling:
+
 - Same dark background
 - Monospace uppercase title "RESET PASSWORD"
 - System font instructions/subtitle
@@ -1995,6 +2057,7 @@ git commit -m "feat: redesign all auth screens with cinematic tactical entry"
 ### Task 22: Redesign Analytics screens and Settings sub-screens
 
 **Files:**
+
 - Modify: `src/screens/analytics/DashboardScreen.tsx`
 - Modify: `src/screens/analytics/HeatmapScreen.tsx`
 - Modify: `src/screens/analytics/ReportsScreen.tsx`
@@ -2004,6 +2067,7 @@ git commit -m "feat: redesign all auth screens with cinematic tactical entry"
 **Step 1: Update Analytics screens**
 
 For each analytics screen (Dashboard, Heatmap, Reports):
+
 - Add TacticalHeader with screen name (e.g., `ANALYTICS`, `HEATMAP`, `REPORTS`)
 - Wrap data sections in Briefing cards with monospace headers
 - Apply tactical color scheme to charts/graphs (amber/green/red data colors on dark backgrounds)
@@ -2013,6 +2077,7 @@ For each analytics screen (Dashboard, Heatmap, Reports):
 **Step 2: Update Settings sub-screens**
 
 For all settings sub-screens:
+
 - Add TacticalHeader with screen name (e.g., `PROFILE`, `KNOWN DEVICES`, `NOTIFICATIONS`)
 - Use Surface cards (Tier 3) for settings rows
 - Monospace section labels in `textSecondary` (#a8a898)
@@ -2045,9 +2110,11 @@ git commit -m "feat: redesign analytics, fingerprint, and settings sub-screens w
 ### Task 23: Add pulse animation and AI tab dot to tab bar
 
 **Files:**
+
 - Modify: `src/navigation/MainNavigator.tsx`
 
 **Context:** Task 8 already wired `AlertsTabIcon` (using `useAlerts`) and `DevicesTabIcon` (using `useDevices` + `isDeviceOnline`). This task adds:
+
 1. Pulse animation for critical-state dots
 2. AI tab status dot (green when AI service is available via LLM feature flag)
 
@@ -2139,6 +2206,7 @@ const AITabIcon = ({ color }: { color: string }) => {
 ```
 
 Update the AI tab screen to use `AITabIcon`:
+
 ```typescript
 <Tab.Screen
   name="AITab"
@@ -2172,6 +2240,7 @@ git commit -m "feat: add pulse animation and AI tab status dot"
 ### Task 24: Wire header status indicators to real data
 
 **Files:**
+
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
 - Modify: `src/screens/alerts/AlertListScreen.tsx`
 - Modify: `src/screens/devices/DeviceListScreen.tsx`
@@ -2202,11 +2271,13 @@ git commit -m "fix: ensure header status indicators reflect live data"
 ### Task 25: Clean up dead code and unused imports
 
 **Files:**
+
 - Multiple files across the codebase
 
 **Step 1: Remove light theme references**
 
 Search for imports of `lightTheme` and references to `colorScheme === 'light'`:
+
 ```bash
 grep -r "lightTheme\|colorScheme === 'light'\|colorScheme !== 'dark'" src/ --include="*.ts" --include="*.tsx" -l
 ```
@@ -2254,6 +2325,7 @@ Run: `npm run ios`
 **Step 2: Verify each screen visually**
 
 Walk through every screen and check:
+
 - [ ] Login: Cinematic entry, amber buttons, monospace labels
 - [ ] Register: Same cinematic styling as Login
 - [ ] Forgot Password: Same cinematic styling

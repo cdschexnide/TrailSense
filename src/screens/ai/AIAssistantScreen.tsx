@@ -92,10 +92,7 @@ export const AIAssistantScreen: React.FC = () => {
   const threatStatus = useMemo(() => {
     if (securityContext.criticalAlerts > 0)
       return { color: c.accentDanger, label: 'CRITICAL' };
-    if (
-      securityContext.totalAlerts > 0 &&
-      securityContext.unreviewedAlerts > 0
-    )
+    if (securityContext.totalAlerts > 0 && securityContext.unreviewedAlerts > 0)
       return { color: c.accentWarning, label: 'ELEVATED' };
     return { color: c.accentSuccess, label: 'READY' };
   }, [securityContext]);
@@ -155,10 +152,7 @@ export const AIAssistantScreen: React.FC = () => {
   const prevMessageCount = useRef(0);
   useEffect(() => {
     if (messages.length > prevMessageCount.current) {
-      setTimeout(
-        () => scrollRef.current?.scrollToEnd({ animated: true }),
-        200
-      );
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 200);
     }
     prevMessageCount.current = messages.length;
   }, [messages.length]);
@@ -227,10 +221,7 @@ export const AIAssistantScreen: React.FC = () => {
           .llmService;
 
         const chatResponse = await llmService.chat({
-          messages: [
-            ...messages.filter(m => m.role !== 'system'),
-            userMessage,
-          ],
+          messages: [...messages.filter(m => m.role !== 'system'), userMessage],
           rawAlerts: alerts,
           rawDevices: devices,
         });
@@ -274,8 +265,7 @@ export const AIAssistantScreen: React.FC = () => {
   );
 
   const isWelcomeState = messages.length === 0 && showSuggestions;
-  const showQuickActions =
-    messages.length > 0 && !inputText && !isGenerating;
+  const showQuickActions = messages.length > 0 && !inputText && !isGenerating;
 
   // ── Welcome screen ──────────────────────────────────
   const renderWelcome = () => (
@@ -310,23 +300,34 @@ export const AIAssistantScreen: React.FC = () => {
       />
       <Text style={styles.enableTitle}>Enable TrailSense AI</Text>
       <Text style={styles.enableSubtitle}>
-        Download the on-device AI model to enable intelligent security
-        analysis.
+        Download the on-device AI model to enable intelligent security analysis.
       </Text>
 
       <View style={styles.featureList}>
         <View style={styles.featureRow}>
-          <Icon name="cloud-download-outline" size={20} color={c.accentPrimary} />
+          <Icon
+            name="cloud-download-outline"
+            size={20}
+            color={c.accentPrimary}
+          />
           <Text style={styles.featureText}>
             {`~${modelDownloadSize} one-time download`}
           </Text>
         </View>
         <View style={styles.featureRow}>
-          <Icon name="phone-portrait-outline" size={20} color={c.accentSuccess} />
+          <Icon
+            name="phone-portrait-outline"
+            size={20}
+            color={c.accentSuccess}
+          />
           <Text style={styles.featureText}>Runs 100% on-device</Text>
         </View>
         <View style={styles.featureRow}>
-          <Icon name="shield-checkmark-outline" size={20} color={c.accentPrimary} />
+          <Icon
+            name="shield-checkmark-outline"
+            size={20}
+            color={c.accentPrimary}
+          />
           <Text style={styles.featureText}>No data sent to cloud</Text>
         </View>
       </View>
@@ -379,8 +380,8 @@ export const AIAssistantScreen: React.FC = () => {
       </View>
       <Text style={styles.enableTitle}>AI Not Available</Text>
       <Text style={styles.enableSubtitle}>
-        TrailSense AI requires a custom development build with ExecuTorch
-        and iOS 17+ or Android 13+.
+        TrailSense AI requires a custom development build with ExecuTorch and
+        iOS 17+ or Android 13+.
       </Text>
     </View>
   );
@@ -427,9 +428,7 @@ export const AIAssistantScreen: React.FC = () => {
                 { backgroundColor: threatStatus.color },
               ]}
             />
-            <Text
-              style={[styles.statusLabel, { color: threatStatus.color }]}
-            >
+            <Text style={[styles.statusLabel, { color: threatStatus.color }]}>
               {threatStatus.label}
             </Text>
             {messages.length > 0 && (
@@ -463,9 +462,7 @@ export const AIAssistantScreen: React.FC = () => {
               {messages.map((item, index) => {
                 const isLastMessage = index === messages.length - 1;
                 const isStreamingMsg =
-                  isGenerating &&
-                  isLastMessage &&
-                  item.role === 'assistant';
+                  isGenerating && isLastMessage && item.role === 'assistant';
                 return (
                   <ChatMessage
                     key={`${item.timestamp}-${index}`}
@@ -479,9 +476,7 @@ export const AIAssistantScreen: React.FC = () => {
                     onFeedback={() =>
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
                     }
-                    showFeedback={
-                      !isStreamingMsg && item.role === 'assistant'
-                    }
+                    showFeedback={!isStreamingMsg && item.role === 'assistant'}
                   />
                 );
               })}
@@ -533,23 +528,17 @@ export const AIAssistantScreen: React.FC = () => {
                 disabled={!inputText.trim() || isGenerating}
                 style={({ pressed }) => [
                   styles.sendBtn,
-                  (!inputText.trim() || isGenerating) &&
-                    styles.sendBtnDisabled,
+                  (!inputText.trim() || isGenerating) && styles.sendBtnDisabled,
                   pressed && { opacity: 0.8 },
                 ]}
               >
                 {isGenerating ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={c.accentPrimary}
-                  />
+                  <ActivityIndicator size="small" color={c.accentPrimary} />
                 ) : (
                   <Icon
                     name="arrow-up"
                     size={18}
-                    color={
-                      inputText.trim() ? c.accentPrimary : c.textTertiary
-                    }
+                    color={inputText.trim() ? c.accentPrimary : c.textTertiary}
                   />
                 )}
               </Pressable>

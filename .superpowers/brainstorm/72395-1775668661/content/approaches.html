@@ -1,0 +1,61 @@
+<h2>Reports Feature — Two Architectural Approaches</h2>
+<p class="subtitle">How should the Reports screen be structured?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Hub &amp; Spoke (Recommended)</h3>
+      <p><strong>ReportsScreen as a hub</strong> with three sections: Templates, Saved Reports, and Intelligence Brief. Each flows into a detail/generation screen.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Clean entry point — everything discoverable from one screen</li>
+            <li>Matches iOS settings-style navigation users already know</li>
+            <li>Each pillar (export, saved views, briefs) gets equal weight</li>
+            <li>Easy to extend with new template types later</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>More screens to build (hub + detail screens)</li>
+            <li>Extra tap to get to any specific report</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Tabbed Single Screen</h3>
+      <p><strong>ReportsScreen with 3 tabs</strong> (like the Dashboard's Overview/Signals/Patterns). Templates tab, Saved tab, Brief tab — all inline.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Consistent with DashboardScreen's tab pattern</li>
+            <li>Fewer navigation screens to build</li>
+            <li>Quick switching between pillars</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Tabs get crowded when each pillar has its own content</li>
+            <li>Report generation/preview needs a modal or push anyway</li>
+            <li>Saved reports list + template picker + brief all compete for space</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+  <h3>Recommendation: Option A</h3>
+  <p>Hub &amp; Spoke keeps the Reports screen clean and scalable. The Dashboard already uses tabs for its analytics views — making Reports a hub differentiates it as a distinct feature rather than "more tabs." The extra navigation depth is justified because report generation involves configuration steps (picking template, filters, time range) that benefit from dedicated screens.</p>
+</div>

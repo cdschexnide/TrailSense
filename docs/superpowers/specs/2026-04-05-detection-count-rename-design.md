@@ -19,58 +19,69 @@ The backend Prisma schema retains `detectionCount` for now. The frontend maps th
 ### 1. Type & API Boundary
 
 **`src/types/device.ts`**
+
 - Rename `detectionCount?: number` to `alertCount?: number` on the `Device` interface
 
 **`src/api/endpoints/devices.ts`**
+
 - Add an idempotent `mapDeviceResponse()` helper: if the object has `detectionCount` but not `alertCount`, remap it; if it already has `alertCount` (e.g. mock/demo cache returns frontend-shaped objects), pass through unchanged. This prevents zeroing out counts in mock mode where `seedMockData()` seeds the React Query cache directly with frontend-shaped `mockDevices`.
 - Add a `mapDeviceRequest()` helper for the PATCH write path: translates `alertCount` back to `detectionCount` before sending to the backend, since the backend Prisma schema expects `detectionCount`.
 - Apply response mapper in `getDevices`, `getDeviceById`, `addDevice`, `updateDevice`. Apply request mapper in `updateDevice`.
 
 **`src/mocks/data/mockDevices.ts`**
+
 - Rename `detectionCount` to `alertCount` on all 5 mock device objects
 
 **`src/mocks/data/mockAnalytics.ts`**
+
 - Rename `detectionCount` to `alertCount` on `mockTopDevices` derived objects
 - Update sort comparator to use `alertCount`
 
 ### 2. UI Labels
 
 **`src/components/organisms/DeviceCard/DeviceCard.tsx`** (lines 145-146)
+
 - Field reference: `device.detectionCount` → `device.alertCount`
 - Metrics bar label: `"Detections"` → `"Alerts"`
 
 **`src/screens/devices/DeviceDetailScreen.tsx`** (lines 100, 153)
+
 - Local variable: `detectionCount` → `alertCount`
 - Hero metric string: `"X Detections"` → `"X Alerts"`
 - **History tab left unchanged:** The history tab (lines 294-349) currently uses fabricated data — arbitrary percentage breakdowns and hardcoded recent rows. Relabeling these as "Alert Summary" / "Recent Alerts" would present invented data as authoritative alert analytics. The history tab labels ("Detection Summary", "Recent Detections") remain as-is until backed by real alert/history data in a separate change.
 
 **`src/components/ai/cards/DeviceStatusCard.tsx`** (line 52, 72)
+
 - Local variable: `detections` → `alerts`
 - Display text: `{detections} det` → `{alerts} alerts`
 
 ### 3. LLM Context & Hooks
 
 **`src/hooks/useSecurityContext.ts`** (lines 171, 176)
+
 - Local variable: `detections` → `alerts`
 - Output string: `"Detections: X"` → `"Alerts: X"`
 
 **`src/services/llm/FocusedContextBuilder.ts`** (lines 215, 220)
+
 - Local variable: `detectionCount` → `alertCount`
 - Output string: `"Detections: X"` → `"Alerts: X"`
 
 ### 4. Tests
 
 **`__tests__/services/llm/FocusedContextBuilder.test.ts`**
+
 - Update device fixtures: `detectionCount` → `alertCount`
 - Update assertion strings: `"Detections:"` → `"Alerts:"`
 
 **`__tests__/services/llm/buildStructuredData.test.ts`**
+
 - Update `makeDevice` helper: `detectionCount: 3` → `alertCount: 3`
 
 ## Explicitly Out of Scope
 
 - **Backend Prisma schema** — `detectionCount` stays on the backend; the API mapping layer handles translation. A backend rename is a separate coordination task.
-- **`countByDetection()` in FocusedContextBuilder** (line 227) — counts alerts by detection *type* (wifi/bluetooth/cellular). Different concept, semantically correct.
+- **`countByDetection()` in FocusedContextBuilder** (line 227) — counts alerts by detection _type_ (wifi/bluetooth/cellular). Different concept, semantically correct.
 - **`DETECTION TYPES` string in FocusedContextBuilder** (line 258) — same as above, describes signal type breakdown.
 - **`context.detectionHistory.length` in LLMService.ts** (lines 151, 161) — fingerprint pattern analysis history array, unrelated to the Device field.
 - **`detectionType` enum/field** — signal classification (wifi/bluetooth/cellular), unrelated.

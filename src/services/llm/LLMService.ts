@@ -14,8 +14,12 @@ import {
   DeviceContext,
   ChatContext,
 } from '@/types/llm';
+import type { AnalyticsData } from '@/types/alert';
+import type { AnalyticsComparisonResponse } from '@/hooks/useAnalytics';
+import type { Finding, IntelligenceBrief } from '@/types/report';
 import {
   AlertSummaryTemplate,
+  BriefTemplate,
   PatternAnalysisTemplate,
   ConversationalTemplate,
 } from './templates';
@@ -30,6 +34,7 @@ import { ResponseProcessor } from './ResponseProcessor';
 class LLMService {
   // Template instances
   private alertSummaryTemplate = new AlertSummaryTemplate();
+  private briefTemplate = new BriefTemplate();
   private patternAnalysisTemplate = new PatternAnalysisTemplate();
   private conversationalTemplate = new ConversationalTemplate();
 
@@ -176,6 +181,39 @@ class LLMService {
       return this.parsePatternAnalysis(response.text);
     } catch (error) {
       llmLogger.error('Failed to analyze device pattern', error);
+      throw error;
+    }
+  }
+
+  async generateBrief(context: {
+    analytics: AnalyticsData;
+    comparison?: AnalyticsComparisonResponse | null;
+    period: string;
+  }): Promise<IntelligenceBrief> {
+    try {
+      llmLogger.info('Generating intelligence brief', {
+        period: context.period,
+      });
+
+      const messages = this.briefTemplate.buildPrompt(context);
+      const response = await this.generate({
+        messages,
+        context,
+        options: {
+          maxTokens: 900,
+          temperature: 0.4,
+        },
+      });
+
+      const parsed = this.parseBriefResponse(response.text);
+
+      return {
+        ...parsed,
+        generatedAt: new Date().toISOString(),
+        period: context.period,
+      };
+    } catch (error) {
+      llmLogger.error('Failed to generate intelligence brief', error);
       throw error;
     }
   }
@@ -422,6 +460,40 @@ class LLMService {
       confidence,
       whitelistSuggestion,
     };
+  }
+
+  private parseBriefResponse(
+    text: string
+  ): Pick<IntelligenceBrief, 'summary' | 'findings'> {
+    const summaryMatch = text.match(/SUMMARY:\s*([\s\S]*?)FINDINGS:/i);
+    const findingsMatch = text.match(/FINDINGS:\s*([\s\S]*)$/i);
+
+    const summary = summaryMatch?.[1]?.trim() || text.trim();
+    const findingsText = findingsMatch?.[1]?.trim() || '[]';
+
+    let findings: Finding[] = [];
+
+    try {
+      const parsed = JSON.parse(findingsText);
+      if (Array.isArray(parsed)) {
+        findings = parsed
+          .filter(item => item && typeof item.title === 'string')
+          .map(item => ({
+            title: item.title,
+            description:
+              typeof item.description === 'string' ? item.description : '',
+            severity:
+              item.severity === 'critical' || item.severity === 'warning'
+                ? item.severity
+                : 'info',
+            metric: item.metric,
+          }));
+      }
+    } catch {
+      findings = [];
+    }
+
+    return { summary, findings };
   }
 
   /**

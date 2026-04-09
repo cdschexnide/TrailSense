@@ -121,12 +121,18 @@ describe('IntentClassifier', () => {
     });
 
     it('extracts time range - today', () => {
-      const result = IntentClassifier.classify('What happened today?', mockDevices);
+      const result = IntentClassifier.classify(
+        'What happened today?',
+        mockDevices
+      );
       expect(result.filters.timeRange).toBe('24h');
     });
 
     it('extracts time range - this week', () => {
-      const result = IntentClassifier.classify('Activity this week', mockDevices);
+      const result = IntentClassifier.classify(
+        'Activity this week',
+        mockDevices
+      );
       expect(result.filters.timeRange).toBe('7d');
     });
 
@@ -139,7 +145,10 @@ describe('IntentClassifier', () => {
     });
 
     it('extracts cellular detection type', () => {
-      const result = IntentClassifier.classify('Show cellular alerts', mockDevices);
+      const result = IntentClassifier.classify(
+        'Show cellular alerts',
+        mockDevices
+      );
       expect(result.filters.detectionType).toBe('cellular');
     });
   });

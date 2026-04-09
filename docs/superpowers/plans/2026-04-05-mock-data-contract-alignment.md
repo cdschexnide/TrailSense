@@ -15,6 +15,7 @@
 ### Task 1: Shared Timestamp Helpers
 
 **Files:**
+
 - Create: `src/mocks/helpers/timestamps.ts`
 - Create: `__tests__/mocks/helpers/timestamps.test.ts`
 
@@ -22,7 +23,13 @@
 
 ```typescript
 // __tests__/mocks/helpers/timestamps.test.ts
-import { now, minutesAgo, hoursAgo, daysAgo, todayAt } from '@/mocks/helpers/timestamps';
+import {
+  now,
+  minutesAgo,
+  hoursAgo,
+  daysAgo,
+  todayAt,
+} from '@/mocks/helpers/timestamps';
 
 describe('timestamp helpers', () => {
   it('now() returns current ISO string', () => {
@@ -133,6 +140,7 @@ git commit -m "feat: add dynamic timestamp helpers for mock data"
 ### Task 2: Shared Fingerprint Helpers
 
 **Files:**
+
 - Create: `src/mocks/helpers/fingerprints.ts`
 - Create: `__tests__/mocks/helpers/fingerprints.test.ts`
 
@@ -246,10 +254,7 @@ export function cellularFingerprint(hash: string): string {
 }
 
 /** Apply the correct prefix for a given detection type. */
-export function fingerprintForType(
-  type: DetectionType,
-  hash: string
-): string {
+export function fingerprintForType(type: DetectionType, hash: string): string {
   return `${FINGERPRINT_PREFIX[type]}${hash}`;
 }
 
@@ -279,6 +284,7 @@ git commit -m "feat: add backend-format fingerprint helpers for mock data"
 ### Task 3: Update Type Definitions
 
 **Files:**
+
 - Modify: `src/types/auth.ts:1-15`
 - Modify: `src/types/alert.ts:8-26`
 
@@ -290,7 +296,9 @@ In `src/types/auth.ts`, change:
 // Line 6: make role optional
 role: 'admin' | 'user';
 ```
+
 to:
+
 ```typescript
 role?: 'admin' | 'user';
 ```
@@ -302,11 +310,14 @@ updatedAt?: string;
 ```
 
 And change:
+
 ```typescript
 // Line 14: make expiresIn optional
 expiresIn: number;
 ```
+
 to:
+
 ```typescript
 expiresIn?: number;
 ```
@@ -324,7 +335,9 @@ In `src/types/alert.ts`, after the `triangulatedPosition` block (line 25), add t
     confidence: number;
   };
 ```
+
 to:
+
 ```typescript
   // Triangulation-specific fields
   presenceCertainty?: number;
@@ -345,7 +358,9 @@ In `src/types/alert.ts`, add `createdAt` to the `Alert` interface (after `metada
   metadata?: AlertMetadata;
 }
 ```
+
 to:
+
 ```typescript
   metadata?: AlertMetadata;
   createdAt?: string;
@@ -392,6 +407,7 @@ git commit -m "feat: align auth and alert types with backend contracts"
 ### Task 4: Update Mock Devices to Use Dynamic Timestamps
 
 **Files:**
+
 - Modify: `src/mocks/data/mockDevices.ts`
 
 - [ ] **Step 1: Write failing test for dynamic device timestamps**
@@ -588,6 +604,7 @@ git commit -m "feat: dynamic timestamps and contract-aligned fields in mock devi
 ### Task 5: Update Mock Alerts — Fingerprints, Timestamps, Metadata
 
 **Files:**
+
 - Modify: `src/mocks/data/mockAlerts.ts`
 
 - [ ] **Step 1: Write failing test for alert contract alignment**
@@ -1022,6 +1039,7 @@ git commit -m "feat: align mock alerts with backend fingerprint format and metad
 ### Task 6: Update Mock Users — Remove Non-Backend Fields
 
 **Files:**
+
 - Modify: `src/mocks/data/mockUsers.ts`
 
 - [ ] **Step 1: Update mockUsers.ts to match backend user shape**
@@ -1072,6 +1090,7 @@ export const mockCredentials = {
 ```
 
 Key changes:
+
 - Kept `role` (required by `src/store/slices/userSlice.ts:7`)
 - Removed `lastLogin` (backend doesn't return this)
 - Added `updatedAt` (backend returns this)
@@ -1094,6 +1113,7 @@ git commit -m "feat: trim mock user data to match backend response shape"
 ### Task 7: Update Mock Analytics — topDevices Shape and DeviceFingerprint
 
 **Files:**
+
 - Modify: `src/mocks/data/mockAnalytics.ts`
 
 - [ ] **Step 1: Write failing test for analytics alignment**
@@ -1263,9 +1283,8 @@ export function getAnalyticsData(alerts: Alert[]): AnalyticsData {
 
   const hourlyDistribution = Array.from({ length: 24 }, (_, hour) => ({
     hour,
-    count: alerts.filter(
-      alert => new Date(alert.timestamp).getHours() === hour
-    ).length,
+    count: alerts.filter(alert => new Date(alert.timestamp).getHours() === hour)
+      .length,
   }));
 
   const timestamps = alerts.map(alert => alert.timestamp).sort();
@@ -1283,9 +1302,8 @@ export function getAnalyticsData(alerts: Alert[]): AnalyticsData {
       .slice(0, 10)
       .map(fingerprintHash => ({
         fingerprintHash,
-        count: alerts.filter(
-          alert => alert.fingerprintHash === fingerprintHash
-        ).length,
+        count: alerts.filter(alert => alert.fingerprintHash === fingerprintHash)
+          .length,
       })),
     // Derived extras — computed from alerts
     totalDetections,
@@ -1333,9 +1351,7 @@ function generateBackendFingerprint(
   fingerprintHash: string,
   alerts: Alert[]
 ): BackendDeviceFingerprint {
-  const detections = alerts.filter(
-    a => a.fingerprintHash === fingerprintHash
-  );
+  const detections = alerts.filter(a => a.fingerprintHash === fingerprintHash);
 
   if (detections.length === 0) {
     return {
@@ -1352,8 +1368,7 @@ function generateBackendFingerprint(
   }
 
   const sortedDetections = [...detections].sort(
-    (a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
   const firstSeen = sortedDetections[0].timestamp;
@@ -1389,9 +1404,7 @@ function generateBackendFingerprint(
 export function getDeviceFingerprints(
   alerts: Alert[]
 ): BackendDeviceFingerprint[] {
-  const uniqueFingerprints = [
-    ...new Set(alerts.map(a => a.fingerprintHash)),
-  ];
+  const uniqueFingerprints = [...new Set(alerts.map(a => a.fingerprintHash))];
   return uniqueFingerprints
     .slice(0, 10)
     .map(hash => generateBackendFingerprint(hash, alerts));
@@ -1458,7 +1471,9 @@ export const mockThreatTimeline = Array.from({ length: 30 }, (_, i) => {
 /**
  * Top devices — aligned to src/api/analytics.ts:99 getTopDevices shape.
  */
-export const mockTopDevices = [...new Set(mockAlerts.map(a => a.fingerprintHash))]
+export const mockTopDevices = [
+  ...new Set(mockAlerts.map(a => a.fingerprintHash)),
+]
   .slice(0, 10)
   .map(hash => {
     const alertsForHash = mockAlerts.filter(a => a.fingerprintHash === hash);
@@ -1498,6 +1513,7 @@ git commit -m "feat: align analytics mock data with backend shapes, add factory 
 ### Task 8: Update Mock Replay Positions — Fingerprints
 
 **Files:**
+
 - Modify: `src/mocks/data/mockReplayPositions.ts`
 
 - [ ] **Step 1: Update SCENARIOS fingerprints to backend format**
@@ -1505,9 +1521,7 @@ git commit -m "feat: align analytics mock data with backend shapes, add factory 
 In `src/mocks/data/mockReplayPositions.ts`, import the shared persona fingerprints and update the SCENARIOS array. At the top of the file, add the import:
 
 ```typescript
-import {
-  PERSONA_FINGERPRINTS as PERSONAS,
-} from '../helpers/fingerprints';
+import { PERSONA_FINGERPRINTS as PERSONAS } from '../helpers/fingerprints';
 ```
 
 Then update each scenario's `fingerprintHash`:
@@ -1570,6 +1584,7 @@ git commit -m "feat: update replay positions to use backend fingerprint format"
 ### Task 9: Update Mock WebSocket — Missing Fields and positions-updated Event
 
 **Files:**
+
 - Modify: `src/mocks/mockWebSocket.ts`
 
 - [ ] **Step 1: Write failing test for WebSocket contract alignment**
@@ -1877,7 +1892,10 @@ class MockWebSocketService {
       const idx = signalLevels.indexOf(signalStrength);
       if (idx >= 0) {
         const drift = Math.random() < 0.5 ? -1 : 1;
-        const newIdx = Math.max(0, Math.min(signalLevels.length - 1, idx + drift));
+        const newIdx = Math.max(
+          0,
+          Math.min(signalLevels.length - 1, idx + drift)
+        );
         signalStrength = signalLevels[newIdx];
         this.signalStrengthState.set(device.id, signalStrength);
       }
@@ -1947,11 +1965,9 @@ class MockWebSocketService {
   /**
    * Derive threat level from presence/proximity using backend's 4x4 matrix.
    */
-  private deriveThreatLevel(
-    presence: number,
-    proximity: number
-  ): ThreatLevel {
-    const pRow = presence <= 25 ? 0 : presence <= 50 ? 1 : presence <= 75 ? 2 : 3;
+  private deriveThreatLevel(presence: number, proximity: number): ThreatLevel {
+    const pRow =
+      presence <= 25 ? 0 : presence <= 50 ? 1 : presence <= 75 ? 2 : 3;
     const pCol =
       proximity <= 30 ? 0 : proximity <= 55 ? 1 : proximity <= 75 ? 2 : 3;
 
@@ -2000,6 +2016,7 @@ git commit -m "feat: align mock WebSocket with backend event shapes and add posi
 ### Task 10: Update Seed Function — Use Factory Functions
 
 **Files:**
+
 - Modify: `src/utils/seedMockData.ts`
 
 - [ ] **Step 1: Update imports and use factory functions**
@@ -2054,9 +2071,7 @@ function generateMockPositions(
 
   for (let i = 0; i < 8; i++) {
     const persona = PERSONA_FINGERPRINTS[i];
-    const signalType = persona
-      ? persona.signalType
-      : signalTypes[i % 3];
+    const signalType = persona ? persona.signalType : signalTypes[i % 3];
     const fingerprintHash = persona
       ? persona.fingerprintHash
       : randomFingerprint(signalTypes[i % 3]);
@@ -2243,6 +2258,7 @@ git commit -m "feat: use factory functions in seed utility for fresh timestamps"
 ### Task 11: Update Barrel Exports
 
 **Files:**
+
 - Modify: `src/mocks/data/index.ts`
 
 - [ ] **Step 1: Add getMockDevices and getMockAlerts to barrel exports**
@@ -2250,6 +2266,7 @@ git commit -m "feat: use factory functions in seed utility for fresh timestamps"
 In `src/mocks/data/index.ts`, update the Devices and Alerts sections:
 
 Change the Analytics section (lines 44-51):
+
 ```typescript
 export {
   mockAnalyticsData,
@@ -2260,7 +2277,9 @@ export {
   mockTopDevices,
 } from './mockAnalytics';
 ```
+
 to:
+
 ```typescript
 export {
   getAnalyticsData,
@@ -2276,6 +2295,7 @@ export {
 ```
 
 Change lines 13-17:
+
 ```typescript
 export {
   mockDevices,
@@ -2283,7 +2303,9 @@ export {
   mockOfflineDevices,
 } from './mockDevices';
 ```
+
 to:
+
 ```typescript
 export {
   getMockDevices,
@@ -2294,6 +2316,7 @@ export {
 ```
 
 Change lines 20-30:
+
 ```typescript
 export {
   mockAlerts,
@@ -2307,7 +2330,9 @@ export {
   PERSONA_FINGERPRINTS,
 } from './mockAlerts';
 ```
+
 to:
+
 ```typescript
 export {
   getMockAlerts,

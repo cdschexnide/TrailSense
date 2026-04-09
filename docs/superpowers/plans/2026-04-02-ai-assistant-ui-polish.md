@@ -13,6 +13,7 @@
 ### Task 1: Add ScrollView import and wrap welcome content
 
 **Files:**
+
 - Modify: `src/screens/ai/AIAssistantScreen.tsx:19` (import), `src/screens/ai/AIAssistantScreen.tsx:306-344` (renderWelcome)
 
 - [ ] **Step 1: Add ScrollView to the import**
@@ -59,80 +60,80 @@ import {
 Replace the `renderWelcome` function (lines 306-344) from:
 
 ```tsx
-  const renderWelcome = () => (
-    <View style={styles.welcomeContainer}>
-      {/* Security Status */}
-      {!securityContext.isLoading && (
-        <SecurityStatusCard context={securityContext} />
-      )}
+const renderWelcome = () => (
+  <View style={styles.welcomeContainer}>
+    {/* Security Status */}
+    {!securityContext.isLoading && (
+      <SecurityStatusCard context={securityContext} />
+    )}
 
-      {/* AI Branding */}
-      <View style={styles.brandingContainer}>
-        <Image
-          source={logoSource}
-          style={styles.aiIconLarge}
-          resizeMode="contain"
-        />
-        <Text
-          variant="largeTitle"
-          weight="bold"
-          color="label"
-          style={styles.brandTitle}
-        >
-          TrailSense AI
-        </Text>
-        <Text
-          variant="body"
-          style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
-        >
-          Your on-device security assistant. Ask about alerts, detection
-          patterns, sensor status, and more.
-        </Text>
-      </View>
-
-      {/* Suggestions */}
-      <SuggestionChips
-        suggestions={allSuggestions}
-        onSelect={handleSuggestionSelect}
-        title="Try asking"
+    {/* AI Branding */}
+    <View style={styles.brandingContainer}>
+      <Image
+        source={logoSource}
+        style={styles.aiIconLarge}
+        resizeMode="contain"
       />
+      <Text
+        variant="largeTitle"
+        weight="bold"
+        color="label"
+        style={styles.brandTitle}
+      >
+        TrailSense AI
+      </Text>
+      <Text
+        variant="body"
+        style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
+      >
+        Your on-device security assistant. Ask about alerts, detection patterns,
+        sensor status, and more.
+      </Text>
     </View>
-  );
+
+    {/* Suggestions */}
+    <SuggestionChips
+      suggestions={allSuggestions}
+      onSelect={handleSuggestionSelect}
+      title="Try asking"
+    />
+  </View>
+);
 ```
 
 with:
 
 ```tsx
-  const renderWelcome = () => (
-    <ScrollView
-      style={styles.welcomeContainer}
-      contentContainerStyle={styles.welcomeContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Security Status */}
-      {!securityContext.isLoading && (
-        <SecurityStatusCard context={securityContext} />
-      )}
+const renderWelcome = () => (
+  <ScrollView
+    style={styles.welcomeContainer}
+    contentContainerStyle={styles.welcomeContent}
+    showsVerticalScrollIndicator={false}
+  >
+    {/* Security Status */}
+    {!securityContext.isLoading && (
+      <SecurityStatusCard context={securityContext} />
+    )}
 
-      {/* AI Branding — subtitle only; title is already in the header */}
-      <View style={styles.brandingContainer}>
-        <Text
-          variant="body"
-          style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
-        >
-          Your on-device security assistant. Ask about alerts, detection
-          patterns, sensor status, and more.
-        </Text>
-      </View>
+    {/* AI Branding — subtitle only; title is already in the header */}
+    <View style={styles.brandingContainer}>
+      <Text
+        variant="body"
+        style={[styles.brandSubtitle, { color: colors.secondaryLabel }]}
+      >
+        Your on-device security assistant. Ask about alerts, detection patterns,
+        sensor status, and more.
+      </Text>
+    </View>
 
-      {/* Suggestions */}
-      <SuggestionChips
-        suggestions={allSuggestions}
-        onSelect={handleSuggestionSelect}
-        title="Try asking"
-      />
-    </ScrollView>
-  );
+    {/* Suggestions */}
+    <SuggestionChips
+      suggestions={allSuggestions}
+      onSelect={handleSuggestionSelect}
+      title="Try asking"
+    />
+  </ScrollView>
+);
 ```
 
 - [ ] **Step 3: Verify the app compiles**
@@ -158,6 +159,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ### Task 2: Update styles for compact branding and scroll content
 
 **Files:**
+
 - Modify: `src/screens/ai/AIAssistantScreen.tsx:789-810` (styles)
 
 - [ ] **Step 1: Update brandingContainer and add welcomeContent style**
@@ -264,6 +266,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ### Task 3: Change SafeAreaView edges and add keyboard comment
 
 **Files:**
+
 - Modify: `src/screens/ai/AIAssistantScreen.tsx:492-517` (SafeAreaView edges), `src/screens/ai/AIAssistantScreen.tsx:645` (keyboard comment)
 
 - [ ] **Step 1: Change SafeAreaView edges on all three render paths**
@@ -273,50 +276,55 @@ There are three `SafeAreaView` elements that need `edges` changed from `['top', 
 **First (not available state, ~line 494):**
 
 Change:
+
 ```tsx
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top', 'bottom']}
-      >
-        {renderNotAvailable()}
-      </SafeAreaView>
+<SafeAreaView
+  style={[styles.container, { backgroundColor: colors.systemBackground }]}
+  edges={['top', 'bottom']}
+>
+  {renderNotAvailable()}
+</SafeAreaView>
 ```
 
 to:
+
 ```tsx
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top']}
-      >
-        {renderNotAvailable()}
-      </SafeAreaView>
+<SafeAreaView
+  style={[styles.container, { backgroundColor: colors.systemBackground }]}
+  edges={['top']}
+>
+  {renderNotAvailable()}
+</SafeAreaView>
 ```
 
 **Second (enable prompt state, ~line 505):**
 
 Change:
+
 ```tsx
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top', 'bottom']}
-      >
-        {renderEnablePrompt()}
-      </SafeAreaView>
+<SafeAreaView
+  style={[styles.container, { backgroundColor: colors.systemBackground }]}
+  edges={['top', 'bottom']}
+>
+  {renderEnablePrompt()}
+</SafeAreaView>
 ```
 
 to:
+
 ```tsx
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.systemBackground }]}
-        edges={['top']}
-      >
-        {renderEnablePrompt()}
-      </SafeAreaView>
+<SafeAreaView
+  style={[styles.container, { backgroundColor: colors.systemBackground }]}
+  edges={['top']}
+>
+  {renderEnablePrompt()}
+</SafeAreaView>
 ```
 
 **Third (main chat state, ~line 515):**
 
 Change:
+
 ```tsx
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.systemBackground }]}
@@ -325,6 +333,7 @@ Change:
 ```
 
 to:
+
 ```tsx
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.systemBackground }]}
@@ -377,6 +386,7 @@ Expected: No lint errors in `AIAssistantScreen.tsx`.
 - [ ] **Step 3: Visual verification checklist**
 
 If running on simulator (`npx expo run:ios --device "iPhone 16 Pro"`), verify:
+
 - All 6 suggestion chips visible by scrolling the welcome content
 - SecurityStatusCard renders at the top
 - Subtitle text ("Your on-device security assistant...") appears below status card with tight spacing

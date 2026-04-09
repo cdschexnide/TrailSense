@@ -13,6 +13,7 @@
 ## Task 1: Create DetectedDeviceMarker Component
 
 **Files:**
+
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/DetectedDeviceMarker/DetectedDeviceMarker.tsx`
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/DetectedDeviceMarker/index.ts`
 
@@ -135,6 +136,7 @@ git commit -m "feat(components): add DetectedDeviceMarker for map positions"
 ## Task 2: Create PositionInfoPopup Component
 
 **Files:**
+
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/PositionInfoPopup/PositionInfoPopup.tsx`
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/PositionInfoPopup/index.ts`
 
@@ -317,6 +319,7 @@ git commit -m "feat(components): add PositionInfoPopup for marker details"
 ## Task 3: Export New Components from Molecules Index
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/index.ts`
 
 **Step 1: Check current exports and add new ones**
@@ -341,6 +344,7 @@ git commit -m "feat(components): export DetectedDeviceMarker and PositionInfoPop
 ## Task 4: Create TrailSenseDeviceMarker Component
 
 **Files:**
+
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/TrailSenseDeviceMarker/TrailSenseDeviceMarker.tsx`
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/src/components/molecules/TrailSenseDeviceMarker/index.ts`
 
@@ -512,6 +516,7 @@ git commit -m "feat(components): add TrailSenseDeviceMarker with pulse animation
 ## Task 5: Update ProximityHeatmapScreen - Add Position State and Imports
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Add imports at top of file (after existing imports around line 30)**
@@ -532,8 +537,9 @@ import { TriangulatedPosition } from '@/types/triangulation';
 Add after the `initialCameraRef` line:
 
 ```typescript
-  // Selected position for popup
-  const [selectedPosition, setSelectedPosition] = useState<TriangulatedPosition | null>(null);
+// Selected position for popup
+const [selectedPosition, setSelectedPosition] =
+  useState<TriangulatedPosition | null>(null);
 ```
 
 **Step 3: Add usePositions hook call (after useAlerts call around line 153)**
@@ -541,9 +547,9 @@ Add after the `initialCameraRef` line:
 Add after the `useAlerts` call:
 
 ```typescript
-  // Fetch triangulated positions for selected device
-  const { data: positionsData } = usePositions(selectedDevice?.id);
-  const positions = positionsData?.positions ?? [];
+// Fetch triangulated positions for selected device
+const { data: positionsData } = usePositions(selectedDevice?.id);
+const positions = positionsData?.positions ?? [];
 ```
 
 **Step 4: Commit**
@@ -559,6 +565,7 @@ git commit -m "feat(heatmap): add imports and state for position markers"
 ## Task 6: Update ProximityHeatmapScreen - Add Position Markers to Map
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Add position markers inside the MapView (after the Camera component, around line 503)**
@@ -599,6 +606,7 @@ git commit -m "feat(heatmap): render TrailSense and detected device markers on m
 ## Task 7: Update ProximityHeatmapScreen - Add Position Popup Overlay
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Add popup overlay (after the Reset View Button, around line 641)**
@@ -647,6 +655,7 @@ git commit -m "feat(heatmap): add position info popup on marker tap"
 ## Task 8: Update ProximityHeatmapScreen - Add Positions Count to Summary
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Update the Zone Summary card to show triangulated positions count**
@@ -706,6 +715,7 @@ git commit -m "feat(heatmap): show triangulated positions count in summary"
 ## Task 9: Clear Selected Position on Device Change
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Update the useEffect that resets overlay on device change (around line 334)**
@@ -713,12 +723,12 @@ git commit -m "feat(heatmap): show triangulated positions count in summary"
 Find the useEffect with `setOverlayTransform` and add:
 
 ```typescript
-  // Reset overlay when device changes
-  useEffect(() => {
-    setOverlayTransform({ translateX: 0, translateY: 0, scale: 1 });
-    initialCameraRef.current = null;
-    setSelectedPosition(null); // Clear any open popup
-  }, [selectedDeviceIndex]);
+// Reset overlay when device changes
+useEffect(() => {
+  setOverlayTransform({ translateX: 0, translateY: 0, scale: 1 });
+  initialCameraRef.current = null;
+  setSelectedPosition(null); // Clear any open popup
+}, [selectedDeviceIndex]);
 ```
 
 **Step 2: Commit**
@@ -734,6 +744,7 @@ git commit -m "fix(heatmap): clear position popup when switching devices"
 ## Task 10: Add WebSocket Handler to Invalidate Positions on Update
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Add import for websocketService and queryClient**
@@ -749,20 +760,26 @@ import { POSITIONS_QUERY_KEY } from '@hooks/api/usePositions';
 **Step 2: Add useEffect to handle WebSocket updates (after the usePositions call)**
 
 ```typescript
-  // Handle WebSocket position updates
-  const queryClient = useQueryClient();
+// Handle WebSocket position updates
+const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const handlePositionsUpdated = (data: { deviceId: string; positions: any[] }) => {
-      // Invalidate positions query for this device to trigger refetch
-      if (data.deviceId === selectedDevice?.id) {
-        queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, data.deviceId] });
-      }
-    };
+useEffect(() => {
+  const handlePositionsUpdated = (data: {
+    deviceId: string;
+    positions: any[];
+  }) => {
+    // Invalidate positions query for this device to trigger refetch
+    if (data.deviceId === selectedDevice?.id) {
+      queryClient.invalidateQueries({
+        queryKey: [POSITIONS_QUERY_KEY, data.deviceId],
+      });
+    }
+  };
 
-    websocketService.on('positions-updated', handlePositionsUpdated);
-    return () => websocketService.off('positions-updated', handlePositionsUpdated);
-  }, [selectedDevice?.id, queryClient]);
+  websocketService.on('positions-updated', handlePositionsUpdated);
+  return () =>
+    websocketService.off('positions-updated', handlePositionsUpdated);
+}, [selectedDevice?.id, queryClient]);
 ```
 
 **Step 3: Commit**
@@ -807,17 +824,18 @@ git commit -m "feat: complete position markers UI for ProximityHeatmapScreen"
 
 ## Summary of Changes
 
-| File | Change |
-|------|--------|
-| `src/components/molecules/DetectedDeviceMarker/` | New component - signal-type-colored marker |
-| `src/components/molecules/PositionInfoPopup/` | New component - minimal popup on tap |
-| `src/components/molecules/TrailSenseDeviceMarker/` | New component - blue pulsing device marker |
-| `src/components/molecules/index.ts` | Export new components |
-| `src/screens/radar/ProximityHeatmapScreen.tsx` | Integrate markers, popup, WebSocket updates |
+| File                                               | Change                                      |
+| -------------------------------------------------- | ------------------------------------------- |
+| `src/components/molecules/DetectedDeviceMarker/`   | New component - signal-type-colored marker  |
+| `src/components/molecules/PositionInfoPopup/`      | New component - minimal popup on tap        |
+| `src/components/molecules/TrailSenseDeviceMarker/` | New component - blue pulsing device marker  |
+| `src/components/molecules/index.ts`                | Export new components                       |
+| `src/screens/radar/ProximityHeatmapScreen.tsx`     | Integrate markers, popup, WebSocket updates |
 
 ## Visual Result
 
 After implementation:
+
 - **Blue pulsing marker**: TrailSense device location
 - **Colored markers**: Detected devices (blue=WiFi, purple=Bluetooth, orange=Cellular)
 - **Tap marker**: Shows popup with signal type, confidence %, accuracy ±Xm

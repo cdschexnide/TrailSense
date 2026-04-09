@@ -13,21 +13,25 @@ Calculate device online/offline status in the mobile app based on the `lastSeen`
 ## How It Works
 
 ### ESP32 Firmware (TrailSenseDevice)
+
 - Sends heartbeat to Golioth every **60 seconds**
 - Payload: `{"did":"...", "ts":..., "health":{...}, "loc":{...}}`
 
 ### Backend (trailsense-backend)
+
 - Receives heartbeat via Golioth webhook or polling
 - Updates `device.lastSeen` timestamp in database
 - Returns `lastSeen` field in GET /api/devices response
 
 ### Mobile App (TrailSense)
+
 - Calculates online status: `online = (now - lastSeen) < 5 minutes`
 - 5-minute threshold = ~5 missed heartbeats (accounts for network delays)
 
 ## Implementation
 
 ### Utility Function
+
 ```typescript
 // src/utils/dateUtils.ts
 export const DEVICE_OFFLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
@@ -41,6 +45,7 @@ export const isDeviceOnline = (lastSeen?: string | null): boolean => {
 ```
 
 ### Files Updated
+
 - `src/utils/dateUtils.ts` - Added `isDeviceOnline()` utility
 - `src/components/organisms/DeviceCard/DeviceCard.tsx` - Uses calculated status
 - `src/screens/devices/DeviceListScreen.tsx` - Stats and sorting use calculated status
@@ -55,14 +60,15 @@ export const isDeviceOnline = (lastSeen?: string | null): boolean => {
 
 ## Threshold Decision
 
-| Interval | Missed Heartbeats | Rationale |
-|----------|-------------------|-----------|
-| 60s | 0 | Too aggressive - would flicker |
-| 3 min | 3 | Aggressive |
-| **5 min** | **5** | **Balanced - chosen** |
-| 10 min | 10 | Too lenient |
+| Interval  | Missed Heartbeats | Rationale                      |
+| --------- | ----------------- | ------------------------------ |
+| 60s       | 0                 | Too aggressive - would flicker |
+| 3 min     | 3                 | Aggressive                     |
+| **5 min** | **5**             | **Balanced - chosen**          |
+| 10 min    | 10                | Too lenient                    |
 
 5 minutes chosen to account for:
+
 - LTE network variability
 - Golioth processing delays
 - Backend polling intervals (60 seconds)

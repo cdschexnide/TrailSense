@@ -53,7 +53,7 @@ const [selectedDeviceId, setSelectedDeviceId] = useState<string | undefined>(
 const [pickerOpen, setPickerOpen] = useState(false);
 
 const selectedDevice = selectedDeviceId
-  ? devices.find(d => d.id === selectedDeviceId) ?? devices[0]
+  ? (devices.find(d => d.id === selectedDeviceId) ?? devices[0])
   : devices[0];
 ```
 
@@ -142,22 +142,29 @@ Moves out of `LiveMapContent` and becomes a tappable `Pressable` at the parent l
 ## Edge Cases
 
 ### Single device
+
 Status bar shows device name but no chevron. Picker is not available. Functionally identical to current behavior.
 
 ### Offline device selected
+
 User can select an offline device. Status dot shows red. If the device has no GPS coordinates, the existing "No GPS Location" empty state renders. Positions will be empty. Replay still works if historical data exists.
 
 ### Device deleted while viewing
+
 If the selected device disappears from the `devices` array (deleted on another client, React Query refetch removes it), the `?? devices[0]` render fallback shows the correct device, but `selectedDeviceId` state becomes stale. Add a reconciliation `useEffect`: when `selectedDeviceId` is set but `devices.find(d => d.id === selectedDeviceId)` returns undefined, call `handleSelectDevice(devices[0]?.id)` to reset state (clearing selection, replay, etc.).
 
 ### WebSocket listener
+
 The existing `useEffect` that listens for `positions-updated` events filters by `selectedDevice?.id`. This works automatically — switching devices means the listener only processes events for the currently selected device.
 
 ### Mode switching
+
 Switching between Live Map and Replay keeps the same device selected. Only the mode changes.
 
 ### Replay data on device switch
+
 When switching devices in Replay mode:
+
 - `useReplayData(newDeviceId)` fires automatically (query key change)
 - Timeline resets to minute 0, autoplay pauses
 - Bucketing and interpolation hooks recompute from new data (they derive from `replayPositions`)
@@ -165,12 +172,14 @@ When switching devices in Replay mode:
 ## Files Changed
 
 ### Modified
+
 - `src/screens/radar/ProximityHeatmapScreen.tsx` — state changes, status bar update, picker integration
 - `src/screens/devices/DeviceDetailScreen.tsx` — pass `deviceId` in "View on Map" navigation
 - `src/navigation/types.ts` — add `deviceId` to `LiveRadar` params
 - `src/components/molecules/index.ts` — re-export DevicePicker
 
 ### Created
+
 - `src/components/molecules/DevicePicker/DevicePicker.tsx` — dropdown picker component
 - `src/components/molecules/DevicePicker/index.ts` — barrel export
 
@@ -183,6 +192,7 @@ The mock replay data generator (`src/mocks/data/mockReplayPositions.ts`) has thr
 3. `generateReplayData(date?: Date)` doesn't accept a `deviceId` parameter, and `generateReplayPositions(date?: Date)` wraps it with the same signature
 
 Changes required:
+
 - Replace global `PROPERTY_CENTER` with a `DEVICE_CENTERS` lookup map and `getDeviceCenter(deviceId)` helper. Thread the center through `toLatLng()` and `createScenarioAlert()` as a parameter.
 - Change `generateReplayData` signature to accept an options object `{ date?: Date; deviceId?: string }` instead of `date?: Date`. This avoids breaking the parameter contract — a `Date` can never be confused with a `string`.
 - Update `generateReplayPositions` to accept the same options object.

@@ -1,7 +1,9 @@
 import { DeviceFingerprint } from '@types';
 
 interface FingerprintRepository {
-  findOne(query: { fingerprintHash: string }): Promise<DeviceFingerprint | null>;
+  findOne(query: {
+    fingerprintHash: string;
+  }): Promise<DeviceFingerprint | null>;
   upsert(fingerprint: DeviceFingerprint): Promise<void>;
   find(): Promise<DeviceFingerprint[]>;
 }

@@ -1,9 +1,5 @@
 import type { Device } from '@/types/device';
-import type {
-  ClassifiedIntent,
-  IntentFilters,
-  IntentType,
-} from '@/types/llm';
+import type { ClassifiedIntent, IntentFilters, IntentType } from '@/types/llm';
 
 const THREAT_LEVEL_PATTERNS = [
   { regex: /\bcritical\b/i, value: 'critical' },
@@ -93,10 +89,16 @@ const INTENT_RULES: Array<{
 ];
 
 function normalizeText(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 }
 
-function extractDeviceName(message: string, devices: Device[]): string | undefined {
+function extractDeviceName(
+  message: string,
+  devices: Device[]
+): string | undefined {
   const normalizedMessage = normalizeText(message);
 
   for (const device of devices) {
@@ -164,7 +166,10 @@ function extractFilters(message: string, devices: Device[]): IntentFilters {
   return filters;
 }
 
-function detectIntent(message: string, filters: IntentFilters): ClassifiedIntent {
+function detectIntent(
+  message: string,
+  filters: IntentFilters
+): ClassifiedIntent {
   for (const rule of INTENT_RULES) {
     if (rule.patterns.some(pattern => pattern.test(message))) {
       return {

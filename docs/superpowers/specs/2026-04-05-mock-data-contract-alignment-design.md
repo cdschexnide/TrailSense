@@ -103,10 +103,10 @@ Exported from `fingerprints.ts` for use by alerts, replay, and positions:
 
 ```typescript
 const PERSONA_FINGERPRINTS = {
-  delivery: 'c_a1b2c3',   // cellular (hex-valid)
-  visitor: 'w_d4e5f6',    // wifi (hex-valid)
-  loiterer: 'b_a7b8c9',   // bluetooth (hex-valid)
-  vehicle: 'c_d0e1f2',    // cellular (hex-valid)
+  delivery: 'c_a1b2c3', // cellular (hex-valid)
+  visitor: 'w_d4e5f6', // wifi (hex-valid)
+  loiterer: 'b_a7b8c9', // bluetooth (hex-valid)
+  vehicle: 'c_d0e1f2', // cellular (hex-valid)
 };
 ```
 
@@ -118,14 +118,14 @@ const PERSONA_FINGERPRINTS = {
 
 ### Changes
 
-| Field | Before | After |
-|-------|--------|-------|
-| `lastSeen` (online) | `'2025-12-16T09:45:00Z'` | `minutesAgo(1)` to `minutesAgo(3)` |
-| `lastSeen` (offline) | `'2025-12-14T16:22:00Z'` | `daysAgo(2)` to `daysAgo(5)` |
-| `updatedAt` | Hardcoded | Same value as `lastSeen` |
-| `lastBootAt` | Hardcoded | `hoursAgo(uptimeSeconds / 3600)` |
-| `signalStrength` (device-005) | `'offline'` | `'poor'` |
-| `metadata` | Absent | `null` (explicit) |
+| Field                         | Before                   | After                              |
+| ----------------------------- | ------------------------ | ---------------------------------- |
+| `lastSeen` (online)           | `'2025-12-16T09:45:00Z'` | `minutesAgo(1)` to `minutesAgo(3)` |
+| `lastSeen` (offline)          | `'2025-12-14T16:22:00Z'` | `daysAgo(2)` to `daysAgo(5)`       |
+| `updatedAt`                   | Hardcoded                | Same value as `lastSeen`           |
+| `lastBootAt`                  | Hardcoded                | `hoursAgo(uptimeSeconds / 3600)`   |
+| `signalStrength` (device-005) | `'offline'`              | `'poor'`                           |
+| `metadata`                    | Absent                   | `null` (explicit)                  |
 
 ### Unchanged
 
@@ -184,22 +184,22 @@ metadata: {
 threat level, following the backend's 4x4 threat matrix:
 
 | Threat Level | Presence Range | Proximity Range |
-|-------------|----------------|-----------------|
-| critical | 70-95 | 70-95 |
-| high | 50-80 | 50-80 |
-| medium | 30-60 | 30-60 |
-| low | 10-35 | 10-35 |
+| ------------ | -------------- | --------------- |
+| critical     | 70-95          | 70-95           |
+| high         | 50-80          | 50-80           |
+| medium       | 30-60          | 30-60           |
+| low          | 10-35          | 10-35           |
 
 ### Persona fingerprints
 
 Updated to backend format via shared constants:
 
-| Before | After | Type |
-|--------|-------|------|
-| `fp-delivery-a1b2c3` | `c_a1b2c3` | cellular |
-| `fp-visitor-d4e5f6` | `w_d4e5f6` | wifi |
+| Before               | After      | Type      |
+| -------------------- | ---------- | --------- |
+| `fp-delivery-a1b2c3` | `c_a1b2c3` | cellular  |
+| `fp-visitor-d4e5f6`  | `w_d4e5f6` | wifi      |
 | `fp-loiterer-g7h8i9` | `b_a7b8c9` | bluetooth |
-| `fp-vehicle-j0k1l2` | `c_d0e1f2` | cellular |
+| `fp-vehicle-j0k1l2`  | `c_d0e1f2` | cellular  |
 
 ### Implementation
 
@@ -216,15 +216,26 @@ Alerts export a factory function `getMockAlerts()` for dynamic timestamps.
 Current payload:
 
 ```typescript
-{ id, name, battery, lastSeen, online, alertCount, uptimeSeconds }
+{
+  (id, name, battery, lastSeen, online, alertCount, uptimeSeconds);
+}
 ```
 
 Updated payload (matches backend `device-status` event post-mapping):
 
 ```typescript
 {
-  id, name, batteryPercent, lastSeen, online, alertCount,
-  uptimeSeconds, signalStrength, lastBootAt, latitude, longitude
+  (id,
+    name,
+    batteryPercent,
+    lastSeen,
+    online,
+    alertCount,
+    uptimeSeconds,
+    signalStrength,
+    lastBootAt,
+    latitude,
+    longitude);
 }
 ```
 
@@ -324,11 +335,11 @@ interface BackendDeviceFingerprint {
 
 The existing `DeviceFingerprint` interface is left unchanged.
 
-| Field | Mock Before | Mock After |
-|-------|-------------|------------|
-| Type | `DeviceFingerprint` | `BackendDeviceFingerprint` |
-| `category` | `'unknown'` / `'known'` | Signal type: `'wifi'` / `'bluetooth'` / `'cellular'` |
-| `fingerprintHash` | `fp-*` format | Backend-prefixed format |
+| Field             | Mock Before             | Mock After                                           |
+| ----------------- | ----------------------- | ---------------------------------------------------- |
+| Type              | `DeviceFingerprint`     | `BackendDeviceFingerprint`                           |
+| `category`        | `'unknown'` / `'known'` | Signal type: `'wifi'` / `'bluetooth'` / `'cellular'` |
+| `fingerprintHash` | `fp-*` format           | Backend-prefixed format                              |
 
 ### `mockHeatmapPoints`
 
@@ -363,10 +374,14 @@ Remove populated values for fields the backend doesn't return, but keep
 
 ```typescript
 // Before
-{ id, email, name, phone, role, createdAt, lastLogin }
+{
+  (id, email, name, phone, role, createdAt, lastLogin);
+}
 
 // After
-{ id, email, name, role, createdAt, updatedAt }
+{
+  (id, email, name, role, createdAt, updatedAt);
+}
 ```
 
 `phone` and `lastLogin` are removed. `role` is kept because it's required by
@@ -414,20 +429,20 @@ Remove `expiresIn` — backend token response only returns
 
 ## Files Touched
 
-| Area | Files | Change Type |
-|------|-------|-------------|
-| Shared helpers | `src/mocks/helpers/timestamps.ts` | New |
-| Shared helpers | `src/mocks/helpers/fingerprints.ts` | New |
-| Mock data | `src/mocks/data/mockDevices.ts` | Edit |
-| Mock data | `src/mocks/data/mockAlerts.ts` | Edit |
-| Mock data | `src/mocks/data/mockAnalytics.ts` | Edit |
-| Mock data | `src/mocks/data/mockReplayPositions.ts` | Edit |
-| Mock data | `src/mocks/data/mockUsers.ts` | Edit |
-| Mock WebSocket | `src/mocks/mockWebSocket.ts` | Edit |
-| Seed function | `src/utils/seedMockData.ts` | Edit |
-| Types | `src/types/auth.ts` | Edit |
-| Types | `src/types/alert.ts` | Edit |
-| WebSocket | `src/api/websocket.ts` | Edit |
+| Area           | Files                                   | Change Type |
+| -------------- | --------------------------------------- | ----------- |
+| Shared helpers | `src/mocks/helpers/timestamps.ts`       | New         |
+| Shared helpers | `src/mocks/helpers/fingerprints.ts`     | New         |
+| Mock data      | `src/mocks/data/mockDevices.ts`         | Edit        |
+| Mock data      | `src/mocks/data/mockAlerts.ts`          | Edit        |
+| Mock data      | `src/mocks/data/mockAnalytics.ts`       | Edit        |
+| Mock data      | `src/mocks/data/mockReplayPositions.ts` | Edit        |
+| Mock data      | `src/mocks/data/mockUsers.ts`           | Edit        |
+| Mock WebSocket | `src/mocks/mockWebSocket.ts`            | Edit        |
+| Seed function  | `src/utils/seedMockData.ts`             | Edit        |
+| Types          | `src/types/auth.ts`                     | Edit        |
+| Types          | `src/types/alert.ts`                    | Edit        |
+| WebSocket      | `src/api/websocket.ts`                  | Edit        |
 
 **Not touched:** `mockSettings.ts`, `mockKnownDevices.ts`, screen components,
 React Query hooks, API endpoint modules.

@@ -8,6 +8,7 @@
 Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashboard aesthetic - dark mode dominant, data-visualization forward, technical but elegant.
 
 ### Goals
+
 - FAANG-level professional polish
 - Tesla/Rivian dashboard DNA
 - Glanceable health checks
@@ -15,6 +16,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 - Consistent patterns across both flows
 
 ### Non-Goals
+
 - Changing navigation structure
 - Modifying business logic
 - Adding new features
@@ -33,16 +35,16 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 
 ## Color Language
 
-| Element | Treatment |
-|---------|-----------|
-| Critical alerts | Subtle red background glow |
-| High alerts | Thin 3px orange left accent line |
-| Medium alerts | Thin 3px yellow left accent line |
-| Low alerts | Thin 3px green left accent line |
-| Online devices | Green status dot |
-| Offline devices | Red status dot + subtle red glow |
-| Interactive elements | Brand accent (golden tan `#C9B896`) |
-| Selected filter chips | Brand accent background tint |
+| Element               | Treatment                           |
+| --------------------- | ----------------------------------- |
+| Critical alerts       | Subtle red background glow          |
+| High alerts           | Thin 3px orange left accent line    |
+| Medium alerts         | Thin 3px yellow left accent line    |
+| Low alerts            | Thin 3px green left accent line     |
+| Online devices        | Green status dot                    |
+| Offline devices       | Red status dot + subtle red glow    |
+| Interactive elements  | Brand accent (golden tan `#C9B896`) |
+| Selected filter chips | Brand accent background tint        |
 
 ---
 
@@ -62,6 +64,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Specifications:**
+
 - **Area chart:** 24-hour detection volume with gradient fill fading downward
 - **Chart interaction:** Tap a time segment to jump to that period in the timeline
 - **Filter chips:** Tap to filter list, tap again to clear. Selected chip gets subtle brand accent background
@@ -70,6 +73,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ### Alert Cards
 
 **Critical alert (with glow):**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│ ← Subtle red glow
@@ -81,6 +85,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Non-critical alert (with accent line):**
+
 ```
 ▌                                                 │
 ▌  Bluetooth Detection                    1:41p   │ ← Orange/yellow/green accent
@@ -89,6 +94,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Card specifications:**
+
 - No borders, no badges, no MAC addresses at list level
 - Severity conveyed through glow (critical) or thin 3px left accent (others)
 - Title: Detection type in medium weight
@@ -190,12 +196,12 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 └─────────────────────────────────────────────────┘
 ```
 
-| Button | Action |
-|--------|--------|
+| Button        | Action                                |
+| ------------- | ------------------------------------- |
 | Mark Reviewed | Primary action, large tappable button |
-| Flag (⚑) | Toggle false positive |
-| AI (✦) | Explain with AI |
-| More (⋯) | Whitelist, Delete, Share |
+| Flag (⚑)      | Toggle false positive                 |
+| AI (✦)        | Explain with AI                       |
+| More (⋯)      | Whitelist, Delete, Share              |
 
 ---
 
@@ -204,6 +210,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ### Hero Section (Simple Status)
 
 **All online:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │                                                 │
@@ -214,6 +221,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Some offline:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │                                                 │
@@ -224,6 +232,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Specifications:**
+
 - Instant health check: One glance tells you if everything is okay
 - No graph: Devices don't need the same visual weight as Alerts
 - No filter chips or grouping: Flat list below
@@ -232,6 +241,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ### Device Cards (Flat List, No Grouping)
 
 **Online device:**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │                                                 │
@@ -245,6 +255,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Offline device (with glow):**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│ ← Subtle red glow
@@ -259,6 +270,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Card specifications:**
+
 - Status dot: Right-aligned, green (online) or red (offline)
 - Last seen: Critical for knowing if device is actually responsive
 - Metrics bar: Horizontal layout with subtle dividers, Tesla dashboard style
@@ -369,12 +381,12 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 └─────────────────────────────────────────────────┘
 ```
 
-| Button | Action |
-|--------|--------|
+| Button      | Action                                                |
+| ----------- | ----------------------------------------------------- |
 | View on Map | Primary action, opens Map tab centered on this device |
-| Edit (✏️) | Rename device |
-| Config (⚙️) | Detection sensitivity, notification settings |
-| More (⋯) | Remove Device (with confirmation) |
+| Edit (✏️)   | Rename device                                         |
+| Config (⚙️) | Detection sensitivity, notification settings          |
+| More (⋯)    | Remove Device (with confirmation)                     |
 
 ---
 
@@ -382,30 +394,31 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 
 ### Animations
 
-| Element | Animation | Duration |
-|---------|-----------|----------|
-| Hero collapse | Smooth shrink on scroll, spring on expand | 250ms |
-| Card tap | Scale to 0.98 + slight dim | 100ms |
-| Card glow (critical/offline) | Subtle pulse, very slow | 3s cycle |
-| Tab switch | Crossfade content | 200ms |
-| Bottom bar | Slide up on screen load | 300ms spring |
-| Filter chip select | Background fade in + slight scale | 150ms |
-| Chart segment tap | Highlight glow + list scroll | 200ms |
+| Element                      | Animation                                 | Duration     |
+| ---------------------------- | ----------------------------------------- | ------------ |
+| Hero collapse                | Smooth shrink on scroll, spring on expand | 250ms        |
+| Card tap                     | Scale to 0.98 + slight dim                | 100ms        |
+| Card glow (critical/offline) | Subtle pulse, very slow                   | 3s cycle     |
+| Tab switch                   | Crossfade content                         | 200ms        |
+| Bottom bar                   | Slide up on screen load                   | 300ms spring |
+| Filter chip select           | Background fade in + slight scale         | 150ms        |
+| Chart segment tap            | Highlight glow + list scroll              | 200ms        |
 
 ### Haptic Feedback
 
-| Action | Haptic |
-|--------|--------|
-| Card tap | Light impact |
-| Filter chip tap | Light impact |
-| Mark Reviewed | Success notification |
-| Flag as False Positive | Medium impact |
-| Delete confirm | Warning notification |
-| Pull to refresh | Light impact at threshold |
+| Action                 | Haptic                    |
+| ---------------------- | ------------------------- |
+| Card tap               | Light impact              |
+| Filter chip tap        | Light impact              |
+| Mark Reviewed          | Success notification      |
+| Flag as False Positive | Medium impact             |
+| Delete confirm         | Warning notification      |
+| Pull to refresh        | Light impact at threshold |
 
 ### Empty States
 
 **Alerts (no alerts):**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │                                                 │
@@ -420,6 +433,7 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 ```
 
 **Devices (no devices):**
+
 ```
 ┌─────────────────────────────────────────────────┐
 │                                                 │
@@ -453,53 +467,56 @@ Transform the Alerts and Devices screens from utilitarian to Tesla/Rivian dashbo
 
 ### New Components to Create
 
-| Component | Description |
-|-----------|-------------|
-| `AlertsHero` | Area chart + filter chips, collapsible |
-| `DevicesHero` | Simple status display |
-| `AlertCard` | Scannable card with glow/accent treatment |
-| `DeviceCard` | Metrics bar layout |
-| `DetailHero` | Summary header for detail screens |
-| `TabSegment` | Signal/Location/History tabs |
-| `FloatingActionBar` | Bottom action bar |
-| `GlowContainer` | Wrapper for glow effect on critical/offline items |
-| `MetricsBar` | Horizontal metrics with dividers |
-| `ActivitySparkline` | Mini chart for history tabs |
+| Component           | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `AlertsHero`        | Area chart + filter chips, collapsible            |
+| `DevicesHero`       | Simple status display                             |
+| `AlertCard`         | Scannable card with glow/accent treatment         |
+| `DeviceCard`        | Metrics bar layout                                |
+| `DetailHero`        | Summary header for detail screens                 |
+| `TabSegment`        | Signal/Location/History tabs                      |
+| `FloatingActionBar` | Bottom action bar                                 |
+| `GlowContainer`     | Wrapper for glow effect on critical/offline items |
+| `MetricsBar`        | Horizontal metrics with dividers                  |
+| `ActivitySparkline` | Mini chart for history tabs                       |
 
 ### Components to Modify
 
-| Component | Changes |
-|-----------|---------|
-| `FilterChip` | Restyle for Tesla aesthetic |
+| Component            | Changes                      |
+| -------------------- | ---------------------------- |
+| `FilterChip`         | Restyle for Tesla aesthetic  |
 | `GroupedListSection` | Use for tab content sections |
-| `GroupedListRow` | Use for detail screen rows |
+| `GroupedListRow`     | Use for detail screen rows   |
 
 ---
 
 ## Design Patterns Summary
 
-| Screen | Hero | List/Content | Detail Pattern |
-|--------|------|--------------|----------------|
-| Alerts | Activity graph + filter chips | Scannable cards with glow/accent | Hero + Tabs (Signal/Location/History) + Bottom bar |
-| Devices | Simple status ("All Online") | Metrics bar cards | Hero + Tabs (Status/Location/History) + Bottom bar |
+| Screen  | Hero                          | List/Content                     | Detail Pattern                                     |
+| ------- | ----------------------------- | -------------------------------- | -------------------------------------------------- |
+| Alerts  | Activity graph + filter chips | Scannable cards with glow/accent | Hero + Tabs (Signal/Location/History) + Bottom bar |
+| Devices | Simple status ("All Online")  | Metrics bar cards                | Hero + Tabs (Status/Location/History) + Bottom bar |
 
 ---
 
 ## Files to Modify
 
 ### Screens
+
 - `src/screens/alerts/AlertsListScreen.tsx`
 - `src/screens/alerts/AlertDetailScreen.tsx`
 - `src/screens/devices/DeviceListScreen.tsx`
 - `src/screens/devices/DeviceDetailScreen.tsx`
 
 ### Components
+
 - `src/components/organisms/AlertCard/AlertCard.tsx`
 - `src/components/organisms/DeviceCard/DeviceCard.tsx`
 - `src/components/organisms/HeaderHero/AlertsHeaderHero.tsx`
 - `src/components/organisms/HeaderHero/DevicesHeaderHero.tsx`
 
 ### New Components
+
 - `src/components/molecules/FloatingActionBar/`
 - `src/components/molecules/MetricsBar/`
 - `src/components/molecules/ActivitySparkline/`

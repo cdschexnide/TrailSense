@@ -69,9 +69,7 @@ export const PatternCard: React.FC<PatternCardProps> = ({
               style={[
                 styles.badge,
                 {
-                  borderColor: classificationColor(
-                    visitor.classification
-                  ),
+                  borderColor: classificationColor(visitor.classification),
                 },
               ]}
             >
@@ -79,9 +77,7 @@ export const PatternCard: React.FC<PatternCardProps> = ({
                 style={[
                   styles.badgeText,
                   {
-                    color: classificationColor(
-                      visitor.classification
-                    ),
+                    color: classificationColor(visitor.classification),
                   },
                 ]}
               >

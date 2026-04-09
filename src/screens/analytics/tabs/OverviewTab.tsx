@@ -2,7 +2,13 @@ import React from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { formatDistanceStrict } from 'date-fns';
 import { BarChart } from 'react-native-gifted-charts';
-import { ChartCard, GroupedListRow, GroupedListSection, InsightCard, StatCard } from '@components/molecules';
+import {
+  ChartCard,
+  GroupedListRow,
+  GroupedListSection,
+  InsightCard,
+  StatCard,
+} from '@components/molecules';
 import { StackedAreaChart } from '@components/organisms/charts';
 import { Text } from '@components/atoms/Text';
 import { useTheme } from '@hooks/useTheme';
@@ -42,7 +48,9 @@ const changeMeta = (
 
 const getBatteryLabel = (device: Device) => {
   const battery = device.batteryPercent ?? device.battery;
-  return typeof battery === 'number' ? `${battery}% battery` : 'Battery unknown';
+  return typeof battery === 'number'
+    ? `${battery}% battery`
+    : 'Battery unknown';
 };
 
 export const OverviewTab: React.FC<OverviewTabProps> = ({
@@ -75,19 +83,31 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
         <StatCard
           title="Detections"
           value={analytics.totalAlerts}
-          change={changeMeta(analytics.totalAlerts, previous.totalAlerts, 'neutral')}
+          change={changeMeta(
+            analytics.totalAlerts,
+            previous.totalAlerts,
+            'neutral'
+          )}
           style={styles.statCard}
         />
         <StatCard
           title="Unique Devices"
           value={analytics.uniqueDevices}
-          change={changeMeta(analytics.uniqueDevices, previous.uniqueDevices, 'lower')}
+          change={changeMeta(
+            analytics.uniqueDevices,
+            previous.uniqueDevices,
+            'lower'
+          )}
           style={styles.statCard}
         />
         <StatCard
           title="Avg Confidence"
           value={`${analytics.avgConfidence}%`}
-          change={changeMeta(analytics.avgConfidence, previous.avgConfidence, 'higher')}
+          change={changeMeta(
+            analytics.avgConfidence,
+            previous.avgConfidence,
+            'higher'
+          )}
           style={styles.statCard}
         />
         <StatCard
@@ -147,9 +167,13 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
 
       <View style={styles.insights}>
         {insights.length === 0 ? (
-          <ChartCard title="Highlights" subtitle="No notable shifts in this period">
+          <ChartCard
+            title="Highlights"
+            subtitle="No notable shifts in this period"
+          >
             <Text variant="subheadline" color="secondaryLabel">
-              Analytics are stable. Check Signals or Patterns for detailed breakdowns.
+              Analytics are stable. Check Signals or Patterns for detailed
+              breakdowns.
             </Text>
           </ChartCard>
         ) : (
@@ -157,7 +181,11 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             <InsightCard
               key={insight.type}
               insight={insight}
-              onPress={insight.targetTab ? () => onSelectTab(insight.targetTab!) : undefined}
+              onPress={
+                insight.targetTab
+                  ? () => onSelectTab(insight.targetTab!)
+                  : undefined
+              }
             />
           ))
         )}
@@ -170,7 +198,9 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
             icon={device.online ? 'radio' : 'radio-outline'}
             iconColor={device.online ? colors.systemGreen : colors.systemRed}
             iconBackgroundColor={
-              device.online ? `${colors.systemGreen}20` : `${colors.systemRed}20`
+              device.online
+                ? `${colors.systemGreen}20`
+                : `${colors.systemRed}20`
             }
             title={device.name}
             value={device.online ? 'Online' : 'Offline'}

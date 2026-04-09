@@ -40,26 +40,31 @@ You should see in the console:
 ## 📱 What to Test
 
 ### Live Radar Tab 📡
+
 - Watch real-time detections appear every 5 seconds
 - See color-coded threat levels
 - Observe auto-fade after 30 seconds
 
 ### Alerts Tab 📢
+
 - Browse 55 pre-loaded alerts
 - Pull to refresh for new alerts
 - Tap alerts for details
 
 ### Devices Tab 🎯
+
 - View 5 detection devices
 - Watch battery updates every 15 seconds
 - Check online/offline status
 
 ### Analytics Tab 📊
+
 - View detection trends
 - Check threat distributions
 - Explore charts and graphs
 
 ### Settings Tab ⚙️
+
 - Manage 10 whitelist entries
 - Configure notifications
 - View user profile
@@ -80,6 +85,7 @@ You should see in the console:
 ## 🐛 Quick Fixes
 
 **Problem:** Login screen appears
+
 ```bash
 # Check .env file
 echo "USE_MOCK_API=true" > .env
@@ -87,12 +93,14 @@ npm start
 ```
 
 **Problem:** No data showing
+
 ```bash
 # Clear cache and restart
 npm start --reset-cache
 ```
 
 **Problem:** No WebSocket events
+
 ```bash
 # Check you're on Live Radar tab
 # Wait 5 seconds for first event

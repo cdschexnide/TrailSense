@@ -14,51 +14,51 @@
 
 ## File Map
 
-| Action | File | Category |
-|--------|------|----------|
-| Modify | `src/types/alert.ts` | types |
-| Modify | `src/types/knownDevice.ts` | types |
-| Modify | `src/types/replay.ts` | types |
-| Modify | `src/navigation/types.ts` | navigation |
-| Modify | `src/navigation/linking.ts` | navigation |
-| Modify | `src/utils/visualEffects.ts` | utilities |
-| Modify | `src/utils/rssiUtils.ts` | utilities |
-| Modify | `src/components/organisms/AlertCard/AlertCard.tsx` | alert-ui |
-| Modify | `src/screens/alerts/AlertDetailScreen.tsx` | alert-ui |
-| Modify | `src/screens/alerts/AlertListScreen.tsx` | alert-ui |
-| Modify | `src/screens/fingerprint/DeviceFingerprintScreen.tsx` | alert-ui |
-| Modify | `src/screens/home/PropertyCommandCenter.tsx` | alert-ui |
-| Modify | `src/hooks/usePropertyStatus.ts` | alert-ui |
-| Modify | `src/components/ai/cards/AlertBriefingCard.tsx` | ai-cards |
-| Modify | `src/components/ai/cards/SitrepCard.tsx` | ai-cards |
-| Modify | `src/services/llm/FocusedContextBuilder.ts` | llm |
-| Modify | `src/services/llm/ResponseProcessor.ts` | llm |
-| Modify | `src/services/llm/templates/AlertSummaryTemplate.ts` | llm |
-| Modify | `src/services/llm/templates/PatternAnalysisTemplate.ts` | llm |
-| Modify | `src/services/threatClassifier.ts` | services |
-| Modify | `src/services/deviceFingerprinting.ts` | services |
-| Modify | `src/services/patternDetection.ts` | services |
-| Modify | `src/services/fingerprintStore.ts` | services |
-| Modify | `src/store/slices/blockedDevicesSlice.ts` | state |
-| Modify | `src/hooks/useBlockedDevices.ts` | state |
-| Modify | `src/hooks/useSecurityContext.ts` | llm |
-| Modify | `src/api/analytics.ts` | analytics |
-| Modify | `src/hooks/useAnalytics.ts` | analytics |
-| Modify | `src/hooks/useTimeBucketing.ts` | replay |
-| Modify | `src/hooks/useReplayPath.ts` | replay |
-| Modify | `src/screens/radar/ProximityHeatmapScreen.tsx` | replay |
-| Modify | `src/components/organisms/ReplayRadarDisplay/ReplayRadarDisplay.tsx` | replay |
-| Modify | `src/components/molecules/FingerprintPeek/FingerprintPeek.tsx` | replay |
-| Modify | `src/screens/settings/AddKnownDeviceScreen.tsx` | known-devices |
-| Modify | `src/screens/settings/KnownDevicesScreen.tsx` | known-devices |
-| Modify | `src/components/molecules/KnownDeviceItem/KnownDeviceItem.tsx` | known-devices |
-| Modify | `src/mocks/data/mockAlerts.ts` | mock-data |
-| Modify | `src/mocks/data/mockAnalytics.ts` | mock-data |
-| Modify | `src/mocks/data/mockKnownDevices.ts` | mock-data |
-| Modify | `src/mocks/data/mockReplayPositions.ts` | mock-data |
-| Modify | `src/mocks/mockWebSocket.ts` | mock-data |
-| Modify | `src/utils/seedMockData.ts` | mock-data |
-| Modify | `__tests__/hooks/useAlerts.test.tsx` | tests |
+| Action | File                                                                 | Category      |
+| ------ | -------------------------------------------------------------------- | ------------- |
+| Modify | `src/types/alert.ts`                                                 | types         |
+| Modify | `src/types/knownDevice.ts`                                           | types         |
+| Modify | `src/types/replay.ts`                                                | types         |
+| Modify | `src/navigation/types.ts`                                            | navigation    |
+| Modify | `src/navigation/linking.ts`                                          | navigation    |
+| Modify | `src/utils/visualEffects.ts`                                         | utilities     |
+| Modify | `src/utils/rssiUtils.ts`                                             | utilities     |
+| Modify | `src/components/organisms/AlertCard/AlertCard.tsx`                   | alert-ui      |
+| Modify | `src/screens/alerts/AlertDetailScreen.tsx`                           | alert-ui      |
+| Modify | `src/screens/alerts/AlertListScreen.tsx`                             | alert-ui      |
+| Modify | `src/screens/fingerprint/DeviceFingerprintScreen.tsx`                | alert-ui      |
+| Modify | `src/screens/home/PropertyCommandCenter.tsx`                         | alert-ui      |
+| Modify | `src/hooks/usePropertyStatus.ts`                                     | alert-ui      |
+| Modify | `src/components/ai/cards/AlertBriefingCard.tsx`                      | ai-cards      |
+| Modify | `src/components/ai/cards/SitrepCard.tsx`                             | ai-cards      |
+| Modify | `src/services/llm/FocusedContextBuilder.ts`                          | llm           |
+| Modify | `src/services/llm/ResponseProcessor.ts`                              | llm           |
+| Modify | `src/services/llm/templates/AlertSummaryTemplate.ts`                 | llm           |
+| Modify | `src/services/llm/templates/PatternAnalysisTemplate.ts`              | llm           |
+| Modify | `src/services/threatClassifier.ts`                                   | services      |
+| Modify | `src/services/deviceFingerprinting.ts`                               | services      |
+| Modify | `src/services/patternDetection.ts`                                   | services      |
+| Modify | `src/services/fingerprintStore.ts`                                   | services      |
+| Modify | `src/store/slices/blockedDevicesSlice.ts`                            | state         |
+| Modify | `src/hooks/useBlockedDevices.ts`                                     | state         |
+| Modify | `src/hooks/useSecurityContext.ts`                                    | llm           |
+| Modify | `src/api/analytics.ts`                                               | analytics     |
+| Modify | `src/hooks/useAnalytics.ts`                                          | analytics     |
+| Modify | `src/hooks/useTimeBucketing.ts`                                      | replay        |
+| Modify | `src/hooks/useReplayPath.ts`                                         | replay        |
+| Modify | `src/screens/radar/ProximityHeatmapScreen.tsx`                       | replay        |
+| Modify | `src/components/organisms/ReplayRadarDisplay/ReplayRadarDisplay.tsx` | replay        |
+| Modify | `src/components/molecules/FingerprintPeek/FingerprintPeek.tsx`       | replay        |
+| Modify | `src/screens/settings/AddKnownDeviceScreen.tsx`                      | known-devices |
+| Modify | `src/screens/settings/KnownDevicesScreen.tsx`                        | known-devices |
+| Modify | `src/components/molecules/KnownDeviceItem/KnownDeviceItem.tsx`       | known-devices |
+| Modify | `src/mocks/data/mockAlerts.ts`                                       | mock-data     |
+| Modify | `src/mocks/data/mockAnalytics.ts`                                    | mock-data     |
+| Modify | `src/mocks/data/mockKnownDevices.ts`                                 | mock-data     |
+| Modify | `src/mocks/data/mockReplayPositions.ts`                              | mock-data     |
+| Modify | `src/mocks/mockWebSocket.ts`                                         | mock-data     |
+| Modify | `src/utils/seedMockData.ts`                                          | mock-data     |
+| Modify | `__tests__/hooks/useAlerts.test.tsx`                                 | tests         |
 
 **Backend (separate repo, coordination only):**
 | Modify | `trailsense-backend/src/controllers/alertsController.ts` | backend |
@@ -68,6 +68,7 @@
 ### Task 1: Update Alert, AlertMetadata, DeviceFingerprint, and AnalyticsData Types
 
 **Files:**
+
 - Modify: `src/types/alert.ts`
 
 - [ ] **Step 1: Update AlertMetadata interface**
@@ -176,6 +177,7 @@ Update AlertMetadata, DeviceFingerprint, and AnalyticsData."
 ### Task 2: Update KnownDevice and Replay Types
 
 **Files:**
+
 - Modify: `src/types/knownDevice.ts`
 - Modify: `src/types/replay.ts`
 
@@ -190,6 +192,7 @@ In `src/types/replay.ts`:
 Remove `macAddress: string` from `BucketEntry` (line 7). It already has `fingerprintHash` on line 6.
 
 Update `FingerprintPeekProps` (lines 34-40):
+
 ```typescript
 export interface FingerprintPeekProps {
   fingerprintHash: string;
@@ -211,6 +214,7 @@ git commit -m "refactor: update KnownDevice and replay types to use fingerprintH
 ### Task 3: Replace interpretRSSI with interpretAccuracy in visualEffects
 
 **Files:**
+
 - Modify: `src/utils/visualEffects.ts:240-268`
 
 - [ ] **Step 1: Replace the RSSI interpretation section**
@@ -263,6 +267,7 @@ git commit -m "refactor: replace interpretRSSI with interpretAccuracy"
 ### Task 4: Replace rssiUtils with fingerprint-based utilities
 
 **Files:**
+
 - Modify: `src/utils/rssiUtils.ts`
 
 - [ ] **Step 1: Rewrite the file**
@@ -308,6 +313,7 @@ git commit -m "refactor: replace rssiUtils with fingerprint-based utilities"
 ### Task 5: Update AlertCard Component
 
 **Files:**
+
 - Modify: `src/components/organisms/AlertCard/AlertCard.tsx`
 
 - [ ] **Step 1: Update imports**
@@ -331,6 +337,7 @@ onAddToKnown?: (fingerprintHash: string) => void;
 - [ ] **Step 3: Update proximity interpretation**
 
 Replace line 159:
+
 ```typescript
 // Old:
 const rssiInfo = interpretRSSI(alert.rssi);
@@ -341,12 +348,14 @@ const accuracyInfo = interpretAccuracy(alert.accuracyMeters);
 - [ ] **Step 4: Update all rssiInfo references**
 
 Throughout the component:
+
 - `rssiInfo.color` → `accuracyInfo.color`
 - `rssiInfo.label` → `accuracyInfo.label`
 
 - [ ] **Step 5: Update the signal metric display**
 
 Replace the `{alert.rssi} dBm` text (around line 221) with:
+
 ```typescript
 {alert.confidence}%
 ```
@@ -354,6 +363,7 @@ Replace the `{alert.rssi} dBm` text (around line 221) with:
 - [ ] **Step 6: Update the identifier display**
 
 Replace the macAddress conditional block (around lines 254-270) with:
+
 ```typescript
 <View style={styles.metadataItem}>
   <Text variant="caption2" color="secondaryLabel">
@@ -377,11 +387,13 @@ git commit -m "refactor: update AlertCard to use confidence, accuracyMeters, fin
 ### Task 6: Update AlertDetailScreen
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertDetailScreen.tsx`
 
 - [ ] **Step 1: Replace getProximityLabel helper with accuracy-based version**
 
 Import `interpretAccuracy` from `@utils/visualEffects`:
+
 ```typescript
 import { interpretAccuracy } from '@utils/visualEffects';
 ```
@@ -405,6 +417,7 @@ Note: the second metric uses `accuracyMeters` (position accuracy), NOT confidenc
 - [ ] **Step 3: Update Signal section rows**
 
 Replace RSSI row with Confidence row:
+
 ```typescript
 <GroupedListRow
   icon="cellular"
@@ -415,6 +428,7 @@ Replace RSSI row with Confidence row:
 ```
 
 Replace Proximity row with Estimated Accuracy row:
+
 ```typescript
 <GroupedListRow
   icon="locate-outline"
@@ -427,6 +441,7 @@ Replace Proximity row with Estimated Accuracy row:
 - [ ] **Step 4: Update fingerprint display and navigation**
 
 Replace MAC Address row:
+
 ```typescript
 <GroupedListRow
   icon="qr-code-outline"
@@ -437,6 +452,7 @@ Replace MAC Address row:
 ```
 
 Replace DeviceFingerprint navigation:
+
 ```typescript
 <GroupedListRow
   icon="analytics-outline"
@@ -464,6 +480,7 @@ git commit -m "refactor: update AlertDetailScreen to fingerprint-first"
 ### Task 7: Update AlertListScreen, PropertyCommandCenter, usePropertyStatus
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertListScreen.tsx`
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
 - Modify: `src/hooks/usePropertyStatus.ts`
@@ -471,13 +488,15 @@ git commit -m "refactor: update AlertDetailScreen to fingerprint-first"
 - [ ] **Step 1: Update AlertListScreen search filter**
 
 Replace macAddress search (lines 101-102):
+
 ```typescript
-alert.fingerprintHash.toLowerCase().includes(search.toLowerCase())
+alert.fingerprintHash.toLowerCase().includes(search.toLowerCase());
 ```
 
 - [ ] **Step 2: Update AlertListScreen blocked device filter**
 
 Replace line 119:
+
 ```typescript
 result = result.filter((alert: Alert) => !isBlocked(alert.fingerprintHash));
 ```
@@ -500,6 +519,7 @@ Replace `recentAlerts[0]?.macAddress` (line 254) with `recentAlerts[0]?.fingerpr
 - [ ] **Step 5: Update usePropertyStatus**
 
 Replace line 81:
+
 ```typescript
 const uniqueVisitors = new Set(todayAlerts.map(alert => alert.fingerprintHash));
 ```
@@ -516,6 +536,7 @@ git commit -m "refactor: update alert list, home screen, and property status to 
 ### Task 8: Update Navigation Types and Deep Links
 
 **Files:**
+
 - Modify: `src/navigation/types.ts`
 - Modify: `src/navigation/linking.ts`
 
@@ -526,6 +547,7 @@ In `src/navigation/types.ts`, replace all `DeviceFingerprint: { macAddress: stri
 - [ ] **Step 2: Update AddKnownDevice params**
 
 Replace both `AddKnownDevice: { macAddress?: string; deviceId?: string } | undefined` (lines 76, 91) with:
+
 ```typescript
 AddKnownDevice: { fingerprintHash?: string; deviceId?: string } | undefined;
 ```
@@ -533,6 +555,7 @@ AddKnownDevice: { fingerprintHash?: string; deviceId?: string } | undefined;
 - [ ] **Step 3: Update deep links**
 
 In `src/navigation/linking.ts`, replace all 5 occurrences of `:macAddress` with `:fingerprintHash`:
+
 - Line 20: `DeviceFingerprint: 'home/fingerprint/:fingerprintHash',`
 - Line 28: `DeviceFingerprint: 'alerts/fingerprint/:fingerprintHash',`
 - Line 40: `DeviceFingerprint: 'radar/fingerprint/:fingerprintHash',`
@@ -551,11 +574,13 @@ git commit -m "refactor: update navigation params and deep links to use fingerpr
 ### Task 9: Update DeviceFingerprintScreen
 
 **Files:**
+
 - Modify: `src/screens/fingerprint/DeviceFingerprintScreen.tsx`
 
 - [ ] **Step 1: Replace all macAddress references with fingerprintHash**
 
 This is a global find-replace within the file. Every `macAddress` becomes `fingerprintHash`:
+
 - Line 21: `const { fingerprintHash } = route.params;`
 - Line 27: `computeVisitPattern(alerts, fingerprintHash)`
 - Line 34: `alert.fingerprintHash === fingerprintHash`
@@ -579,12 +604,14 @@ git commit -m "refactor: update DeviceFingerprintScreen to use fingerprintHash"
 ### Task 10: Update AI Cards
 
 **Files:**
+
 - Modify: `src/components/ai/cards/AlertBriefingCard.tsx`
 - Modify: `src/components/ai/cards/SitrepCard.tsx`
 
 - [ ] **Step 1: Update AlertBriefingCard**
 
 In `src/components/ai/cards/AlertBriefingCard.tsx`:
+
 - Update import: remove `rssiToZone`, `formatMac` if no longer needed, or update to new function names
 - Line 113: Replace `{alert.rssi} dBm · {rssiToZone(alert.rssi).split(' ')[0]}` with `{alert.confidence}% · ~{alert.accuracyMeters.toFixed(0)}m`
 - Replace `formatMac(alert.macAddress)` with `alert.fingerprintHash`
@@ -592,6 +619,7 @@ In `src/components/ai/cards/AlertBriefingCard.tsx`:
 - [ ] **Step 2: Update SitrepCard**
 
 In `src/components/ai/cards/SitrepCard.tsx`:
+
 - Update import: remove `rssiToZone`, `formatMac` references
 - Line 95: Same replacement as AlertBriefingCard — `{alert.confidence}% · ~{alert.accuracyMeters.toFixed(0)}m`
 - Replace `formatMac(alert.macAddress)` with `alert.fingerprintHash`
@@ -608,6 +636,7 @@ git commit -m "refactor: update AI cards to use confidence/accuracyMeters/finger
 ### Task 11: Update LLM Services
 
 **Files:**
+
 - Modify: `src/services/llm/FocusedContextBuilder.ts`
 - Modify: `src/services/llm/ResponseProcessor.ts`
 - Modify: `src/services/llm/templates/AlertSummaryTemplate.ts`
@@ -616,6 +645,7 @@ git commit -m "refactor: update AI cards to use confidence/accuracyMeters/finger
 - [ ] **Step 1: Update FocusedContextBuilder**
 
 Replace `rssiToZone` function (lines 42-52) with accuracy-based zone:
+
 ```typescript
 function accuracyToZone(accuracyMeters: number): string {
   if (accuracyMeters < 5) {
@@ -632,6 +662,7 @@ function accuracyToZone(accuracyMeters: number): string {
 ```
 
 Replace `formatMac` function (lines 133-136) with:
+
 ```typescript
 function formatFingerprint(fingerprintHash: string): string {
   return fingerprintHash;
@@ -670,6 +701,7 @@ git commit -m "refactor: update LLM services to use confidence/accuracyMeters/fi
 ### Task 12: Rewrite ThreatClassifier
 
 **Files:**
+
 - Modify: `src/services/threatClassifier.ts`
 
 - [ ] **Step 1: Rewrite classifyAlert**
@@ -763,6 +795,7 @@ git commit -m "refactor: rewrite ThreatClassifier for fingerprint-first alert mo
 ### Task 13: Update deviceFingerprinting, patternDetection, and fingerprintStore
 
 **Files:**
+
 - Modify: `src/services/deviceFingerprinting.ts`
 - Modify: `src/services/patternDetection.ts`
 - Modify: `src/services/fingerprintStore.ts`
@@ -791,6 +824,7 @@ git commit -m "refactor: update fingerprint services to use fingerprintHash"
 ### Task 14: Update Blocked Devices (Redux Slice + Hook)
 
 **Files:**
+
 - Modify: `src/store/slices/blockedDevicesSlice.ts`
 - Modify: `src/hooks/useBlockedDevices.ts`
 
@@ -828,11 +862,13 @@ git commit -m "refactor: update blocked devices to key by fingerprintHash"
 ### Task 15: Update useSecurityContext
 
 **Files:**
+
 - Modify: `src/hooks/useSecurityContext.ts`
 
 - [ ] **Step 1: Update the context string builder**
 
 Replace lines 190-197 in the recent alerts formatter:
+
 ```typescript
 // Old:
 const rssi = a.rssi ? `${a.rssi} dBm` : 'N/A';
@@ -861,6 +897,7 @@ git commit -m "refactor: update useSecurityContext to use confidence/fingerprint
 ### Task 16: Update Analytics API and Hook
 
 **Files:**
+
 - Modify: `src/api/analytics.ts`
 - Modify: `src/hooks/useAnalytics.ts`
 
@@ -869,6 +906,7 @@ git commit -m "refactor: update useSecurityContext to use confidence/fingerprint
 - [ ] **Step 1: Update analytics API**
 
 In `src/api/analytics.ts`:
+
 - Line 37: `async getDeviceHistory(fingerprintHash: string)` — update param name
 - Line 38: URL path changes to `/analytics/devices/${fingerprintHash}`
 - Update `getTopDevices` return type: `macAddress` → `fingerprintHash`
@@ -876,6 +914,7 @@ In `src/api/analytics.ts`:
 - [ ] **Step 2: Update useAnalytics hook**
 
 In `src/hooks/useAnalytics.ts`:
+
 - Line 50: `export const useDeviceHistory = (fingerprintHash: string) =>`
 - Update query key: `['device-history', fingerprintHash]`
 - Update queryFn: `analyticsApi.getDeviceHistory(fingerprintHash)`
@@ -893,6 +932,7 @@ git commit -m "refactor: update analytics API and hook to use fingerprintHash"
 ### Task 17: Update Replay/Radar Hooks and Screens
 
 **Files:**
+
 - Modify: `src/hooks/useTimeBucketing.ts`
 - Modify: `src/hooks/useReplayPath.ts`
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
@@ -902,6 +942,7 @@ git commit -m "refactor: update analytics API and hook to use fingerprintHash"
 - [ ] **Step 1: Update useTimeBucketing**
 
 Replace macAddress-based alert-position joining:
+
 - Line 32: `if (position.fingerprintHash) {` (was `position.macAddress`)
 - Line 34: `alert.fingerprintHash !== position.fingerprintHash` (was `alert.macAddress !== position.macAddress`)
 - Line 106: `fingerprintHash: matchingAlert?.fingerprintHash ?? position.fingerprintHash ?? ''` (remove macAddress fallback)
@@ -909,6 +950,7 @@ Replace macAddress-based alert-position joining:
 - [ ] **Step 2: Update useReplayPath**
 
 Replace all macAddress-based grouping with fingerprintHash:
+
 - Line 15, 23, 32: interface fields `macAddress` → `fingerprintHash`
 - Line 66: `deviceMinutes.get(entry.fingerprintHash)`
 - Line 69: `deviceMinutes.set(entry.fingerprintHash, minuteMap)`
@@ -919,6 +961,7 @@ Replace all macAddress-based grouping with fingerprintHash:
 - [ ] **Step 3: Update ProximityHeatmapScreen**
 
 Replace all macAddress references:
+
 - Line 278: `fingerprintHash={selectedPosition.fingerprintHash || ''}`
 - Line 281-283: `onViewProfile={fingerprintHash => navigation.navigate('DeviceFingerprint', { fingerprintHash })}`
 - Lines 358-361: dedup by `e.fingerprintHash` instead of `e.macAddress`
@@ -936,6 +979,7 @@ Replace all macAddress references:
 - [ ] **Step 5: Update FingerprintPeek**
 
 Replace `macAddress` prop usage with `fingerprintHash`:
+
 - Line 7: `fingerprintHash` prop (type already updated in Task 2)
 - Line 11: display `fingerprintHash` substring instead of macAddress
 - Line 53-56: button disabled check and onPress use `fingerprintHash`
@@ -952,6 +996,7 @@ git commit -m "refactor: update replay/radar to use fingerprintHash instead of m
 ### Task 18: Update Known Device Screens and Components
 
 **Files:**
+
 - Modify: `src/screens/settings/AddKnownDeviceScreen.tsx`
 - Modify: `src/screens/settings/KnownDevicesScreen.tsx`
 - Modify: `src/components/molecules/KnownDeviceItem/KnownDeviceItem.tsx`
@@ -997,6 +1042,7 @@ git commit -m "refactor: update known device screens to use fingerprintHash"
 ### Task 19: Update Mock Alerts Data
 
 **Files:**
+
 - Modify: `src/mocks/data/mockAlerts.ts`
 
 - [ ] **Step 1: Replace generateMac with generateFingerprintHash**
@@ -1012,6 +1058,7 @@ const generateFingerprintHash = (type: DetectionType): string => {
 - [ ] **Step 2: Update persona definitions**
 
 Replace `macAddress` with `fingerprintHash` using backend prefix format:
+
 ```typescript
 // Example: { macAddress: 'AA:1A:28:3C:46:50', signalType: 'cellular' }
 // Becomes: { fingerprintHash: 'c_3c4650', signalType: 'cellular' }
@@ -1020,6 +1067,7 @@ Replace `macAddress` with `fingerprintHash` using backend prefix format:
 - [ ] **Step 3: Update all mock alert objects**
 
 For each alert:
+
 - Remove: `rssi`, `macAddress`, `cellularStrength`, `wifiDetected`, `bluetoothDetected`, `multiband`, `isStationary`, `seenCount`, `duration`
 - Add: `fingerprintHash`, `confidence` (0-100 integer), `accuracyMeters` (3-30 float)
 
@@ -1047,6 +1095,7 @@ git commit -m "refactor: update mock alerts to fingerprint-first shape"
 ### Task 20: Update Mock Analytics, Known Devices, and WebSocket
 
 **Files:**
+
 - Modify: `src/mocks/data/mockAnalytics.ts`
 - Modify: `src/mocks/data/mockKnownDevices.ts`
 - Modify: `src/mocks/mockWebSocket.ts`
@@ -1080,6 +1129,7 @@ git commit -m "refactor: update mock analytics, known devices, and WebSocket for
 ### Task 21: Update Seed Data, Replay Positions, and Fix Confidence Scale
 
 **Files:**
+
 - Modify: `src/utils/seedMockData.ts`
 - Modify: `src/mocks/data/mockReplayPositions.ts`
 
@@ -1109,6 +1159,7 @@ git commit -m "refactor: update seed data and replay positions, fix confidence t
 ### Task 22: Update Tests
 
 **Files:**
+
 - Modify: `__tests__/hooks/useAlerts.test.tsx`
 
 - [ ] **Step 1: Verify existing tests still pass**
@@ -1143,6 +1194,7 @@ Expected: Zero TypeScript errors. If any remain, they indicate missed `rssi`/`ma
 - [ ] **Step 2: Search for any remaining old references**
 
 Run:
+
 ```bash
 grep -r '\.rssi\b' src/ --include='*.ts' --include='*.tsx' -l
 grep -r '\.macAddress\b' src/ --include='*.ts' --include='*.tsx' -l
@@ -1167,6 +1219,7 @@ Expected: Clean or auto-fixed.
 - [ ] **Step 5: Smoke-check key screens**
 
 Start the app and verify these screens render without crashes:
+
 - Alert list screen (search, filter)
 - Alert detail screen (signal tab, location tab)
 - Device fingerprint screen (from alert navigation)

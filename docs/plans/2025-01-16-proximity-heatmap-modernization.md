@@ -34,6 +34,7 @@
 ## Task 1: Create PositionListItem Component
 
 **Files:**
+
 - Create: `src/components/molecules/PositionListItem/PositionListItem.tsx`
 - Create: `src/components/molecules/PositionListItem/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -145,11 +146,13 @@ git commit -m "feat(components): add PositionListItem for detected devices list"
 ## Task 2: Remove SVG Imports and Zone Constants
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Remove SVG imports (lines 16-24)**
 
 Delete these imports:
+
 ```typescript
 import Svg, {
   Circle,
@@ -165,6 +168,7 @@ import Svg, {
 **Step 2: Remove mock data toggle and generator (lines 50-96)**
 
 Delete:
+
 - `USE_MOCK_HEATMAP_DATA` constant
 - `generateMockAlerts` function
 - `MOCK_ALERTS` constant
@@ -172,6 +176,7 @@ Delete:
 **Step 3: Remove zone constants and types (lines 103-125)**
 
 Delete:
+
 - `ZONES` array
 - `MAX_RADIUS_METERS` constant
 - `ProximityData` interface
@@ -188,23 +193,29 @@ git commit -m "refactor(heatmap): remove SVG imports and zone constants"
 ## Task 3: Remove Zone Calculation Logic
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Remove overlay transform state (around line 139-144)**
 
 Delete:
+
 ```typescript
 const [overlayTransform, setOverlayTransform] = useState({
   translateX: 0,
   translateY: 0,
   scale: 1,
 });
-const initialCameraRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
+const initialCameraRef = useRef<{
+  center: [number, number];
+  zoom: number;
+} | null>(null);
 ```
 
 **Step 2: Remove mock alerts usage (around line 186)**
 
 Delete:
+
 ```typescript
 const alerts = USE_MOCK_HEATMAP_DATA ? MOCK_ALERTS : fetchedAlerts;
 ```
@@ -212,6 +223,7 @@ const alerts = USE_MOCK_HEATMAP_DATA ? MOCK_ALERTS : fetchedAlerts;
 **Step 3: Remove proximityData calculation (around line 206-245)**
 
 Delete the entire `proximityData` calculation block including:
+
 - `proximityData: ProximityData[]` mapping
 - `totalDetections` calculation
 - `maxCount` calculation
@@ -223,11 +235,15 @@ Delete the entire `handleCameraChanged` callback function.
 **Step 5: Remove resetMapView's overlay reset logic**
 
 Simplify `resetMapView` to only handle camera:
+
 ```typescript
 const resetMapView = useCallback(() => {
   if (cameraRef.current && hasValidLocation) {
     cameraRef.current.setCamera({
-      centerCoordinate: [deviceCoordinates.longitude!, deviceCoordinates.latitude!],
+      centerCoordinate: [
+        deviceCoordinates.longitude!,
+        deviceCoordinates.latitude!,
+      ],
       zoomLevel: 16,
       animationDuration: 500,
     });
@@ -238,6 +254,7 @@ const resetMapView = useCallback(() => {
 **Step 6: Remove overlay reset from device change effect (around line 364-368)**
 
 Simplify to only clear selected position:
+
 ```typescript
 useEffect(() => {
   setSelectedPosition(null);
@@ -260,6 +277,7 @@ git commit -m "refactor(heatmap): remove zone calculation logic"
 ## Task 4: Add centerOnPosition Function
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Add centerOnPosition callback after resetMapView**
@@ -296,11 +314,13 @@ git commit -m "feat(heatmap): add centerOnPosition for list-to-map interaction"
 ## Task 5: Remove SVG Overlay from JSX
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Remove the heatmapOverlay View (around lines 558-677)**
 
 Delete the entire block:
+
 ```typescript
 {/* SVG Heatmap Overlay - syncs with map gestures via transform */}
 <View
@@ -319,9 +339,11 @@ Delete the entire block:
 **Step 2: Remove onCameraChanged prop from MapView**
 
 Change:
+
 ```typescript
-onCameraChanged={handleCameraChanged}
+onCameraChanged = { handleCameraChanged };
 ```
+
 To: (remove the prop entirely)
 
 **Step 3: Simplify Reset View button condition**
@@ -329,6 +351,7 @@ To: (remove the prop entirely)
 The button should show when map has been moved from device center. Simplify to always show or use a simpler condition based on camera state.
 
 For now, keep a simple version:
+
 ```typescript
 {/* Reset View Button */}
 <TouchableOpacity
@@ -352,6 +375,7 @@ git commit -m "refactor(heatmap): remove SVG heatmap overlay from JSX"
 ## Task 6: Remove Zone Cards from JSX
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Remove Zone Legend card (around lines 726-760)**
@@ -378,6 +402,7 @@ git commit -m "refactor(heatmap): remove zone-based cards from UI"
 ## Task 7: Add Detected Devices List
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Add the detected devices list card after the heatmapCard**
@@ -452,11 +477,13 @@ git commit -m "feat(heatmap): add detected devices list with map interaction"
 ## Task 8: Clean Up Unused Styles
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Remove unused styles from StyleSheet**
 
 Delete these style definitions:
+
 - `heatmapOverlay`
 - `legendCard`
 - `legendHeader`
@@ -520,6 +547,7 @@ npx expo start --clear
 ```
 
 Verify:
+
 - Map loads with satellite view
 - ESP32 device shows as blue pulsing marker
 - Detected devices show as colored markers
@@ -539,14 +567,15 @@ git commit -m "feat(heatmap): complete modernization - positions over zones"
 
 ## Summary of Changes
 
-| Action | Files |
-|--------|-------|
+| Action | Files                                                            |
+| ------ | ---------------------------------------------------------------- |
 | Create | `src/components/molecules/PositionListItem/PositionListItem.tsx` |
-| Create | `src/components/molecules/PositionListItem/index.ts` |
-| Modify | `src/components/molecules/index.ts` |
-| Modify | `src/screens/radar/ProximityHeatmapScreen.tsx` |
+| Create | `src/components/molecules/PositionListItem/index.ts`             |
+| Modify | `src/components/molecules/index.ts`                              |
+| Modify | `src/screens/radar/ProximityHeatmapScreen.tsx`                   |
 
 **Removed:**
+
 - SVG heatmap overlay with zone rings
 - Zone Summary, Detection Type Totals, Detection Breakdown cards
 - Zone constants, calculations, and related state
@@ -554,6 +583,7 @@ git commit -m "feat(heatmap): complete modernization - positions over zones"
 - ~350 lines of code
 
 **Added:**
+
 - PositionListItem component
 - Detected devices list with empty state
 - centerOnPosition function for list-to-map interaction

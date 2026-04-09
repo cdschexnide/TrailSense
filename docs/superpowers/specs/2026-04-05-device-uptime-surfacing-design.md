@@ -37,12 +37,12 @@ the WebSocket layer and React Query cache automatically.
 A pure function `formatUptime(seconds: number): string` added in
 `DeviceDetailScreen.tsx` alongside the existing `formatRelativeTime` helper:
 
-| Condition | Output |
-|-----------|--------|
-| `>= 86400` (1 day) | `Xd Yh` (e.g., `3d 12h`) |
-| `>= 3600` (1 hour) | `Xh Ym` (e.g., `2h 34m`) |
+| Condition          | Output                    |
+| ------------------ | ------------------------- |
+| `>= 86400` (1 day) | `Xd Yh` (e.g., `3d 12h`)  |
+| `>= 3600` (1 hour) | `Xh Ym` (e.g., `2h 34m`)  |
 | `>= 60` (1 minute) | `Xm Ys` (e.g., `45m 12s`) |
-| `< 60` | `< 1m` |
+| `< 60`             | `< 1m`                    |
 
 The Status tab Uptime row changes from:
 
@@ -81,10 +81,12 @@ event alongside detection counts.
 ### 4. Mock Data Updates
 
 **`src/mocks/data/mockDevices.ts`:**
+
 - Online devices get realistic `uptimeSeconds` and `lastBootAt` values
 - Offline devices leave both fields `undefined`
 
 **`src/mocks/mockWebSocket.ts`:**
+
 - `generateMockDeviceStatus()` includes a random `uptimeSeconds` value in
   status emissions so the Status tab shows changing values in dev/demo mode
 
@@ -93,12 +95,12 @@ incoming fields into the React Query cache.
 
 ## Files Changed
 
-| File | Change |
-|------|--------|
-| `src/types/device.ts` | Add `uptimeSeconds` and `lastBootAt` fields |
+| File                                         | Change                                                     |
+| -------------------------------------------- | ---------------------------------------------------------- |
+| `src/types/device.ts`                        | Add `uptimeSeconds` and `lastBootAt` fields                |
 | `src/screens/devices/DeviceDetailScreen.tsx` | Add `formatUptime`, update Status tab, add History tab row |
-| `src/mocks/data/mockDevices.ts` | Add uptime values to online mock devices |
-| `src/mocks/mockWebSocket.ts` | Include `uptimeSeconds` in mock status emissions |
+| `src/mocks/data/mockDevices.ts`              | Add uptime values to online mock devices                   |
+| `src/mocks/mockWebSocket.ts`                 | Include `uptimeSeconds` in mock status emissions           |
 
 ## What Does NOT Change
 

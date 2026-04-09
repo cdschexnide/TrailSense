@@ -15,6 +15,7 @@
 ### Task 1: Add `deviceId` to `RadarStackParamList`
 
 **Files:**
+
 - Modify: `src/navigation/types.ts:41-45`
 
 - [ ] **Step 1: Update the LiveRadar param type**
@@ -46,6 +47,7 @@ git commit -m "feat: add deviceId param to LiveRadar nav type"
 ### Task 2: Create DevicePicker component
 
 **Files:**
+
 - Create: `src/components/molecules/DevicePicker/DevicePicker.tsx`
 - Create: `src/components/molecules/DevicePicker/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -384,6 +386,7 @@ git commit -m "feat: add DevicePicker dropdown component"
 ### Task 3: Integrate DevicePicker into ProximityHeatmapScreen
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 This is the main integration task. It has three parts: (A) replace state, (B) move status bar to parent + add picker trigger, (C) add device switch handler and deviceId param handler.
@@ -411,7 +414,7 @@ const selectedDevice = devices[selectedDeviceIndex];
 
 // Add:
 const selectedDevice = selectedDeviceId
-  ? devices.find(d => d.id === selectedDeviceId) ?? devices[0]
+  ? (devices.find(d => d.id === selectedDeviceId) ?? devices[0])
   : devices[0];
 ```
 
@@ -465,14 +468,11 @@ useEffect(() => {
 Add after the `centerOnPosition` callback:
 
 ```typescript
-const handleSelectDevice = useCallback(
-  (deviceId: string) => {
-    setSelectedDeviceId(deviceId);
-    autoPlayRef.current.pause();
-    autoPlayRef.current.setMinuteIndex(0);
-  },
-  []
-);
+const handleSelectDevice = useCallback((deviceId: string) => {
+  setSelectedDeviceId(deviceId);
+  autoPlayRef.current.pause();
+  autoPlayRef.current.setMinuteIndex(0);
+}, []);
 ```
 
 - [ ] **Step 5: Add replay camera re-center effect**
@@ -495,11 +495,7 @@ useEffect(() => {
     zoomLevel: 16,
     animationDuration: 1000,
   });
-}, [
-  deviceCoordinates.latitude,
-  deviceCoordinates.longitude,
-  hasValidLocation,
-]);
+}, [deviceCoordinates.latitude, deviceCoordinates.longitude, hasValidLocation]);
 ```
 
 - [ ] **Step 6: Add imports for DevicePicker and Haptics**
@@ -635,7 +631,7 @@ devices: any[];
 In the `LiveMapContent` call inside the parent return (around line 609), remove:
 
 ```typescript
-devices={devices}
+devices = { devices };
 ```
 
 - [ ] **Step 10: Run type-check**
@@ -655,6 +651,7 @@ git commit -m "feat: integrate DevicePicker into Radar screen"
 ### Task 4: Update DeviceDetail cross-tab navigation
 
 **Files:**
+
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx:124-132`
 
 - [ ] **Step 1: Update handleViewOnMap to pass deviceId**
@@ -689,6 +686,7 @@ git commit -m "feat: pass deviceId when navigating from DeviceDetail to Radar"
 ### Task 5: Fix mock replay data to support per-device switching
 
 **Files:**
+
 - Modify: `src/mocks/data/mockReplayPositions.ts`
 - Modify: `src/hooks/api/useReplayPositions.ts`
 
@@ -705,17 +703,21 @@ In `src/mocks/data/mockReplayPositions.ts`, replace the global `PROPERTY_CENTER`
 // const PROPERTY_CENTER = { latitude: 30.396526, longitude: -94.317806 };
 
 // Replace with a device center lookup:
-const DEVICE_CENTERS: Record<string, { latitude: number; longitude: number }> = {
-  'device-001': { latitude: 30.396526, longitude: -94.317806 },
-  'device-002': { latitude: 30.3943, longitude: -94.3191 },
-  'device-003': { latitude: 30.397, longitude: -94.3155 },
-  'device-004': { latitude: 30.3958, longitude: -94.3205 },
-  'device-005': { latitude: 30.3988, longitude: -94.3162 },
-};
+const DEVICE_CENTERS: Record<string, { latitude: number; longitude: number }> =
+  {
+    'device-001': { latitude: 30.396526, longitude: -94.317806 },
+    'device-002': { latitude: 30.3943, longitude: -94.3191 },
+    'device-003': { latitude: 30.397, longitude: -94.3155 },
+    'device-004': { latitude: 30.3958, longitude: -94.3205 },
+    'device-005': { latitude: 30.3988, longitude: -94.3162 },
+  };
 
 const DEFAULT_CENTER = DEVICE_CENTERS['device-001'];
 
-function getDeviceCenter(deviceId?: string): { latitude: number; longitude: number } {
+function getDeviceCenter(deviceId?: string): {
+  latitude: number;
+  longitude: number;
+} {
   if (!deviceId) return DEFAULT_CENTER;
   return DEVICE_CENTERS[deviceId] ?? DEFAULT_CENTER;
 }
@@ -728,8 +730,7 @@ function getDeviceCenter(deviceId?: string): { latitude: number; longitude: numb
 ```typescript
 const METERS_PER_DEG_LAT = 111_320;
 // Use fixed reference latitude — devices are close enough that this is accurate
-const METERS_PER_DEG_LNG =
-  111_320 * Math.cos((30.396526 * Math.PI) / 180);
+const METERS_PER_DEG_LNG = 111_320 * Math.cos((30.396526 * Math.PI) / 180);
 ```
 
 Update `toLatLng` to accept a center parameter:
@@ -830,7 +831,9 @@ export function generateReplayData(options?: ReplayDataOptions): ReplayData {
         const point = scenario.pointForProgress(visitProgress, minuteProgress);
         const coords = toLatLng(point.northMeters, point.eastMeters, center);
         const accuracyMeters = 10 + (step % 5) * 2;
-        const confidence = Math.round(Math.min(99, Math.max(55, point.confidence)));
+        const confidence = Math.round(
+          Math.min(99, Math.max(55, point.confidence))
+        );
         const timestamp = positionTime.toISOString();
 
         positions.push({
@@ -879,7 +882,9 @@ export function generateReplayPositions(date?: Date): ReplayPosition[] {
 }
 
 // After:
-export function generateReplayPositions(options?: ReplayDataOptions): ReplayPosition[] {
+export function generateReplayPositions(
+  options?: ReplayDataOptions
+): ReplayPosition[] {
   return generateReplayData(options).positions;
 }
 ```
@@ -968,6 +973,7 @@ git commit -m "fix: mock replay data varies by deviceId for device cycling"
 ### Task 6: Manual verification and final tests
 
 **Files:**
+
 - No file changes — verification only
 
 - [ ] **Step 1: Run all existing tests**
@@ -990,6 +996,7 @@ Expected: PASS (auto-fixes any formatting issues)
 Run: `npm start`
 
 Manual verification checklist:
+
 1. Open Radar tab — should show first device's Live Map (same as before)
 2. Tap device name in status bar — dropdown opens with all 5 mock devices, backdrop covers full screen
 3. Tap outside the dropdown (on the map area) — dropdown dismisses

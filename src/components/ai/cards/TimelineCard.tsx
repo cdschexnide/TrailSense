@@ -43,9 +43,7 @@ export const TimelineCard: React.FC<TimelineCardProps> = ({
   const maxCount = Math.max(...data.hourlyBuckets.map(b => b.count), 1);
 
   // Show every 2 hours to keep it compact
-  const visibleBuckets = data.hourlyBuckets.filter(
-    (_, i) => i % 2 === 0
-  );
+  const visibleBuckets = data.hourlyBuckets.filter((_, i) => i % 2 === 0);
 
   return (
     <BriefingContainer

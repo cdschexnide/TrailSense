@@ -1,5 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
-import { ThreatLevel } from '@types';
+import { ThreatLevel, ReportConfig, ReportTemplate } from '@types';
 
 export interface AlertFilterParams {
   threatLevels: ThreatLevel[];
@@ -56,6 +56,9 @@ export type AnalyticsStackParamList = {
   Dashboard: undefined;
   Heatmap: undefined;
   Reports: undefined;
+  ReportBuilder: { template: ReportTemplate; savedReportId?: string };
+  ReportPreview: { config: ReportConfig; savedReportId?: string };
+  Brief: undefined;
 };
 
 export type MoreStackParamList = {
@@ -63,6 +66,9 @@ export type MoreStackParamList = {
   Dashboard: undefined;
   Heatmap: undefined;
   Reports: undefined;
+  ReportBuilder: { template: ReportTemplate; savedReportId?: string };
+  ReportPreview: { config: ReportConfig; savedReportId?: string };
+  Brief: undefined;
   Settings: undefined;
   Profile: undefined;
   KnownDevices: undefined;

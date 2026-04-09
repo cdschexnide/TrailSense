@@ -8,12 +8,14 @@
 A comprehensive UI/UX refactor of the TrailSense mobile app focused on achieving Apple-native polish. The underlying business logic, navigation logic, and core functionality remain unchanged. This refactor is purely visual design, user interface components, and overall user experience.
 
 ### Goals
+
 - Modern, sleek, professional appearance
 - Consistent feel across all screens
 - Apple Human Interface Guidelines alignment
 - Support for both light and dark modes
 
 ### Non-Goals
+
 - Changing navigation structure
 - Modifying business logic
 - Adding new features
@@ -22,50 +24,54 @@ A comprehensive UI/UX refactor of the TrailSense mobile app focused on achieving
 
 ## Design Decisions
 
-| Decision | Choice |
-|----------|--------|
-| Visual style | Apple-native polish (Home, Wallet, Health apps) |
-| Color modes | Both light and dark |
+| Decision      | Choice                                                                     |
+| ------------- | -------------------------------------------------------------------------- |
+| Visual style  | Apple-native polish (Home, Wallet, Health apps)                            |
+| Color modes   | Both light and dark                                                        |
 | Status colors | Apple semantic colors (systemRed, systemOrange, systemGreen, systemYellow) |
-| Brand accent | Warm golden tan from logo (`#C9B896`) |
-| Summary cards | Interactive filter chips + scannable status |
-| Primary goal | Professional, modern, consistent feel |
+| Brand accent  | Warm golden tan from logo (`#C9B896`)                                      |
+| Summary cards | Interactive filter chips + scannable status                                |
+| Primary goal  | Professional, modern, consistent feel                                      |
 
 ---
 
 ## Color System
 
 ### Brand Accent
+
 Replace cyan/teal accent with warm golden tan derived from the TrailSense logo trail element.
 
 ```typescript
 // Primary brand accent
-brandAccent: '#C9B896'        // Golden tan (primary)
-brandAccentLight: '#D4C9A8'   // Lighter variant
-brandAccentDark: '#B5A682'    // Darker variant
+brandAccent: '#C9B896'; // Golden tan (primary)
+brandAccentLight: '#D4C9A8'; // Lighter variant
+brandAccentDark: '#B5A682'; // Darker variant
 ```
 
 ### Status Colors
+
 Adopt Apple's semantic colors for all status indicators:
 
 ```typescript
 // Threat levels (use Apple semantic colors)
-critical: systemRed      // #FF3B30 (light) / #FF453A (dark)
-high: systemOrange       // #FF9500 (light) / #FF9F0A (dark)
-medium: systemYellow     // #FFCC00 (light) / #FFD60A (dark)
-low: systemGreen         // #34C759 (light) / #30D158 (dark)
+critical: systemRed; // #FF3B30 (light) / #FF453A (dark)
+high: systemOrange; // #FF9500 (light) / #FF9F0A (dark)
+medium: systemYellow; // #FFCC00 (light) / #FFD60A (dark)
+low: systemGreen; // #34C759 (light) / #30D158 (dark)
 
 // Device status
-online: systemGreen
-offline: systemRed
+online: systemGreen;
+offline: systemRed;
 ```
 
 ### Background Philosophy
+
 - **Backgrounds are neutral** (system grays, grouped backgrounds)
 - **Color indicates meaning** (status, alerts, interactive elements)
 - **Accent color highlights actions** (buttons, links, selected states)
 
 No more colored card backgrounds. Color is used only for:
+
 - Status indicator dots
 - Tinted icons
 - Interactive element highlights
@@ -80,6 +86,7 @@ No more colored card backgrounds. Color is used only for:
 **Before:** Colored backgrounds and borders creating visual heaviness
 
 **After:**
+
 - `secondarySystemBackground` fill
 - Subtle shadow (`shadowSm`) OR hairline border (never both)
 - Consistent `12pt` corner radius
@@ -138,6 +145,7 @@ Follow Apple's grouped inset list style:
 **Before:** Cyan accent line + large title
 
 **After:**
+
 - Remove accent line entirely
 - Native iOS large title style
 - Action buttons use brand accent tint
@@ -146,6 +154,7 @@ Follow Apple's grouped inset list style:
 ### Bottom Tab Bar
 
 Current 6 tabs remain, with refinements:
+
 - Rename "TrailSens..." to "AI" (prevents truncation)
 - Selected state: brand accent (golden tan)
 - Unselected: `secondaryLabel` gray
@@ -185,6 +194,7 @@ Alerts   Devices    Map    Analytics   AI    Settings
 ```
 
 Key changes:
+
 - Inline filter chips (not colored boxes)
 - Neutral card backgrounds with status dot
 - Time-based grouping (Today, Yesterday, This Week)
@@ -228,6 +238,7 @@ Key changes:
 ```
 
 Key changes:
+
 - Detection type as screen title
 - Priority as subtitle badge
 - Grouped list sections
@@ -258,6 +269,7 @@ Key changes:
 ```
 
 Key changes:
+
 - Inline status chips
 - Simplified device cards
 - Metrics inline: `85% · Good · 14,917`
@@ -334,6 +346,7 @@ Key changes:
 ```
 
 Key changes:
+
 - Device name as screen title
 - Status as compact subtitle
 - Device switching via horizontal swipe (page dots)
@@ -376,6 +389,7 @@ Key changes:
 ```
 
 Key changes:
+
 - Segmented control for time period (native iOS style)
 - Stats in grouped list format
 - Trend indicators inline with metrics
@@ -383,6 +397,7 @@ Key changes:
 ### Settings Screen
 
 Minor refinements only (already closest to iOS style):
+
 - Remove icons from rows OR ensure consistent SF Symbol weights
 - Current values right-aligned in muted color
 - Profile card slightly elevated
@@ -394,14 +409,14 @@ Minor refinements only (already closest to iOS style):
 
 ### Animations
 
-| Interaction | Animation |
-|-------------|-----------|
-| List item tap | Subtle highlight fade (0.1s) |
-| Card press | Scale to 0.98 + dim |
-| Status changes | Fade crossfade (0.3s) |
-| Filter selection | Spring animation |
-| Pull to refresh | Native iOS rubber-band |
-| Swipe actions | Velocity-based spring |
+| Interaction      | Animation                    |
+| ---------------- | ---------------------------- |
+| List item tap    | Subtle highlight fade (0.1s) |
+| Card press       | Scale to 0.98 + dim          |
+| Status changes   | Fade crossfade (0.3s)        |
+| Filter selection | Spring animation             |
+| Pull to refresh  | Native iOS rubber-band       |
+| Swipe actions    | Velocity-based spring        |
 
 ### Haptic Feedback
 
@@ -437,42 +452,47 @@ Skeleton screens matching content shape with shimmer animation (1-2s cycle).
 
 ## Implementation Priority
 
-| Priority | Scope | Rationale |
-|----------|-------|-----------|
-| **P0** | Design tokens (colors, brand accent) | Foundation for everything |
-| **P1** | Alerts List + Alert Detail | Most-used, high visibility |
-| **P1** | Devices List + Device Detail | Second most-used |
-| **P2** | Summary stat components | Used across multiple screens |
-| **P2** | Card & ListSection components | Core building blocks |
-| **P3** | Map/Proximity Heatmap | Already partially updated |
-| **P3** | Analytics Dashboard | Lower frequency usage |
-| **P4** | Settings screens | Already closest to iOS style |
-| **P4** | Empty/Loading states | Polish layer |
+| Priority | Scope                                | Rationale                    |
+| -------- | ------------------------------------ | ---------------------------- |
+| **P0**   | Design tokens (colors, brand accent) | Foundation for everything    |
+| **P1**   | Alerts List + Alert Detail           | Most-used, high visibility   |
+| **P1**   | Devices List + Device Detail         | Second most-used             |
+| **P2**   | Summary stat components              | Used across multiple screens |
+| **P2**   | Card & ListSection components        | Core building blocks         |
+| **P3**   | Map/Proximity Heatmap                | Already partially updated    |
+| **P3**   | Analytics Dashboard                  | Lower frequency usage        |
+| **P4**   | Settings screens                     | Already closest to iOS style |
+| **P4**   | Empty/Loading states                 | Polish layer                 |
 
 ---
 
 ## Files to Modify
 
 ### Core Design System
+
 - `src/constants/colors.ts` - Add brand accent, refine threat colors
 - `src/theme/dark.ts` - Update with new palette
 - `src/theme/light.ts` - Create proper light mode palette
 
 ### Components (Atoms)
+
 - `src/components/atoms/Badge/` - Update color usage
 - `src/components/atoms/Button/` - Brand accent as primary
 
 ### Components (Molecules)
+
 - `src/components/molecules/StatCard.tsx` - Redesign as filter chips
 - `src/components/molecules/Card/` - Neutral backgrounds
 - `src/components/molecules/ListSection/` - Grouped inset style
 
 ### Components (Organisms)
+
 - `src/components/organisms/AlertCard/` - Remove colored bg, add status dot
 - `src/components/organisms/DeviceCard/` - Simplify, neutral bg
 - `src/components/organisms/HeaderHero/` - Remove accent line
 
 ### Screens
+
 - `src/screens/alerts/*` - Apply new patterns
 - `src/screens/devices/*` - Apply new patterns
 - `src/screens/radar/*` - Apply new patterns

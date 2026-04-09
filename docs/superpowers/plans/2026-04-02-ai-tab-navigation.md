@@ -13,6 +13,7 @@
 ### Task 1: Add AITab to navigation types
 
 **Files:**
+
 - Modify: `src/navigation/types.ts:20-26`
 
 - [ ] **Step 1: Add AITab to MainTabParamList**
@@ -87,6 +88,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ### Task 2: Register AITab in MainNavigator and convert More to gear icon
 
 **Files:**
+
 - Modify: `src/navigation/MainNavigator.tsx:1-83`
 
 - [ ] **Step 1: Add AIStack import and register all 6 tabs**
@@ -218,6 +220,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ### Task 3: Remove AI screen from MoreStack and MoreMenuScreen
 
 **Files:**
+
 - Modify: `src/navigation/stacks/MoreStack.tsx:10,40`
 - Modify: `src/screens/more/MoreMenuScreen.tsx:19-25`
 
@@ -232,7 +235,7 @@ import { AIAssistantScreen } from '@screens/ai';
 And remove the screen registration on line 40:
 
 ```tsx
-      <Stack.Screen name="TrailSenseAI" component={AIAssistantScreen} />
+<Stack.Screen name="TrailSenseAI" component={AIAssistantScreen} />
 ```
 
 - [ ] **Step 2: Remove AI entry from MoreMenuScreen**
@@ -240,13 +243,13 @@ And remove the screen registration on line 40:
 In `src/screens/more/MoreMenuScreen.tsx`, remove the AI Assistant menu item (lines 19-25):
 
 ```tsx
-        <GroupedListRow
-          title="AI Assistant"
-          icon="sparkles-outline"
-          iconColor="#8A6090"
-          showChevron
-          onPress={() => navigation.navigate('TrailSenseAI')}
-        />
+<GroupedListRow
+  title="AI Assistant"
+  icon="sparkles-outline"
+  iconColor="#8A6090"
+  showChevron
+  onPress={() => navigation.navigate('TrailSenseAI')}
+/>
 ```
 
 - [ ] **Step 3: Verify types compile**
@@ -270,6 +273,7 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ### Task 4: Move AI deep link to AITab
 
 **Files:**
+
 - Modify: `src/navigation/linking.ts:46-52`
 
 - [ ] **Step 1: Move TrailSenseAI deep link from MoreTab to AITab**
@@ -357,6 +361,7 @@ Expected: No lint errors.
 - [ ] **Step 3: Visual verification checklist (on simulator)**
 
 If running on simulator (`npx expo run:ios --device "iPhone 16 Pro"`):
+
 - 6 tabs visible: Home, Alerts, AI (sparkles), Radar, Devices, ⚙️ (no label)
 - Tapping AI tab loads AIAssistantScreen
 - Tapping gear icon loads MoreMenuScreen (no AI entry in the list)

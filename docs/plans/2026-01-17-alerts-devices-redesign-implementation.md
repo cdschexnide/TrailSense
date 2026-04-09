@@ -17,6 +17,7 @@
 A wrapper component that adds a subtle colored glow behind its children. Used for critical alerts and offline devices.
 
 **Files:**
+
 - Create: `src/components/molecules/GlowContainer/GlowContainer.tsx`
 - Create: `src/components/molecules/GlowContainer/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -134,6 +135,7 @@ export default GlowContainer;
 **Step 3: Add to molecules index**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { GlowContainer } from './GlowContainer';
 ```
@@ -161,6 +163,7 @@ Supports pulse animation and intensity levels."
 Horizontal bar displaying metrics with subtle dividers, Tesla dashboard style.
 
 **Files:**
+
 - Create: `src/components/molecules/MetricsBar/MetricsBar.tsx`
 - Create: `src/components/molecules/MetricsBar/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -257,6 +260,7 @@ export default MetricsBar;
 **Step 3: Add to molecules index**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { MetricsBar } from './MetricsBar';
 ```
@@ -279,6 +283,7 @@ Tesla dashboard style layout."
 Area chart with gradient fill for the Alerts hero section.
 
 **Files:**
+
 - Create: `src/components/molecules/ActivityChart/ActivityChart.tsx`
 - Create: `src/components/molecules/ActivityChart/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -417,6 +422,7 @@ export default ActivityChart;
 **Step 3: Add to molecules index**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { ActivityChart } from './ActivityChart';
 ```
@@ -439,6 +445,7 @@ Uses Skia for smooth rendering."
 Bottom action bar with primary button and secondary icons.
 
 **Files:**
+
 - Create: `src/components/molecules/FloatingActionBar/FloatingActionBar.tsx`
 - Create: `src/components/molecules/FloatingActionBar/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -638,6 +645,7 @@ export default FloatingActionBar;
 **Step 3: Add to molecules index**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { FloatingActionBar } from './FloatingActionBar';
 ```
@@ -660,6 +668,7 @@ Used on detail screens for quick actions."
 Segmented control for switching between tabs in detail screens.
 
 **Files:**
+
 - Create: `src/components/molecules/TabSegment/TabSegment.tsx`
 - Create: `src/components/molecules/TabSegment/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -778,6 +787,7 @@ export default TabSegment;
 **Step 3: Add to molecules index**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { TabSegment } from './TabSegment';
 ```
@@ -800,6 +810,7 @@ Signal/Location/History navigation."
 Hero summary section for detail screens showing key metrics.
 
 **Files:**
+
 - Create: `src/components/molecules/DetailHero/DetailHero.tsx`
 - Create: `src/components/molecules/DetailHero/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -923,6 +934,7 @@ export default DetailHero;
 **Step 3: Add to molecules index**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { DetailHero } from './DetailHero';
 ```
@@ -947,6 +959,7 @@ title, subtitle, and inline metrics."
 Replace current inline filter bar with activity chart + filter chips below.
 
 **Files:**
+
 - Modify: `src/components/organisms/HeaderHero/AlertsHeaderHero.tsx`
 
 **Step 1: Update AlertsHeaderHero**
@@ -1100,6 +1113,7 @@ export default AlertsHeaderHero;
 In `src/screens/alerts/AlertListScreen.tsx`, update the hero component props:
 
 Find this line (~line 131):
+
 ```typescript
 <AlertsHeaderHero
   threatCounts={threatCounts}
@@ -1109,6 +1123,7 @@ Find this line (~line 131):
 ```
 
 Replace with:
+
 ```typescript
 <AlertsHeaderHero
   threatCounts={threatCounts}
@@ -1143,6 +1158,7 @@ Chart collapses on scroll, filter chips remain visible."
 Add glow effect for critical alerts using GlowContainer.
 
 **Files:**
+
 - Modify: `src/components/organisms/AlertCard/AlertCard.tsx`
 
 **Step 1: Update AlertCard to use GlowContainer for critical**
@@ -1150,6 +1166,7 @@ Add glow effect for critical alerts using GlowContainer.
 In `src/components/organisms/AlertCard/AlertCard.tsx`:
 
 Add import at top:
+
 ```typescript
 import { GlowContainer } from '@components/molecules/GlowContainer';
 ```
@@ -1258,6 +1275,7 @@ Find the return statement (~line 142) and update:
 ```
 
 Update styles:
+
 ```typescript
 const styles = StyleSheet.create({
   glowWrapper: {
@@ -1312,6 +1330,7 @@ Non-critical alerts use thin left accent line (3px)."
 Replace filter chips with simple status display.
 
 **Files:**
+
 - Modify: `src/components/organisms/HeaderHero/DevicesHeaderHero.tsx`
 
 **Step 1: Update DevicesHeaderHero**
@@ -1591,6 +1610,7 @@ git commit -m "refactor(Devices): simple status hero, flat list
 Replace current stats display with horizontal MetricsBar and add glow for offline.
 
 **Files:**
+
 - Modify: `src/components/organisms/DeviceCard/DeviceCard.tsx`
 
 **Step 1: Update DeviceCard**
@@ -1848,6 +1868,7 @@ git commit -m "refactor(DeviceCard): metrics bar layout, glow for offline
 Add tabs (Signal | Location | History) and floating action bar.
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertDetailScreen.tsx`
 
 **Step 1: Refactor AlertDetailScreen with tabs**
@@ -2242,6 +2263,7 @@ git commit -m "refactor(AlertDetail): tabs + floating action bar
 Add tabs (Status | Location | History) and floating action bar.
 
 **Files:**
+
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx`
 
 **Step 1: Refactor DeviceDetailScreen with tabs**
@@ -2653,6 +2675,7 @@ npx expo start --clear
 ```
 
 Navigate through:
+
 1. Alerts List - Verify activity chart hero, filter chips, card glow/accents
 2. Alert Detail - Verify hero, tabs, floating action bar
 3. Devices List - Verify simple status hero, metrics bar cards, no grouping
@@ -2689,20 +2712,20 @@ Phase 5: Device detail
 
 ## Summary
 
-| Phase | Components/Files | Status |
-|-------|-----------------|--------|
-| 1.1 | GlowContainer | Create |
-| 1.2 | MetricsBar | Create |
-| 1.3 | ActivityChart | Create |
-| 1.4 | FloatingActionBar | Create |
-| 1.5 | TabSegment | Create |
-| 1.6 | DetailHero | Create |
-| 2.1 | AlertsHeaderHero | Modify |
-| 2.2 | AlertCard | Modify |
-| 3.1 | DevicesHeaderHero | Modify |
-| 3.2 | DeviceCard | Modify |
-| 3.3 | DeviceListScreen | Modify |
-| 4.1 | AlertDetailScreen | Modify |
-| 5.1 | DeviceDetailScreen | Modify |
+| Phase | Components/Files   | Status |
+| ----- | ------------------ | ------ |
+| 1.1   | GlowContainer      | Create |
+| 1.2   | MetricsBar         | Create |
+| 1.3   | ActivityChart      | Create |
+| 1.4   | FloatingActionBar  | Create |
+| 1.5   | TabSegment         | Create |
+| 1.6   | DetailHero         | Create |
+| 2.1   | AlertsHeaderHero   | Modify |
+| 2.2   | AlertCard          | Modify |
+| 3.1   | DevicesHeaderHero  | Modify |
+| 3.2   | DeviceCard         | Modify |
+| 3.3   | DeviceListScreen   | Modify |
+| 4.1   | AlertDetailScreen  | Modify |
+| 5.1   | DeviceDetailScreen | Modify |
 
 **Total: 13 tasks, ~6 new components, 7 file modifications**

@@ -1,4 +1,5 @@
 # On-Device LLM Integration Research for TrailSense
+
 **Research Date:** November 24, 2025
 **Purpose:** Evaluate on-device LLM options for React Native mobile app integration
 
@@ -13,7 +14,9 @@
 **LLM Solution:** Convert structured alert data into human-readable explanations.
 
 #### Example Transformation
+
 **Input (Structured Data):**
+
 ```json
 {
   "detection_type": "wifi",
@@ -28,6 +31,7 @@
 ```
 
 **LLM Output (Natural Language):**
+
 ```
 ⚠️ HIGH ALERT: Unknown iPhone detected very close to your property (within 10 feet)
 and getting closer. This device has a strong signal (-55 dBm) and was first seen
@@ -35,6 +39,7 @@ and getting closer. This device has a strong signal (-55 dBm) and was first seen
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 You are a security assistant. Convert this detection into a clear,
@@ -54,6 +59,7 @@ const summary = await llm.generate(prompt, { max_tokens: 100 });
 ```
 
 #### Benefits
+
 ✅ Improves user comprehension
 ✅ Reduces decision fatigue
 ✅ Makes app accessible to non-technical users
@@ -68,18 +74,21 @@ const summary = await llm.generate(prompt, { max_tokens: 100 });
 **LLM Solution:** Analyze multiple detections and explain patterns in natural language.
 
 #### Example
+
 **Input (Multiple Detections):**
+
 ```javascript
 const detections = [
-  { device: "XX:XX:XX:XX:XX:XX", time: "14:05", day: "Monday", zone: "FAR" },
-  { device: "XX:XX:XX:XX:XX:XX", time: "14:07", day: "Tuesday", zone: "FAR" },
-  { device: "XX:XX:XX:XX:XX:XX", time: "14:03", day: "Wednesday", zone: "FAR" },
-  { device: "XX:XX:XX:XX:XX:XX", time: "14:10", day: "Thursday", zone: "FAR" },
-  { device: "XX:XX:XX:XX:XX:XX", time: "14:06", day: "Friday", zone: "FAR" }
+  { device: 'XX:XX:XX:XX:XX:XX', time: '14:05', day: 'Monday', zone: 'FAR' },
+  { device: 'XX:XX:XX:XX:XX:XX', time: '14:07', day: 'Tuesday', zone: 'FAR' },
+  { device: 'XX:XX:XX:XX:XX:XX', time: '14:03', day: 'Wednesday', zone: 'FAR' },
+  { device: 'XX:XX:XX:XX:XX:XX', time: '14:10', day: 'Thursday', zone: 'FAR' },
+  { device: 'XX:XX:XX:XX:XX:XX', time: '14:06', day: 'Friday', zone: 'FAR' },
 ];
 ```
 
 **LLM Output:**
+
 ```
 📊 PATTERN DETECTED: This device appears on your property every weekday around
 2:00-2:10 PM and stays in the FAR zone (50-200 feet away, likely the street).
@@ -90,6 +99,7 @@ reduce false alarms.
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 Analyze these detections and identify patterns:
@@ -104,6 +114,7 @@ const analysis = await llm.generate(prompt, { max_tokens: 150 });
 ```
 
 #### Benefits
+
 ✅ Reduces false alarms
 ✅ Helps users build whitelist
 ✅ Identifies routine vs suspicious behavior
@@ -122,6 +133,7 @@ const analysis = await llm.generate(prompt, { max_tokens: 150 });
 **User:** "What happened while I was away this weekend?"
 
 **LLM:**
+
 ```
 While you were away (Sat-Sun), there were 12 detections:
 - 8 from your neighbor's WiFi (whitelisted)
@@ -133,6 +145,7 @@ While you were away (Sat-Sun), there were 12 detections:
 **User:** "Show me all suspicious detections from last night"
 
 **LLM:**
+
 ```
 Last night (10 PM - 6 AM), there were 2 suspicious detections:
 
@@ -149,6 +162,7 @@ Both devices have not been seen before. Review your cameras for these times.
 **User:** "Why did I get an alert for my own phone?"
 
 **LLM:**
+
 ```
 Your phone "John's iPhone" triggered an alert because it wasn't on the whitelist
 yet. I've noticed this device appears every day when you arrive home around
@@ -159,17 +173,19 @@ for this device.
 ```
 
 #### Implementation
+
 ```typescript
 const conversationContext = [
   { role: 'system', content: 'You are a security assistant for TrailSense...' },
   { role: 'user', content: userQuery },
-  { role: 'assistant', content: await querySecurityData(userQuery) }
+  { role: 'assistant', content: await querySecurityData(userQuery) },
 ];
 
 const response = await llm.chat(conversationContext, { max_tokens: 200 });
 ```
 
 #### Benefits
+
 ✅ Natural interaction (no complex UI navigation)
 ✅ Contextual insights
 ✅ Proactive recommendations
@@ -186,6 +202,7 @@ const response = await llm.chat(conversationContext, { max_tokens: 200 });
 #### Example
 
 **LLM Analysis:**
+
 ```
 🤖 WHITELIST SUGGESTION
 
@@ -205,6 +222,7 @@ Auto-dismiss: Yes
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 Analyze this device's detection history and determine if it should be whitelisted:
@@ -223,6 +241,7 @@ const suggestion = await llm.generate(prompt, { max_tokens: 150 });
 ```
 
 #### Benefits
+
 ✅ Reduces manual whitelist maintenance
 ✅ Learns user's environment
 ✅ Reduces false alarms over time
@@ -238,18 +257,20 @@ const suggestion = await llm.generate(prompt, { max_tokens: 150 });
 #### Example
 
 **Threat Score Breakdown:**
+
 ```javascript
 const threatFactors = {
-  cellular_only: true,        // +40 points
-  nighttime: true,            // +20 points
-  immediate_zone: true,       // +30 points
-  unknown_device: true,       // +15 points
-  stationary: true,           // +15 points
-  total_score: 120            // CRITICAL
+  cellular_only: true, // +40 points
+  nighttime: true, // +20 points
+  immediate_zone: true, // +30 points
+  unknown_device: true, // +15 points
+  stationary: true, // +15 points
+  total_score: 120, // CRITICAL
 };
 ```
 
 **LLM Explanation:**
+
 ```
 🔴 CRITICAL THREAT: This detection has multiple red flags:
 
@@ -272,6 +293,7 @@ visitor.
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 Explain why this detection received a CRITICAL threat score:
@@ -286,6 +308,7 @@ const explanation = await llm.generate(prompt, { max_tokens: 200 });
 ```
 
 #### Benefits
+
 ✅ Transparency in threat scoring
 ✅ User education (learn what's suspicious)
 ✅ Actionable guidance
@@ -304,6 +327,7 @@ const explanation = await llm.generate(prompt, { max_tokens: 200 });
 **User (voice):** "Hey TrailSense, what's the status?"
 
 **LLM (text-to-speech):**
+
 ```
 Your property is secure. No alerts in the past 8 hours. The last detection
 was your neighbor's WiFi at 2:30 PM, which is whitelisted. All devices are
@@ -313,6 +337,7 @@ online and functioning normally.
 **User:** "Any detections while I was asleep?"
 
 **LLM:**
+
 ```
 Yes, one detection at 11:45 PM. Unknown WiFi device in the FAR zone, likely
 a passing car. It was marked as LOW threat and only stayed for 30 seconds.
@@ -320,23 +345,28 @@ Nothing to worry about.
 ```
 
 #### Implementation (with React Native ExecuTorch)
+
 ```typescript
 // Speech-to-text (on-device)
 const transcript = await ExecuTorchModule.speechToText(audioBuffer);
 
 // LLM processing
-const response = await llm.generate(`
+const response = await llm.generate(
+  `
 User voice query: "${transcript}"
 Security context: ${await getSecuritySummary()}
 
 Provide a concise, conversational response suitable for voice output.
-`, { max_tokens: 100 });
+`,
+  { max_tokens: 100 }
+);
 
 // Text-to-speech (Expo AV or native)
 await textToSpeech(response);
 ```
 
 #### Benefits
+
 ✅ Hands-free security monitoring
 ✅ Accessibility for visually impaired
 ✅ Convenient for busy users
@@ -355,19 +385,21 @@ await textToSpeech(response);
 **User (text):** "Alert me when unknown devices are very close at night"
 
 **LLM Parsing:**
+
 ```javascript
 const alertRule = {
   conditions: [
     { field: 'whitelist_status', value: 'unknown' },
     { field: 'zone', value: 'IMMEDIATE' },
-    { field: 'time', value: 'nighttime' } // 10 PM - 6 AM
+    { field: 'time', value: 'nighttime' }, // 10 PM - 6 AM
   ],
   action: 'push_notification',
-  priority: 'high'
+  priority: 'high',
 };
 ```
 
 **LLM Confirmation:**
+
 ```
 ✅ Alert rule created:
 
@@ -380,6 +412,7 @@ This rule will override quiet hours and send immediate notifications.
 **User:** "Don't alert me about deliveries during the day"
 
 **LLM:**
+
 ```
 ✅ Alert rule updated:
 
@@ -390,6 +423,7 @@ You'll still receive alerts for close proximity or nighttime detections.
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 Parse this user's alert configuration request into structured rules:
@@ -408,11 +442,12 @@ Also provide a human-readable confirmation.
 
 const parsed = await llm.generate(prompt, {
   max_tokens: 200,
-  response_format: 'json'
+  response_format: 'json',
 });
 ```
 
 #### Benefits
+
 ✅ Dramatically simplified configuration
 ✅ No UI complexity
 ✅ Accessible to non-technical users
@@ -429,6 +464,7 @@ const parsed = await llm.generate(prompt, {
 #### Example Weekly Report
 
 **LLM-Generated Insights:**
+
 ```
 📊 WEEKLY SECURITY REPORT (Nov 18-24, 2025)
 
@@ -464,6 +500,7 @@ KEY FINDINGS:
 ```
 
 #### Implementation
+
 ```typescript
 const weeklyData = await getWeeklySecurityData();
 
@@ -485,6 +522,7 @@ const report = await llm.generate(prompt, { max_tokens: 400 });
 ```
 
 #### Benefits
+
 ✅ Proactive security management
 ✅ User education
 ✅ Actionable insights
@@ -501,15 +539,17 @@ const report = await llm.generate(prompt, { max_tokens: 400 });
 #### Example
 
 **Input (3 Simultaneous Detections):**
+
 ```javascript
 const detections = [
   { type: 'wifi', device: 'iPhone', rssi: -55, zone: 'IMMEDIATE' },
   { type: 'bluetooth', device: 'Apple Watch', rssi: -58, zone: 'IMMEDIATE' },
-  { type: 'bluetooth', device: 'AirPods Pro', rssi: -52, zone: 'IMMEDIATE' }
+  { type: 'bluetooth', device: 'AirPods Pro', rssi: -52, zone: 'IMMEDIATE' },
 ];
 ```
 
 **LLM Clustering:**
+
 ```
 📱 SINGLE VISITOR DETECTED
 
@@ -526,6 +566,7 @@ Instead of 3 separate alerts, I've grouped this as a single event.
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 Analyze these simultaneous detections and determine if they represent
@@ -541,6 +582,7 @@ const clustering = await llm.generate(prompt, { max_tokens: 150 });
 ```
 
 #### Benefits
+
 ✅ Reduces alert fatigue (3 alerts → 1)
 ✅ More accurate threat assessment
 ✅ Better user experience
@@ -559,6 +601,7 @@ const clustering = await llm.generate(prompt, { max_tokens: 150 });
 **User:** "What does RSSI mean?"
 
 **LLM:**
+
 ```
 RSSI stands for "Received Signal Strength Indicator." It measures how strong
 a WiFi or Bluetooth signal is, in dBm (decibel-milliwatts).
@@ -573,6 +616,7 @@ We use RSSI to estimate distance and assign zones (IMMEDIATE, NEAR, FAR, EXTREME
 **User:** "How do I add a device to my whitelist?"
 
 **LLM:**
+
 ```
 To whitelist a device:
 
@@ -591,6 +635,7 @@ Would you like me to walk you through this with a specific alert?
 **User:** "Why am I getting so many alerts?"
 
 **LLM:**
+
 ```
 High alert volume is often caused by:
 
@@ -609,6 +654,7 @@ to whitelist?
 ```
 
 #### Implementation
+
 ```typescript
 const prompt = `
 You are a helpful assistant for the TrailSense security app. Answer this
@@ -630,6 +676,7 @@ const answer = await llm.generate(prompt, { max_tokens: 150 });
 ```
 
 #### Benefits
+
 ✅ Reduces support burden
 ✅ Improves user onboarding
 ✅ In-context help (no leaving app)
@@ -640,11 +687,13 @@ const answer = await llm.generate(prompt, { max_tokens: 150 });
 ## USE CASE PRIORITY SUMMARY
 
 ### High Priority (Implement in Phase 1-2)
+
 1. ✅ **5.1 Natural Language Alert Summaries** - Core feature
 2. ✅ **5.2 Pattern Recognition Narratives** - High value
 3. ✅ **5.3 Conversational Security Assistant** - Differentiator
 
 ### Medium Priority (Implement in Phase 3)
+
 4. **5.4 Smart Whitelist Management** - Automation
 5. **5.5 Threat Scenario Classification** - Education
 6. **5.6 Voice-Activated Queries** - Convenience
@@ -652,6 +701,7 @@ const answer = await llm.generate(prompt, { max_tokens: 150 });
 8. **5.9 Detection Clustering** - UX improvement
 
 ### Low Priority (Future enhancements)
+
 9. **5.7 Natural Language Alert Configuration** - Nice to have
 10. **5.10 Contextual Help & Onboarding** - Support reduction
 

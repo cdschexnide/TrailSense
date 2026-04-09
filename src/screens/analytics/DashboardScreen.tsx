@@ -34,7 +34,12 @@ type DashboardScreenProps =
 export const DashboardScreen = ({ navigation }: DashboardScreenProps) => {
   const [period, setPeriod] = useState<Period>('week');
   const [tab, setTab] = useState<AnalyticsTab>('overview');
-  const { data: analytics, isLoading, isError, refetch } = useAnalytics({
+  const {
+    data: analytics,
+    isLoading,
+    isError,
+    refetch,
+  } = useAnalytics({
     period,
   });
   const { data: comparison } = useComparison({
@@ -148,7 +153,11 @@ export const DashboardScreen = ({ navigation }: DashboardScreenProps) => {
         ) : tab === 'signals' ? (
           <SignalsTab analytics={analytics} />
         ) : (
-          <PatternsTab analytics={analytics} comparison={comparison} period={period} />
+          <PatternsTab
+            analytics={analytics}
+            comparison={comparison}
+            period={period}
+          />
         )}
       </View>
     </ScreenLayout>

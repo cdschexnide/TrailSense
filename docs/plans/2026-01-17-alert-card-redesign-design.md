@@ -15,6 +15,7 @@
 ### Visual Layout
 
 **Standard Card (High/Medium/Low):**
+
 ```
 ┌─────────────────────────────────────────────┐
 │▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀│  ← 3px top accent (threat color)
@@ -26,6 +27,7 @@
 ```
 
 **Critical Card (enhanced emphasis):**
+
 ```
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  ← 1px border (threat color)
 ┃▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀┃  ← 5px top accent
@@ -38,30 +40,31 @@
 
 ### Design Tokens
 
-| Element | Specification |
-|---------|---------------|
-| Card height | ~76px (reduced from ~140px) |
-| Top accent height | 3px standard, 5px critical |
-| Border radius | 12px |
-| Card background | `theme.colors.secondarySystemBackground` |
-| Padding horizontal | 12px |
-| Padding vertical | 10px |
-| Icon size | 20px (inline with title) |
-| Gap between icon and title | 8px |
-| Row gap | 6px |
+| Element                    | Specification                            |
+| -------------------------- | ---------------------------------------- |
+| Card height                | ~76px (reduced from ~140px)              |
+| Top accent height          | 3px standard, 5px critical               |
+| Border radius              | 12px                                     |
+| Card background            | `theme.colors.secondarySystemBackground` |
+| Padding horizontal         | 12px                                     |
+| Padding vertical           | 10px                                     |
+| Icon size                  | 20px (inline with title)                 |
+| Gap between icon and title | 8px                                      |
+| Row gap                    | 6px                                      |
 
 ### Typography
 
-| Element | Variant | Weight | Color |
-|---------|---------|--------|-------|
-| Detection title | headline | semibold | label |
-| Timestamp | caption1 | regular | secondaryLabel |
-| Metadata | caption1 | regular | secondaryLabel |
+| Element         | Variant  | Weight   | Color          |
+| --------------- | -------- | -------- | -------------- |
+| Detection title | headline | semibold | label          |
+| Timestamp       | caption1 | regular  | secondaryLabel |
+| Metadata        | caption1 | regular  | secondaryLabel |
 | Proximity badge | caption2 | semibold | rssiInfo.color |
 
 ### Metadata Format
 
 Single line, dot-separated:
+
 ```
 {rssi} dBm · {proximity pill} · {deviceId} · {macAddress last 4}
 ```
@@ -72,12 +75,12 @@ Single line, dot-separated:
 
 ### Threat Level Styling
 
-| Level | Accent Height | Border | Color |
-|-------|---------------|--------|-------|
-| Critical | 5px | 1px all around | systemRed |
-| High | 3px | none | systemOrange |
-| Medium | 3px | none | systemYellow |
-| Low | 3px | none | systemGreen |
+| Level    | Accent Height | Border         | Color        |
+| -------- | ------------- | -------------- | ------------ |
+| Critical | 5px           | 1px all around | systemRed    |
+| High     | 3px           | none           | systemOrange |
+| Medium   | 3px           | none           | systemYellow |
+| Low      | 3px           | none           | systemGreen  |
 
 ### Animations (preserved from current)
 
@@ -100,9 +103,11 @@ Single line, dot-separated:
 ### Task 1: Restructure Card Layout
 
 **Files:**
+
 - Modify: `src/components/organisms/AlertCard/AlertCard.tsx`
 
 **Changes:**
+
 1. Remove left stripe View
 2. Add top accent View (absolute positioned)
 3. Change icon from 52px circle to 20px inline
@@ -111,6 +116,7 @@ Single line, dot-separated:
 ### Task 2: Implement Metadata Row
 
 **Changes:**
+
 1. Create single-line metadata format with dot separators
 2. Keep proximity badge as inline pill
 3. Truncate MAC to last 4 chars
@@ -119,6 +125,7 @@ Single line, dot-separated:
 ### Task 3: Add Critical Border Treatment
 
 **Changes:**
+
 1. Add conditional 1px border for critical alerts
 2. Increase top accent to 5px for critical
 3. Remove pulse animation code
@@ -126,6 +133,7 @@ Single line, dot-separated:
 ### Task 4: Update Styles
 
 **Changes:**
+
 1. Reduce vertical padding
 2. Update border radius to 12px
 3. Adjust spacing for compact layout
@@ -134,6 +142,7 @@ Single line, dot-separated:
 ### Task 5: Test and Verify
 
 **Verification:**
+
 - Cards should be ~76px tall
 - Critical cards should have visible border
 - All metadata displays correctly inline

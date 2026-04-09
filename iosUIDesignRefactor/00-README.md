@@ -19,6 +19,7 @@
 **⚠️ CRITICAL: Follow this order strictly. Each phase builds on the previous.**
 
 ### Phase 1: Foundation - Design System Overhaul
+
 **File:** `01-foundation-design-system.md`
 **Duration:** 8-10 hours
 **Status:** ⬜ Not Started
@@ -26,6 +27,7 @@
 Must complete FIRST. All other phases depend on this.
 
 ### Phase 2: Atom Components - iOS Native APIs
+
 **File:** `02-atom-components.md`
 **Duration:** 12-15 hours
 **Status:** ⬜ Not Started
@@ -33,6 +35,7 @@ Must complete FIRST. All other phases depend on this.
 Requires Phase 1 complete. Creates breaking changes in Button, Text, Icon, Badge, Input components.
 
 ### Phase 3: Molecule Components
+
 **File:** `03-molecule-components.md`
 **Duration:** 10-12 hours
 **Status:** ⬜ Not Started
@@ -40,6 +43,7 @@ Requires Phase 1 complete. Creates breaking changes in Button, Text, Icon, Badge
 Requires Phase 2 complete. Refactors Card, ListItem, SearchBar, StatCard, ChartCard.
 
 ### Phase 4: Organism Components
+
 **File:** `04-organism-components.md`
 **Duration:** 15-18 hours
 **Status:** ⬜ Not Started
@@ -47,6 +51,7 @@ Requires Phase 2 complete. Refactors Card, ListItem, SearchBar, StatCard, ChartC
 Requires Phase 3 complete. Major redesign of AlertCard, DeviceCard, RadarDisplay.
 
 ### Phase 5: Template Components
+
 **File:** `05-template-components.md`
 **Duration:** 4-6 hours
 **Status:** ⬜ Not Started
@@ -54,6 +59,7 @@ Requires Phase 3 complete. Major redesign of AlertCard, DeviceCard, RadarDisplay
 Requires Phase 4 complete. Updates ScreenLayout, EmptyState, LoadingState, ErrorState.
 
 ### Phase 6: Screen Implementations
+
 **File:** `06-screen-implementations.md`
 **Duration:** 20-25 hours
 **Status:** ⬜ Not Started
@@ -61,6 +67,7 @@ Requires Phase 4 complete. Updates ScreenLayout, EmptyState, LoadingState, Error
 Requires Phases 1-5 complete. Updates all screens to use new component APIs.
 
 ### Phase 7: Charts & Data Visualization
+
 **File:** `07-charts-data-visualization.md`
 **Duration:** 8-10 hours
 **Status:** ⬜ Not Started
@@ -68,6 +75,7 @@ Requires Phases 1-5 complete. Updates all screens to use new component APIs.
 Can run parallel with Phases 4-5. Required before Phase 6 Analytics screens.
 
 ### Phase 8: Interactions & Polish
+
 **File:** `08-interactions-polish.md`
 **Duration:** 8-10 hours
 **Status:** ⬜ Not Started
@@ -75,6 +83,7 @@ Can run parallel with Phases 4-5. Required before Phase 6 Analytics screens.
 Requires Phase 6 complete. Adds gestures, haptics, animations.
 
 ### Phase 9: Accessibility
+
 **File:** `09-accessibility.md`
 **Duration:** 6-8 hours
 **Status:** ⬜ Not Started
@@ -82,6 +91,7 @@ Requires Phase 6 complete. Adds gestures, haptics, animations.
 Requires Phase 8 complete. Dynamic Type, VoiceOver, contrast, touch targets.
 
 ### Phase 10: Documentation & Cleanup
+
 **File:** `10-documentation-cleanup.md`
 **Duration:** 4-6 hours
 **Status:** ⬜ Not Started

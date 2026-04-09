@@ -19,13 +19,13 @@ TrailSense has an AI assistant screen (`AIAssistantScreen.tsx`) backed by a serv
 
 ## Dependency Changes
 
-| Package | Current | Target | Notes |
-|---------|---------|--------|-------|
-| `expo` | `~52.0.0` | `~54.0.0` | Core SDK upgrade |
-| `react-native` | `0.76.6` | Expo 54 pinned (resolved by `npx expo install`) | Managed by Expo |
-| `react-native-executorch` | `0.5.3` | `0.8.1` | No more bundled Expo |
-| `react-native-worklets-core` | `^1.6.2` | Remove | Not imported anywhere in src/; was a transitive dep of executorch 0.5.x |
-| All `expo-*` packages | SDK 52 versions | SDK 54 versions | Via `npx expo install --fix` |
+| Package                      | Current         | Target                                          | Notes                                                                   |
+| ---------------------------- | --------------- | ----------------------------------------------- | ----------------------------------------------------------------------- |
+| `expo`                       | `~52.0.0`       | `~54.0.0`                                       | Core SDK upgrade                                                        |
+| `react-native`               | `0.76.6`        | Expo 54 pinned (resolved by `npx expo install`) | Managed by Expo                                                         |
+| `react-native-executorch`    | `0.5.3`         | `0.8.1`                                         | No more bundled Expo                                                    |
+| `react-native-worklets-core` | `^1.6.2`        | Remove                                          | Not imported anywhere in src/; was a transitive dep of executorch 0.5.x |
+| All `expo-*` packages        | SDK 52 versions | SDK 54 versions                                 | Via `npx expo install --fix`                                            |
 
 Expo-managed dependencies (`react-native-reanimated`, `react-native-screens`, etc.) will be resolved by `npx expo install --fix`. Third-party native packages (`@rnmapbox/maps`, `@shopify/react-native-skia`, etc.) are outside Expo's known-version mappings and must be validated explicitly for compatibility with the React Native version Expo 54 pins.
 
@@ -36,6 +36,7 @@ Expo-managed dependencies (`react-native-reanimated`, `react-native-screens`, et
 The `LLMModule` constructor became private in 0.8.x. Model loading now happens via a static factory method that returns a ready-to-use instance.
 
 **Old API (0.5.3):**
+
 ```typescript
 const llm = new LLMModule({
   tokenCallback,
@@ -46,12 +47,13 @@ await llm.load(LLAMA3_2_1B_SPINQUANT, progressCallback);
 ```
 
 **New API (0.8.1):**
+
 ```typescript
 const llm = await LLMModule.fromModelName(
-  LLAMA3_2_1B_SPINQUANT,     // includes modelName field
-  progressCallback,           // (progress: number) => void
-  tokenCallback,              // (token: string) => void
-  messageHistoryCallback      // (messageHistory: Message[]) => void
+  LLAMA3_2_1B_SPINQUANT, // includes modelName field
+  progressCallback, // (progress: number) => void
+  tokenCallback, // (token: string) => void
+  messageHistoryCallback // (messageHistory: Message[]) => void
 );
 ```
 
@@ -78,27 +80,27 @@ The `isRuntimeSupported()` check in modelManager is still the correct gate. The 
 
 ## Files Changed
 
-| File | Change Type | Description |
-|------|-------------|-------------|
-| `package.json` | Modify | Bump expo, executorch, remove worklets-core |
-| `package-lock.json` | Regenerate | Via npm install |
-| `app.json` | Review | Verify newArchEnabled, deployment target (already correct) |
-| `src/services/llm/modelManager.ts` | Rewrite `loadModel()` | Static factory pattern, remove responseCallback, remove HAMMER2_1 import |
-| `src/services/llm/AIProvider.tsx` | Fix | Progress bar renders `downloadProgress` as 0-100% but modelManager reports 0..1; multiply by 100 |
-| `src/config/llmConfig.ts` | Cleanup | Remove empty MODEL_DOWNLOAD_URL/TOKENIZER_DOWNLOAD_URL |
-| `src/services/llm/modelDownloader.ts` | Delete | Dead code — never imported outside barrel export. Download is handled by `LLMModule.fromModelName()` in 0.8.x |
-| `src/services/llm/index.ts` | Modify | Remove modelDownloader barrel export |
-| `ios/` | Regenerate | Via `npx expo prebuild --clean` |
+| File                                  | Change Type           | Description                                                                                                   |
+| ------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `package.json`                        | Modify                | Bump expo, executorch, remove worklets-core                                                                   |
+| `package-lock.json`                   | Regenerate            | Via npm install                                                                                               |
+| `app.json`                            | Review                | Verify newArchEnabled, deployment target (already correct)                                                    |
+| `src/services/llm/modelManager.ts`    | Rewrite `loadModel()` | Static factory pattern, remove responseCallback, remove HAMMER2_1 import                                      |
+| `src/services/llm/AIProvider.tsx`     | Fix                   | Progress bar renders `downloadProgress` as 0-100% but modelManager reports 0..1; multiply by 100              |
+| `src/config/llmConfig.ts`             | Cleanup               | Remove empty MODEL_DOWNLOAD_URL/TOKENIZER_DOWNLOAD_URL                                                        |
+| `src/services/llm/modelDownloader.ts` | Delete                | Dead code — never imported outside barrel export. Download is handled by `LLMModule.fromModelName()` in 0.8.x |
+| `src/services/llm/index.ts`           | Modify                | Remove modelDownloader barrel export                                                                          |
+| `ios/`                                | Regenerate            | Via `npx expo prebuild --clean`                                                                               |
 
 ## Files NOT Changed
 
-| File | Reason |
-|------|--------|
-| `src/screens/ai/AIAssistantScreen.tsx` | UI layer, no dependency on LLMModule API |
-| `src/services/llm/LLMService.ts` | Talks to modelManager, not LLMModule directly |
-| `src/services/llm/inferenceEngine.ts` | Talks to modelManager, not LLMModule directly |
-| `src/config/featureFlags.ts` | Already configured correctly |
-| `src/types/llm.ts` | Project's Message type is structurally compatible with 0.8.x |
+| File                                   | Reason                                                       |
+| -------------------------------------- | ------------------------------------------------------------ |
+| `src/screens/ai/AIAssistantScreen.tsx` | UI layer, no dependency on LLMModule API                     |
+| `src/services/llm/LLMService.ts`       | Talks to modelManager, not LLMModule directly                |
+| `src/services/llm/inferenceEngine.ts`  | Talks to modelManager, not LLMModule directly                |
+| `src/config/featureFlags.ts`           | Already configured correctly                                 |
+| `src/types/llm.ts`                     | Project's Message type is structurally compatible with 0.8.x |
 
 ## Post-Code Manual Steps
 

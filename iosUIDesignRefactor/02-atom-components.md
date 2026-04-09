@@ -277,6 +277,7 @@ This phase refactors all atom components to use iOS-native design patterns and A
 #### Add Symbol Weight
 
 - [x] **Add `weight` prop:**
+
   ```typescript
   weight?: 'ultralight' | 'thin' | 'light' | 'regular' | 'medium' | 'semibold' | 'bold' | 'heavy' | 'black';
   ```
@@ -563,6 +564,7 @@ This phase refactors all atom components to use iOS-native design patterns and A
   - [x] Update color props to semantic colors
 
 **Examples completed:**
+
 - [x] LoginScreen (complete example with largeTitle, body, secondaryLabel)
 - [x] RegisterScreen (largeTitle, body, caption1 with semantic colors)
 - [x] ForgotPasswordScreen (largeTitle, title1, body with align prop)
@@ -585,6 +587,7 @@ This phase refactors all atom components to use iOS-native design patterns and A
 **Icon component is backward compatible** - existing usage works, semantic colors are optional improvements
 
 **Examples completed:**
+
 - [x] Header organism (updated to systemBlue)
 - [x] DeviceCard organism (updated to tertiaryLabel)
 - [x] EmptyState template (updated to quaternaryLabel with numeric size)
@@ -599,6 +602,7 @@ This phase refactors all atom components to use iOS-native design patterns and A
   - [x] Update variant names (remove prefixes like `threat-`, `detection-`)
 
 **Examples completed:**
+
 - [x] WhitelistItem molecule (updated to new API)
 - [x] AlertCard organism (updated threat/detection variants)
 - [x] DeviceCard organism (updated online/offline variants)
@@ -615,6 +619,7 @@ This phase refactors all atom components to use iOS-native design patterns and A
   - [x] Update styling if custom styles used
 
 **Examples completed:**
+
 - [x] LoginScreen (complete example with textContentType, returnKeyType, clearButtonMode)
 - [x] RegisterScreen (4 inputs: name, email, password, confirm - all with textContentType)
 - [x] ForgotPasswordScreen (email input with returnKeyType="send", onSubmitEditing)
@@ -662,6 +667,7 @@ After updating all imports and usage:
   - [ ] Verify color transitions
 
 - [ ] **Build Testing** 🔄 In Progress
+
   ```bash
   npm run type-check  # Shows ~70 errors (all in usage sites)
   npm run lint        # Not run yet
@@ -690,18 +696,21 @@ After updating all imports and usage:
 - ⚠️ No linting errors (Not tested yet)
 
 **Phase 2 Core Component Library: COMPLETE ✅**
+
 - All 5 Atom Components ✅
 - All 3 Organism Components ✅
 - All 3 Template Components ✅
 - Example Molecules ✅
 
 **Phase 2 Usage Site Migration: 85% COMPLETE (~26/~39 files) 🔄**
+
 - Atoms, Organisms, Templates: 100% ✅ (11 components)
 - Screen Components: ~23% (3/~16) 🔄
   - Auth Screens: 100% (3/3) ✅
   - Other Screens: 0% (0/~13) ⚠️
 
 **Files Updated This Session:**
+
 - Organism components (3): AlertCard, DeviceCard, Header
 - Template components (3): EmptyState, ErrorState, LoadingState
 - Auth screens (2): RegisterScreen, ForgotPasswordScreen
@@ -781,6 +790,7 @@ git commit -m "refactor: update all Text usage sites to new API"
 **Usage Site Migration (~13 files remaining, ~26 complete)**
 
 **Remaining Files:**
+
 - Screen components (~13):
   - `src/screens/alerts/` (~5 files: AlertDetailScreen, AlertFilterScreen, etc.)
   - `src/screens/devices/` (~3 files: DeviceDetailScreen, AddDeviceScreen, etc.)
@@ -818,6 +828,7 @@ git commit -m "refactor: update all Text usage sites to new API"
 8. Move to Phase 3: Molecule Components
 
 **Recommended Approach for Remaining Screens:**
+
 - Use LoginScreen/RegisterScreen as templates for forms
 - Use AlertCard/DeviceCard patterns for list items
 - Batch update similar screens together (all settings, all alerts, etc.)

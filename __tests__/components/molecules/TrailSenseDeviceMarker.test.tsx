@@ -18,7 +18,9 @@ describe('TrailSenseDeviceMarker', () => {
     );
 
     const annotation = UNSAFE_getByType('mock-point-annotation');
-    const wrapper = React.Children.only(annotation.props.children) as React.ReactElement;
+    const wrapper = React.Children.only(
+      annotation.props.children
+    ) as React.ReactElement;
 
     expect(wrapper.props.collapsable).toBe(false);
   });

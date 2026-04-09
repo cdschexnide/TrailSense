@@ -30,11 +30,13 @@ Replaces the existing placeholder at `src/screens/analytics/ReportsScreen.tsx`.
 **Layout:** ScreenLayout with scrollable content, three grouped list sections.
 
 **Section 1 — Intelligence Brief:**
+
 - Single row: "Intelligence Brief" label, brain/sparkle icon, chevron
 - Subtitle shows last generated date if a brief was previously generated, otherwise "Generate an AI-powered security briefing"
 - Tapping navigates to `BriefScreen`
 
 **Section 2 — Report Templates:**
+
 - Three `ReportTemplateRow` items:
   - **Security Summary** — "Threat overview, detection counts, top devices, period comparison"
   - **Activity Report** — "Temporal patterns, hourly/daily breakdowns, nighttime activity"
@@ -43,6 +45,7 @@ Replaces the existing placeholder at `src/screens/analytics/ReportsScreen.tsx`.
 - Tapping navigates to `ReportBuilderScreen` with template pre-selected
 
 **Section 3 — Saved Reports:**
+
 - List of `SavedReportRow` items from Redux store
 - Each row: custom name, template type badge (small colored pill), last generated date
 - Inline delete action via existing `SwipeableRow` + `createSwipeActions` pattern (from `KnownDeviceItem`). Note: `SwipeableRow` renders action buttons beside the row, not a gesture-based swipe.
@@ -88,11 +91,11 @@ The optional `savedReportId` is forwarded from ReportBuilderScreen so that Repor
 
 **Filter application:** Analytics data is pre-aggregated by the API. Filters act as **visibility controls** — they hide sections, not re-aggregate data. **Headline metrics always show property-wide numbers.** Filtered sections are labeled accordingly. Not every filter applies to every template:
 
-| Filter | Security Summary | Activity Report | Signal Analysis |
-|--------|:---:|:---:|:---:|
-| Threat Levels | Threat distribution chart | — | — |
-| Detection Types | Detection type chart | — | Modality cards, signal trend |
-| Devices | Per-sensor section | Per-sensor trend | — |
+| Filter          |     Security Summary      | Activity Report  |       Signal Analysis        |
+| --------------- | :-----------------------: | :--------------: | :--------------------------: |
+| Threat Levels   | Threat distribution chart |        —         |              —               |
+| Detection Types |   Detection type chart    |        —         | Modality cards, signal trend |
+| Devices         |    Per-sensor section     | Per-sensor trend |              —               |
 
 **Layout:**
 
@@ -150,6 +153,7 @@ LLM-powered intelligence brief with executive summary and structured findings.
    - Optional metric callout (e.g., "3 new devices, all between 2-4 AM")
 
 **LLM integration:**
+
 - New `BriefTemplate` class extending `PromptTemplate` in `src/services/llm/templates/`
 - New `generateBrief()` method added to `LLMService` (follows the same pattern as `generateAlertSummary()` and `analyzeDevicePattern()`)
 - Input: AnalyticsData + ComparisonData, serialized with truncation per base class
@@ -163,7 +167,10 @@ LLM-powered intelligence brief with executive summary and structured findings.
 New file: `src/types/report.ts`
 
 ```typescript
-export type ReportTemplate = 'security-summary' | 'activity-report' | 'signal-analysis';
+export type ReportTemplate =
+  | 'security-summary'
+  | 'activity-report'
+  | 'signal-analysis';
 
 export interface ReportConfig {
   template: ReportTemplate;
@@ -201,6 +208,7 @@ export interface Finding {
 Follows the existing three-layer pattern:
 
 **Redux Persist** — New `savedReportsSlice` at `src/store/slices/savedReportsSlice.ts`:
+
 - State: `{ reports: SavedReport[]; lastBriefGeneratedAt?: string }`
 - Actions: `addSavedReport`, `updateSavedReport`, `deleteSavedReport`, `updateLastGenerated`, `setLastBriefGeneratedAt`
 - Added to persist whitelist alongside auth, settings, blockedDevices
@@ -224,12 +232,14 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
 ## Export Pipeline
 
 **PDF generation:**
+
 - `expo-print` renders an HTML string to PDF
 - HTML template built per report type with inline CSS
 - Charts rendered as simplified HTML/CSS representations (horizontal bars, styled tables) — no canvas
 - File naming: `TrailSense_{TemplateName}_{Period}_{Date}.pdf`
 
 **CSV generation:**
+
 - CSV string built in-memory from analytics data, sectioned with blank-line separators
 - Sections vary by template:
   - **Security Summary:** summary metrics row (date, total_detections, unique_devices, avg_confidence, closest_approach_m), threat_level/count (filtered), detection_type/count (filtered)
@@ -238,6 +248,7 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
 - File naming: `TrailSense_{TemplateName}_{Period}_{Date}.csv`
 
 **Share flow:**
+
 1. User taps "Export" in header
 2. Action sheet: "Share as PDF", "Share as CSV"
 3. Generate file to temp directory, open `expo-sharing` share sheet (user can save to Files, AirDrop, email, etc. from the system share sheet)
@@ -245,6 +256,7 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
 ## New Components
 
 **Molecules:**
+
 - `ReportTemplateRow` — Icon, template name, description, chevron. Used on hub screen.
 - `SavedReportRow` — Name, template badge, date, swipe-to-delete. Used on hub screen.
 - `BriefSummaryCard` — Card with larger body text for narrative prose.
@@ -252,11 +264,13 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
 - `ReportSection` — Title + children wrapper for rendered report sections.
 
 **Organisms:**
+
 - `SecuritySummaryReport` — Full Security Summary template renderer. Takes AnalyticsData + ComparisonData.
 - `ActivityReportReport` — Full Activity Report template renderer.
 - `SignalAnalysisReport` — Full Signal Analysis template renderer.
 
 **Services:**
+
 - `src/services/llm/templates/BriefTemplate.ts` — LLM prompt template for intelligence brief.
 - `src/services/reportExport.ts` — PDF HTML builder and CSV string builder per template.
 
@@ -274,6 +288,7 @@ Register all four screens in `MoreStack.tsx` and `AnalyticsStack.tsx`.
 ## No New API Endpoints
 
 All data comes from existing endpoints:
+
 - `analyticsApi.getAnalytics()` — core analytics data
 - `analyticsApi.getComparison()` — period comparison
 - Existing LLM service pipeline for brief generation

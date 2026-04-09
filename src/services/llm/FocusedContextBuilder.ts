@@ -58,7 +58,10 @@ function filterAlerts(alerts: Alert[], filters: IntentFilters): Alert[] {
     if (filters.threatLevel && alert.threatLevel !== filters.threatLevel) {
       return false;
     }
-    if (filters.detectionType && alert.detectionType !== filters.detectionType) {
+    if (
+      filters.detectionType &&
+      alert.detectionType !== filters.detectionType
+    ) {
       return false;
     }
     if (
@@ -79,7 +82,10 @@ function filterAlerts(alerts: Alert[], filters: IntentFilters): Alert[] {
 
 function filterDevices(devices: Device[], filters: IntentFilters): Device[] {
   return devices.filter(device => {
-    if (typeof filters.online === 'boolean' && device.online !== filters.online) {
+    if (
+      typeof filters.online === 'boolean' &&
+      device.online !== filters.online
+    ) {
       return false;
     }
     if (filters.deviceName && device.name !== filters.deviceName) {
@@ -191,10 +197,13 @@ function buildDeviceContext(
     return 'No matching devices found.';
   }
 
-  const deviceAlertCounts = alerts.reduce<Record<string, number>>((counts, alert) => {
-    counts[alert.deviceId] = (counts[alert.deviceId] || 0) + 1;
-    return counts;
-  }, {});
+  const deviceAlertCounts = alerts.reduce<Record<string, number>>(
+    (counts, alert) => {
+      counts[alert.deviceId] = (counts[alert.deviceId] || 0) + 1;
+      return counts;
+    },
+    {}
+  );
 
   const sortedDevices = [...filteredDevices].sort((a, b) => {
     if (a.online !== b.online) {
@@ -229,7 +238,9 @@ function buildStatusContext(alerts: Alert[], devices: Device[]): string {
   const unreviewedAlerts = alerts.filter(alert => !alert.isReviewed).length;
   const recentCritical = [...alerts]
     .filter(alert => alert.threatLevel === 'critical')
-    .sort((a, b) => parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp))[0];
+    .sort(
+      (a, b) => parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp)
+    )[0];
   const last24hCount = filterAlerts(alerts, { timeRange: '24h' }).length;
 
   const concerns: string[] = [];
@@ -261,18 +272,25 @@ LAST 24 HOURS: ${last24hCount} alerts
 ${recentCritical ? `MOST RECENT CRITICAL: ${recentCritical.detectionType} at ${getDeviceName(recentCritical.deviceId, devices)}, ${formatDate(recentCritical.timestamp)}` : 'MOST RECENT CRITICAL: None'}`;
 }
 
-function buildPatternContext(alerts: Alert[], devices: Device[], filters: IntentFilters): string {
+function buildPatternContext(
+  alerts: Alert[],
+  devices: Device[],
+  filters: IntentFilters
+): string {
   const filteredAlerts = filterAlerts(alerts, filters);
   if (filteredAlerts.length === 0) {
     return 'No pattern data available for the selected filters.';
   }
 
-  const visitsByMac = filteredAlerts.reduce<Record<string, Alert[]>>((groups, alert) => {
-    const key = alert.fingerprintHash;
-    groups[key] = groups[key] || [];
-    groups[key].push(alert);
-    return groups;
-  }, {});
+  const visitsByMac = filteredAlerts.reduce<Record<string, Alert[]>>(
+    (groups, alert) => {
+      const key = alert.fingerprintHash;
+      groups[key] = groups[key] || [];
+      groups[key].push(alert);
+      return groups;
+    },
+    {}
+  );
 
   const repeatVisitors = Object.entries(visitsByMac)
     .filter(([, entries]) => entries.length > 1)
@@ -284,19 +302,24 @@ function buildPatternContext(alerts: Alert[], devices: Device[], filters: Intent
 
   return `DETECTION PATTERNS:
 REPEAT VISITORS:
-${repeatVisitors.length > 0
-  ? repeatVisitors
-      .map(([fingerprintHash, entries]) => {
-        const first = entries[0];
-        const nighttime = entries.filter(entry => {
-          const hour = new Date(entry.timestamp).getHours();
-          return hour < 6;
-        }).length;
-        const label = nighttime >= Math.ceil(entries.length / 2) ? 'SUSPICIOUS' : 'ROUTINE';
-        return `- ${formatFingerprint(fingerprintHash)}: ${entries.length} detections, ${first.detectionType}, last at ${getDeviceName(first.deviceId, devices)} -> ${label}`;
-      })
-      .join('\n')
-  : '- No repeat visitors detected'}
+${
+  repeatVisitors.length > 0
+    ? repeatVisitors
+        .map(([fingerprintHash, entries]) => {
+          const first = entries[0];
+          const nighttime = entries.filter(entry => {
+            const hour = new Date(entry.timestamp).getHours();
+            return hour < 6;
+          }).length;
+          const label =
+            nighttime >= Math.ceil(entries.length / 2)
+              ? 'SUSPICIOUS'
+              : 'ROUTINE';
+          return `- ${formatFingerprint(fingerprintHash)}: ${entries.length} detections, ${first.detectionType}, last at ${getDeviceName(first.deviceId, devices)} -> ${label}`;
+        })
+        .join('\n')
+    : '- No repeat visitors detected'
+}
 
 HOURLY DISTRIBUTION:
 ${hourlyBuckets
@@ -414,8 +437,7 @@ export class FocusedContextBuilder {
         const unreviewedCount = alerts.filter(a => !a.isReviewed).length;
         const topAlerts = [...alerts]
           .sort(
-            (a, b) =>
-              parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp)
+            (a, b) => parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp)
           )
           .slice(0, 5);
         return {

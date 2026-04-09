@@ -15,3 +15,6 @@ export * from './triangulation';
 
 // Replay types
 export * from './replay';
+
+// Report types
+export * from './report';

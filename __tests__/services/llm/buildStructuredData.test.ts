@@ -41,10 +41,28 @@ const makeDevice = (overrides: Partial<Device> = {}): Device => ({
 
 describe('FocusedContextBuilder.buildStructuredData', () => {
   const alerts: Alert[] = [
-    makeAlert({ id: 'a1', threatLevel: 'critical', timestamp: '2026-04-02T06:38:00Z' }),
-    makeAlert({ id: 'a2', threatLevel: 'high', timestamp: '2026-04-02T05:50:00Z' }),
-    makeAlert({ id: 'a3', threatLevel: 'medium', fingerprintHash: 'c_aabbccddeeff', timestamp: '2026-04-02T03:42:00Z' }),
-    makeAlert({ id: 'a4', threatLevel: 'high', fingerprintHash: 'c_aabbccddeeff', timestamp: '2026-04-02T02:14:00Z' }),
+    makeAlert({
+      id: 'a1',
+      threatLevel: 'critical',
+      timestamp: '2026-04-02T06:38:00Z',
+    }),
+    makeAlert({
+      id: 'a2',
+      threatLevel: 'high',
+      timestamp: '2026-04-02T05:50:00Z',
+    }),
+    makeAlert({
+      id: 'a3',
+      threatLevel: 'medium',
+      fingerprintHash: 'c_aabbccddeeff',
+      timestamp: '2026-04-02T03:42:00Z',
+    }),
+    makeAlert({
+      id: 'a4',
+      threatLevel: 'high',
+      fingerprintHash: 'c_aabbccddeeff',
+      timestamp: '2026-04-02T02:14:00Z',
+    }),
   ];
 
   const devices: Device[] = [

@@ -2,8 +2,11 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AnalyticsStackParamList } from '@navigation/types';
 import {
+  BriefScreen,
   DashboardScreen,
   HeatmapScreen,
+  ReportBuilderScreen,
+  ReportPreviewScreen,
   ReportsScreen,
 } from '@screens/analytics';
 
@@ -19,6 +22,9 @@ export const AnalyticsStack = () => {
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Heatmap" component={HeatmapScreen} />
       <Stack.Screen name="Reports" component={ReportsScreen} />
+      <Stack.Screen name="ReportBuilder" component={ReportBuilderScreen} />
+      <Stack.Screen name="ReportPreview" component={ReportPreviewScreen} />
+      <Stack.Screen name="Brief" component={BriefScreen} />
     </Stack.Navigator>
   );
 };

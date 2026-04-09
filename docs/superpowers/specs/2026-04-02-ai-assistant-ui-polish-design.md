@@ -39,18 +39,22 @@ The welcome container is a plain `View` with `flex: 1`. When SecurityStatusCard 
 ### `src/screens/ai/AIAssistantScreen.tsx`
 
 **Welcome section (`renderWelcome`):**
+
 - Wrap content in `<ScrollView>` with `showsVerticalScrollIndicator={false}` and `contentContainerStyle={{ paddingBottom: 16 }}`
 - Remove the `Image` (logo) and `Text` (title) from `brandingContainer`, keep only the subtitle
 - Reduce `brandingContainer` style: `paddingVertical: 32` becomes `paddingTop: 12, paddingBottom: 8`; remove `paddingHorizontal: 32` (subtitle can use its own)
 - Remove `aiIconLarge` and `brandTitle` references from the welcome section
 
 **SafeAreaView edges:**
+
 - Change `edges={['top', 'bottom']}` to `edges={['top']}` on all three render paths (main chat, enable prompt, not available). The tab bar handles the bottom inset; doubling it creates extra dead space.
 
 **Keyboard comment:**
+
 - Add a brief comment above the `TextInput` noting the simulator keyboard toggle (`Cmd+K`)
 
 **Styles cleanup:**
+
 - Update `brandingContainer` style values
 - `welcomeContainer` keeps `flex: 1` (the ScrollView fills it)
 

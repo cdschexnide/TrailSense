@@ -276,8 +276,8 @@ export class NotificationService {
 ### Firebase Cloud Messaging
 
 - [x] **3.1** Configure Firebase in app.json
-- [ ] **3.2** Add google-services.json (Android) - *Requires Firebase Console setup*
-- [ ] **3.3** Add GoogleService-Info.plist (iOS) - *Requires Firebase Console setup*
+- [ ] **3.2** Add google-services.json (Android) - _Requires Firebase Console setup_
+- [ ] **3.3** Add GoogleService-Info.plist (iOS) - _Requires Firebase Console setup_
 - [x] **3.4** Request notification permissions
 - [x] **3.5** Get FCM token on login
 - [x] **3.6** Register token with backend

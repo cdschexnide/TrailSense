@@ -89,6 +89,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.2.1 Button Haptics
 
 - [ ] **Verify Button component has haptics:**
+
   ```typescript
   import * as Haptics from 'expo-haptics';
 
@@ -112,6 +113,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.2.2 Swipe Action Haptics
 
 - [ ] **Add haptics to swipe actions:**
+
   ```typescript
   // When action revealed:
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -127,6 +129,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.2.3 Input Haptics
 
 - [ ] **Add haptics to Input component:**
+
   ```typescript
   // On focus:
   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -138,6 +141,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.2.4 Success/Error Haptics
 
 - [ ] **Add notification haptics for state changes:**
+
   ```typescript
   // Success (e.g., saved, deleted):
   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -196,6 +200,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 ##### Button Press Animation
 
 - [ ] **Verify button press state:**
+
   ```typescript
   <Pressable
     style={({ pressed }) => [
@@ -286,6 +291,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.4.3 Find and Fix Hardcoded Colors
 
 - [ ] **Search codebase for hardcoded colors:**
+
   ```bash
   grep -r "#[0-9A-Fa-f]\{6\}" src/
   grep -r "rgb(" src/
@@ -361,6 +367,7 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.6.1 List Performance
 
 - [ ] **Verify FlatList optimization:**
+
   ```typescript
   <FlatList
     data={items}
@@ -382,11 +389,12 @@ This phase adds iOS-native gestures, haptic feedback, animations, and interactio
 #### 8.6.2 Animation Performance
 
 - [ ] **Use native driver where possible:**
+
   ```typescript
   Animated.timing(value, {
     toValue: 1,
     duration: 300,
-    useNativeDriver: true,  // Critical for 60fps
+    useNativeDriver: true, // Critical for 60fps
   }).start();
   ```
 

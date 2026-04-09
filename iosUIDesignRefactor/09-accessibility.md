@@ -21,6 +21,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 #### 9.1.1 Verify Text Component Scales
 
 - [ ] **Ensure Text component supports Dynamic Type:**
+
   ```typescript
   import { Text as RNText } from 'react-native';
 
@@ -77,6 +78,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
   - [ ] Adjust spacing to accommodate larger text
 
 - [ ] **Example fix for card overflow:**
+
   ```typescript
   // Before:
   <View style={{ height: 100 }}>
@@ -118,6 +120,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 ##### Button Accessibility
 
 - [ ] **Ensure all buttons have labels:**
+
   ```typescript
   <Button
     accessibilityLabel="Mark alert as reviewed"
@@ -167,6 +170,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 ##### Card Accessibility
 
 - [ ] **Add accessibility to AlertCard:**
+
   ```typescript
   <Pressable
     accessibilityLabel={`${threatLevel} threat alert, ${detectionType} detection, device ${deviceName}, ${formatDate(timestamp)}`}
@@ -213,6 +217,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 #### 9.2.3 Set Accessibility States
 
 - [ ] **Add states to interactive elements:**
+
   ```typescript
   <Button
     disabled={isLoading}
@@ -235,6 +240,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 #### 9.2.4 Group Related Elements
 
 - [ ] **Use accessibilityViewIsModal for modals:**
+
   ```typescript
   <View accessibilityViewIsModal={true}>
     {/* Modal content */}
@@ -360,6 +366,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 #### 9.4.2 Add Padding Where Needed
 
 - [ ] **Example fix:**
+
   ```typescript
   // Before: Icon too small to tap
   <Icon name="close" size={20} onPress={handleClose} />
@@ -395,6 +402,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 #### 9.5.1 Detect Reduce Motion Setting
 
 - [ ] **Check for reduce motion preference:**
+
   ```typescript
   import { AccessibilityInfo } from 'react-native';
 
@@ -415,6 +423,7 @@ This phase ensures the app is accessible to all users by implementing Dynamic Ty
 #### 9.5.2 Simplify Animations When Enabled
 
 - [ ] **Radar sweep animation:**
+
   ```typescript
   const shouldAnimate = !reduceMotionEnabled;
 

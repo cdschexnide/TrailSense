@@ -164,7 +164,9 @@ export const PatternsTab: React.FC<PatternsTabProps> = ({
             value: item.count,
             label: `${item.hour}`,
             frontColor:
-              item.hour === peakHour?.hour ? colors.systemOrange : colors.systemBlue,
+              item.hour === peakHour?.hour
+                ? colors.systemOrange
+                : colors.systemBlue,
           }))}
           barWidth={12}
           spacing={8}
@@ -186,7 +188,10 @@ export const PatternsTab: React.FC<PatternsTabProps> = ({
             label: DAYS[item.day],
             frontColor:
               item.count ===
-              Math.max(...analytics.dayOfWeekDistribution.map(day => day.count), 0)
+              Math.max(
+                ...analytics.dayOfWeekDistribution.map(day => day.count),
+                0
+              )
                 ? colors.systemOrange
                 : colors.systemBlue,
           }))}
@@ -228,7 +233,10 @@ export const PatternsTab: React.FC<PatternsTabProps> = ({
         )}
       </ChartCard>
 
-      <ChartCard title="Anomalies" subtitle="Compared with the previous period baseline">
+      <ChartCard
+        title="Anomalies"
+        subtitle="Compared with the previous period baseline"
+      >
         <View style={styles.anomalyList}>
           {period === 'year' && !comparison ? (
             <Text variant="subheadline" color="secondaryLabel">
@@ -272,17 +280,19 @@ export const PatternsTab: React.FC<PatternsTabProps> = ({
       <MultiLineChart
         title="Activity By Sensor"
         subtitle="Detection count trends per TrailSense device"
-        series={(analytics.perSensorTrend[0]?.sensors ?? []).slice(0, 3).map(
-          (sensor, index) => ({
-            color: [colors.systemBlue, colors.systemTeal, colors.systemPurple][index],
+        series={(analytics.perSensorTrend[0]?.sensors ?? [])
+          .slice(0, 3)
+          .map((sensor, index) => ({
+            color: [colors.systemBlue, colors.systemTeal, colors.systemPurple][
+              index
+            ],
             data: analytics.perSensorTrend.map(point => ({
               label: point.date.slice(5),
               value:
-                point.sensors.find(item => item.deviceId === sensor.deviceId)?.count ??
-                0,
+                point.sensors.find(item => item.deviceId === sensor.deviceId)
+                  ?.count ?? 0,
             })),
-          })
-        )}
+          }))}
       />
     </View>
   );

@@ -35,9 +35,11 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - [x] If pressable needed, use plain tap (no visual feedback)
 
 - [x] **Add `grouped` variant prop**
+
   ```typescript
   variant?: 'default' | 'grouped';
   ```
+
   - default: White background, shadow
   - grouped: secondarySystemGroupedBackground, no shadow
 
@@ -53,8 +55,8 @@ This phase refactors molecule components to use iOS design patterns and the new 
   interface CardProps {
     children: React.ReactNode;
     variant?: 'default' | 'grouped';
-    onPress?: () => void;  // Keep but remove visual press feedback
-    loading?: boolean;      // Keep loading state
+    onPress?: () => void; // Keep but remove visual press feedback
+    loading?: boolean; // Keep loading state
     style?: ViewStyle;
   }
   ```
@@ -78,13 +80,14 @@ This phase refactors molecule components to use iOS design patterns and the new 
 - [x] **Create iOS-style list row component**
 
 - [x] **Add accessory type support:**
+
   ```typescript
   type AccessoryType =
     | 'none'
-    | 'disclosureIndicator'      // Chevron >
-    | 'detailButton'             // Info icon (i)
-    | 'checkmark'                // Checkmark ✓
-    | 'detailDisclosureButton';  // Info icon + chevron
+    | 'disclosureIndicator' // Chevron >
+    | 'detailButton' // Info icon (i)
+    | 'checkmark' // Checkmark ✓
+    | 'detailDisclosureButton'; // Info icon + chevron
 
   interface ListRowProps {
     // Content
@@ -101,7 +104,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 
     // Interaction
     onPress?: () => void;
-    onAccessoryPress?: () => void;  // For detail buttons
+    onAccessoryPress?: () => void; // For detail buttons
 
     // State
     disabled?: boolean;
@@ -112,6 +115,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   ```
 
 - [x] **Implement layout:**
+
   ```
   [Icon/Image] [Title]              [RightText] [Accessory]
                [Subtitle]
@@ -157,6 +161,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 - [x] **Create iOS-style list section with header/footer**
 
 - [x] **Props interface:**
+
   ```typescript
   interface ListSectionProps {
     children: React.ReactNode;
@@ -167,6 +172,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   ```
 
 - [x] **Layout:**
+
   ```
   [HEADER TEXT]
   ┌─────────────────────────────┐
@@ -193,11 +199,13 @@ This phase refactors molecule components to use iOS design patterns and the new 
 - [x] **Create swipeable row for iOS swipe actions**
 
 - [x] **Install/verify dependency:**
+
   ```bash
   # react-native-gesture-handler already installed
   ```
 
 - [x] **Props interface:**
+
   ```typescript
   interface SwipeAction {
     label: string;
@@ -220,6 +228,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - Haptic feedback when action revealed
 
 - [x] **Common action presets:**
+
   ```typescript
   export const swipeActions = {
     delete: (onPress: () => void): SwipeAction => ({
@@ -256,6 +265,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - Update all usage sites to ListRow
 
 #### Decision Point
+
 - [x] **Choose approach:** Refactor OR Deprecate
   - If refactor: update implementation to use ListRow
   - If deprecate: create migration guide, update usage sites
@@ -287,9 +297,11 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - Tappable to clear
 
 - [x] **Add cancel button:**
+
   ```typescript
   showCancelButton?: boolean;
   ```
+
   - Appears to right of search field when focused
   - Animated slide in/out
   - Text: "Cancel"
@@ -351,6 +363,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 #### Redesign to Match Apple Health
 
 - [x] **Layout:**
+
   ```
   ┌─────────────────────────┐
   │ TITLE                   │
@@ -417,6 +430,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 #### Redesign for iOS
 
 - [x] **Layout:**
+
   ```
   ┌─────────────────────────────┐
   │ Chart Title                  │
@@ -440,7 +454,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
   interface ChartCardProps {
     title: string;
     subtitle?: string;
-    children: React.ReactNode;  // Chart component
+    children: React.ReactNode; // Chart component
     style?: ViewStyle;
   }
   ```
@@ -498,6 +512,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 #### Updated Implementation
 
 - [x] **Use ListRow:**
+
   ```typescript
   <SwipeableRow
     rightActions={[swipeActions.delete(onDelete)]}
@@ -535,6 +550,7 @@ This phase refactors molecule components to use iOS design patterns and the new 
 ## Update All Usage Sites
 
 ### Card Usage
+
 - [x] Find all Card imports: `grep -r "from '@components/molecules/Card'" src/`
 - [x] Update each usage:
   - [x] Verify variant prop (default or grouped)
@@ -542,27 +558,32 @@ This phase refactors molecule components to use iOS design patterns and the new 
   - [x] Verify styling matches iOS patterns
 
 **Key files:**
+
 - [x] DashboardScreen (multiple cards) - No usage found
 - [x] AlertListScreen - No usage found
 - [x] DeviceListScreen - No usage found
 - [x] Any other screens using cards - No usage found
 
 ### SearchBar Usage
+
 - [x] Find all SearchBar imports
 - [x] Add cancel button where appropriate
 - [x] Update event handlers
 
 **Key files:**
+
 - [x] AlertListScreen - No usage found
 - [x] DeviceListScreen - No usage found
 - [x] WhitelistScreen - No usage found
 
 ### StatCard & ChartCard Usage
+
 - [x] Find all StatCard/ChartCard imports
 - [x] Verify data props match new interfaces
 - [x] Test rendering
 
 **Key files:**
+
 - [x] DashboardScreen - No usage found
 - [x] Analytics screens - No usage found
 

@@ -4,9 +4,7 @@ import { useWebSocket } from '@hooks/useWebSocket';
 
 export function AuthLifecycle() {
   useAuth();
-  const token = useAppSelector(
-    state => state.auth.tokens?.accessToken ?? null
-  );
+  const token = useAppSelector(state => state.auth.tokens?.accessToken ?? null);
   useWebSocket(token);
   return null;
 }

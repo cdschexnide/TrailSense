@@ -12,22 +12,23 @@
 
 ## File Map
 
-| File | Repo | Action | Responsibility |
-|------|------|--------|---------------|
-| `src/types/index.ts` | Backend | Modify | Add `detectionCount` and `name` to `DeviceStatus` |
-| `src/controllers/goliothWebhookController.ts` | Backend | Modify | Add fields to `deviceToBroadcast()` |
-| `src/controllers/__tests__/goliothWebhookController.test.ts` | Backend | Modify | Assert new fields in broadcast |
-| `src/api/websocket.ts` | Frontend | Modify | Add `detectionCount` to event type, add `mapDeviceStatusEvent` mapper |
-| `src/hooks/useWebSocket.ts` | Frontend | Modify | Add unknown-device invalidation |
-| `src/mocks/mockWebSocket.ts` | Frontend | Modify | Include `alertCount` and `name` in mock status emissions |
-| `__tests__/api/websocket.test.ts` | Frontend | Create | Test `mapDeviceStatusEvent` mapper |
-| `__tests__/hooks/useWebSocket.test.ts` | Frontend | Create | Test upsert/invalidation logic |
+| File                                                         | Repo     | Action | Responsibility                                                        |
+| ------------------------------------------------------------ | -------- | ------ | --------------------------------------------------------------------- |
+| `src/types/index.ts`                                         | Backend  | Modify | Add `detectionCount` and `name` to `DeviceStatus`                     |
+| `src/controllers/goliothWebhookController.ts`                | Backend  | Modify | Add fields to `deviceToBroadcast()`                                   |
+| `src/controllers/__tests__/goliothWebhookController.test.ts` | Backend  | Modify | Assert new fields in broadcast                                        |
+| `src/api/websocket.ts`                                       | Frontend | Modify | Add `detectionCount` to event type, add `mapDeviceStatusEvent` mapper |
+| `src/hooks/useWebSocket.ts`                                  | Frontend | Modify | Add unknown-device invalidation                                       |
+| `src/mocks/mockWebSocket.ts`                                 | Frontend | Modify | Include `alertCount` and `name` in mock status emissions              |
+| `__tests__/api/websocket.test.ts`                            | Frontend | Create | Test `mapDeviceStatusEvent` mapper                                    |
+| `__tests__/hooks/useWebSocket.test.ts`                       | Frontend | Create | Test upsert/invalidation logic                                        |
 
 ---
 
 ### Task 1: Backend — Expand DeviceStatus type and deviceToBroadcast()
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/trailsense-backend/src/types/index.ts:91-100`
 - Modify: `/Users/codyschexnider/Documents/Project/trailsense-backend/src/controllers/goliothWebhookController.ts:65-85`
 
@@ -94,20 +95,20 @@ Expected: PASS — the Prisma device record already has `detectionCount` (number
 In `trailsense-backend/src/controllers/__tests__/goliothWebhookController.test.ts`, find the `expect(broadcastDeviceStatus)` assertion around lines 93-104. Update it to include the new fields:
 
 ```typescript
-    expect(broadcastDeviceStatus).toHaveBeenCalledWith(
-      'dev-1',
-      expect.objectContaining({
-        online: true,
-        battery: 85,
-        signalStrength: 'good',
-        uptimeSeconds: 3600,
-        lastBootAt: expect.any(String),
-        latitude: 37.77,
-        longitude: -122.42,
-        detectionCount: 0,
-        name: 'dev-1',
-      }),
-    );
+expect(broadcastDeviceStatus).toHaveBeenCalledWith(
+  'dev-1',
+  expect.objectContaining({
+    online: true,
+    battery: 85,
+    signalStrength: 'good',
+    uptimeSeconds: 3600,
+    lastBootAt: expect.any(String),
+    latitude: 37.77,
+    longitude: -122.42,
+    detectionCount: 0,
+    name: 'dev-1',
+  })
+);
 ```
 
 The `makeDevice()` helper already includes `detectionCount: 0` and `name: 'dev-1'` (lines 38-57), so the mock device record flows through `deviceToBroadcast()` correctly.
@@ -130,6 +131,7 @@ git commit -m "feat: include detectionCount and name in device-status broadcast"
 ### Task 2: Frontend — Add mapDeviceStatusEvent mapper to websocket.ts
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/api/websocket.ts:9-16` (type), `:78-79` (mock handler), `:122-124` (real handler)
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/__tests__/api/websocket.test.ts`
 
@@ -246,33 +248,33 @@ export function mapDeviceStatusEvent(
 In the mock handler (around line 78), change:
 
 ```typescript
-        this.mockDeviceStatusHandler = status => {
-          this.emit('device-status', status);
-        };
+this.mockDeviceStatusHandler = status => {
+  this.emit('device-status', status);
+};
 ```
 
 to:
 
 ```typescript
-        this.mockDeviceStatusHandler = status => {
-          this.emit('device-status', mapDeviceStatusEvent(status));
-        };
+this.mockDeviceStatusHandler = status => {
+  this.emit('device-status', mapDeviceStatusEvent(status));
+};
 ```
 
 In the real socket handler (around line 122), change:
 
 ```typescript
-    this.socket.on('device-status', (status: DeviceStatusEvent) => {
-      this.emit('device-status', status);
-    });
+this.socket.on('device-status', (status: DeviceStatusEvent) => {
+  this.emit('device-status', status);
+});
 ```
 
 to:
 
 ```typescript
-    this.socket.on('device-status', (status: DeviceStatusEvent) => {
-      this.emit('device-status', mapDeviceStatusEvent(status));
-    });
+this.socket.on('device-status', (status: DeviceStatusEvent) => {
+  this.emit('device-status', mapDeviceStatusEvent(status));
+});
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
@@ -298,6 +300,7 @@ git commit -m "feat: add mapDeviceStatusEvent mapper at WebSocket boundary"
 ### Task 3: Frontend — Patch individual device + invalidate all device queries in useWebSocket
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/hooks/useWebSocket.ts:30-47`
 - Create: `/Users/codyschexnider/Documents/Project/TrailSense/__tests__/hooks/useWebSocket.test.ts`
 
@@ -341,11 +344,7 @@ const baseDevice: Device = {
 
 function createWrapper(queryClient: QueryClient) {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(
-      QueryClientProvider,
-      { client: queryClient },
-      children
-    );
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
   Wrapper.displayName = 'TestWrapper';
   return Wrapper;
 }
@@ -434,22 +433,19 @@ Expected: FAIL — "invalidates all device queries" fails because the current ha
 In `src/hooks/useWebSocket.ts`, replace the `handleDeviceStatus` function (lines 30-47):
 
 ```typescript
-    // Handle device status updates
-    const handleDeviceStatus = (status: Partial<Device> & { id: string }) => {
-      // Patch individual device cache instantly
-      queryClient.setQueryData<Device>(
-        [DEVICES_QUERY_KEY, status.id],
-        oldData => {
-          if (!oldData) return oldData;
-          return { ...oldData, ...status };
-        }
-      );
+// Handle device status updates
+const handleDeviceStatus = (status: Partial<Device> & { id: string }) => {
+  // Patch individual device cache instantly
+  queryClient.setQueryData<Device>([DEVICES_QUERY_KEY, status.id], oldData => {
+    if (!oldData) return oldData;
+    return { ...oldData, ...status };
+  });
 
-      // Invalidate all device queries (lists, filtered lists, detail views)
-      // Uses prefix matching: [DEVICES_QUERY_KEY] matches [devices],
-      // [devices, filters], [devices, id], etc.
-      queryClient.invalidateQueries({ queryKey: [DEVICES_QUERY_KEY] });
-    };
+  // Invalidate all device queries (lists, filtered lists, detail views)
+  // Uses prefix matching: [DEVICES_QUERY_KEY] matches [devices],
+  // [devices, filters], [devices, id], etc.
+  queryClient.invalidateQueries({ queryKey: [DEVICES_QUERY_KEY] });
+};
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -475,6 +471,7 @@ git commit -m "feat: patch individual device + invalidate all device queries on 
 ### Task 4: Frontend — Include live alertCount and name in mock WebSocket emissions
 
 **Files:**
+
 - Modify: `/Users/codyschexnider/Documents/Project/TrailSense/src/mocks/mockWebSocket.ts:14-24` (class properties), `:133-198` (generateMockAlert), `:203-239` (generateMockDeviceStatus)
 
 - [ ] **Step 1: Add `alertCountState` Map to MockWebSocketService**
@@ -494,9 +491,9 @@ In `src/mocks/mockWebSocket.ts`, add a new Map after the existing `uptimeState` 
 In `generateMockAlert()`, after the `this.emit('alert', alert);` line (line 197), add:
 
 ```typescript
-    // Increment alert count for the device that produced this alert
-    const currentCount = this.alertCountState.get(device.id) ?? 0;
-    this.alertCountState.set(device.id, currentCount + 1);
+// Increment alert count for the device that produced this alert
+const currentCount = this.alertCountState.get(device.id) ?? 0;
+this.alertCountState.set(device.id, currentCount + 1);
 ```
 
 - [ ] **Step 3: Update generateMockDeviceStatus to include tracked alertCount and name**
@@ -504,27 +501,27 @@ In `generateMockAlert()`, after the `this.emit('alert', alert);` line (line 197)
 In `generateMockDeviceStatus()`, replace the `statusUpdate` object (lines 228-234):
 
 ```typescript
-    const statusUpdate: Partial<Device> & { id: string } = {
-      id: device.id,
-      battery: newBattery,
-      lastSeen: new Date().toISOString(),
-      online: newBattery > 5, // Go offline if battery too low
-      ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
-    };
+const statusUpdate: Partial<Device> & { id: string } = {
+  id: device.id,
+  battery: newBattery,
+  lastSeen: new Date().toISOString(),
+  online: newBattery > 5, // Go offline if battery too low
+  ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
+};
 ```
 
 with:
 
 ```typescript
-    const statusUpdate: Partial<Device> & { id: string } = {
-      id: device.id,
-      name: device.name,
-      battery: newBattery,
-      lastSeen: new Date().toISOString(),
-      online: newBattery > 5, // Go offline if battery too low
-      alertCount: this.alertCountState.get(device.id) ?? device.alertCount,
-      ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
-    };
+const statusUpdate: Partial<Device> & { id: string } = {
+  id: device.id,
+  name: device.name,
+  battery: newBattery,
+  lastSeen: new Date().toISOString(),
+  online: newBattery > 5, // Go offline if battery too low
+  alertCount: this.alertCountState.get(device.id) ?? device.alertCount,
+  ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
+};
 ```
 
 This reads the tracked alert count (which increments as mock alerts fire every 5s) rather than the static `device.alertCount` from the mock data array.
@@ -575,6 +572,7 @@ Expected: All tests pass
 
 Run: `cd /Users/codyschexnider/Documents/Project/TrailSense && npm start`
 Open the app in the iOS simulator:
+
 - Navigate to **Devices** tab — device cards should show alert counts incrementing over time as mock alerts fire (every 5s) and device-status events propagate the tracked count (every 15s)
 - Tap an online device — **Status tab** should show live-updating data, **History tab** alert count should match the card
 - Check the console for `[MockWebSocket] 🔋 Device Status:` logs — they should still appear as before

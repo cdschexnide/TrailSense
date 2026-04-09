@@ -12,19 +12,20 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|---------------|
-| `src/types/device.ts` | Modify | Add `uptimeSeconds` and `lastBootAt` fields |
-| `src/screens/devices/DeviceDetailScreen.tsx` | Modify | Add `formatUptime`, update Status tab row, add History tab row |
-| `src/mocks/data/mockDevices.ts` | Modify | Add uptime values to online mock devices |
-| `src/mocks/mockWebSocket.ts` | Modify | Include `uptimeSeconds` in mock status emissions |
-| `__tests__/screens/devices/DeviceDetailScreen.test.tsx` | Create | Test `formatUptime` and uptime rendering |
+| File                                                    | Action | Responsibility                                                 |
+| ------------------------------------------------------- | ------ | -------------------------------------------------------------- |
+| `src/types/device.ts`                                   | Modify | Add `uptimeSeconds` and `lastBootAt` fields                    |
+| `src/screens/devices/DeviceDetailScreen.tsx`            | Modify | Add `formatUptime`, update Status tab row, add History tab row |
+| `src/mocks/data/mockDevices.ts`                         | Modify | Add uptime values to online mock devices                       |
+| `src/mocks/mockWebSocket.ts`                            | Modify | Include `uptimeSeconds` in mock status emissions               |
+| `__tests__/screens/devices/DeviceDetailScreen.test.tsx` | Create | Test `formatUptime` and uptime rendering                       |
 
 ---
 
 ### Task 1: Add fields to Device type
 
 **Files:**
+
 - Modify: `src/types/device.ts:1-16`
 
 - [ ] **Step 1: Add `uptimeSeconds` and `lastBootAt` to the Device interface**
@@ -69,6 +70,7 @@ git commit -m "feat: add uptimeSeconds and lastBootAt to Device type"
 ### Task 2: Add formatUptime and update DeviceDetailScreen
 
 **Files:**
+
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx:63-81` (add formatter after existing `formatRelativeTime`)
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx:165-170` (Status tab Uptime row)
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx:301-320` (History tab Detection Summary section)
@@ -147,6 +149,7 @@ Expected: PASS — all 4 test cases green
 In `src/screens/devices/DeviceDetailScreen.tsx`, replace the Uptime row (lines 165-170):
 
 Replace:
+
 ```typescript
         <GroupedListRow
           icon="time-outline"
@@ -157,6 +160,7 @@ Replace:
 ```
 
 With:
+
 ```typescript
         <GroupedListRow
           icon="time-outline"
@@ -244,6 +248,7 @@ git commit -m "feat: replace placeholder uptime with real formatted data and add
 ### Task 3: Update mock data
 
 **Files:**
+
 - Modify: `src/mocks/data/mockDevices.ts:5-76`
 - Modify: `src/mocks/mockWebSocket.ts:198-220`
 
@@ -252,6 +257,7 @@ git commit -m "feat: replace placeholder uptime with real formatted data and add
 In `src/mocks/data/mockDevices.ts`, add uptime fields to the three online devices. Offline devices (device-004, device-005) get no uptime fields.
 
 Device `device-001` (North Gate Sensor, online):
+
 ```typescript
   {
     id: 'device-001',
@@ -272,6 +278,7 @@ Device `device-001` (North Gate Sensor, online):
 ```
 
 Device `device-002` (South Boundary, online):
+
 ```typescript
   {
     id: 'device-002',
@@ -292,6 +299,7 @@ Device `device-002` (South Boundary, online):
 ```
 
 Device `device-003` (East Trail Monitor, online):
+
 ```typescript
   {
     id: 'device-003',
@@ -318,29 +326,31 @@ Devices `device-004` and `device-005` remain unchanged (offline, no uptime data)
 In `src/mocks/mockWebSocket.ts`, update the `generateMockDeviceStatus` method. Replace the `statusUpdate` object (lines 209-214):
 
 Replace:
+
 ```typescript
-    const statusUpdate: Partial<Device> & { id: string } = {
-      id: device.id,
-      battery: newBattery,
-      lastSeen: new Date().toISOString(),
-      online: newBattery > 5, // Go offline if battery too low
-    };
+const statusUpdate: Partial<Device> & { id: string } = {
+  id: device.id,
+  battery: newBattery,
+  lastSeen: new Date().toISOString(),
+  online: newBattery > 5, // Go offline if battery too low
+};
 ```
 
 With:
-```typescript
-    const uptimeSeconds =
-      device.uptimeSeconds != null
-        ? device.uptimeSeconds + Math.floor(Math.random() * 300) + 60
-        : undefined;
 
-    const statusUpdate: Partial<Device> & { id: string } = {
-      id: device.id,
-      battery: newBattery,
-      lastSeen: new Date().toISOString(),
-      online: newBattery > 5, // Go offline if battery too low
-      ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
-    };
+```typescript
+const uptimeSeconds =
+  device.uptimeSeconds != null
+    ? device.uptimeSeconds + Math.floor(Math.random() * 300) + 60
+    : undefined;
+
+const statusUpdate: Partial<Device> & { id: string } = {
+  id: device.id,
+  battery: newBattery,
+  lastSeen: new Date().toISOString(),
+  online: newBattery > 5, // Go offline if battery too low
+  ...(uptimeSeconds != null ? { uptimeSeconds } : {}),
+};
 ```
 
 This gives online devices (which have `uptimeSeconds` in mock data) a slowly incrementing uptime value each status tick. Offline devices (no `uptimeSeconds`) emit no uptime field.
@@ -385,6 +395,7 @@ Expected: No errors (auto-fix any formatting issues)
 
 Run: `npm start`
 Open the app in the iOS simulator. Navigate to Devices > tap any online device:
+
 - **Status tab:** Uptime row should show formatted value like `1d 0h` (not `24h 32m`)
 - **History tab:** "Last Reboot" row should appear in Detection Summary showing relative time like `1d ago`
 - Tap an offline device: both should show `--`

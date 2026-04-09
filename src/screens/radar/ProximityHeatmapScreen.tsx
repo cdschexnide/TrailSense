@@ -913,7 +913,6 @@ export const ProximityHeatmapScreen = ({ navigation, route }: any) => {
             />
           ) : null}
         </Animated.View>
-
       </View>
 
       <DevicePicker

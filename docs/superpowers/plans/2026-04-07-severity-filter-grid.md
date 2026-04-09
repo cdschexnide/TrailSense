@@ -13,6 +13,7 @@
 ### Task 1: Add flexWrap grid layout to InlineFilterBar
 
 **Files:**
+
 - Modify: `src/components/molecules/InlineFilterBar/InlineFilterBar.tsx`
 - Create: `__tests__/components/molecules/InlineFilterBar.test.tsx`
 
@@ -174,6 +175,7 @@ export default InlineFilterBar;
 ```
 
 Key changes:
+
 - Added `flexWrap: 'wrap'` to container
 - Split `gap` into `columnGap` and `rowGap` for clarity
 - Added `styles.chip` with `width: '48.5%'` — passed to each FilterChip
@@ -272,6 +274,7 @@ git commit -m "feat: convert severity filter chips to 2×2 grid layout"
 ### Task 2: Add selection toggle test
 
 **Files:**
+
 - Modify: `__tests__/components/molecules/InlineFilterBar.test.tsx`
 
 - [ ] **Step 1: Add test for selection toggle behavior**
@@ -279,33 +282,33 @@ git commit -m "feat: convert severity filter chips to 2×2 grid layout"
 Append to the `describe` block in `__tests__/components/molecules/InlineFilterBar.test.tsx`:
 
 ```tsx
-  it('calls onSelect with key when chip is pressed', () => {
-    const onSelect = jest.fn();
-    const { getByText } = render(
-      <InlineFilterBar
-        options={mockOptions}
-        selectedKey={null}
-        onSelect={onSelect}
-      />
-    );
+it('calls onSelect with key when chip is pressed', () => {
+  const onSelect = jest.fn();
+  const { getByText } = render(
+    <InlineFilterBar
+      options={mockOptions}
+      selectedKey={null}
+      onSelect={onSelect}
+    />
+  );
 
-    fireEvent.press(getByText('CRITICAL'));
-    expect(onSelect).toHaveBeenCalledWith('critical');
-  });
+  fireEvent.press(getByText('CRITICAL'));
+  expect(onSelect).toHaveBeenCalledWith('critical');
+});
 
-  it('calls onSelect with null when selected chip is pressed again', () => {
-    const onSelect = jest.fn();
-    const { getByText } = render(
-      <InlineFilterBar
-        options={mockOptions}
-        selectedKey="critical"
-        onSelect={onSelect}
-      />
-    );
+it('calls onSelect with null when selected chip is pressed again', () => {
+  const onSelect = jest.fn();
+  const { getByText } = render(
+    <InlineFilterBar
+      options={mockOptions}
+      selectedKey="critical"
+      onSelect={onSelect}
+    />
+  );
 
-    fireEvent.press(getByText('CRITICAL'));
-    expect(onSelect).toHaveBeenCalledWith(null);
-  });
+  fireEvent.press(getByText('CRITICAL'));
+  expect(onSelect).toHaveBeenCalledWith(null);
+});
 ```
 
 Also add the `fireEvent` import at the top of the file:
