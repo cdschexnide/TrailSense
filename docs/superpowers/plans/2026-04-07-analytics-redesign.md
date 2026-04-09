@@ -9,6 +9,7 @@
 **Tech Stack:** React Native (Expo SDK 54), react-native-gifted-charts, React Query, TypeScript, date-fns, expo-haptics
 
 **Critical codebase contracts (all code must follow these):**
+
 - `useTheme()` returns `{ theme, colorScheme, setColorScheme }` — access colors via `theme.colors`
 - `ScreenLayout` header accepts `rightActions?: React.ReactNode` (not `rightAction`)
 - `DashboardScreen` is a **named export** (`export const DashboardScreen`)
@@ -57,6 +58,7 @@ Created:
 ### Task 1: Install react-native-gifted-charts
 
 **Files:**
+
 - Modify: `package.json`
 
 - [ ] **Step 1: Install the package**
@@ -83,6 +85,7 @@ git commit -m "feat(analytics): install react-native-gifted-charts"
 ### Task 2: Extend AnalyticsData Type
 
 **Files:**
+
 - Modify: `src/types/alert.ts:69-91`
 
 - [ ] **Step 1: Add new fields to AnalyticsData interface**
@@ -90,91 +93,91 @@ git commit -m "feat(analytics): install react-native-gifted-charts"
 Add these fields after the existing `topDetectedDevices` field (line 78) and before the legacy fields comment (line 79):
 
 ```typescript
-  // Signals tab fields
-  rssiDistribution: Array<{
-    bucketMin: number;
-    bucketMax: number;
+// Signals tab fields
+rssiDistribution: Array<{
+  bucketMin: number;
+  bucketMax: number;
+  count: number;
+}>;
+medianRssi: number;
+peakRssi: number;
+proximityZoneDistribution: Array<{
+  zone: 'immediate' | 'near' | 'far' | 'extreme';
+  count: number;
+}>;
+confidenceDistribution: Array<{
+  tier: 'high' | 'medium' | 'low';
+  count: number;
+}>;
+modalityBreakdown: {
+  wifi: {
     count: number;
-  }>;
-  medianRssi: number;
-  peakRssi: number;
-  proximityZoneDistribution: Array<{
-    zone: 'immediate' | 'near' | 'far' | 'extreme';
+    channelsActive: number;
+    probeRequestPercent: number;
+  }
+  ble: {
     count: number;
-  }>;
-  confidenceDistribution: Array<{
-    tier: 'high' | 'medium' | 'low';
+    phonePercent: number;
+    applePercent: number;
+    beaconPercent: number;
+  }
+  cellular: {
     count: number;
-  }>;
-  modalityBreakdown: {
-    wifi: {
-      count: number;
-      channelsActive: number;
-      probeRequestPercent: number;
-    };
-    ble: {
-      count: number;
-      phonePercent: number;
-      applePercent: number;
-      beaconPercent: number;
-    };
-    cellular: {
-      count: number;
-      avgPeakDbm: number;
-      avgBurstDurationMs: number;
-      avgNoiseFloorDbm: number;
-    };
-  };
-  crossModalStats: {
-    wifiBleLinks: number;
-    avgLinkConfidence: number;
-    phantomMerges: number;
-  };
-  rssiTrend: Array<{
-    date: string;
-    wifiAvgRssi: number | null;
-    bleAvgRssi: number | null;
-    cellularAvgRssi: number | null;
-  }>;
+    avgPeakDbm: number;
+    avgBurstDurationMs: number;
+    avgNoiseFloorDbm: number;
+  }
+}
+crossModalStats: {
+  wifiBleLinks: number;
+  avgLinkConfidence: number;
+  phantomMerges: number;
+}
+rssiTrend: Array<{
+  date: string;
+  wifiAvgRssi: number | null;
+  bleAvgRssi: number | null;
+  cellularAvgRssi: number | null;
+}>;
 
-  // Patterns tab fields
-  hourlyDayOfWeekDistribution: Array<{
-    dayOfWeek: number;
-    hour: number;
+// Patterns tab fields
+hourlyDayOfWeekDistribution: Array<{
+  dayOfWeek: number;
+  hour: number;
+  count: number;
+  date: string;
+}>;
+dayOfWeekDistribution: Array<{
+  day: number;
+  count: number;
+}>;
+nighttimeActivity: {
+  count: number;
+  percentOfTotal: number;
+  trend: Array<{ date: string; count: number }>;
+}
+perSensorTrend: Array<{
+  date: string;
+  sensors: Array<{
+    deviceId: string;
+    deviceName: string;
     count: number;
-    date: string;
   }>;
-  dayOfWeekDistribution: Array<{
-    day: number;
-    count: number;
-  }>;
-  nighttimeActivity: {
-    count: number;
-    percentOfTotal: number;
-    trend: Array<{ date: string; count: number }>;
-  };
-  perSensorTrend: Array<{
-    date: string;
-    sensors: Array<{
-      deviceId: string;
-      deviceName: string;
-      count: number;
-    }>;
-  }>;
+}>;
 
-  // Threat timeline (per-day breakdown by severity)
-  threatTimeline: Array<{
-    date: string;
-    critical: number;
-    high: number;
-    medium: number;
-    low: number;
-  }>;
+// Threat timeline (per-day breakdown by severity)
+threatTimeline: Array<{
+  date: string;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}>;
 
-  // Overview metrics (exact values, not approximations)
-  uniqueDevices: number;        // distinct fingerprintHash count in period
-  avgConfidence: number;        // mean confidence across all alerts in period
-  closestApproachMeters: number; // minimum accuracyMeters in period
+// Overview metrics (exact values, not approximations)
+uniqueDevices: number; // distinct fingerprintHash count in period
+avgConfidence: number; // mean confidence across all alerts in period
+closestApproachMeters: number; // minimum accuracyMeters in period
 ```
 
 These three fields live on `AnalyticsData` directly, so both `comparison.current` and `comparison.comparison` carry exact values. The Overview tab reads `analytics.uniqueDevices` vs `comparison.comparison.uniqueDevices` to compute the delta — no approximation needed. The `new-devices` insight compares `current.uniqueDevices > comparison.uniqueDevices`.
@@ -197,6 +200,7 @@ git commit -m "feat(analytics): extend AnalyticsData type with signal, pattern, 
 ### Task 3: Generate Extended Mock Analytics Data
 
 **Files:**
+
 - Modify: `src/mocks/data/mockAnalytics.ts`
 - Modify: `src/mocks/data/index.ts`
 
@@ -263,9 +267,8 @@ function generateProximityZones(alerts: Alert[]) {
     },
     {
       zone: 'far' as const,
-      count: alerts.filter(
-        a => a.accuracyMeters >= 15 && a.accuracyMeters < 50
-      ).length,
+      count: alerts.filter(a => a.accuracyMeters >= 15 && a.accuracyMeters < 50)
+        .length,
     },
     {
       zone: 'extreme' as const,
@@ -332,7 +335,10 @@ function generateCrossModalStats(alerts: Alert[]) {
 }
 
 function generateRssiTrend(alerts: Alert[]) {
-  const dailyMap = new Map<string, { wifi: number[]; ble: number[]; cell: number[] }>();
+  const dailyMap = new Map<
+    string,
+    { wifi: number[]; ble: number[]; cell: number[] }
+  >();
 
   alerts.forEach(alert => {
     const date = alert.timestamp.split('T')[0];
@@ -347,7 +353,9 @@ function generateRssiTrend(alerts: Alert[]) {
   });
 
   const avg = (arr: number[]) =>
-    arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+    arr.length > 0
+      ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+      : null;
 
   return Array.from(dailyMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
@@ -361,7 +369,12 @@ function generateRssiTrend(alerts: Alert[]) {
 }
 
 function generateHourlyDayOfWeekDistribution(alerts: Alert[]) {
-  const result: Array<{ dayOfWeek: number; hour: number; count: number; date: string }> = [];
+  const result: Array<{
+    dayOfWeek: number;
+    hour: number;
+    count: number;
+    date: string;
+  }> = [];
 
   alerts.forEach(alert => {
     const d = new Date(alert.timestamp);
@@ -443,7 +456,10 @@ function generatePerSensorTrend(alerts: Alert[]) {
 }
 
 function generateThreatTimeline(alerts: Alert[]) {
-  const dailyMap = new Map<string, { critical: number; high: number; medium: number; low: number }>();
+  const dailyMap = new Map<
+    string,
+    { critical: number; high: number; medium: number; low: number }
+  >();
 
   alerts.forEach(alert => {
     const date = alert.timestamp.split('T')[0];
@@ -513,6 +529,7 @@ git commit -m "feat(analytics): generate extended mock analytics data with deter
 ### Task 4: Add useComparison Hook and Seed Comparison Data
 
 **Files:**
+
 - Modify: `src/hooks/useAnalytics.ts`
 - Modify: `src/utils/seedMockData.ts`
 
@@ -523,11 +540,13 @@ No `useThreatTimeline` hook. The threat timeline is a field on `AnalyticsData` (
 Add after the existing `useDeviceHistory` hook. Returns the real API shape:
 
 ```typescript
-export const useComparison = (options: {
-  period?: 'day' | 'week' | 'month';
-  compareWith?: 'previous' | 'lastYear';
-  enabled?: boolean;
-} = {}) => {
+export const useComparison = (
+  options: {
+    period?: 'day' | 'week' | 'month';
+    compareWith?: 'previous' | 'lastYear';
+    enabled?: boolean;
+  } = {}
+) => {
   const { period = 'week', compareWith = 'previous', enabled = true } = options;
 
   return useQuery({
@@ -545,52 +564,51 @@ export const useComparison = (options: {
 Add after the analytics seeding block (around line 175). The comparison mock creates a "previous period" `AnalyticsData` with slightly different values so that deltas are meaningful:
 
 ```typescript
-    // Comparison data — uses the real API shape.
-    // The previous-period data must differ in hourlyDayOfWeekDistribution
-    // so that anomaly detection (spikes, quiet gaps, timing shifts) has a
-    // meaningful baseline to compare against.
-    const shiftedHourly = freshAnalytics.hourlyDayOfWeekDistribution.map(entry => ({
-      ...entry,
-      // Shift counts: halve nighttime (hour 0-5), boost daytime (hour 10-16)
-      count: (entry.hour >= 0 && entry.hour <= 5)
-        ? Math.round(entry.count * 0.5)
-        : (entry.hour >= 10 && entry.hour <= 16)
-          ? Math.round(entry.count * 1.5)
-          : entry.count,
-    }));
-    // Shift peak hour earlier (move hour-20/21 counts to hour-17/18)
-    const shiftedHourlyDist = (freshAnalytics.hourlyDistribution ?? []).map(h => ({
-      ...h,
-      count: h.hour >= 20 && h.hour <= 21
-        ? Math.round(h.count * 0.3)
-        : h.hour >= 17 && h.hour <= 18
-          ? Math.round(h.count * 2.0)
-          : h.count,
-    }));
-    const previousAnalytics: AnalyticsData = {
-      ...freshAnalytics,
-      totalAlerts: Math.round(freshAnalytics.totalAlerts * 0.85),
-      uniqueDevices: Math.round(freshAnalytics.uniqueDevices * 0.75),
-      avgConfidence: Math.round(freshAnalytics.avgConfidence * 1.15),  // Previous was HIGHER → triggers confidence drop
-      closestApproachMeters: Math.round(freshAnalytics.closestApproachMeters * 1.3),
-      hourlyDayOfWeekDistribution: shiftedHourly,
-      hourlyDistribution: shiftedHourlyDist,
-    };
-    const compPeriods = ['day', 'week', 'month'] as const;
-    compPeriods.forEach(period => {
-      queryClient.setQueryData(
-        ['analytics-comparison', period, 'previous'],
-        {
-          current: freshAnalytics,
-          comparison: previousAnalytics,
-          percentageChange: {
-            totalDetections: 18,
-            unknownDevices: 35,
-            avgResponseTime: -5,
-          },
-        }
-      );
-    });
+// Comparison data — uses the real API shape.
+// The previous-period data must differ in hourlyDayOfWeekDistribution
+// so that anomaly detection (spikes, quiet gaps, timing shifts) has a
+// meaningful baseline to compare against.
+const shiftedHourly = freshAnalytics.hourlyDayOfWeekDistribution.map(entry => ({
+  ...entry,
+  // Shift counts: halve nighttime (hour 0-5), boost daytime (hour 10-16)
+  count:
+    entry.hour >= 0 && entry.hour <= 5
+      ? Math.round(entry.count * 0.5)
+      : entry.hour >= 10 && entry.hour <= 16
+        ? Math.round(entry.count * 1.5)
+        : entry.count,
+}));
+// Shift peak hour earlier (move hour-20/21 counts to hour-17/18)
+const shiftedHourlyDist = (freshAnalytics.hourlyDistribution ?? []).map(h => ({
+  ...h,
+  count:
+    h.hour >= 20 && h.hour <= 21
+      ? Math.round(h.count * 0.3)
+      : h.hour >= 17 && h.hour <= 18
+        ? Math.round(h.count * 2.0)
+        : h.count,
+}));
+const previousAnalytics: AnalyticsData = {
+  ...freshAnalytics,
+  totalAlerts: Math.round(freshAnalytics.totalAlerts * 0.85),
+  uniqueDevices: Math.round(freshAnalytics.uniqueDevices * 0.75),
+  avgConfidence: Math.round(freshAnalytics.avgConfidence * 1.15), // Previous was HIGHER → triggers confidence drop
+  closestApproachMeters: Math.round(freshAnalytics.closestApproachMeters * 1.3),
+  hourlyDayOfWeekDistribution: shiftedHourly,
+  hourlyDistribution: shiftedHourlyDist,
+};
+const compPeriods = ['day', 'week', 'month'] as const;
+compPeriods.forEach(period => {
+  queryClient.setQueryData(['analytics-comparison', period, 'previous'], {
+    current: freshAnalytics,
+    comparison: previousAnalytics,
+    percentageChange: {
+      totalDetections: 18,
+      unknownDevices: 35,
+      avgResponseTime: -5,
+    },
+  });
+});
 ```
 
 Add the `AnalyticsData` type import at the top of `seedMockData.ts`:
@@ -617,6 +635,7 @@ git commit -m "feat(analytics): add useComparison hook with correct API shape, s
 ### Task 5: Build Insight Generation Service
 
 **Files:**
+
 - Create: `src/services/analyticsInsights.ts`
 - Create: `__tests__/services/analyticsInsights.test.ts`
 
@@ -689,11 +708,9 @@ describe('generateInsights', () => {
 
   it('detects sensor offline', () => {
     const offlineDevice = { id: '1', name: 'Test', online: false };
-    const result = generateInsights(
-      mockAnalyticsData,
-      null,
-      [offlineDevice] as any
-    );
+    const result = generateInsights(mockAnalyticsData, null, [
+      offlineDevice,
+    ] as any);
     const offline = result.find(i => i.type === 'sensor-offline');
     expect(offline).toBeDefined();
   });
@@ -877,6 +894,7 @@ git commit -m "feat(analytics): add insight generation service with tests"
 ### Task 6: Build Custom Components — InsightCard, ModalityCard, ProximityZoneVisual
 
 **Files:**
+
 - Create: `src/components/molecules/InsightCard/InsightCard.tsx`
 - Create: `src/components/molecules/InsightCard/index.ts`
 - Create: `src/components/molecules/ModalityCard/ModalityCard.tsx`
@@ -1164,14 +1182,10 @@ export const ProximityZoneVisual: React.FC<ProximityZoneVisualProps> = ({
             >
               {getCount(zone)}
             </Text>
-            <Text
-              style={[styles.countLabel, { color: colors.secondaryLabel }]}
-            >
+            <Text style={[styles.countLabel, { color: colors.secondaryLabel }]}>
               {ZONE_CONFIG[zone].label}
             </Text>
-            <Text
-              style={[styles.countRange, { color: colors.tertiaryLabel }]}
-            >
+            <Text style={[styles.countRange, { color: colors.tertiaryLabel }]}>
               {ZONE_CONFIG[zone].range}
             </Text>
           </View>
@@ -1284,6 +1298,7 @@ git commit -m "feat(analytics): add InsightCard, ModalityCard, ProximityZoneVisu
 ### Task 7: Build Chart Components — StackedAreaChart, ActivityHeatmap, MultiLineChart
 
 **Files:**
+
 - Create: `src/components/organisms/charts/StackedAreaChart.tsx`
 - Create: `src/components/organisms/charts/ActivityHeatmap.tsx`
 - Create: `src/components/organisms/charts/MultiLineChart.tsx`
@@ -1387,9 +1402,7 @@ export const StackedAreaChart: React.FC<StackedAreaChartProps> = ({
         {Object.entries(THREAT_COLORS).map(([level, color]) => (
           <View key={level} style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: color }]} />
-            <Text
-              style={[styles.legendText, { color: colors.secondaryLabel }]}
-            >
+            <Text style={[styles.legendText, { color: colors.secondaryLabel }]}>
               {level.charAt(0).toUpperCase() + level.slice(1)}
             </Text>
           </View>
@@ -1415,6 +1428,7 @@ const styles = StyleSheet.create({
 - [ ] **Step 2: Create ActivityHeatmap with period-aware rendering**
 
 Create `src/components/organisms/charts/ActivityHeatmap.tsx`. This supports three modes:
+
 - **24h**: Single-row heatmap by hour (24 columns)
 - **7d/30d (default)**: 7 rows (Mon–Sun) × 12 columns (2-hour blocks)
 - **1y**: Aggregated by month from the `date` field
@@ -1439,16 +1453,58 @@ interface ActivityHeatmapProps {
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const HOUR_LABELS = [
-  '12a', '2a', '4a', '6a', '8a', '10a',
-  '12p', '2p', '4p', '6p', '8p', '10p',
+  '12a',
+  '2a',
+  '4a',
+  '6a',
+  '8a',
+  '10a',
+  '12p',
+  '2p',
+  '4p',
+  '6p',
+  '8p',
+  '10p',
 ];
 const HOUR_24_LABELS = [
-  '12a', '', '2a', '', '4a', '', '6a', '', '8a', '', '10a', '',
-  '12p', '', '2p', '', '4p', '', '6p', '', '8p', '', '10p', '',
+  '12a',
+  '',
+  '2a',
+  '',
+  '4a',
+  '',
+  '6a',
+  '',
+  '8a',
+  '',
+  '10a',
+  '',
+  '12p',
+  '',
+  '2p',
+  '',
+  '4p',
+  '',
+  '6p',
+  '',
+  '8p',
+  '',
+  '10p',
+  '',
 ];
 const MONTH_LABELS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 const ACCENT = '#f59e0b';
 
@@ -1478,9 +1534,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
 
     if (period === 'year') {
       // 7 rows (days) × 12 columns (months)
-      const g: number[][] = Array.from({ length: 7 }, () =>
-        Array(12).fill(0)
-      );
+      const g: number[][] = Array.from({ length: 7 }, () => Array(12).fill(0));
       data.forEach(point => {
         const month = parseInt(point.date.slice(5, 7), 10) - 1; // 0-11
         if (
@@ -1501,9 +1555,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
     }
 
     // Default: 7 rows × 12 columns (2-hour blocks)
-    const g: number[][] = Array.from({ length: 7 }, () =>
-      Array(12).fill(0)
-    );
+    const g: number[][] = Array.from({ length: 7 }, () => Array(12).fill(0));
     data.forEach(point => {
       const col = Math.floor(point.hour / 2);
       if (point.dayOfWeek >= 0 && point.dayOfWeek < 7 && col >= 0 && col < 12) {
@@ -1704,12 +1756,8 @@ export const MultiLineChart: React.FC<MultiLineChartProps> = ({
       <View style={styles.legend}>
         {datasets.map(ds => (
           <View key={ds.label} style={styles.legendItem}>
-            <View
-              style={[styles.legendLine, { backgroundColor: ds.color }]}
-            />
-            <Text
-              style={[styles.legendText, { color: colors.secondaryLabel }]}
-            >
+            <View style={[styles.legendLine, { backgroundColor: ds.color }]} />
+            <Text style={[styles.legendText, { color: colors.secondaryLabel }]}>
               {ds.label}
             </Text>
           </View>
@@ -1776,9 +1824,7 @@ describe('ActivityHeatmap', () => {
   });
 
   it('renders month labels for 1y period', () => {
-    const { getByText } = render(
-      <ActivityHeatmap data={[]} period="year" />
-    );
+    const { getByText } = render(<ActivityHeatmap data={[]} period="year" />);
     expect(getByText('Jan')).toBeTruthy();
     expect(getByText('Dec')).toBeTruthy();
   });
@@ -1819,11 +1865,13 @@ git commit -m "feat(analytics): add StackedAreaChart, period-aware ActivityHeatm
 ### Task 8: Build Overview Tab
 
 **Files:**
+
 - Create: `src/screens/analytics/tabs/OverviewTab.tsx`
 
 - [ ] **Step 1: Create OverviewTab**
 
 Create `src/screens/analytics/tabs/OverviewTab.tsx`. Key contracts:
+
 - Uses `const { theme } = useTheme(); const colors = theme.colors;`
 - Comparison data is `{ current: AnalyticsData; comparison: AnalyticsData; percentageChange: {...} }`
 - Overview cards compute uniqueDevices, avgConfidence, closestApproach client-side from the two `AnalyticsData` objects
@@ -1834,6 +1882,7 @@ Create `src/screens/analytics/tabs/OverviewTab.tsx`. Key contracts:
 The component receives `analytics: AnalyticsData`, `comparison` (the full API response or null), `period: string`, and `devices` from `useDevices()`.
 
 Overview cards use the exact fields now on `AnalyticsData`:
+
 - **Detections**: `analytics.totalAlerts` vs `comparison.comparison.totalAlerts`
 - **Unique Devices**: `analytics.uniqueDevices` vs `comparison.comparison.uniqueDevices`
 - **Avg Confidence**: `analytics.avgConfidence` vs `comparison.comparison.avgConfidence`
@@ -1848,6 +1897,7 @@ The threat trend chart uses `analytics.threatTimeline` — the real per-day brea
 Sensor health shows `device.uptimeSeconds` formatted as a human-readable duration (e.g., "4d 12h").
 
 The full component code is substantial. The implementing agent should:
+
 1. Build the component following the patterns above
 2. Match the mockup from the design spec (2×2 comparison grid, stacked area chart, horizontal stacked bar, insight cards, sensor health list)
 3. Import `StackedAreaChart` from `@components/organisms/charts`
@@ -1867,6 +1917,7 @@ git commit -m "feat(analytics): build Overview tab with real threat timeline dat
 ### Task 9: Build Signals Tab
 
 **Files:**
+
 - Create: `src/screens/analytics/tabs/SignalsTab.tsx`
 
 - [ ] **Step 1: Create SignalsTab**
@@ -1876,6 +1927,7 @@ Create `src/screens/analytics/tabs/SignalsTab.tsx`. Uses `const { theme } = useT
 The RSSI trend chart must pass `invertYAxis={true}` to `MultiLineChart` so that stronger signals (closer to 0 dBm) appear at the top. It must also pass line styles per the spec: WiFi solid (no dash), BLE dashed (`dashWidth: 6, dashGap: 3`), Cellular dotted (`dashWidth: 2, dashGap: 4`).
 
 The component receives `analytics: AnalyticsData` and renders 6 sections matching the design spec:
+
 1. RSSI histogram using gifted-charts `BarChart`
 2. Proximity zones using `ProximityZoneVisual`
 3. Confidence distribution as progress bars
@@ -1898,6 +1950,7 @@ git commit -m "feat(analytics): build Signals tab with RSSI histogram, proximity
 ### Task 10: Build Patterns Tab
 
 **Files:**
+
 - Create: `src/screens/analytics/tabs/PatternsTab.tsx`
 
 - [ ] **Step 1: Create PatternsTab**
@@ -1911,11 +1964,13 @@ The component receives `analytics: AnalyticsData`, `period: 'day' | 'week' | 'mo
 **Critical: DashboardScreen must pass `comparisonAnalytics`** to PatternsTab. This is `comparison?.comparison ?? null` from the `useComparison` hook result.
 
 Anomaly detection must implement all three types from the spec:
+
 - **Spike**: Any 2-hour block with >2× the baseline average for that time slot (use `hourlyDayOfWeekDistribution` from current period vs `comparisonAnalytics.hourlyDayOfWeekDistribution`)
 - **Quiet gap**: Any normally-active 2-hour block (baseline avg > 1) with zero detections in current period
 - **Timing shift**: Peak activity hour in current data shifted >2 hours from peak hour in `comparisonAnalytics`
 
 The `detectAnomalies` function takes both `analytics.hourlyDayOfWeekDistribution` and `comparisonAnalytics?.hourlyDayOfWeekDistribution`. It should:
+
 1. Aggregate both current and baseline data into 2-hour blocks per day-of-week
 2. For each block, compare current count vs baseline count
 3. Flag blocks where current > 2× baseline as spikes
@@ -1924,6 +1979,7 @@ The `detectAnomalies` function takes both `analytics.hourlyDayOfWeekDistribution
 6. If `comparisonAnalytics` is null (year period), fall back to self-comparison: use the overall average of the current data as the baseline
 
 Renders 6 sections:
+
 1. Activity heatmap (period-aware via `period` prop)
 2. Hourly distribution (24-bar chart)
 3. Day of week (7-bar chart, busiest highlighted)
@@ -1943,6 +1999,7 @@ git commit -m "feat(analytics): build Patterns tab with period-aware heatmap and
 ### Task 11: Create Tab Barrel Export and Refactor DashboardScreen
 
 **Files:**
+
 - Create: `src/screens/analytics/tabs/index.ts`
 - Modify: `src/screens/analytics/DashboardScreen.tsx`
 - Modify: `src/screens/analytics/index.ts`
@@ -1960,6 +2017,7 @@ export { PatternsTab } from './PatternsTab';
 - [ ] **Step 2: Refactor DashboardScreen as tab host**
 
 Replace the contents of `src/screens/analytics/DashboardScreen.tsx`. Key contracts:
+
 - **Named export**: `export const DashboardScreen = ...` (not default export)
 - **useTheme**: `const { theme } = useTheme(); const colors = theme.colors;`
 - **ScreenLayout header**: `rightActions: <Button>Reports</Button>` (ReactNode, matching existing pattern at line 197)
@@ -1970,6 +2028,7 @@ Replace the contents of `src/screens/analytics/DashboardScreen.tsx`. Key contrac
 - Passes `comparison?.comparison ?? null` (the previous period's `AnalyticsData`) to PatternsTab as `comparisonAnalytics` for anomaly baseline detection.
 
 The screen renders:
+
 1. Period selector (existing pattern from current DashboardScreen)
 2. Tab bar (Overview | Signals | Patterns) with haptic feedback
 3. Conditional tab content based on `activeTab` state
@@ -2037,6 +2096,7 @@ Run: `npm start` then press `i` for iOS simulator.
 Navigate to Analytics. For each period (24h, 7d, 30d, 1y), check each tab:
 
 **Overview:**
+
 - Comparison cards show values (hidden % change for 1y period)
 - Stacked area chart shows real severity breakdown per day (not uniform proportions)
 - Detection breakdown bar renders
@@ -2044,6 +2104,7 @@ Navigate to Analytics. For each period (24h, 7d, 30d, 1y), check each tab:
 - Sensor health shows battery % AND uptime duration
 
 **Signals:**
+
 - RSSI histogram renders with median/peak callouts
 - Proximity zones render with correct counts
 - Confidence distribution bars render
@@ -2052,6 +2113,7 @@ Navigate to Analytics. For each period (24h, 7d, 30d, 1y), check each tab:
 - RSSI trend has inverted Y-axis (stronger signals at top)
 
 **Patterns:**
+
 - Heatmap renders as single-row for 24h, 7×12 for 7d/30d, month-columns for 1y
 - Hourly bars render with peak/quietest callouts
 - Day-of-week bars render with busiest highlighted

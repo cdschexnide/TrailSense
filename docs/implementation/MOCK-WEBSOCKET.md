@@ -146,6 +146,7 @@ npm start
 ```
 
 Console output:
+
 ```
 ═══════════════════════════════════════════
           🎭 MOCK MODE ENABLED 🎭
@@ -178,6 +179,7 @@ Navigate to the **Radar** tab to see:
 ### Event Details
 
 Each detection shows:
+
 - **Distance** - Estimated from RSSI
 - **Angle** - Calculated from MAC address hash
 - **Threat Level** - Color-coded (red=critical, orange=high, yellow=medium, green=low)
@@ -188,6 +190,7 @@ Each detection shows:
 To use real WebSocket (requires backend):
 
 1. Edit `.env`:
+
    ```env
    USE_MOCK_API=false
    ```
@@ -305,12 +308,14 @@ Real-time alerts are also added to the alerts list cache via `useWebSocket` hook
 ### No Events Appearing
 
 1. Check mock mode is enabled:
+
    ```bash
    # .env file
    USE_MOCK_API=true
    ```
 
 2. Check console for connection:
+
    ```
    [MockWebSocket] 🎭 Connecting to mock WebSocket...
    [MockWebSocket] ✓ Connected

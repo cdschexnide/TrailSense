@@ -220,12 +220,16 @@ class MockWebSocketService {
    * Generate mock device status update
    */
   private generateMockDeviceStatus() {
-    const device = this.devices[Math.floor(Math.random() * this.devices.length)];
+    const device =
+      this.devices[Math.floor(Math.random() * this.devices.length)];
 
     const batteryChange = Math.floor(Math.random() * 5) - 2;
     const newBattery = Math.max(
       0,
-      Math.min(100, (device.batteryPercent ?? device.battery ?? 50) + batteryChange)
+      Math.min(
+        100,
+        (device.batteryPercent ?? device.battery ?? 50) + batteryChange
+      )
     );
 
     const priorUptime =
@@ -334,11 +338,9 @@ class MockWebSocketService {
     return items[items.length - 1];
   }
 
-  private deriveThreatLevel(
-    presence: number,
-    proximity: number
-  ): ThreatLevel {
-    const presenceRow = presence <= 25 ? 0 : presence <= 50 ? 1 : presence <= 75 ? 2 : 3;
+  private deriveThreatLevel(presence: number, proximity: number): ThreatLevel {
+    const presenceRow =
+      presence <= 25 ? 0 : presence <= 50 ? 1 : presence <= 75 ? 2 : 3;
     const proximityColumn =
       proximity <= 30 ? 0 : proximity <= 55 ? 1 : proximity <= 75 ? 2 : 3;
 

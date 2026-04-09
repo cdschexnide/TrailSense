@@ -15,53 +15,56 @@
 ## File Structure
 
 ### New Files
-| File | Responsibility |
-|------|---------------|
-| `src/types/report.ts` | Report types: ReportTemplate, ReportConfig, SavedReport, Finding, IntelligenceBrief |
-| `src/store/slices/savedReportsSlice.ts` | Redux slice for CRUD on saved report configs (persisted) |
-| `src/components/molecules/ReportTemplateRow/ReportTemplateRow.tsx` | Hub row: icon, template name, description, chevron |
-| `src/components/molecules/ReportTemplateRow/index.ts` | Barrel export |
-| `src/components/molecules/SavedReportRow/SavedReportRow.tsx` | Hub row: name, template badge, date, swipe-to-delete |
-| `src/components/molecules/SavedReportRow/index.ts` | Barrel export |
-| `src/components/molecules/FindingCard/FindingCard.tsx` | Brief finding: severity dot, title, description, metric |
-| `src/components/molecules/FindingCard/index.ts` | Barrel export |
-| `src/components/molecules/BriefSummaryCard/BriefSummaryCard.tsx` | Narrative summary card with larger body text |
-| `src/components/molecules/BriefSummaryCard/index.ts` | Barrel export |
-| `src/components/molecules/ReportSection/ReportSection.tsx` | Titled section wrapper for report content |
-| `src/components/molecules/ReportSection/index.ts` | Barrel export |
-| `src/components/organisms/reports/SecuritySummaryReport.tsx` | Full Security Summary template renderer |
-| `src/components/organisms/reports/ActivityReportReport.tsx` | Full Activity Report template renderer |
-| `src/components/organisms/reports/SignalAnalysisReport.tsx` | Full Signal Analysis template renderer |
-| `src/components/organisms/reports/index.ts` | Barrel export for report organisms |
-| `src/screens/analytics/ReportBuilderScreen.tsx` | Filter config + generate screen |
-| `src/screens/analytics/ReportPreviewScreen.tsx` | Rendered report + export actions |
-| `src/screens/analytics/BriefScreen.tsx` | LLM intelligence brief generation |
-| `src/services/llm/templates/BriefTemplate.ts` | LLM prompt template for intelligence briefs |
-| `src/services/reportExport.ts` | PDF HTML builder + CSV string builder per template |
-| `__tests__/store/slices/savedReportsSlice.test.ts` | Slice tests |
-| `__tests__/services/reportExport.test.ts` | Export service tests |
-| `__tests__/screens/analytics/ReportsScreen.test.tsx` | Hub screen tests |
+
+| File                                                               | Responsibility                                                                      |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `src/types/report.ts`                                              | Report types: ReportTemplate, ReportConfig, SavedReport, Finding, IntelligenceBrief |
+| `src/store/slices/savedReportsSlice.ts`                            | Redux slice for CRUD on saved report configs (persisted)                            |
+| `src/components/molecules/ReportTemplateRow/ReportTemplateRow.tsx` | Hub row: icon, template name, description, chevron                                  |
+| `src/components/molecules/ReportTemplateRow/index.ts`              | Barrel export                                                                       |
+| `src/components/molecules/SavedReportRow/SavedReportRow.tsx`       | Hub row: name, template badge, date, swipe-to-delete                                |
+| `src/components/molecules/SavedReportRow/index.ts`                 | Barrel export                                                                       |
+| `src/components/molecules/FindingCard/FindingCard.tsx`             | Brief finding: severity dot, title, description, metric                             |
+| `src/components/molecules/FindingCard/index.ts`                    | Barrel export                                                                       |
+| `src/components/molecules/BriefSummaryCard/BriefSummaryCard.tsx`   | Narrative summary card with larger body text                                        |
+| `src/components/molecules/BriefSummaryCard/index.ts`               | Barrel export                                                                       |
+| `src/components/molecules/ReportSection/ReportSection.tsx`         | Titled section wrapper for report content                                           |
+| `src/components/molecules/ReportSection/index.ts`                  | Barrel export                                                                       |
+| `src/components/organisms/reports/SecuritySummaryReport.tsx`       | Full Security Summary template renderer                                             |
+| `src/components/organisms/reports/ActivityReportReport.tsx`        | Full Activity Report template renderer                                              |
+| `src/components/organisms/reports/SignalAnalysisReport.tsx`        | Full Signal Analysis template renderer                                              |
+| `src/components/organisms/reports/index.ts`                        | Barrel export for report organisms                                                  |
+| `src/screens/analytics/ReportBuilderScreen.tsx`                    | Filter config + generate screen                                                     |
+| `src/screens/analytics/ReportPreviewScreen.tsx`                    | Rendered report + export actions                                                    |
+| `src/screens/analytics/BriefScreen.tsx`                            | LLM intelligence brief generation                                                   |
+| `src/services/llm/templates/BriefTemplate.ts`                      | LLM prompt template for intelligence briefs                                         |
+| `src/services/reportExport.ts`                                     | PDF HTML builder + CSV string builder per template                                  |
+| `__tests__/store/slices/savedReportsSlice.test.ts`                 | Slice tests                                                                         |
+| `__tests__/services/reportExport.test.ts`                          | Export service tests                                                                |
+| `__tests__/screens/analytics/ReportsScreen.test.tsx`               | Hub screen tests                                                                    |
 
 ### Modified Files
-| File | Change |
-|------|--------|
-| `src/types/index.ts` | Add `export * from './report'` |
-| `src/store/index.ts` | Add savedReportsSlice with persist config |
-| `src/navigation/types.ts` | Add ReportBuilder, ReportPreview, Brief to MoreStack + AnalyticsStack param lists |
-| `src/navigation/stacks/MoreStack.tsx` | Register 3 new screens |
-| `src/navigation/stacks/AnalyticsStack.tsx` | Register 3 new screens |
-| `src/screens/analytics/ReportsScreen.tsx` | Replace placeholder with hub |
-| `src/screens/analytics/index.ts` | Add new screen exports |
-| `src/components/molecules/index.ts` | Add new molecule exports |
-| `src/components/organisms/index.ts` | Add report organism exports |
-| `src/services/llm/templates/index.ts` | Add BriefTemplate export |
-| `package.json` | Add expo-print, expo-sharing dependencies |
+
+| File                                       | Change                                                                            |
+| ------------------------------------------ | --------------------------------------------------------------------------------- |
+| `src/types/index.ts`                       | Add `export * from './report'`                                                    |
+| `src/store/index.ts`                       | Add savedReportsSlice with persist config                                         |
+| `src/navigation/types.ts`                  | Add ReportBuilder, ReportPreview, Brief to MoreStack + AnalyticsStack param lists |
+| `src/navigation/stacks/MoreStack.tsx`      | Register 3 new screens                                                            |
+| `src/navigation/stacks/AnalyticsStack.tsx` | Register 3 new screens                                                            |
+| `src/screens/analytics/ReportsScreen.tsx`  | Replace placeholder with hub                                                      |
+| `src/screens/analytics/index.ts`           | Add new screen exports                                                            |
+| `src/components/molecules/index.ts`        | Add new molecule exports                                                          |
+| `src/components/organisms/index.ts`        | Add report organism exports                                                       |
+| `src/services/llm/templates/index.ts`      | Add BriefTemplate export                                                          |
+| `package.json`                             | Add expo-print, expo-sharing dependencies                                         |
 
 ---
 
 ### Task 1: Install Dependencies
 
 **Files:**
+
 - Modify: `package.json`
 
 - [ ] **Step 1: Install expo-print and expo-sharing**
@@ -90,6 +93,7 @@ git commit -m "feat: add expo-print and expo-sharing dependencies for report exp
 ### Task 2: Report Types
 
 **Files:**
+
 - Create: `src/types/report.ts`
 - Modify: `src/types/index.ts`
 
@@ -161,6 +165,7 @@ export const REPORT_TEMPLATES: Record<
 - [ ] **Step 2: Add to types barrel**
 
 Add to `src/types/index.ts`:
+
 ```typescript
 // Report types
 export * from './report';
@@ -186,6 +191,7 @@ git commit -m "feat: add report types (ReportConfig, SavedReport, Finding, Intel
 ### Task 3: savedReportsSlice (TDD)
 
 **Files:**
+
 - Create: `src/store/slices/savedReportsSlice.ts`
 - Modify: `src/store/index.ts`
 - Create: `__tests__/store/slices/savedReportsSlice.test.ts`
@@ -203,9 +209,7 @@ import reducer, {
 } from '@store/slices/savedReportsSlice';
 import type { SavedReport, ReportConfig } from '@/types/report';
 
-const makeConfig = (
-  overrides?: Partial<ReportConfig>
-): ReportConfig => ({
+const makeConfig = (overrides?: Partial<ReportConfig>): ReportConfig => ({
   template: 'security-summary',
   period: 'week',
   threatLevels: ['critical', 'high', 'medium', 'low'],
@@ -277,10 +281,7 @@ describe('savedReportsSlice', () => {
 
   it('should set lastBriefGeneratedAt', () => {
     const timestamp = '2026-04-08T14:00:00.000Z';
-    const state = reducer(
-      initialState,
-      setLastBriefGeneratedAt(timestamp)
-    );
+    const state = reducer(initialState, setLastBriefGeneratedAt(timestamp));
     expect(state.lastBriefGeneratedAt).toBe(timestamp);
   });
 });
@@ -334,17 +335,12 @@ const savedReportsSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; timestamp: string }>
     ) => {
-      const report = state.reports.find(
-        r => r.id === action.payload.id
-      );
+      const report = state.reports.find(r => r.id === action.payload.id);
       if (report) {
         report.lastGeneratedAt = action.payload.timestamp;
       }
     },
-    setLastBriefGeneratedAt: (
-      state,
-      action: PayloadAction<string>
-    ) => {
+    setLastBriefGeneratedAt: (state, action: PayloadAction<string>) => {
       state.lastBriefGeneratedAt = action.payload;
     },
   },
@@ -372,11 +368,13 @@ Expected: All 6 tests PASS.
 - [ ] **Step 5: Register slice in store with persistence**
 
 Modify `src/store/index.ts`. Add these imports at the top:
+
 ```typescript
 import savedReportsReducer from './slices/savedReportsSlice';
 ```
 
 Add persist config after the existing `blockedDevicesPersistConfig`:
+
 ```typescript
 const savedReportsPersistConfig = {
   key: 'savedReports',
@@ -389,6 +387,7 @@ const persistedSavedReportsReducer = persistReducer(
 ```
 
 Add to the `reducer` object in `configureStore`:
+
 ```typescript
 savedReports: persistedSavedReportsReducer,
 ```
@@ -413,6 +412,7 @@ git commit -m "feat: add savedReportsSlice with persistence for saved report con
 ### Task 4: Navigation Updates
 
 **Files:**
+
 - Modify: `src/navigation/types.ts`
 - Modify: `src/navigation/stacks/MoreStack.tsx`
 - Modify: `src/navigation/stacks/AnalyticsStack.tsx`
@@ -420,11 +420,13 @@ git commit -m "feat: add savedReportsSlice with persistence for saved report con
 - [ ] **Step 1: Add new screen types to navigation types**
 
 In `src/navigation/types.ts`, add the import at the top:
+
 ```typescript
 import { ReportTemplate, ReportConfig } from '@types';
 ```
 
 Add three entries to `AnalyticsStackParamList`:
+
 ```typescript
 export type AnalyticsStackParamList = {
   Dashboard: undefined;
@@ -437,6 +439,7 @@ export type AnalyticsStackParamList = {
 ```
 
 Add the same three entries to `MoreStackParamList` (after the existing `Reports: undefined;` line):
+
 ```typescript
   ReportBuilder: { template: ReportTemplate; savedReportId?: string };
   ReportPreview: { config: ReportConfig; savedReportId?: string };
@@ -446,6 +449,7 @@ Add the same three entries to `MoreStackParamList` (after the existing `Reports:
 - [ ] **Step 2: Register screens in AnalyticsStack**
 
 In `src/navigation/stacks/AnalyticsStack.tsx`, add imports:
+
 ```typescript
 import {
   DashboardScreen,
@@ -458,6 +462,7 @@ import {
 ```
 
 Add three `Stack.Screen` entries after the Reports screen:
+
 ```typescript
 <Stack.Screen name="ReportBuilder" component={ReportBuilderScreen} />
 <Stack.Screen name="ReportPreview" component={ReportPreviewScreen} />
@@ -467,6 +472,7 @@ Add three `Stack.Screen` entries after the Reports screen:
 - [ ] **Step 3: Register screens in MoreStack**
 
 In `src/navigation/stacks/MoreStack.tsx`, update the analytics import:
+
 ```typescript
 import {
   DashboardScreen,
@@ -479,6 +485,7 @@ import {
 ```
 
 Add three `Stack.Screen` entries after the Reports screen:
+
 ```typescript
 <Stack.Screen name="ReportBuilder" component={ReportBuilderScreen} />
 <Stack.Screen name="ReportPreview" component={ReportPreviewScreen} />
@@ -488,6 +495,7 @@ Add three `Stack.Screen` entries after the Reports screen:
 - [ ] **Step 4: Create placeholder screens so navigation compiles**
 
 Create temporary `src/screens/analytics/ReportBuilderScreen.tsx`:
+
 ```typescript
 import React from 'react';
 import { View } from 'react-native';
@@ -501,6 +509,7 @@ export const ReportBuilderScreen = () => (
 ```
 
 Create temporary `src/screens/analytics/ReportPreviewScreen.tsx`:
+
 ```typescript
 import React from 'react';
 import { View } from 'react-native';
@@ -514,6 +523,7 @@ export const ReportPreviewScreen = () => (
 ```
 
 Create temporary `src/screens/analytics/BriefScreen.tsx`:
+
 ```typescript
 import React from 'react';
 import { View } from 'react-native';
@@ -529,6 +539,7 @@ export const BriefScreen = () => (
 - [ ] **Step 5: Update screen barrel exports**
 
 In `src/screens/analytics/index.ts`, add:
+
 ```typescript
 export { ReportBuilderScreen } from './ReportBuilderScreen';
 export { ReportPreviewScreen } from './ReportPreviewScreen';
@@ -555,6 +566,7 @@ git commit -m "feat: register ReportBuilder, ReportPreview, Brief screens in nav
 ### Task 5: ReportTemplateRow Molecule
 
 **Files:**
+
 - Create: `src/components/molecules/ReportTemplateRow/ReportTemplateRow.tsx`
 - Create: `src/components/molecules/ReportTemplateRow/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -659,6 +671,7 @@ export { ReportTemplateRow } from './ReportTemplateRow';
 - [ ] **Step 3: Add to molecules barrel**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { ReportTemplateRow } from './ReportTemplateRow';
 ```
@@ -683,6 +696,7 @@ git commit -m "feat: add ReportTemplateRow molecule for reports hub"
 ### Task 6: SavedReportRow Molecule
 
 **Files:**
+
 - Create: `src/components/molecules/SavedReportRow/SavedReportRow.tsx`
 - Create: `src/components/molecules/SavedReportRow/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -820,6 +834,7 @@ export { SavedReportRow } from './SavedReportRow';
 - [ ] **Step 3: Add to molecules barrel**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { SavedReportRow } from './SavedReportRow';
 ```
@@ -842,6 +857,7 @@ git commit -m "feat: add SavedReportRow molecule with template badge"
 ### Task 7: FindingCard and BriefSummaryCard Molecules
 
 **Files:**
+
 - Create: `src/components/molecules/FindingCard/FindingCard.tsx`
 - Create: `src/components/molecules/FindingCard/index.ts`
 - Create: `src/components/molecules/BriefSummaryCard/BriefSummaryCard.tsx`
@@ -1010,6 +1026,7 @@ export { BriefSummaryCard } from './BriefSummaryCard';
 - [ ] **Step 5: Add both to molecules barrel**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { FindingCard } from './FindingCard';
 export { BriefSummaryCard } from './BriefSummaryCard';
@@ -1033,6 +1050,7 @@ git commit -m "feat: add FindingCard and BriefSummaryCard molecules for intellig
 ### Task 8: ReportSection Molecule
 
 **Files:**
+
 - Create: `src/components/molecules/ReportSection/ReportSection.tsx`
 - Create: `src/components/molecules/ReportSection/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -1110,6 +1128,7 @@ export { ReportSection } from './ReportSection';
 - [ ] **Step 3: Add to molecules barrel**
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { ReportSection } from './ReportSection';
 ```
@@ -1126,6 +1145,7 @@ git commit -m "feat: add ReportSection molecule for report content layout"
 ### Task 9: ReportsScreen Hub (Replace Placeholder)
 
 **Files:**
+
 - Modify: `src/screens/analytics/ReportsScreen.tsx`
 - Create: `__tests__/screens/analytics/ReportsScreen.test.tsx`
 
@@ -1408,6 +1428,7 @@ git commit -m "feat: replace Reports placeholder with hub screen (templates, sav
 ### Task 10: ReportBuilderScreen
 
 **Files:**
+
 - Modify: `src/screens/analytics/ReportBuilderScreen.tsx`
 
 - [ ] **Step 1: Implement the full builder screen**
@@ -1906,6 +1927,7 @@ git commit -m "feat: implement ReportBuilderScreen with period, filters, and sav
 ### Task 11: Report Template Organisms
 
 **Files:**
+
 - Create: `src/components/organisms/reports/SecuritySummaryReport.tsx`
 - Create: `src/components/organisms/reports/ActivityReportReport.tsx`
 - Create: `src/components/organisms/reports/SignalAnalysisReport.tsx`
@@ -2473,6 +2495,7 @@ export { SignalAnalysisReport } from './SignalAnalysisReport';
 - [ ] **Step 5: Add to organisms barrel**
 
 Add to `src/components/organisms/index.ts`:
+
 ```typescript
 export * from './reports';
 ```
@@ -2495,6 +2518,7 @@ git commit -m "feat: add SecuritySummary, ActivityReport, SignalAnalysis report 
 ### Task 12: Report Export Service (TDD)
 
 **Files:**
+
 - Create: `src/services/reportExport.ts`
 - Create: `__tests__/services/reportExport.test.ts`
 
@@ -2502,7 +2526,11 @@ git commit -m "feat: add SecuritySummary, ActivityReport, SignalAnalysis report 
 
 ```typescript
 // __tests__/services/reportExport.test.ts
-import { buildCsvString, buildPdfHtml, getReportFilename } from '@services/reportExport';
+import {
+  buildCsvString,
+  buildPdfHtml,
+  getReportFilename,
+} from '@services/reportExport';
 import { mockAnalyticsData } from '@/mocks/data';
 import type { ReportConfig } from '@/types/report';
 
@@ -2518,13 +2546,17 @@ describe('reportExport', () => {
   describe('getReportFilename', () => {
     it('generates correct filename for security-summary PDF', () => {
       const name = getReportFilename(baseConfig, 'pdf');
-      expect(name).toMatch(/^TrailSense_SecuritySummary_7d_\d{4}-\d{2}-\d{2}\.pdf$/);
+      expect(name).toMatch(
+        /^TrailSense_SecuritySummary_7d_\d{4}-\d{2}-\d{2}\.pdf$/
+      );
     });
 
     it('generates correct filename for activity-report CSV', () => {
       const config = { ...baseConfig, template: 'activity-report' as const };
       const name = getReportFilename(config, 'csv');
-      expect(name).toMatch(/^TrailSense_ActivityReport_7d_\d{4}-\d{2}-\d{2}\.csv$/);
+      expect(name).toMatch(
+        /^TrailSense_ActivityReport_7d_\d{4}-\d{2}-\d{2}\.csv$/
+      );
     });
   });
 
@@ -2683,14 +2715,10 @@ function buildActivityReportCsv(
     ...analytics.dailyTrend.map(d => `${d.date},${d.count}`),
     '',
     'hour,count',
-    ...(analytics.hourlyDistribution || []).map(
-      d => `${d.hour},${d.count}`
-    ),
+    ...(analytics.hourlyDistribution || []).map(d => `${d.hour},${d.count}`),
     '',
     'day_of_week,count',
-    ...(analytics.dayOfWeekDistribution || []).map(
-      d => `${d.day},${d.count}`
-    ),
+    ...(analytics.dayOfWeekDistribution || []).map(d => `${d.day},${d.count}`),
     '',
     'nighttime_count,nighttime_percent',
     `${analytics.nighttimeActivity.count},${analytics.nighttimeActivity.percentOfTotal}`,
@@ -2724,43 +2752,51 @@ function buildSignalAnalysisCsv(
     ),
     '',
     'proximity_zone,count',
-    ...analytics.proximityZoneDistribution.map(
-      d => `${d.zone},${d.count}`
-    ),
+    ...analytics.proximityZoneDistribution.map(d => `${d.zone},${d.count}`),
     '',
     'confidence_tier,count',
-    ...analytics.confidenceDistribution.map(
-      d => `${d.tier},${d.count}`
-    ),
+    ...analytics.confidenceDistribution.map(d => `${d.tier},${d.count}`),
   ];
 
   // Modality breakdown filtered by selected detection types
   rows.push('', 'modality,count,metric_1,metric_2');
   if (config.detectionTypes.includes('wifi')) {
     const w = analytics.modalityBreakdown.wifi;
-    rows.push(`wifi,${w.count},channels_active:${w.channelsActive},probe_request_pct:${w.probeRequestPercent}`);
+    rows.push(
+      `wifi,${w.count},channels_active:${w.channelsActive},probe_request_pct:${w.probeRequestPercent}`
+    );
   }
   if (config.detectionTypes.includes('bluetooth')) {
     const b = analytics.modalityBreakdown.ble;
-    rows.push(`bluetooth,${b.count},phone_pct:${b.phonePercent},apple_pct:${b.applePercent}`);
+    rows.push(
+      `bluetooth,${b.count},phone_pct:${b.phonePercent},apple_pct:${b.applePercent}`
+    );
   }
   if (config.detectionTypes.includes('cellular')) {
     const c = analytics.modalityBreakdown.cellular;
-    rows.push(`cellular,${c.count},peak_dbm:${c.avgPeakDbm},burst_ms:${c.avgBurstDurationMs}`);
+    rows.push(
+      `cellular,${c.count},peak_dbm:${c.avgPeakDbm},burst_ms:${c.avgBurstDurationMs}`
+    );
   }
 
   // Signal strength trend filtered by detection types
   if (analytics.rssiTrend.length > 0) {
     const trendHeaders = ['date'];
-    if (config.detectionTypes.includes('wifi')) trendHeaders.push('wifi_avg_rssi');
-    if (config.detectionTypes.includes('bluetooth')) trendHeaders.push('ble_avg_rssi');
-    if (config.detectionTypes.includes('cellular')) trendHeaders.push('cellular_avg_rssi');
+    if (config.detectionTypes.includes('wifi'))
+      trendHeaders.push('wifi_avg_rssi');
+    if (config.detectionTypes.includes('bluetooth'))
+      trendHeaders.push('ble_avg_rssi');
+    if (config.detectionTypes.includes('cellular'))
+      trendHeaders.push('cellular_avg_rssi');
     rows.push('', trendHeaders.join(','));
     analytics.rssiTrend.forEach(point => {
       const values = [point.date];
-      if (config.detectionTypes.includes('wifi')) values.push(String(point.wifiAvgRssi ?? ''));
-      if (config.detectionTypes.includes('bluetooth')) values.push(String(point.bleAvgRssi ?? ''));
-      if (config.detectionTypes.includes('cellular')) values.push(String(point.cellularAvgRssi ?? ''));
+      if (config.detectionTypes.includes('wifi'))
+        values.push(String(point.wifiAvgRssi ?? ''));
+      if (config.detectionTypes.includes('bluetooth'))
+        values.push(String(point.bleAvgRssi ?? ''));
+      if (config.detectionTypes.includes('cellular'))
+        values.push(String(point.cellularAvgRssi ?? ''));
       rows.push(values.join(','));
     });
   }
@@ -2782,7 +2818,12 @@ const PDF_STYLES = `
   .section-label { font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 4px; }
 `;
 
-function pdfWrap(title: string, period: string, analytics: AnalyticsData, body: string): string {
+function pdfWrap(
+  title: string,
+  period: string,
+  analytics: AnalyticsData,
+  body: string
+): string {
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><style>${PDF_STYLES}</style></head>
 <body>
@@ -2801,11 +2842,26 @@ export function buildPdfHtml(
 
   switch (config.template) {
     case 'security-summary':
-      return buildSecuritySummaryPdf(analytics, config, templateInfo.name, period);
+      return buildSecuritySummaryPdf(
+        analytics,
+        config,
+        templateInfo.name,
+        period
+      );
     case 'activity-report':
-      return buildActivityReportPdf(analytics, config, templateInfo.name, period);
+      return buildActivityReportPdf(
+        analytics,
+        config,
+        templateInfo.name,
+        period
+      );
     case 'signal-analysis':
-      return buildSignalAnalysisPdf(analytics, config, templateInfo.name, period);
+      return buildSignalAnalysisPdf(
+        analytics,
+        config,
+        templateInfo.name,
+        period
+      );
   }
 }
 
@@ -2817,24 +2873,41 @@ function buildSecuritySummaryPdf(
 ): string {
   const threatRows = analytics.threatLevelDistribution
     .filter(d => config.threatLevels.includes(d.level as any))
-    .map(d => `<tr><td>${d.level}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.level}</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
   const detectionRows = analytics.detectionTypeDistribution
     .filter(d => config.detectionTypes.includes(d.type as any))
-    .map(d => `<tr><td>${d.type}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.type}</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
   const deviceRows = analytics.deviceDistribution
     .filter(d => config.deviceIds.includes(d.deviceId))
-    .map(d => `<tr><td>${d.deviceId}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.deviceId}</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
-  const topDeviceRows = analytics.topDetectedDevices.slice(0, 5)
-    .map((d, i) => `<tr><td>${i + 1}</td><td>${d.fingerprintHash.slice(0, 12)}...</td><td style="text-align:right">${d.count} visits</td></tr>`)
+  const topDeviceRows = analytics.topDetectedDevices
+    .slice(0, 5)
+    .map(
+      (d, i) =>
+        `<tr><td>${i + 1}</td><td>${d.fingerprintHash.slice(0, 12)}...</td><td style="text-align:right">${d.count} visits</td></tr>`
+    )
     .join('');
 
-  return pdfWrap(title, period, analytics, `
+  return pdfWrap(
+    title,
+    period,
+    analytics,
+    `
     <div class="section-label">Property-Wide Metrics</div>
     <div class="metrics">
       <div class="metric"><div class="metric-value">${analytics.totalAlerts}</div><div class="metric-label">Detections</div></div>
@@ -2846,7 +2919,8 @@ function buildSecuritySummaryPdf(
     <h2>Detection Types</h2><table>${detectionRows}</table>
     <h2>Top Detected Devices</h2><table>${topDeviceRows}</table>
     ${deviceRows ? `<h2>Detections by Sensor</h2><div class="section-label">Filtered by selected sensors</div><table>${deviceRows}</table>` : ''}
-  `);
+  `
+  );
 }
 
 function buildActivityReportPdf(
@@ -2856,25 +2930,44 @@ function buildActivityReportPdf(
   period: string
 ): string {
   const dailyRows = analytics.dailyTrend
-    .map(d => `<tr><td>${d.date}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.date}</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
   const hourlyRows = (analytics.hourlyDistribution || [])
-    .map(d => `<tr><td>${d.hour}:00</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.hour}:00</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
-  const sensorRows = analytics.perSensorTrend.slice(-7).flatMap(day =>
-    day.sensors
-      .filter(s => config.deviceIds.includes(s.deviceId))
-      .map(s => `<tr><td>${day.date}</td><td>${s.deviceName}</td><td style="text-align:right">${s.count}</td></tr>`)
-  ).join('');
+  const sensorRows = analytics.perSensorTrend
+    .slice(-7)
+    .flatMap(day =>
+      day.sensors
+        .filter(s => config.deviceIds.includes(s.deviceId))
+        .map(
+          s =>
+            `<tr><td>${day.date}</td><td>${s.deviceName}</td><td style="text-align:right">${s.count}</td></tr>`
+        )
+    )
+    .join('');
 
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const dayOfWeekRows = (analytics.dayOfWeekDistribution || [])
-    .map(d => `<tr><td>${dayNames[d.day] || d.day}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${dayNames[d.day] || d.day}</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
-  return pdfWrap(title, period, analytics, `
+  return pdfWrap(
+    title,
+    period,
+    analytics,
+    `
     <h2>Daily Trend</h2><table>${dailyRows}</table>
     <h2>Hourly Distribution</h2><table>${hourlyRows}</table>
     ${dayOfWeekRows ? `<h2>Day of Week</h2><table>${dayOfWeekRows}</table>` : ''}
@@ -2884,7 +2977,8 @@ function buildActivityReportPdf(
       <div class="metric"><div class="metric-value">${analytics.nighttimeActivity.count}</div><div class="metric-label">Night Detections</div></div>
     </div>
     ${sensorRows ? `<h2>Activity by Sensor</h2><div class="section-label">Filtered by selected sensors</div><table>${sensorRows}</table>` : ''}
-  `);
+  `
+  );
 }
 
 function buildSignalAnalysisPdf(
@@ -2894,42 +2988,71 @@ function buildSignalAnalysisPdf(
   period: string
 ): string {
   const rssiRows = analytics.rssiDistribution
-    .map(d => `<tr><td>${d.bucketMin} to ${d.bucketMax} dBm</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.bucketMin} to ${d.bucketMax} dBm</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
   const proximityRows = analytics.proximityZoneDistribution
-    .map(d => `<tr><td>${d.zone}</td><td style="text-align:right">${d.count}</td></tr>`)
+    .map(
+      d =>
+        `<tr><td>${d.zone}</td><td style="text-align:right">${d.count}</td></tr>`
+    )
     .join('');
 
   const modalitySections: string[] = [];
   if (config.detectionTypes.includes('wifi')) {
     const w = analytics.modalityBreakdown.wifi;
-    modalitySections.push(`<h3>WiFi</h3><p>${w.count} detections · ${w.channelsActive} channels · ${w.probeRequestPercent}% probe requests</p>`);
+    modalitySections.push(
+      `<h3>WiFi</h3><p>${w.count} detections · ${w.channelsActive} channels · ${w.probeRequestPercent}% probe requests</p>`
+    );
   }
   if (config.detectionTypes.includes('bluetooth')) {
     const b = analytics.modalityBreakdown.ble;
-    modalitySections.push(`<h3>Bluetooth</h3><p>${b.count} detections · ${b.phonePercent}% phones · ${b.applePercent}% Apple · ${b.beaconPercent}% beacons</p>`);
+    modalitySections.push(
+      `<h3>Bluetooth</h3><p>${b.count} detections · ${b.phonePercent}% phones · ${b.applePercent}% Apple · ${b.beaconPercent}% beacons</p>`
+    );
   }
   if (config.detectionTypes.includes('cellular')) {
     const c = analytics.modalityBreakdown.cellular;
-    modalitySections.push(`<h3>Cellular</h3><p>${c.count} detections · ${c.avgPeakDbm} dBm peak · ${c.avgBurstDurationMs}ms burst</p>`);
+    modalitySections.push(
+      `<h3>Cellular</h3><p>${c.count} detections · ${c.avgPeakDbm} dBm peak · ${c.avgBurstDurationMs}ms burst</p>`
+    );
   }
 
   // Signal strength trend table filtered by detection types
   const trendHeaders = ['Date'];
   if (config.detectionTypes.includes('wifi')) trendHeaders.push('WiFi RSSI');
-  if (config.detectionTypes.includes('bluetooth')) trendHeaders.push('BLE RSSI');
-  if (config.detectionTypes.includes('cellular')) trendHeaders.push('Cellular RSSI');
+  if (config.detectionTypes.includes('bluetooth'))
+    trendHeaders.push('BLE RSSI');
+  if (config.detectionTypes.includes('cellular'))
+    trendHeaders.push('Cellular RSSI');
   const trendHeaderRow = `<tr>${trendHeaders.map(h => `<td><strong>${h}</strong></td>`).join('')}</tr>`;
-  const trendDataRows = analytics.rssiTrend.map(point => {
-    const cells = [`<td>${point.date}</td>`];
-    if (config.detectionTypes.includes('wifi')) cells.push(`<td style="text-align:right">${point.wifiAvgRssi ?? '—'}</td>`);
-    if (config.detectionTypes.includes('bluetooth')) cells.push(`<td style="text-align:right">${point.bleAvgRssi ?? '—'}</td>`);
-    if (config.detectionTypes.includes('cellular')) cells.push(`<td style="text-align:right">${point.cellularAvgRssi ?? '—'}</td>`);
-    return `<tr>${cells.join('')}</tr>`;
-  }).join('');
+  const trendDataRows = analytics.rssiTrend
+    .map(point => {
+      const cells = [`<td>${point.date}</td>`];
+      if (config.detectionTypes.includes('wifi'))
+        cells.push(
+          `<td style="text-align:right">${point.wifiAvgRssi ?? '—'}</td>`
+        );
+      if (config.detectionTypes.includes('bluetooth'))
+        cells.push(
+          `<td style="text-align:right">${point.bleAvgRssi ?? '—'}</td>`
+        );
+      if (config.detectionTypes.includes('cellular'))
+        cells.push(
+          `<td style="text-align:right">${point.cellularAvgRssi ?? '—'}</td>`
+        );
+      return `<tr>${cells.join('')}</tr>`;
+    })
+    .join('');
 
-  return pdfWrap(title, period, analytics, `
+  return pdfWrap(
+    title,
+    period,
+    analytics,
+    `
     <div class="metrics">
       <div class="metric"><div class="metric-value">${analytics.medianRssi} dBm</div><div class="metric-label">Median RSSI</div></div>
       <div class="metric"><div class="metric-value">${analytics.peakRssi} dBm</div><div class="metric-label">Peak RSSI</div></div>
@@ -2944,7 +3067,8 @@ function buildSignalAnalysisPdf(
       <div class="metric"><div class="metric-value">${analytics.crossModalStats.phantomMerges}</div><div class="metric-label">Phantom Merges</div></div>
     </div>
     ${trendDataRows ? `<h2>Signal Strength Trend</h2><table>${trendHeaderRow}${trendDataRows}</table>` : ''}
-  `);
+  `
+  );
 }
 ```
 
@@ -2968,6 +3092,7 @@ git commit -m "feat: add report export service (PDF HTML builder, CSV builder, f
 ### Task 13: ReportPreviewScreen
 
 **Files:**
+
 - Modify: `src/screens/analytics/ReportPreviewScreen.tsx`
 
 - [ ] **Step 1: Implement the full preview screen**
@@ -3182,6 +3307,7 @@ git commit -m "feat: implement ReportPreviewScreen with template rendering and e
 ### Task 14: BriefTemplate (LLM Prompt)
 
 **Files:**
+
 - Create: `src/services/llm/templates/BriefTemplate.ts`
 - Modify: `src/services/llm/templates/index.ts`
 
@@ -3276,6 +3402,7 @@ Respond with SUMMARY: followed by paragraphs, then FINDINGS: followed by the JSO
 - [ ] **Step 2: Add to templates barrel**
 
 Add to `src/services/llm/templates/index.ts`:
+
 ```typescript
 export { BriefTemplate } from './BriefTemplate';
 ```
@@ -3283,6 +3410,7 @@ export { BriefTemplate } from './BriefTemplate';
 - [ ] **Step 3: Wire generateBrief into LLMService**
 
 In `src/services/llm/LLMService.ts`, add imports at the top:
+
 ```typescript
 import { BriefTemplate } from './templates';
 import type { Finding } from '@/types/report';
@@ -3290,11 +3418,13 @@ import type { AnalyticsData } from '@/types/alert';
 ```
 
 Add a new template instance in the class:
+
 ```typescript
 private briefTemplate = new BriefTemplate();
 ```
 
 Add the `generateBrief` method (after the existing `chat` method, before `generate`):
+
 ```typescript
   /**
    * Generate intelligence brief from analytics data
@@ -3374,6 +3504,7 @@ git commit -m "feat: add BriefTemplate and generateBrief() to LLMService"
 ### Task 15: BriefScreen
 
 **Files:**
+
 - Modify: `src/screens/analytics/BriefScreen.tsx`
 
 - [ ] **Step 1: Implement the full brief screen**
@@ -3769,6 +3900,7 @@ git commit -m "feat: implement BriefScreen with analytics-driven intelligence br
 ### Task 16: Final Integration and Verification
 
 **Files:**
+
 - All files from previous tasks
 
 - [ ] **Step 1: Run full type check**

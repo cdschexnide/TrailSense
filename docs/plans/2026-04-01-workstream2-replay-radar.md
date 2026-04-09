@@ -16,49 +16,49 @@
 
 ### Review findings addressed in v2 and v3
 
-| # | Finding | Fix |
-|---|---------|-----|
-| 1 | Timestamp shared value never syncs | Removed dead `timestamp` shared value entirely. Radar takes plain `currentMinute` prop, filters dots via `useMemo`. Architecture updated to reflect JS-thread rendering with pre-computed coordinates. |
-| 2 | Mock data hardwired | New `useReplayPositions` hook wraps API with time-window params, falls back to mock in dev |
-| 3 | fingerprintHash vs macAddress | Added optional `macAddress` to `TriangulatedPosition` type. `findMatchingAlert` joins on `macAddress` (authoritative) with deviceId+timestamp fallback. Mock generator populates `macAddress` on every position. BucketEntry carries real `macAddress`; FingerprintPeek navigates with it. |
-| 4 | Scrubber has no pan gesture | `Gesture.Pan()` on scrub track maps drag X to minute index |
-| 5 | Tap handler accesses JS from worklet | `runOnJS` bridges tap callback; hit-test data stored as plain array, not Map |
-| 6 | threatLevel fabricated from confidence | Co-generated alerts carry authoritative `threatLevel`. `findMatchingAlert` uses `macAddress` as primary join key (authoritative in both mock and prod when backend populates it). Fallback to deviceId+timestamp for legacy data. |
-| 7 | Crossfade impossible with conditional mount | Both views always mounted; `pointerEvents="none"` + animated opacity |
-| 8 | Props contract mismatch | TimelineScrubberProps uses plain JS state; Task 12 test directly invokes and verifies navigation payload |
+| #   | Finding                                     | Fix                                                                                                                                                                                                                                                                                        |
+| --- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Timestamp shared value never syncs          | Removed dead `timestamp` shared value entirely. Radar takes plain `currentMinute` prop, filters dots via `useMemo`. Architecture updated to reflect JS-thread rendering with pre-computed coordinates.                                                                                     |
+| 2   | Mock data hardwired                         | New `useReplayPositions` hook wraps API with time-window params, falls back to mock in dev                                                                                                                                                                                                 |
+| 3   | fingerprintHash vs macAddress               | Added optional `macAddress` to `TriangulatedPosition` type. `findMatchingAlert` joins on `macAddress` (authoritative) with deviceId+timestamp fallback. Mock generator populates `macAddress` on every position. BucketEntry carries real `macAddress`; FingerprintPeek navigates with it. |
+| 4   | Scrubber has no pan gesture                 | `Gesture.Pan()` on scrub track maps drag X to minute index                                                                                                                                                                                                                                 |
+| 5   | Tap handler accesses JS from worklet        | `runOnJS` bridges tap callback; hit-test data stored as plain array, not Map                                                                                                                                                                                                               |
+| 6   | threatLevel fabricated from confidence      | Co-generated alerts carry authoritative `threatLevel`. `findMatchingAlert` uses `macAddress` as primary join key (authoritative in both mock and prod when backend populates it). Fallback to deviceId+timestamp for legacy data.                                                          |
+| 7   | Crossfade impossible with conditional mount | Both views always mounted; `pointerEvents="none"` + animated opacity                                                                                                                                                                                                                       |
+| 8   | Props contract mismatch                     | TimelineScrubberProps uses plain JS state; Task 12 test directly invokes and verifies navigation payload                                                                                                                                                                                   |
 
 ### v3 follow-up findings addressed
 
-| # | Finding | Fix |
-|---|---------|-----|
-| v3-1 | startHour deep link doesn't flip fadeAnim | `mode` and `fadeAnim` both initialize synchronously from `startHour` — no effect needed. First render is already in replay mode. |
+| #    | Finding                                                  | Fix                                                                                                                                                                                                    |
+| ---- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| v3-1 | startHour deep link doesn't flip fadeAnim                | `mode` and `fadeAnim` both initialize synchronously from `startHour` — no effect needed. First render is already in replay mode.                                                                       |
 | v3-2 | Dead `timestamp` shared value, inconsistent architecture | Removed `timestamp` shared value entirely. Architecture text updated: radar reads plain `currentMinute` prop, pre-computed x/y avoids math at render time. Reanimated used only for crossfade opacity. |
-| v3-3 | Heuristic MAC/threat correlation | Mock generator co-produces positions + alerts with stable MAC/threatLevel per scenario via `generateReplayData()`. `useReplayData` returns both. Correlation is 1:1 by construction. |
-| v3-4 | Empty macAddress tap pauses with no sheet | `handleTap` skips dots with empty `macAddress` — they are not tappable. Only dots with correlated alerts are interactive. |
-| v3-5 | Task 12 test is a no-op | Test now directly invokes the navigation callback and asserts `navigate` was called with `{ screen: 'LiveRadar', params: { startHour: 14 } }`. |
+| v3-3 | Heuristic MAC/threat correlation                         | Mock generator co-produces positions + alerts with stable MAC/threatLevel per scenario via `generateReplayData()`. `useReplayData` returns both. Correlation is 1:1 by construction.                   |
+| v3-4 | Empty macAddress tap pauses with no sheet                | `handleTap` skips dots with empty `macAddress` — they are not tappable. Only dots with correlated alerts are interactive.                                                                              |
+| v3-5 | Task 12 test is a no-op                                  | Test now directly invokes the navigation callback and asserts `navigate` was called with `{ screen: 'LiveRadar', params: { startHour: 14 } }`.                                                         |
 
 ### v4 follow-up findings addressed
 
-| # | Finding | Fix |
-|---|---------|-----|
-| v4-1 | Real-data path returns `alerts: []` | `useReplayData` now fetches alerts in parallel via `alertsApi.getAlerts` with time-window filter. Both mock and prod paths return `{ positions, alerts }`. |
-| v4-2 | Task 12 test doesn't exercise real wiring | Test now renders the actual component, presses Pressable elements, and asserts `navigate` was called with `RadarTab` + `startHour` — proving the callback is wired through the real component tree. |
-| v4-3 | Re-navigation with new startHour not handled | `useEffect` tracks `startHour` via `prevStartHourRef`. On change: updates `minuteIndex`, switches to replay mode if needed. Deduplicates same-hour no-ops. |
+| #    | Finding                                      | Fix                                                                                                                                                                                                 |
+| ---- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v4-1 | Real-data path returns `alerts: []`          | `useReplayData` now fetches alerts in parallel via `alertsApi.getAlerts` with time-window filter. Both mock and prod paths return `{ positions, alerts }`.                                          |
+| v4-2 | Task 12 test doesn't exercise real wiring    | Test now renders the actual component, presses Pressable elements, and asserts `navigate` was called with `RadarTab` + `startHour` — proving the callback is wired through the real component tree. |
+| v4-3 | Re-navigation with new startHour not handled | `useEffect` tracks `startHour` via `prevStartHourRef`. On change: updates `minuteIndex`, switches to replay mode if needed. Deduplicates same-hour no-ops.                                          |
 
 ### v5 follow-up findings addressed
 
-| # | Finding | Fix |
-|---|---------|-----|
+| #    | Finding                                                                | Fix                                                                                                                                                                                                                                                                                                                |
+| ---- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | v5-1 | Production MAC/threat correlation still heuristic (no stable join key) | Add optional `macAddress` field to `TriangulatedPosition` type. Backend populates it (the triangulation system knows which MAC it's tracking). `findMatchingAlert` joins on `macAddress` first, falls back to deviceId+timestamp only when MAC is absent. Mock generator populates `macAddress` on every position. |
-| v5-2 | Tab switch doesn't reset to live mode (unmountOnBlur not set) | Add `useFocusEffect` cleanup that resets mode to live on blur. No navigator config change needed. |
+| v5-2 | Tab switch doesn't reset to live mode (unmountOnBlur not set)          | Add `useFocusEffect` cleanup that resets mode to live on blur. No navigator config change needed.                                                                                                                                                                                                                  |
 
 ### v6 follow-up findings addressed
 
-| # | Finding | Fix |
-|---|---------|-----|
-| v6-1 | Blur reset doesn't stick — route param re-triggers | Consume-and-clear pattern: `useEffect` reads `startHour`, applies it, then `navigation.setParams({ startHour: undefined })` in the same effect. Param is gone before any blur/focus cycle can see it. |
-| v6-2 | useFocusEffect tears down on rerender (unstable handleModeChange) | Replaced `handleModeChange` with `switchToLive`/`switchToReplay` — deps are only `reduceMotion` + `fadeAnim` (both stable). `autoPlay` accessed via `autoPlayRef.current` to avoid callback identity churn. |
-| v6-3 | v6 over-consumed startHour (ref snapshot ignored re-navigation) | Consume-and-clear reads the route param directly (not a ref), so new navigations with a different `startHour` fire the effect again. Clearing after consumption prevents stale re-triggers. Both re-navigation and blur safety are preserved. |
+| #    | Finding                                                           | Fix                                                                                                                                                                                                                                           |
+| ---- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v6-1 | Blur reset doesn't stick — route param re-triggers                | Consume-and-clear pattern: `useEffect` reads `startHour`, applies it, then `navigation.setParams({ startHour: undefined })` in the same effect. Param is gone before any blur/focus cycle can see it.                                         |
+| v6-2 | useFocusEffect tears down on rerender (unstable handleModeChange) | Replaced `handleModeChange` with `switchToLive`/`switchToReplay` — deps are only `reduceMotion` + `fadeAnim` (both stable). `autoPlay` accessed via `autoPlayRef.current` to avoid callback identity churn.                                   |
+| v6-3 | v6 over-consumed startHour (ref snapshot ignored re-navigation)   | Consume-and-clear reads the route param directly (not a ref), so new navigations with a different `startHour` fire the effect again. Clearing after consumption prevents stale re-triggers. Both re-navigation and blur safety are preserved. |
 
 ### Open questions resolved
 
@@ -70,6 +70,7 @@
 ## Task 1: Types & Interfaces
 
 **Files:**
+
 - Create: `src/types/replay.ts`
 - Modify: `src/types/index.ts`
 
@@ -150,6 +151,7 @@ export interface TriangulatedPosition {
 **Step 3: Export from barrel**
 
 Add to `src/types/index.ts`:
+
 ```typescript
 export * from './replay';
 ```
@@ -171,6 +173,7 @@ git commit -m "feat(ws2): add replay radar type definitions"
 ## Task 2: Mock Replay Positions Generator
 
 **Files:**
+
 - Create: `src/mocks/data/mockReplayPositions.ts`
 - Modify: `src/mocks/data/index.ts`
 
@@ -195,9 +198,7 @@ describe('generateReplayPositions', () => {
   });
 
   it('distributes positions across 24h', () => {
-    const hours = new Set(
-      positions.map(p => new Date(p.updatedAt).getHours())
-    );
+    const hours = new Set(positions.map(p => new Date(p.updatedAt).getHours()));
     // Delivery (10, 15), Repeat (8, 12, 18), Loiterer (1-2), Passing (7)
     expect(hours.size).toBeGreaterThanOrEqual(6);
   });
@@ -207,7 +208,7 @@ describe('generateReplayPositions', () => {
     for (const pos of positions) {
       expect(pos.latitude).toBeGreaterThan(31.52);
       expect(pos.latitude).toBeLessThan(31.54);
-      expect(pos.longitude).toBeGreaterThan(-110.30);
+      expect(pos.longitude).toBeGreaterThan(-110.3);
       expect(pos.longitude).toBeLessThan(-110.28);
     }
   });
@@ -247,7 +248,10 @@ Expected: FAIL — module not found
 Create `src/mocks/data/mockReplayPositions.ts`:
 
 ```typescript
-import { TriangulatedPosition, TriangulationSignalType } from '@/types/triangulation';
+import {
+  TriangulatedPosition,
+  TriangulationSignalType,
+} from '@/types/triangulation';
 import { Alert, DetectionType } from '@/types/alert';
 import { mockDevices } from './mockDevices';
 
@@ -286,14 +290,24 @@ const scenarios: Scenario[] = [
     threatLevel: 'low',
     visits: [
       {
-        startHour: 10, startMinute: 15, durationMinutes: 5,
-        positionCount: 10, approachAngle: 180,
-        startRadius: 0.95, endRadius: 0.3, drift: 5,
+        startHour: 10,
+        startMinute: 15,
+        durationMinutes: 5,
+        positionCount: 10,
+        approachAngle: 180,
+        startRadius: 0.95,
+        endRadius: 0.3,
+        drift: 5,
       },
       {
-        startHour: 15, startMinute: 30, durationMinutes: 5,
-        positionCount: 10, approachAngle: 180,
-        startRadius: 0.95, endRadius: 0.3, drift: 5,
+        startHour: 15,
+        startMinute: 30,
+        durationMinutes: 5,
+        positionCount: 10,
+        approachAngle: 180,
+        startRadius: 0.95,
+        endRadius: 0.3,
+        drift: 5,
       },
     ],
   },
@@ -305,19 +319,34 @@ const scenarios: Scenario[] = [
     threatLevel: 'medium',
     visits: [
       {
-        startHour: 8, startMinute: 0, durationMinutes: 3,
-        positionCount: 6, approachAngle: 90,
-        startRadius: 0.9, endRadius: 0.5, drift: 3,
+        startHour: 8,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionCount: 6,
+        approachAngle: 90,
+        startRadius: 0.9,
+        endRadius: 0.5,
+        drift: 3,
       },
       {
-        startHour: 12, startMinute: 0, durationMinutes: 3,
-        positionCount: 6, approachAngle: 90,
-        startRadius: 0.9, endRadius: 0.5, drift: 3,
+        startHour: 12,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionCount: 6,
+        approachAngle: 90,
+        startRadius: 0.9,
+        endRadius: 0.5,
+        drift: 3,
       },
       {
-        startHour: 18, startMinute: 0, durationMinutes: 3,
-        positionCount: 6, approachAngle: 90,
-        startRadius: 0.9, endRadius: 0.5, drift: 3,
+        startHour: 18,
+        startMinute: 0,
+        durationMinutes: 3,
+        positionCount: 6,
+        approachAngle: 90,
+        startRadius: 0.9,
+        endRadius: 0.5,
+        drift: 3,
       },
     ],
   },
@@ -329,9 +358,14 @@ const scenarios: Scenario[] = [
     threatLevel: 'critical',
     visits: [
       {
-        startHour: 1, startMinute: 30, durationMinutes: 45,
-        positionCount: 90, approachAngle: 0,
-        startRadius: 0.85, endRadius: 0.85, drift: 60,
+        startHour: 1,
+        startMinute: 30,
+        durationMinutes: 45,
+        positionCount: 90,
+        approachAngle: 0,
+        startRadius: 0.85,
+        endRadius: 0.85,
+        drift: 60,
       },
     ],
   },
@@ -343,9 +377,14 @@ const scenarios: Scenario[] = [
     threatLevel: 'high',
     visits: [
       {
-        startHour: 7, startMinute: 45, durationMinutes: 2,
-        positionCount: 8, approachAngle: 270,
-        startRadius: 0.95, endRadius: 0.95, drift: 180,
+        startHour: 7,
+        startMinute: 45,
+        durationMinutes: 2,
+        positionCount: 8,
+        approachAngle: 270,
+        startRadius: 0.95,
+        endRadius: 0.95,
+        drift: 180,
       },
     ],
   },
@@ -365,7 +404,8 @@ function generateVisitPositions(
     timestamp.setHours(visit.startHour, visit.startMinute, 0, 0);
     timestamp.setTime(timestamp.getTime() + i * intervalMs);
 
-    const radius = visit.startRadius + (visit.endRadius - visit.startRadius) * progress;
+    const radius =
+      visit.startRadius + (visit.endRadius - visit.startRadius) * progress;
     const angle = visit.approachAngle + (progress - 0.5) * visit.drift;
     const angleRad = (angle * Math.PI) / 180;
 
@@ -455,8 +495,14 @@ export const mockReplayPositions = mockReplayData.positions;
 **Step 4: Add to barrel export**
 
 Add to `src/mocks/data/index.ts`:
+
 ```typescript
-export { mockReplayPositions, mockReplayData, generateReplayPositions, generateReplayData } from './mockReplayPositions';
+export {
+  mockReplayPositions,
+  mockReplayData,
+  generateReplayPositions,
+  generateReplayData,
+} from './mockReplayPositions';
 ```
 
 **Step 5: Run test to verify it passes**
@@ -476,6 +522,7 @@ git commit -m "feat(ws2): add mock replay positions generator with 4 scenarios"
 ## Task 3: useRadarProjection Hook
 
 **Files:**
+
 - Create: `src/hooks/useRadarProjection.ts`
 
 **Step 1: Write the failing test**
@@ -493,17 +540,28 @@ const MAX_RANGE = 244; // meters
 describe('useRadarProjection', () => {
   it('projects property center to canvas center', () => {
     const { result } = renderHook(() =>
-      useRadarProjection({ propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useRadarProjection({
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
-    const { x, y } = result.current.project(PROPERTY_CENTER.latitude, PROPERTY_CENTER.longitude);
+    const { x, y } = result.current.project(
+      PROPERTY_CENTER.latitude,
+      PROPERTY_CENTER.longitude
+    );
     expect(x).toBeCloseTo(CANVAS_SIZE / 2, 0);
     expect(y).toBeCloseTo(CANVAS_SIZE / 2, 0);
   });
 
   it('projects point due north to top of canvas', () => {
     const { result } = renderHook(() =>
-      useRadarProjection({ propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useRadarProjection({
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const northPoint = {
@@ -515,12 +573,16 @@ describe('useRadarProjection', () => {
     expect(x).toBeCloseTo(CANVAS_SIZE / 2, 0);
     expect(y).toBeLessThan(CANVAS_SIZE / 2);
     const distFromCenter = CANVAS_SIZE / 2 - y;
-    expect(distFromCenter).toBeGreaterThan(CANVAS_SIZE / 2 * 0.8);
+    expect(distFromCenter).toBeGreaterThan((CANVAS_SIZE / 2) * 0.8);
   });
 
   it('clips points beyond maxRange to circle edge', () => {
     const { result } = renderHook(() =>
-      useRadarProjection({ propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useRadarProjection({
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const farPoint = {
@@ -618,6 +680,7 @@ git commit -m "feat(ws2): add useRadarProjection hook with lat/lng to canvas pro
 > **Fix #3 & #6:** BucketEntry now carries `macAddress` from alert correlation. Threat level comes from the nearest alert by timestamp+deviceId, not fabricated from confidence.
 
 **Files:**
+
 - Create: `src/hooks/useTimeBucketing.ts`
 
 **Step 1: Write the failing test**
@@ -634,7 +697,11 @@ const PROPERTY_CENTER = { latitude: 31.530757, longitude: -110.287842 };
 const CANVAS_SIZE = 350;
 const MAX_RANGE = 244;
 
-function makePosition(hour: number, minute: number, hash = 'fp-test'): TriangulatedPosition {
+function makePosition(
+  hour: number,
+  minute: number,
+  hash = 'fp-test'
+): TriangulatedPosition {
   const date = new Date();
   date.setHours(hour, minute, 0, 0);
   return {
@@ -651,7 +718,11 @@ function makePosition(hour: number, minute: number, hash = 'fp-test'): Triangula
   };
 }
 
-function makeAlert(hour: number, minute: number, mac = 'AA:BB:CC:DD:EE:01'): Alert {
+function makeAlert(
+  hour: number,
+  minute: number,
+  mac = 'AA:BB:CC:DD:EE:01'
+): Alert {
   const date = new Date();
   date.setHours(hour, minute, 0, 0);
   return {
@@ -677,7 +748,13 @@ describe('useTimeBucketing', () => {
     const alerts = [makeAlert(10, 15), makeAlert(10, 16)];
 
     const { result } = renderHook(() =>
-      useTimeBucketing({ positions, alerts, propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useTimeBucketing({
+        positions,
+        alerts,
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const bucket615 = result.current.buckets.get(10 * 60 + 15);
@@ -692,7 +769,13 @@ describe('useTimeBucketing', () => {
     const alerts = [makeAlert(8, 0)];
 
     const { result } = renderHook(() =>
-      useTimeBucketing({ positions, alerts, propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useTimeBucketing({
+        positions,
+        alerts,
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const bucket = result.current.buckets.get(8 * 60);
@@ -707,7 +790,13 @@ describe('useTimeBucketing', () => {
     const alerts = [makeAlert(8, 0)]; // threatLevel: 'high'
 
     const { result } = renderHook(() =>
-      useTimeBucketing({ positions, alerts, propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useTimeBucketing({
+        positions,
+        alerts,
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const bucket = result.current.buckets.get(8 * 60);
@@ -719,7 +808,13 @@ describe('useTimeBucketing', () => {
     const alerts = [makeAlert(8, 0, 'FF:EE:DD:CC:BB:AA')];
 
     const { result } = renderHook(() =>
-      useTimeBucketing({ positions, alerts, propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useTimeBucketing({
+        positions,
+        alerts,
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const bucket = result.current.buckets.get(8 * 60);
@@ -731,7 +826,13 @@ describe('useTimeBucketing', () => {
     const alerts: Alert[] = []; // no alerts
 
     const { result } = renderHook(() =>
-      useTimeBucketing({ positions, alerts, propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useTimeBucketing({
+        positions,
+        alerts,
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     const bucket = result.current.buckets.get(8 * 60);
@@ -741,7 +842,13 @@ describe('useTimeBucketing', () => {
 
   it('returns empty map for no positions', () => {
     const { result } = renderHook(() =>
-      useTimeBucketing({ positions: [], alerts: [], propertyCenter: PROPERTY_CENTER, canvasSize: CANVAS_SIZE, maxRange: MAX_RANGE })
+      useTimeBucketing({
+        positions: [],
+        alerts: [],
+        propertyCenter: PROPERTY_CENTER,
+        canvasSize: CANVAS_SIZE,
+        maxRange: MAX_RANGE,
+      })
     );
 
     expect(result.current.buckets.size).toBe(0);
@@ -826,7 +933,11 @@ export function useTimeBucketing({
   canvasSize,
   maxRange,
 }: UseTimeBucketingOptions): TimeBucketedPositions {
-  const { project } = useRadarProjection({ propertyCenter, canvasSize, maxRange });
+  const { project } = useRadarProjection({
+    propertyCenter,
+    canvasSize,
+    maxRange,
+  });
 
   return useMemo(() => {
     const buckets = new Map<number, BucketEntry[]>();
@@ -892,6 +1003,7 @@ git commit -m "feat(ws2): add useTimeBucketing hook with alert-correlated threat
 ## Task 5: useAutoPlay Hook
 
 **Files:**
+
 - Create: `src/hooks/useAutoPlay.ts`
 
 **Step 1: Write the failing test**
@@ -908,7 +1020,8 @@ function makeBuckets(): Map<number, BucketEntry[]> {
   const entry: BucketEntry = {
     fingerprintHash: 'fp-test',
     macAddress: 'AA:BB:CC:DD:EE:01',
-    x: 100, y: 100,
+    x: 100,
+    y: 100,
     threatLevel: 'medium',
     confidence: 0.7,
     signalType: 'cellular',
@@ -928,17 +1041,23 @@ describe('useAutoPlay', () => {
   });
 
   it('starts paused', () => {
-    const { result } = renderHook(() => useAutoPlay({ buckets: makeBuckets() }));
+    const { result } = renderHook(() =>
+      useAutoPlay({ buckets: makeBuckets() })
+    );
     expect(result.current.isPlaying).toBe(false);
   });
 
   it('defaults to 10x speed', () => {
-    const { result } = renderHook(() => useAutoPlay({ buckets: makeBuckets() }));
+    const { result } = renderHook(() =>
+      useAutoPlay({ buckets: makeBuckets() })
+    );
     expect(result.current.speed).toBe(10);
   });
 
   it('cycles speed through 1, 10, 60, 360', () => {
-    const { result } = renderHook(() => useAutoPlay({ buckets: makeBuckets() }));
+    const { result } = renderHook(() =>
+      useAutoPlay({ buckets: makeBuckets() })
+    );
 
     act(() => result.current.cycleSpeed());
     expect(result.current.speed).toBe(60);
@@ -954,7 +1073,9 @@ describe('useAutoPlay', () => {
   });
 
   it('skipForward jumps to next bucket with entries', () => {
-    const { result } = renderHook(() => useAutoPlay({ buckets: makeBuckets() }));
+    const { result } = renderHook(() =>
+      useAutoPlay({ buckets: makeBuckets() })
+    );
 
     act(() => result.current.setMinuteIndex(0));
     act(() => result.current.skipForward());
@@ -965,7 +1086,9 @@ describe('useAutoPlay', () => {
   });
 
   it('skipBack jumps to previous bucket with entries', () => {
-    const { result } = renderHook(() => useAutoPlay({ buckets: makeBuckets() }));
+    const { result } = renderHook(() =>
+      useAutoPlay({ buckets: makeBuckets() })
+    );
 
     act(() => result.current.setMinuteIndex(600));
     act(() => result.current.skipBack());
@@ -994,7 +1117,10 @@ interface UseAutoPlayOptions {
   initialMinute?: number;
 }
 
-export function useAutoPlay({ buckets, initialMinute = 0 }: UseAutoPlayOptions) {
+export function useAutoPlay({
+  buckets,
+  initialMinute = 0,
+}: UseAutoPlayOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<PlaybackSpeed>(10);
   const [minuteIndex, setMinuteIndex] = useState(initialMinute);
@@ -1066,7 +1192,11 @@ export function useAutoPlay({ buckets, initialMinute = 0 }: UseAutoPlayOptions) 
 
         // No-activity skip
         let emptyCount = 0;
-        for (let i = next; i < Math.min(next + NO_ACTIVITY_THRESHOLD, 1440); i++) {
+        for (
+          let i = next;
+          i < Math.min(next + NO_ACTIVITY_THRESHOLD, 1440);
+          i++
+        ) {
           if (!buckets.has(i)) emptyCount++;
           else break;
         }
@@ -1119,6 +1249,7 @@ git commit -m "feat(ws2): add useAutoPlay hook with speed cycling and skip navig
 > **Fix #2:** Wraps positions API with time-window params. Falls back to mock data in dev mode.
 
 **Files:**
+
 - Create: `src/hooks/api/useReplayPositions.ts`
 - Modify: `src/api/endpoints/positions.ts`
 
@@ -1193,10 +1324,12 @@ In `src/api/endpoints/positions.ts`, add a new function (do NOT modify existing 
 export const getReplayPositions = async (
   deviceId: string,
   from: string, // ISO timestamp
-  to: string,   // ISO timestamp
+  to: string // ISO timestamp
 ): Promise<PositionsResponse> => {
   const params = new URLSearchParams({ deviceId, from, to });
-  const response = await apiClient.get<PositionsResponse>(`/api/positions/history?${params.toString()}`);
+  const response = await apiClient.get<PositionsResponse>(
+    `/api/positions/history?${params.toString()}`
+  );
   return response.data;
 };
 ```
@@ -1211,7 +1344,10 @@ import { alertsApi } from '@/api/endpoints/alerts';
 import { TriangulatedPosition } from '@/types/triangulation';
 import { Alert } from '@/types/alert';
 import { isMockMode } from '@/config/mockConfig';
-import { generateReplayData, ReplayData } from '@/mocks/data/mockReplayPositions';
+import {
+  generateReplayData,
+  ReplayData,
+} from '@/mocks/data/mockReplayPositions';
 
 // Returns both positions AND correlated alerts so useTimeBucketing
 // has authoritative threat levels and MAC addresses.
@@ -1230,8 +1366,16 @@ export function useReplayData(deviceId: string | undefined) {
       midnight.setHours(0, 0, 0, 0);
 
       const [posResponse, alertsResponse] = await Promise.all([
-        getReplayPositions(deviceId!, midnight.toISOString(), now.toISOString()),
-        alertsApi.getAlerts({ deviceId: deviceId!, startDate: midnight.toISOString(), endDate: now.toISOString() }),
+        getReplayPositions(
+          deviceId!,
+          midnight.toISOString(),
+          now.toISOString()
+        ),
+        alertsApi.getAlerts({
+          deviceId: deviceId!,
+          startDate: midnight.toISOString(),
+          endDate: now.toISOString(),
+        }),
       ]);
       return { positions: posResponse.positions, alerts: alertsResponse };
     },
@@ -1270,6 +1414,7 @@ git commit -m "feat(ws2): add useReplayPositions hook with time-window API and m
 > **Fix #5:** Tap handling uses `runOnJS` to bridge worklet → JS thread. Hit-test data is a plain array, not a Map.
 
 **Files:**
+
 - Create: `src/components/organisms/ReplayRadarDisplay/ReplayRadarDisplay.tsx`
 - Create: `src/components/organisms/ReplayRadarDisplay/index.ts`
 
@@ -1539,6 +1684,7 @@ const styles = StyleSheet.create({
 ```
 
 Create `src/components/organisms/ReplayRadarDisplay/index.ts`:
+
 ```typescript
 export { ReplayRadarDisplay } from './ReplayRadarDisplay';
 ```
@@ -1562,6 +1708,7 @@ git commit -m "feat(ws2): add ReplayRadarDisplay with trailing-window rendering 
 > **Fix #4:** Implements `Gesture.Pan()` on the scrub track that maps drag X position to minute index and calls `onScrub`.
 
 **Files:**
+
 - Create: `src/components/organisms/TimelineScrubber/TimelineScrubber.tsx`
 - Create: `src/components/organisms/TimelineScrubber/index.ts`
 
@@ -1950,6 +2097,7 @@ const styles = StyleSheet.create({
 ```
 
 Create `src/components/organisms/TimelineScrubber/index.ts`:
+
 ```typescript
 export { TimelineScrubber } from './TimelineScrubber';
 ```
@@ -1973,6 +2121,7 @@ git commit -m "feat(ws2): add TimelineScrubber with pan gesture scrubbing and tr
 > **Fix #3:** Navigates with `macAddress`, not `fingerprintHash`.
 
 **Files:**
+
 - Create: `src/components/molecules/FingerprintPeek/FingerprintPeek.tsx`
 - Create: `src/components/molecules/FingerprintPeek/index.ts`
 
@@ -2183,6 +2332,7 @@ const styles = StyleSheet.create({
 ```
 
 Create `src/components/molecules/FingerprintPeek/index.ts`:
+
 ```typescript
 export { FingerprintPeek } from './FingerprintPeek';
 ```
@@ -2204,6 +2354,7 @@ git commit -m "feat(ws2): add FingerprintPeek bottom sheet with macAddress navig
 ## Task 10: Update Navigation Types
 
 **Files:**
+
 - Modify: `src/navigation/types.ts:34-37`
 
 **Step 1: Update RadarStackParamList**
@@ -2249,6 +2400,7 @@ git commit -m "feat(ws2): add startHour param to LiveRadar route type"
 > **Open question:** `startHour` consumed once via `hasConsumedRef`.
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Write the failing test**
@@ -2543,7 +2695,9 @@ useFocusEffect(
 In the JSX, add the segmented control after `<ScreenLayout>` and before the content. Then wrap the existing MapBox content and add the replay content. Both are always mounted:
 
 ```tsx
-{/* Segmented Control */}
+{
+  /* Segmented Control */
+}
 <View style={styles.segmentedControl}>
   <Pressable
     style={[styles.segment, mode === 'live' && styles.segmentActive]}
@@ -2569,14 +2723,17 @@ In the JSX, add the segmented control after `<ScreenLayout>` and before the cont
       Replay
     </Text>
   </Pressable>
-</View>
+</View>;
 
-{/* Both views always mounted for crossfade overlap */}
+{
+  /* Both views always mounted for crossfade overlap */
+}
 <View style={styles.modeContainer}>
-  <Animated.View style={[StyleSheet.absoluteFill, liveStyle]} testID="live-map-content">
-    <ScrollView>
-      {/* ...existing MapBox heatmap content... */}
-    </ScrollView>
+  <Animated.View
+    style={[StyleSheet.absoluteFill, liveStyle]}
+    testID="live-map-content"
+  >
+    <ScrollView>{/* ...existing MapBox heatmap content... */}</ScrollView>
   </Animated.View>
 
   <Animated.View
@@ -2587,7 +2744,7 @@ In the JSX, add the segmented control after `<ScreenLayout>` and before the cont
       currentMinute={autoPlay.minuteIndex}
       positions={bucketed}
       propertyCenter={propertyCenter}
-      onDotTap={(macAddress) => {
+      onDotTap={macAddress => {
         autoPlay.pause();
         setPeekMac(macAddress);
       }}
@@ -2602,14 +2759,14 @@ In the JSX, add the segmented control after `<ScreenLayout>` and before the cont
       onSpeedChange={autoPlay.cycleSpeed}
       onSkipForward={autoPlay.skipForward}
       onSkipBack={autoPlay.skipBack}
-      onScrub={(min) => autoPlay.setMinuteIndex(min)}
+      onScrub={min => autoPlay.setMinuteIndex(min)}
     />
     {peekMac && (
       <FingerprintPeek
         macAddress={peekMac}
         fingerprintHash=""
         scrubTimestamp={bucketed.startTime + autoPlay.minuteIndex * 60_000}
-        onViewProfile={(mac) => {
+        onViewProfile={mac => {
           setPeekMac(null);
           navigation.navigate('DeviceFingerprint', { macAddress: mac });
         }}
@@ -2620,7 +2777,7 @@ In the JSX, add the segmented control after `<ScreenLayout>` and before the cont
       />
     )}
   </Animated.View>
-</View>
+</View>;
 ```
 
 Add new styles:
@@ -2678,6 +2835,7 @@ git commit -m "feat(ws2): integrate replay mode with crossfade, timestamp sync, 
 > **Fix #8 (partial):** Test now verifies positive navigation with correct params.
 
 **Files:**
+
 - Modify: `src/screens/home/PropertyCommandCenter.tsx:351-357`
 
 **Step 1: Write the test**
@@ -2833,6 +2991,7 @@ git commit -m "feat(ws2): wire ActivitySparkline onHourPress to replay radar dee
 ## Task 13: Remove LiveRadarScreen
 
 **Files:**
+
 - Delete: `src/screens/radar/LiveRadarScreen.tsx`
 - Modify: `src/screens/radar/index.ts`
 
@@ -2844,6 +3003,7 @@ Expected: Only `src/screens/radar/LiveRadarScreen.tsx` and `src/screens/radar/in
 **Step 2: Remove the export**
 
 In `src/screens/radar/index.ts`, remove:
+
 ```typescript
 export { LiveRadarScreen } from './LiveRadarScreen';
 ```

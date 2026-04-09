@@ -127,13 +127,10 @@ applies — the refetch returns the new device with full data including
 ```typescript
 const handleDeviceStatus = (status: Partial<Device> & { id: string }) => {
   // Patch individual device cache instantly
-  queryClient.setQueryData<Device>(
-    [DEVICES_QUERY_KEY, status.id],
-    oldData => {
-      if (!oldData) return oldData;
-      return { ...oldData, ...status };
-    }
-  );
+  queryClient.setQueryData<Device>([DEVICES_QUERY_KEY, status.id], oldData => {
+    if (!oldData) return oldData;
+    return { ...oldData, ...status };
+  });
 
   // Invalidate all device list queries (unfiltered, filtered, etc.)
   queryClient.invalidateQueries({ queryKey: [DEVICES_QUERY_KEY] });
@@ -175,10 +172,10 @@ in this spec.
 
 ## Files Changed
 
-| File | Side | Change |
-|------|------|--------|
-| `trailsense-backend/src/types/index.ts` | Backend | Add `detectionCount` and `name` to `DeviceStatus` |
-| `trailsense-backend/src/controllers/goliothWebhookController.ts` | Backend | Add fields to `deviceToBroadcast()` |
-| `TrailSense/src/api/websocket.ts` | Frontend | Add `detectionCount` to event type, add `mapDeviceStatusEvent` mapper |
-| `TrailSense/src/hooks/useWebSocket.ts` | Frontend | Add unknown-device invalidation to `handleDeviceStatus` |
-| `TrailSense/src/mocks/mockWebSocket.ts` | Frontend | Include `alertCount` and `name` in mock status emissions |
+| File                                                             | Side     | Change                                                                |
+| ---------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| `trailsense-backend/src/types/index.ts`                          | Backend  | Add `detectionCount` and `name` to `DeviceStatus`                     |
+| `trailsense-backend/src/controllers/goliothWebhookController.ts` | Backend  | Add fields to `deviceToBroadcast()`                                   |
+| `TrailSense/src/api/websocket.ts`                                | Frontend | Add `detectionCount` to event type, add `mapDeviceStatusEvent` mapper |
+| `TrailSense/src/hooks/useWebSocket.ts`                           | Frontend | Add unknown-device invalidation to `handleDeviceStatus`               |
+| `TrailSense/src/mocks/mockWebSocket.ts`                          | Frontend | Include `alertCount` and `name` in mock status emissions              |

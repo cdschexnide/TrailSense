@@ -47,7 +47,10 @@ export const StackedAreaChart: React.FC<StackedAreaChartProps> = ({
     <ChartCard title={title} subtitle={subtitle}>
       <View>
         <LineChart
-          data={sums.map((item, index) => ({ value: item.low, label: labels[index] }))}
+          data={sums.map((item, index) => ({
+            value: item.low,
+            label: labels[index],
+          }))}
           data2={sums.map(item => ({ value: item.medium }))}
           data3={sums.map(item => ({ value: item.high }))}
           data4={sums.map(item => ({ value: item.critical }))}

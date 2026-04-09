@@ -61,8 +61,7 @@ DO recommend:
     // Extract alert details
     const detectionType = alert.detection_type || 'unknown';
     const confidence = alert.confidence ?? 0;
-    const accuracyMeters =
-      alert.accuracy_meters ?? alert.accuracyMeters ?? 0;
+    const accuracyMeters = alert.accuracy_meters ?? alert.accuracyMeters ?? 0;
     const zone = alert.zone || this.getZoneFromAccuracy(accuracyMeters);
     const threatLevel = alert.threat_level || 'low';
     const trend = alert.trend || 'unknown';
@@ -128,8 +127,7 @@ Provide:
    * Get device information from alert metadata
    */
   private getDeviceInfo(alert: AlertSummaryAlert): string {
-    const fingerprintHash =
-      alert.fingerprintHash || alert.fingerprint_hash;
+    const fingerprintHash = alert.fingerprintHash || alert.fingerprint_hash;
     if (fingerprintHash) return `Fingerprint ${fingerprintHash}`;
 
     return 'Unknown device';

@@ -7,6 +7,7 @@
 ## Problem
 
 The AI Assistant screen lives inside `MoreStack`, creating two issues:
+
 1. No back button — the screen has `headerShown: false` and no native back navigation
 2. Tapping the "More" tab while on the AI screen does nothing (already in that stack)
 3. The AI feature is buried 2 taps deep, reducing discoverability
@@ -15,14 +16,14 @@ The AI Assistant screen lives inside `MoreStack`, creating two issues:
 
 ### Tab bar: 6 tabs
 
-| Position | Tab | Icon (Ionicons) | Label |
-|----------|-----|-----------------|-------|
-| 1 | Home | `home-outline` / `home` | Home |
-| 2 | Alerts | `alert-circle-outline` / `alert-circle` | Alerts |
-| 3 | **AI** | `sparkles-outline` / `sparkles` | AI |
-| 4 | Radar | `radio-outline` / `radio` | Radar |
-| 5 | Devices | `hardware-chip-outline` / `hardware-chip` | Devices |
-| 6 | Settings | `settings-outline` / `settings-sharp` | *(no label)* |
+| Position | Tab      | Icon (Ionicons)                           | Label        |
+| -------- | -------- | ----------------------------------------- | ------------ |
+| 1        | Home     | `home-outline` / `home`                   | Home         |
+| 2        | Alerts   | `alert-circle-outline` / `alert-circle`   | Alerts       |
+| 3        | **AI**   | `sparkles-outline` / `sparkles`           | AI           |
+| 4        | Radar    | `radio-outline` / `radio`                 | Radar        |
+| 5        | Devices  | `hardware-chip-outline` / `hardware-chip` | Devices      |
+| 6        | Settings | `settings-outline` / `settings-sharp`     | _(no label)_ |
 
 AI sits center (position 3) as the hero feature. Settings uses a gear icon with no label, saving horizontal space and establishing visual hierarchy: 5 primary features + settings.
 

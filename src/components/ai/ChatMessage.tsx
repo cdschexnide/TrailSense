@@ -51,7 +51,11 @@ const TypingIndicator = () => {
         ])
       );
 
-    const anims = [animateDot(dot1, 0), animateDot(dot2, 150), animateDot(dot3, 300)];
+    const anims = [
+      animateDot(dot1, 0),
+      animateDot(dot2, 150),
+      animateDot(dot3, 300),
+    ];
     anims.forEach(a => a.start());
     return () => anims.forEach(a => a.stop());
   }, [dot1, dot2, dot3]);

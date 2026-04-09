@@ -115,9 +115,7 @@ export const AlertListScreen = ({ navigation, route }: Props) => {
       );
     }
 
-    result = result.filter(
-      (alert: Alert) => !isBlocked(alert.fingerprintHash)
-    );
+    result = result.filter((alert: Alert) => !isBlocked(alert.fingerprintHash));
 
     return result;
   }, [

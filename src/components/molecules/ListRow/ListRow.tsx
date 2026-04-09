@@ -174,6 +174,8 @@ export const ListRow: React.FC<ListRowProps> = ({
     return (
       <Pressable
         onPress={handlePress}
+        accessibilityRole="button"
+        accessibilityLabel={title}
         style={({ pressed }) => [
           pressed && { backgroundColor: colors.systemGray5 },
         ]}

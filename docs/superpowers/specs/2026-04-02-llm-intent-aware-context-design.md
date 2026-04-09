@@ -43,14 +43,14 @@ Pure regex/keyword matching. No inference cost. Returns `{ intent, filters, conf
 
 ### Intent Categories
 
-| Intent | Trigger Keywords | Context Included |
-|---|---|---|
-| `alert_query` | "alerts", "detections", "critical", "high threat", "warnings" | Filtered alerts with full detail |
-| `device_query` | "sensors", "offline", "battery", "devices" | Full device table |
-| `status_overview` | "status", "summary", "how's everything", "what's going on" | Compact summary with top concerns |
-| `pattern_query` | "pattern", "suspicious", "unusual", "activity this week" | Repeat visitors, time analysis, anomalies |
-| `time_query` | "quietest", "busiest", "when", "what time" | Hour-by-hour breakdown |
-| `help` | "what can you do", "help", "how do I" | No data context, capability description |
+| Intent            | Trigger Keywords                                              | Context Included                          |
+| ----------------- | ------------------------------------------------------------- | ----------------------------------------- |
+| `alert_query`     | "alerts", "detections", "critical", "high threat", "warnings" | Filtered alerts with full detail          |
+| `device_query`    | "sensors", "offline", "battery", "devices"                    | Full device table                         |
+| `status_overview` | "status", "summary", "how's everything", "what's going on"    | Compact summary with top concerns         |
+| `pattern_query`   | "pattern", "suspicious", "unusual", "activity this week"      | Repeat visitors, time analysis, anomalies |
+| `time_query`      | "quietest", "busiest", "when", "what time"                    | Hour-by-hour breakdown                    |
+| `help`            | "what can you do", "help", "how do I"                         | No data context, capability description   |
 
 ### Filter Extraction
 
@@ -68,7 +68,13 @@ Falls back to `status_overview` if no intent matches with sufficient confidence.
 
 ```typescript
 interface ClassifiedIntent {
-  intent: 'alert_query' | 'device_query' | 'status_overview' | 'pattern_query' | 'time_query' | 'help';
+  intent:
+    | 'alert_query'
+    | 'device_query'
+    | 'status_overview'
+    | 'pattern_query'
+    | 'time_query'
+    | 'help';
   filters: IntentFilters;
   confidence: number;
 }
@@ -110,6 +116,7 @@ You have 16 critical alerts. Here are the most recent:
 ```
 
 Key behaviors:
+
 - Pre-filtered by intent filters — only relevant alerts
 - Cross-references MAC addresses across alerts to flag repeat visitors
 - Includes proximity zone labels derived from RSSI
@@ -146,6 +153,7 @@ ONLINE:
 ```
 
 Key behaviors:
+
 - Offline devices listed first with duration and reason
 - Battery labeled as CRITICAL (<20%) / LOW (<40%) / OK
 - No alert data cluttering the context
@@ -220,12 +228,12 @@ WEEKDAY vs WEEKEND:
 
 Used by alert context builder:
 
-| RSSI Range | Zone | Distance Estimate |
-|---|---|---|
-| > -50 dBm | IMMEDIATE | ~0-20 ft |
-| -50 to -70 dBm | NEAR | ~20-50 ft |
-| -70 to -85 dBm | FAR | ~50-200 ft |
-| < -85 dBm | EXTREME | ~200+ ft |
+| RSSI Range     | Zone      | Distance Estimate |
+| -------------- | --------- | ----------------- |
+| > -50 dBm      | IMMEDIATE | ~0-20 ft          |
+| -50 to -70 dBm | NEAR      | ~20-50 ft         |
+| -70 to -85 dBm | FAR       | ~50-200 ft        |
+| < -85 dBm      | EXTREME   | ~200+ ft          |
 
 ## 3. System Prompt Redesign
 
@@ -320,6 +328,7 @@ Three stages applied to every response, all pure string manipulation (~1ms total
 ### Stage 1: Clean Formatting
 
 Strip preamble phrases:
+
 - "Based on the provided information, "
 - "Based on the data, "
 - "According to the system's current data, "
@@ -328,6 +337,7 @@ Strip preamble phrases:
 - "Looking at the data, "
 
 Strip filler closings:
+
 - "Is there anything else you'd like to know?"
 - "Feel free to ask if you have more questions."
 - Any sentence containing "taking necessary precautions"
@@ -341,11 +351,11 @@ Cross-reference response against the data provided in the prompt.
 
 **Checks by intent:**
 
-| Intent | Hallucination Pattern | Detection |
-|---|---|---|
-| `device_query` | "empty", "no devices", "none" when matching devices exist | Response contains negation + filter-matched devices non-empty (respects `online`, `deviceName` filters) |
-| `alert_query` | "no alerts" when matching alerts exist | Response negates + filter-matched alerts non-empty (respects `threatLevel`, `detectionType`, `timeRange`, `isReviewed` filters) |
-| `status_overview` | "everything looks normal" with critical/high alerts | Response claims normal + critical count > 0 |
+| Intent            | Hallucination Pattern                                     | Detection                                                                                                                       |
+| ----------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `device_query`    | "empty", "no devices", "none" when matching devices exist | Response contains negation + filter-matched devices non-empty (respects `online`, `deviceName` filters)                         |
+| `alert_query`     | "no alerts" when matching alerts exist                    | Response negates + filter-matched alerts non-empty (respects `threatLevel`, `detectionType`, `timeRange`, `isReviewed` filters) |
+| `status_overview` | "everything looks normal" with critical/high alerts       | Response claims normal + critical count > 0                                                                                     |
 
 Note: Numeric contradiction detection (e.g., "3 critical alerts" when there are 16) is deferred to a future iteration. The 1B model often phrases counts imprecisely ("several", "a few"), making regex-based count extraction unreliable.
 
@@ -454,34 +464,34 @@ interface ChatResponse {
 
 ## 6. New Files
 
-| File | Purpose | Approximate Size |
-|---|---|---|
-| `src/services/llm/IntentClassifier.ts` | Regex/keyword intent classification + filter extraction | ~150 lines |
-| `src/services/llm/FocusedContextBuilder.ts` | Intent-specific context formatters (5 builders + helpers) | ~300 lines |
-| `src/services/llm/ResponseProcessor.ts` | 3-stage post-processing (clean, hallucination check, length) | ~200 lines |
+| File                                        | Purpose                                                      | Approximate Size |
+| ------------------------------------------- | ------------------------------------------------------------ | ---------------- |
+| `src/services/llm/IntentClassifier.ts`      | Regex/keyword intent classification + filter extraction      | ~150 lines       |
+| `src/services/llm/FocusedContextBuilder.ts` | Intent-specific context formatters (5 builders + helpers)    | ~300 lines       |
+| `src/services/llm/ResponseProcessor.ts`     | 3-stage post-processing (clean, hallucination check, length) | ~200 lines       |
 
 ## 7. Modified Files
 
-| File | Changes |
-|---|---|
-| `src/services/llm/templates/ConversationalTemplate.ts` | New system prompt, intent-aware buildPrompt, remove unused question methods |
-| `src/services/llm/LLMService.ts` | `chat()` orchestrates intent → context → prompt → generate → process |
-| `src/services/llm/AIProvider.tsx` | Update `chat` wrapper and `AIContextType` to use `ChatContext` instead of `ConversationContext` |
-| `src/screens/ai/AIAssistantScreen.tsx` | Pass raw alerts/devices instead of pre-built securityContext |
-| `src/types/llm.ts` | Add `ChatContext`, `ClassifiedIntent`, `IntentFilters`; update `ChatResponse` |
+| File                                                   | Changes                                                                                         |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `src/services/llm/templates/ConversationalTemplate.ts` | New system prompt, intent-aware buildPrompt, remove unused question methods                     |
+| `src/services/llm/LLMService.ts`                       | `chat()` orchestrates intent → context → prompt → generate → process                            |
+| `src/services/llm/AIProvider.tsx`                      | Update `chat` wrapper and `AIContextType` to use `ChatContext` instead of `ConversationContext` |
+| `src/screens/ai/AIAssistantScreen.tsx`                 | Pass raw alerts/devices instead of pre-built securityContext                                    |
+| `src/types/llm.ts`                                     | Add `ChatContext`, `ClassifiedIntent`, `IntentFilters`; update `ChatResponse`                   |
 
 ## 8. Token Budget Comparison
 
 For "Tell me about the critical alerts" with 2048 token context window:
 
-| Component | Before | After |
-|---|---|---|
-| System prompt | ~160 tokens | ~70 tokens |
-| Conversation history (5 msgs) | ~200 tokens | ~200 tokens |
-| Context data | ~800 tokens (everything) | ~800 tokens (only critical alerts) |
-| User prompt template | ~20 tokens | ~40 tokens |
-| **Available for generation** | **~868 tokens** | **~938 tokens** |
-| **Relevant data in context** | ~15% (~120 tokens about critical alerts) | ~95% (~760 tokens of critical alert details) |
+| Component                     | Before                                   | After                                        |
+| ----------------------------- | ---------------------------------------- | -------------------------------------------- |
+| System prompt                 | ~160 tokens                              | ~70 tokens                                   |
+| Conversation history (5 msgs) | ~200 tokens                              | ~200 tokens                                  |
+| Context data                  | ~800 tokens (everything)                 | ~800 tokens (only critical alerts)           |
+| User prompt template          | ~20 tokens                               | ~40 tokens                                   |
+| **Available for generation**  | **~868 tokens**                          | **~938 tokens**                              |
+| **Relevant data in context**  | ~15% (~120 tokens about critical alerts) | ~95% (~760 tokens of critical alert details) |
 
 ## 9. What Stays the Same
 

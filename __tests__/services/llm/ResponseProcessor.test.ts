@@ -33,7 +33,7 @@ const alerts: Alert[] = [
 describe('ResponseProcessor', () => {
   it('strips preamble and filler text', () => {
     const result = ResponseProcessor.process(
-      "Based on the provided information, North Gate Sensor is offline. Feel free to ask if you have more questions.",
+      'Based on the provided information, North Gate Sensor is offline. Feel free to ask if you have more questions.',
       'device_query',
       {},
       alerts,
@@ -83,7 +83,10 @@ describe('ResponseProcessor', () => {
   });
 
   it('enforces a 150 word limit', () => {
-    const longSentence = Array.from({ length: 180 }, (_, index) => `word${index}`).join(' ');
+    const longSentence = Array.from(
+      { length: 180 },
+      (_, index) => `word${index}`
+    ).join(' ');
     const result = ResponseProcessor.process(
       `${longSentence}.`,
       'help',

@@ -31,8 +31,7 @@ function cleanFormatting(response: string): string {
     .filter(sentence => !sentence.includes('taking necessary precautions'))
     .filter(sentence => !/^Considering the context of rural/i.test(sentence))
     .filter(
-      sentence =>
-        !CLOSING_PATTERNS.some(pattern => pattern.test(sentence))
+      sentence => !CLOSING_PATTERNS.some(pattern => pattern.test(sentence))
     );
 
   processed = sentences.join(' ').trim();
@@ -58,8 +57,11 @@ function buildFallback(
 ): string {
   switch (intent) {
     case 'alert_query': {
-      const matchingAlerts = [...FocusedContextBuilder.filterAlerts(alerts, filters)].sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      const matchingAlerts = [
+        ...FocusedContextBuilder.filterAlerts(alerts, filters),
+      ].sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
       if (matchingAlerts.length === 0) {
         return 'No matching alerts found.';
@@ -69,7 +71,8 @@ function buildFallback(
         .slice(0, 3)
         .map((alert, index) => {
           const deviceName =
-            devices.find(device => device.id === alert.deviceId)?.name || alert.deviceId;
+            devices.find(device => device.id === alert.deviceId)?.name ||
+            alert.deviceId;
           const time = new Date(alert.timestamp).toLocaleString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -83,7 +86,10 @@ function buildFallback(
       return `${matchingAlerts.length} matching alerts. Most recent: ${list}`;
     }
     case 'device_query': {
-      const matchingDevices = FocusedContextBuilder.filterDevices(devices, filters);
+      const matchingDevices = FocusedContextBuilder.filterDevices(
+        devices,
+        filters
+      );
       if (matchingDevices.length === 0) {
         return 'No matching devices found.';
       }
@@ -91,21 +97,22 @@ function buildFallback(
       return matchingDevices
         .slice(0, 4)
         .map(device => {
-          const lastSeen = new Date(device.lastSeen || device.updatedAt).toLocaleString(
-            'en-US',
-            {
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-            }
-          );
+          const lastSeen = new Date(
+            device.lastSeen || device.updatedAt
+          ).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          });
           return `${device.name}: ${device.online ? 'online' : 'offline'}, battery ${device.batteryPercent ?? device.battery ?? 'N/A'}%, last seen ${lastSeen}.`;
         })
         .join(' ');
     }
     case 'status_overview': {
-      const critical = alerts.filter(alert => alert.threatLevel === 'critical').length;
+      const critical = alerts.filter(
+        alert => alert.threatLevel === 'critical'
+      ).length;
       const high = alerts.filter(alert => alert.threatLevel === 'high').length;
       const offline = devices.filter(device => !device.online).length;
       return `Top issues: ${offline} offline sensors, ${critical} critical alerts, ${high} high alerts.`;
@@ -135,11 +142,17 @@ function hasHallucination(
     return alerts.length > 0 || devices.length > 0;
   }
 
-  if (intent === 'device_query' && /\bno devices?\b|\bno sensors?\b|\bnone\b|\bempty\b/.test(normalized)) {
+  if (
+    intent === 'device_query' &&
+    /\bno devices?\b|\bno sensors?\b|\bnone\b|\bempty\b/.test(normalized)
+  ) {
     return FocusedContextBuilder.filterDevices(devices, filters).length > 0;
   }
 
-  if (intent === 'alert_query' && /\bno alerts?\b|\bnone\b|\bempty\b/.test(normalized)) {
+  if (
+    intent === 'alert_query' &&
+    /\bno alerts?\b|\bnone\b|\bempty\b/.test(normalized)
+  ) {
     return FocusedContextBuilder.filterAlerts(alerts, filters).length > 0;
   }
 
@@ -169,7 +182,9 @@ function enforceLength(text: string, wordLimit: number = 150): string {
     trimmed.lastIndexOf('?')
   );
 
-  return (lastTerminal >= 0 ? trimmed.slice(0, lastTerminal + 1) : trimmed).trim();
+  return (
+    lastTerminal >= 0 ? trimmed.slice(0, lastTerminal + 1) : trimmed
+  ).trim();
 }
 
 export class ResponseProcessor {
@@ -181,7 +196,13 @@ export class ResponseProcessor {
     devices: Device[]
   ): string {
     const cleaned = cleanFormatting(response);
-    const corrected = hasHallucination(cleaned, intent, filters, alerts, devices)
+    const corrected = hasHallucination(
+      cleaned,
+      intent,
+      filters,
+      alerts,
+      devices
+    )
       ? buildFallback(intent, filters, alerts, devices)
       : cleaned;
 

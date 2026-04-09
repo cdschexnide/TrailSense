@@ -50,6 +50,7 @@ This phase is organized by screen category.
   - Message: "You have no security alerts"
 
 - [x] **Update layout:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -95,6 +96,7 @@ This phase is organized by screen category.
 **File:** `src/screens/alerts/AlertDetailScreen.tsx`
 
 - [x] **Update to use ListSection and ListRow:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -193,6 +195,7 @@ This phase is organized by screen category.
   - Use Button components for apply/reset
 
 - [x] **Implement filter UI:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -256,6 +259,7 @@ This phase is organized by screen category.
 - [x] **Update to use redesigned DeviceCard**
 
 - [x] **Update layout:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -307,6 +311,7 @@ This phase is organized by screen category.
 **File:** `src/screens/devices/DeviceDetailScreen.tsx`
 
 - [x] **Update to use ListSection pattern:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -430,6 +435,7 @@ This phase is organized by screen category.
 #### Implement Charts (from Phase 7)
 
 - [ ] **Use React Native Chart Kit (after Phase 7):**
+
   ```typescript
   <ChartCard title="Detections Over Time">
     <LineChart
@@ -463,6 +469,7 @@ This phase is organized by screen category.
 #### Update Layout
 
 - [ ] **Use ScrollView with proper spacing:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -575,6 +582,7 @@ This phase is organized by screen category.
 #### Update Layout
 
 - [x] **Complete layout:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -642,6 +650,7 @@ This phase is organized by screen category.
 #### Update to iOS Inset Grouped List
 
 - [x] **Redesign with ListSection and ListRow:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -750,6 +759,7 @@ This phase is organized by screen category.
 **File:** `src/screens/settings/WhitelistScreen.tsx`
 
 - [x] **Update to use redesigned WhitelistItem:**
+
   ```typescript
   <ScreenLayout
     header={{
@@ -812,6 +822,7 @@ This phase is organized by screen category.
 **File:** `src/screens/auth/LoginScreen.tsx`
 
 - [x] **Update to use new Input and Button components:** (Already updated in previous phases)
+
   ```typescript
   <ScreenLayout>
     <KeyboardAvoidingView ...>
@@ -1032,6 +1043,7 @@ Commit after each screen category:
 ## Implementation Summary
 
 **Completed Screens:**
+
 - ✅ Alert screens (AlertListScreen, AlertDetailScreen, AlertFilterScreen)
 - ✅ Device screens (DeviceListScreen, DeviceDetailScreen)
 - ✅ Radar screens (LiveRadarScreen)
@@ -1039,6 +1051,7 @@ Commit after each screen category:
 - ✅ Auth screens (already updated in previous phases)
 
 **Remaining Screens:**
+
 - ⬜ Analytics screens (DashboardScreen, HeatmapScreen, ReportsScreen) - Requires Phase 7 charts
 - ⬜ Other device screens (DeviceHistoryScreen) - Requires Phase 7 charts
 - ⬜ Other settings screens (ProfileScreen, NotificationSettingsScreen, etc.)

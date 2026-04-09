@@ -22,33 +22,42 @@ Final phase: Document the new design system, create migration guides, clean up c
 **File:** `docs/design-system/IOS-DESIGN-SYSTEM.md` (NEW)
 
 - [ ] **Create comprehensive design system documentation:**
+
   ```markdown
   # TrailSense iOS Design System
 
   ## Overview
+
   This design system follows Apple's Human Interface Guidelines...
 
   ## Colors
+
   ### Semantic Colors
+
   - Primary: systemBlue (#007AFF)
   - Success: systemGreen
   - Warning: systemOrange
   - Error: systemRed
-  [Full color reference...]
+    [Full color reference...]
 
   ## Typography
+
   ### Text Styles
+
   - largeTitle: 34pt, regular
   - title1: 28pt, regular
-  [Full typography scale...]
+    [Full typography scale...]
 
   ## Spacing
+
   ### 8pt Grid System
+
   - xs: 8pt
   - sm: 16pt
-  [Full spacing reference...]
+    [Full spacing reference...]
 
   ## Components
+
   [Document each component with examples...]
   ```
 
@@ -62,22 +71,27 @@ Final phase: Document the new design system, create migration guides, clean up c
 **File:** `docs/design-system/COMPONENT-API.md` (NEW)
 
 - [ ] **Document all component APIs:**
+
   ```markdown
   # Component API Reference
 
   ## Atoms
 
   ### Button
+
   Props:
+
   - buttonStyle: 'filled' | 'tinted' | 'gray' | 'plain'
   - role: 'default' | 'cancel' | 'destructive'
   - size: 'small' | 'medium' | 'large'
-  [Complete API for each component...]
+    [Complete API for each component...]
 
   ### Text
+
   [Complete API...]
 
   ### Icon
+
   [Complete API...]
 
   [Document all atoms, molecules, organisms, templates...]
@@ -88,18 +102,23 @@ Final phase: Document the new design system, create migration guides, clean up c
 **File:** `docs/design-system/MIGRATION-GUIDE.md` (NEW)
 
 - [ ] **Document breaking changes and migration steps:**
-  ```markdown
+
+  ````markdown
   # Migration Guide: iOS UI Refactor
 
   ## Breaking Changes
 
   ### Button Component
+
   **Before:**
+
   ```typescript
   <Button variant="primary">Save</Button>
   ```
+  ````
 
   **After:**
+
   ```typescript
   <Button buttonStyle="filled" role="default">Save</Button>
   ```
@@ -107,12 +126,16 @@ Final phase: Document the new design system, create migration guides, clean up c
   **Migration steps:**
   1. Replace `variant="primary"` with `buttonStyle="filled" role="default"`
   2. Replace `variant="secondary"` with `buttonStyle="tinted"`
-  [Complete migration for all components...]
+     [Complete migration for all components...]
 
   ### Text Component
+
   [Migration guide...]
 
   [Document all breaking changes...]
+
+  ```
+
   ```
 
 ---
@@ -122,12 +145,14 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.2.1 Remove Unused Code
 
 - [ ] **Find and remove unused imports:**
+
   ```bash
   # Use linter or manually check
   npm run lint
   ```
 
 - [ ] **Remove commented-out code:**
+
   ```bash
   grep -r "//" src/ | grep -v "://" | grep "TODO\|FIXME\|XXX"
   ```
@@ -143,6 +168,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.2.2 Update Imports
 
 - [ ] **Ensure consistent import paths:**
+
   ```typescript
   // Use path aliases
   import { Button } from '@components/atoms';
@@ -158,6 +184,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.2.3 Remove Console Logs
 
 - [ ] **Find all console statements:**
+
   ```bash
   grep -r "console\." src/
   ```
@@ -170,6 +197,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.2.4 Fix ESLint Warnings
 
 - [ ] **Run linter:**
+
   ```bash
   npm run lint
   ```
@@ -191,6 +219,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.3.1 Fix All Type Errors
 
 - [ ] **Run type checker:**
+
   ```bash
   npm run type-check
   ```
@@ -204,6 +233,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.3.2 Remove 'any' Types
 
 - [ ] **Find all 'any' usage:**
+
   ```bash
   grep -r ": any" src/
   grep -r "as any" src/
@@ -260,6 +290,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.4.2 Automated Tests (if applicable)
 
 - [ ] **Run existing tests:**
+
   ```bash
   npm test
   ```
@@ -274,29 +305,36 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.4.3 Build Testing
 
 - [ ] **Clean build:**
+
   ```bash
   rm -rf node_modules
   npm install
   ```
 
 - [ ] **Run type check:**
+
   ```bash
   npm run type-check
   ```
+
   - Should pass with no errors
 
 - [ ] **Run linter:**
+
   ```bash
   npm run lint
   ```
+
   - Should pass with no errors
 
 - [ ] **Build app:**
+
   ```bash
   npm run ios
   # or
   npm run android
   ```
+
   - Should build successfully
 
 - [ ] **Test production build:**
@@ -386,6 +424,7 @@ Final phase: Document the new design system, create migration guides, clean up c
   - Link to component docs
 
 - [ ] **Add design system section:**
+
   ```markdown
   ## Design System
 
@@ -407,23 +446,27 @@ Final phase: Document the new design system, create migration guides, clean up c
 **File:** `CHANGELOG.md` (NEW or UPDATE)
 
 - [ ] **Document all changes:**
+
   ```markdown
   # Changelog
 
   ## [2.0.0] - iOS UI Redesign - 2024-XX-XX
 
   ### Major Changes
+
   - Complete iOS design system implementation
   - Redesigned all components to match iOS patterns
   - Implemented comprehensive accessibility support
 
   ### Breaking Changes
+
   - Button component API changed (variant → buttonStyle/role)
   - Text component variants changed to iOS text styles
   - All colors changed to iOS semantic colors
   - See MIGRATION-GUIDE.md for details
 
   ### Added
+
   - iOS-native design system
   - Dark mode support throughout
   - Haptic feedback on all interactions
@@ -435,6 +478,7 @@ Final phase: Document the new design system, create migration guides, clean up c
   - iOS segment controls and pickers
 
   ### Changed
+
   - All components redesigned to match iOS
   - All screens updated to use new design system
   - Typography changed to iOS text styles
@@ -442,6 +486,7 @@ Final phase: Document the new design system, create migration guides, clean up c
   - Shadows changed to iOS-style subtle shadows
 
   ### Fixed
+
   - Color contrast issues
   - Touch target sizes (all 44pt minimum)
   - Accessibility labels
@@ -455,11 +500,13 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.9.1 Review All Changes
 
 - [ ] **Review git status:**
+
   ```bash
   git status
   ```
 
 - [ ] **Review changed files:**
+
   ```bash
   git diff
   ```
@@ -472,11 +519,13 @@ Final phase: Document the new design system, create migration guides, clean up c
 #### 10.9.2 Create Final Commit
 
 - [ ] **Stage all changes:**
+
   ```bash
   git add .
   ```
 
 - [ ] **Create meaningful commit:**
+
   ```bash
   git commit -m "feat: Complete iOS UI/UX redesign
 
@@ -509,6 +558,7 @@ Final phase: Document the new design system, create migration guides, clean up c
 ### 10.10 Create Pull Request (if applicable)
 
 - [ ] **Push to remote:**
+
   ```bash
   git push origin feature/ios-ui-redesign
   ```

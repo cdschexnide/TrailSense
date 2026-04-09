@@ -13,6 +13,7 @@
 ### Task 1: Feature Flags for New Workstreams
 
 **Files:**
+
 - Modify: `src/config/featureFlags.ts`
 
 **Step 1: Add new feature flag types**
@@ -58,6 +59,7 @@ git commit -m "feat(flags): add workstream feature flags for rollback safety"
 ### Task 2: useReducedMotion Hook
 
 **Files:**
+
 - Create: `src/hooks/useReducedMotion.ts`
 
 **Step 1: Create the hook**
@@ -104,6 +106,7 @@ git commit -m "feat(a11y): add useReducedMotion hook"
 ### Task 3: SkeletonCard Atom
 
 **Files:**
+
 - Create: `src/components/atoms/SkeletonCard/SkeletonCard.tsx`
 - Create: `src/components/atoms/SkeletonCard/index.ts`
 - Modify: `src/components/atoms/index.ts`
@@ -211,6 +214,7 @@ git commit -m "feat(atoms): add SkeletonCard with shimmer animation and reduced 
 ### Task 4: Toast Molecule
 
 **Files:**
+
 - Create: `src/components/molecules/Toast/Toast.tsx`
 - Create: `src/components/molecules/Toast/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -381,6 +385,7 @@ git commit -m "feat(molecules): add Toast component with haptics and reduced mot
 ### Task 5: ToastProvider Template
 
 **Files:**
+
 - Create: `src/components/templates/ToastProvider/ToastProvider.tsx`
 - Create: `src/components/templates/ToastProvider/index.ts`
 - Modify: `src/components/templates/index.ts`
@@ -472,7 +477,7 @@ import { ToastProvider } from '@components/templates';
 // Inside the return, wrap RootNavigator:
 <ToastProvider>
   <RootNavigator />
-</ToastProvider>
+</ToastProvider>;
 ```
 
 **Step 5: Verify app still compiles**
@@ -491,6 +496,7 @@ git commit -m "feat(templates): add ToastProvider context, wrap App root"
 ### Task 6: OfflineBanner Molecule
 
 **Files:**
+
 - Create: `src/components/molecules/OfflineBanner/OfflineBanner.tsx`
 - Create: `src/components/molecules/OfflineBanner/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -581,6 +587,7 @@ git commit -m "feat(molecules): add OfflineBanner with NetInfo connectivity dete
 ### Task 7: Empty Search Results in AlertListScreen and DeviceListScreen
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertListScreen.tsx`
 - Modify: `src/screens/devices/DeviceListScreen.tsx`
 - Modify: `src/components/templates/ScreenLayout/ScreenLayout.tsx`
@@ -630,13 +637,13 @@ The `ScreenLayout` template wraps most screens with an `Animated.ScrollView` (li
 In `src/components/templates/ScreenLayout/ScreenLayout.tsx`, add to the `Animated.ScrollView` props (around line 133):
 
 ```tsx
-keyboardDismissMode="on-drag"
+keyboardDismissMode = 'on-drag';
 ```
 
 Also add to AlertListScreen's `Animated.FlatList` (around line 179) and DeviceListScreen's FlatList, since those use `scrollable={false}` on ScreenLayout and manage their own FlatList:
 
 ```tsx
-keyboardDismissMode="on-drag"
+keyboardDismissMode = 'on-drag';
 ```
 
 **Step 4: Commit**
@@ -651,6 +658,7 @@ git commit -m "feat(screens): add empty search state and keyboard dismiss on scr
 ### Task 8: Reduced Motion in GlowContainer, AlertCard, and DeviceCard
 
 **Files:**
+
 - Modify: `src/components/molecules/GlowContainer/GlowContainer.tsx`
 - Modify: `src/components/organisms/AlertCard/AlertCard.tsx`
 - Modify: `src/components/organisms/DeviceCard/DeviceCard.tsx`
@@ -733,6 +741,7 @@ git commit -m "feat(a11y): respect reduced motion in GlowContainer, AlertCard, a
 ### Task 9: Permission Flows (Location + Notifications)
 
 **Files:**
+
 - Create: `src/components/templates/PermissionScreen/PermissionScreen.tsx`
 - Create: `src/components/templates/PermissionScreen/index.ts`
 - Modify: `src/components/templates/index.ts`
@@ -853,6 +862,7 @@ git commit -m "feat(templates): add reusable PermissionScreen for location and n
 ### Task 10: Toast/OfflineBanner Stacking
 
 **Files:**
+
 - Modify: `src/components/molecules/Toast/Toast.tsx`
 
 > **Autoplan decision (Design D16):** OfflineBanner is persistent and sits below the safe area. Toasts animate in below the OfflineBanner. Use a shared top offset so they never overlap.
@@ -887,6 +897,7 @@ git commit -m "fix(Toast): offset top position to avoid OfflineBanner overlap"
 ### Task 11: Dark Mode Shadow Adaptation
 
 **Files:**
+
 - Modify: `src/constants/shadows.ts`
 
 **Step 1: Add dark mode shadow variants**
@@ -914,9 +925,7 @@ export function getShadow(
   colorScheme: 'light' | 'dark'
 ) {
   if (colorScheme === 'dark') {
-    return size === 'none'
-      ? shadowNone
-      : { ...shadowNone, ...darkModeBorder };
+    return size === 'none' ? shadowNone : { ...shadowNone, ...darkModeBorder };
   }
   return Shadows[size];
 }
@@ -940,6 +949,7 @@ git commit -m "feat(theme): add dark mode shadow-to-border adaptation"
 ### Task 12: Demo Mode (User-Facing Mock Mode)
 
 **Files:**
+
 - Modify: `src/config/mockConfig.ts`
 - Modify: `src/config/featureFlags.ts`
 - Modify: `src/screens/settings/SettingsScreen.tsx`
@@ -1003,7 +1013,9 @@ const handleToggleDemo = async () => {
   await setDemoMode(newValue);
   setIsDemoEnabled(newValue);
   showToast(
-    newValue ? 'Demo mode enabled. Restart app to load sample data.' : 'Demo mode disabled. Restart app.',
+    newValue
+      ? 'Demo mode enabled. Restart app to load sample data.'
+      : 'Demo mode disabled. Restart app.',
     'info'
   );
 };
@@ -1021,6 +1033,7 @@ git commit -m "feat(config): add user-facing demo mode toggle in settings"
 ### Task 13: Wire Skeleton Loading into AlertListScreen
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertListScreen.tsx`
 
 **Step 1: Replace LoadingState with skeleton cards**
@@ -1079,6 +1092,7 @@ git commit -m "feat(screens): replace spinner with skeleton loading cards"
 ### Task 14: Analytics Events for New Features
 
 **Files:**
+
 - Create: `src/services/analyticsEvents.ts`
 
 > **Autoplan decision (CEO Section 4):** Add analytics events for key new interactions. Existing Firebase analytics infrastructure handles this.
@@ -1171,33 +1185,33 @@ git commit -m "fix: resolve lint and type errors from production polish"
 
 These decisions were made during the `/autoplan` review (CEO, Design, Eng phases) and are reflected in the tasks above:
 
-| Decision | Source | Task |
-|----------|--------|------|
-| Feature flags for rollback safety | Eng E14 | Task 1 |
-| Permission flows: Location + Notifications only, defer Camera | Design D6, Codex #6 | Task 9 |
-| Toast/OfflineBanner stacking: toast offsets below banner | Design D16 | Task 10 |
-| Analytics events for new features | CEO Section 4 | Task 14 |
-| Status precedence: threat > offline > stale > clear | Design D19 | Workstream 1 (not this WS) |
-| Block device is UI-only suppression, push still arrives | Codex Eng #2 | Workstream 3 (not this WS) |
+| Decision                                                      | Source              | Task                       |
+| ------------------------------------------------------------- | ------------------- | -------------------------- |
+| Feature flags for rollback safety                             | Eng E14             | Task 1                     |
+| Permission flows: Location + Notifications only, defer Camera | Design D6, Codex #6 | Task 9                     |
+| Toast/OfflineBanner stacking: toast offsets below banner      | Design D16          | Task 10                    |
+| Analytics events for new features                             | CEO Section 4       | Task 14                    |
+| Status precedence: threat > offline > stale > clear           | Design D19          | Workstream 1 (not this WS) |
+| Block device is UI-only suppression, push still arrives       | Codex Eng #2        | Workstream 3 (not this WS) |
 
 ## Summary of Deliverables
 
-| Component | Type | Path |
-|-----------|------|------|
-| Feature flags | Config | `src/config/featureFlags.ts` |
-| useReducedMotion | Hook | `src/hooks/useReducedMotion.ts` |
-| SkeletonCard | Atom | `src/components/atoms/SkeletonCard/` |
-| Toast | Molecule | `src/components/molecules/Toast/` |
-| ToastProvider | Template | `src/components/templates/ToastProvider/` |
-| OfflineBanner | Molecule | `src/components/molecules/OfflineBanner/` |
-| PermissionScreen | Template | `src/components/templates/PermissionScreen/` |
-| Analytics events | Service | `src/services/analyticsEvents.ts` |
-| Demo Mode | Config | `src/config/demoMode.ts` |
-| Dark mode shadows | Constants | `src/constants/shadows.ts` |
-| Skeleton loading | Screen mod | `AlertListScreen.tsx`, `DeviceListScreen.tsx` |
-| Empty search | Screen mod | `AlertListScreen.tsx` |
-| Keyboard dismiss | Screen/Template mod | `ScreenLayout.tsx`, `AlertListScreen.tsx`, `DeviceListScreen.tsx` |
-| Reduced motion | Component mod | `GlowContainer.tsx`, `AlertCard.tsx`, `DeviceCard.tsx` |
-| Toast stacking | Component mod | `Toast.tsx` |
+| Component         | Type                | Path                                                              |
+| ----------------- | ------------------- | ----------------------------------------------------------------- |
+| Feature flags     | Config              | `src/config/featureFlags.ts`                                      |
+| useReducedMotion  | Hook                | `src/hooks/useReducedMotion.ts`                                   |
+| SkeletonCard      | Atom                | `src/components/atoms/SkeletonCard/`                              |
+| Toast             | Molecule            | `src/components/molecules/Toast/`                                 |
+| ToastProvider     | Template            | `src/components/templates/ToastProvider/`                         |
+| OfflineBanner     | Molecule            | `src/components/molecules/OfflineBanner/`                         |
+| PermissionScreen  | Template            | `src/components/templates/PermissionScreen/`                      |
+| Analytics events  | Service             | `src/services/analyticsEvents.ts`                                 |
+| Demo Mode         | Config              | `src/config/demoMode.ts`                                          |
+| Dark mode shadows | Constants           | `src/constants/shadows.ts`                                        |
+| Skeleton loading  | Screen mod          | `AlertListScreen.tsx`, `DeviceListScreen.tsx`                     |
+| Empty search      | Screen mod          | `AlertListScreen.tsx`                                             |
+| Keyboard dismiss  | Screen/Template mod | `ScreenLayout.tsx`, `AlertListScreen.tsx`, `DeviceListScreen.tsx` |
+| Reduced motion    | Component mod       | `GlowContainer.tsx`, `AlertCard.tsx`, `DeviceCard.tsx`            |
+| Toast stacking    | Component mod       | `Toast.tsx`                                                       |
 
 **15 tasks, ~15 commits, estimated ~2 sessions with Claude Code.**

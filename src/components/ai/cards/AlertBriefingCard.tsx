@@ -36,8 +36,7 @@ const severityColor = (level: string) => {
   }
 };
 
-const severityIcon = (level: string) =>
-  level === 'critical' ? '◆' : '▲';
+const severityIcon = (level: string) => (level === 'critical' ? '◆' : '▲');
 
 export const AlertBriefingCard: React.FC<AlertBriefingCardProps> = ({
   data,
@@ -72,10 +71,7 @@ export const AlertBriefingCard: React.FC<AlertBriefingCardProps> = ({
       onCopy={onCopy}
       onFeedback={onFeedback}
     >
-      <MiniMap
-        devices={data.devices}
-        highlightDeviceId={detectionDeviceId}
-      />
+      <MiniMap devices={data.devices} highlightDeviceId={detectionDeviceId} />
 
       {data.alerts.map((alert, i) => (
         <View
@@ -100,9 +96,7 @@ export const AlertBriefingCard: React.FC<AlertBriefingCardProps> = ({
               {severityIcon(alert.threatLevel)}{' '}
               {alert.threatLevel.toUpperCase()}
             </Text>
-            <Text style={styles.alertTime}>
-              {formatDate(alert.timestamp)}
-            </Text>
+            <Text style={styles.alertTime}>{formatDate(alert.timestamp)}</Text>
           </View>
           <Text style={styles.alertDetail}>
             {alert.detectionType} detection

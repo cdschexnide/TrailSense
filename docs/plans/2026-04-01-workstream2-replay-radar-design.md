@@ -35,9 +35,9 @@ New Skia-based organism that renders a circular radar with time-filtered detecti
 
 ```typescript
 interface ReplayRadarDisplayProps {
-  timestamp: SharedValue<number>;  // Reanimated shared value, epoch ms
+  timestamp: SharedValue<number>; // Reanimated shared value, epoch ms
   positions: TimeBucketedPositions; // Pre-bucketed at load time
-  maxRange?: number;               // Default 244 (meters, ~800ft)
+  maxRange?: number; // Default 244 (meters, ~800ft)
   propertyCenter: { latitude: number; longitude: number };
   onDotTap?: (fingerprintHash: string) => void;
   onEmptyTap?: () => void;
@@ -72,14 +72,14 @@ When replay mode activates, all `TriangulatedPosition` data for the selected 24h
 
 ```typescript
 interface TimeBucketedPositions {
-  startTime: number;           // epoch ms, midnight
+  startTime: number; // epoch ms, midnight
   buckets: Map<number, BucketEntry[]>; // key = minute index (0-1439)
 }
 
 interface BucketEntry {
   fingerprintHash: string;
-  x: number;                   // pre-computed radar x
-  y: number;                   // pre-computed radar y
+  x: number; // pre-computed radar x
+  y: number; // pre-computed radar y
   threatLevel: ThreatLevel;
   confidence: number;
   signalType: DetectionType;
@@ -150,6 +150,7 @@ PEEK_SHOWN → drag scrubber → IDLE (peek dismisses, scrubbing takes over)
 ### Crossfade Zoom Transition
 
 When toggling from "Live Map" to "Replay":
+
 - Heatmap fades out (opacity 1 to 0, 300ms)
 - Background transitions from light theme to dark (#0a0a0f)
 - Replay radar fades in (opacity 0 to 1, 300ms) with a subtle scale (0.95 to 1.0)
@@ -160,12 +161,12 @@ When toggling from "Live Map" to "Replay":
 
 `src/mocks/data/mockReplayPositions.ts` produces a full 24h of `TriangulatedPosition` data with four scenarios:
 
-| Scenario | Time | Duration | Positions | Behavior |
-|---|---|---|---|---|
-| Delivery driver | 10:15 AM, 3:30 PM | 5 min each | ~10 per visit | Approaches from south, stops near door, leaves |
-| Repeat visitor | 8 AM, 12 PM, 6 PM | 3 min each | ~6 per visit | Same approach from east, consistent pattern |
-| Suspicious loiterer | 1:30 AM | 45 min | ~90 | Slow drift along north boundary, back and forth |
-| Passing vehicle | 7:45 AM | 2 min | ~8 | Fast west-to-east traversal at max range |
+| Scenario            | Time              | Duration   | Positions     | Behavior                                        |
+| ------------------- | ----------------- | ---------- | ------------- | ----------------------------------------------- |
+| Delivery driver     | 10:15 AM, 3:30 PM | 5 min each | ~10 per visit | Approaches from south, stops near door, leaves  |
+| Repeat visitor      | 8 AM, 12 PM, 6 PM | 3 min each | ~6 per visit  | Same approach from east, consistent pattern     |
+| Suspicious loiterer | 1:30 AM           | 45 min     | ~90           | Slow drift along north boundary, back and forth |
+| Passing vehicle     | 7:45 AM           | 2 min      | ~8            | Fast west-to-east traversal at max range        |
 
 Each position gets a `fingerprintHash`, `signalType`, `confidence`, and `threatLevel`. The generator uses the property center from existing mock device GPS coordinates and distributes positions within the `maxRange` radius realistically.
 
@@ -197,6 +198,7 @@ Each position gets a `fingerprintHash`, `signalType`, `confidence`, and `threatL
 ## Accessibility
 
 All animations check `AccessibilityInfo.isReduceMotionEnabled()`. When enabled:
+
 - Instant mode switch (no crossfade)
 - Static dots (no fade trail animation)
 - No playhead glow pulse

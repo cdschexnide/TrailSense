@@ -12,17 +12,18 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|---|---|---|
-| `src/components/AuthLifecycle.tsx` | **Create** | Auth lifecycle side-effects: inactivity monitoring + WebSocket connection |
-| `src/App.tsx` | **Modify** | Remove inline `AuthLifecycle`, import from new file, remove redundant mock `connect()` calls |
-| `__tests__/components/AuthLifecycle.test.tsx` | **Create** | Verify `useWebSocket` is called with correct token from Redux auth state |
+| File                                          | Action     | Responsibility                                                                               |
+| --------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
+| `src/components/AuthLifecycle.tsx`            | **Create** | Auth lifecycle side-effects: inactivity monitoring + WebSocket connection                    |
+| `src/App.tsx`                                 | **Modify** | Remove inline `AuthLifecycle`, import from new file, remove redundant mock `connect()` calls |
+| `__tests__/components/AuthLifecycle.test.tsx` | **Create** | Verify `useWebSocket` is called with correct token from Redux auth state                     |
 
 ---
 
 ### Task 1: Write and run the failing test
 
 **Files:**
+
 - Create: `__tests__/components/AuthLifecycle.test.tsx`
 
 - [ ] **Step 1: Create the test file**
@@ -126,6 +127,7 @@ Expected: FAIL with `Cannot find module '../../src/components/AuthLifecycle'` �
 ### Task 2: Implement the changes and make the test pass
 
 **Files:**
+
 - Create: `src/components/AuthLifecycle.tsx`
 - Modify: `src/App.tsx`
 
@@ -138,9 +140,7 @@ import { useWebSocket } from '@hooks/useWebSocket';
 
 export function AuthLifecycle() {
   useAuth();
-  const token = useAppSelector(
-    state => state.auth.tokens?.accessToken ?? null
-  );
+  const token = useAppSelector(state => state.auth.tokens?.accessToken ?? null);
   useWebSocket(token);
   return null;
 }
@@ -149,6 +149,7 @@ export function AuthLifecycle() {
 - [ ] **Step 2: Read the current `src/App.tsx`**
 
 Open `src/App.tsx`. Locate three things:
+
 1. The import block at the top
 2. The two `websocketService.connect('mock-token-for-testing')` calls inside `initializeApp` (one in the `isDemoMode()` branch, one in the `getIsMockMode()` branch)
 3. The `function AuthLifecycle()` definition near the bottom of the file
@@ -166,11 +167,13 @@ Remove the existing `import { websocketService } from '@api/websocket';` line **
 - [ ] **Step 4: Remove the two redundant mock connect calls from `initializeApp`**
 
 In the `isDemoMode()` branch, remove:
+
 ```tsx
 websocketService.connect('mock-token-for-testing');
 ```
 
 In the `getIsMockMode()` branch, remove:
+
 ```tsx
 websocketService.connect('mock-token-for-testing');
 ```
@@ -193,9 +196,11 @@ The `useAuth` import at the top of App.tsx can also be removed — it is now onl
 - [ ] **Step 6: Verify `App.tsx` still renders `<AuthLifecycle />` in the JSX tree**
 
 Confirm that the JSX in `App.tsx` still contains:
+
 ```tsx
 <AuthLifecycle />
 ```
+
 at the same position inside `QueryClientProvider`, inside `PersistGate`, inside `ReduxProvider`. It must remain in this position — see spec structural constraints.
 
 - [ ] **Step 7: Run the new test to confirm it passes**
@@ -206,6 +211,7 @@ npx jest __tests__/components/AuthLifecycle.test.tsx --no-coverage
 ```
 
 Expected output:
+
 ```
 PASS __tests__/components/AuthLifecycle.test.tsx
   AuthLifecycle

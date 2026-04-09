@@ -51,17 +51,13 @@ export const SitrepCard: React.FC<SitrepCardProps> = ({
     {/* Metrics row */}
     <View style={styles.metricsRow}>
       <View style={[styles.metricBox, { borderColor: c.severityCritical }]}>
-        <Text
-          style={[styles.metricValue, { color: c.accentDanger }]}
-        >
+        <Text style={[styles.metricValue, { color: c.accentDanger }]}>
           {data.threatCounts.critical}
         </Text>
         <Text style={styles.metricCaption}>Critical</Text>
       </View>
       <View style={[styles.metricBox, { borderColor: c.severityHigh }]}>
-        <Text
-          style={[styles.metricValue, { color: c.accentWarning }]}
-        >
+        <Text style={[styles.metricValue, { color: c.accentWarning }]}>
           {data.threatCounts.high}
         </Text>
         <Text style={styles.metricCaption}>High</Text>
@@ -87,13 +83,9 @@ export const SitrepCard: React.FC<SitrepCardProps> = ({
             {alert.threatLevel === 'critical' ? '◆' : '▲'}{' '}
             {alert.threatLevel.toUpperCase()}
           </Text>
-          <Text style={styles.alertTime}>
-            {formatDate(alert.timestamp)}
-          </Text>
+          <Text style={styles.alertTime}>{formatDate(alert.timestamp)}</Text>
         </View>
-        <Text style={styles.alertDetail}>
-          {alert.detectionType} detection
-        </Text>
+        <Text style={styles.alertDetail}>{alert.detectionType} detection</Text>
         <View style={styles.alertMeta}>
           <Text style={styles.metaText}>
             {alert.confidence}% ·{' '}

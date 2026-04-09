@@ -45,10 +45,7 @@ const SuggestionChipsComponent = ({
           <Pressable
             key={suggestion.id}
             onPress={() => onSelect(suggestion)}
-            style={({ pressed }) => [
-              styles.chip,
-              pressed && { opacity: 0.7 },
-            ]}
+            style={({ pressed }) => [styles.chip, pressed && { opacity: 0.7 }]}
           >
             <Text style={styles.chipText}>
               {suggestion.label.toUpperCase()}
@@ -88,7 +85,8 @@ export const DEFAULT_SUGGESTIONS: Suggestion[] = [
   {
     id: 'sitrep',
     label: 'SITREP',
-    query: "Give me a full situation report. What's the current security status, any alerts, and sensor health?",
+    query:
+      "Give me a full situation report. What's the current security status, any alerts, and sensor health?",
     category: 'general',
   },
   {
@@ -100,19 +98,22 @@ export const DEFAULT_SUGGESTIONS: Suggestion[] = [
   {
     id: 'sensors',
     label: 'SENSORS',
-    query: "What's the status of my TrailSense sensors? Are any offline or low on battery?",
+    query:
+      "What's the status of my TrailSense sensors? Are any offline or low on battery?",
     category: 'devices',
   },
   {
     id: 'patterns',
     label: 'PATTERNS',
-    query: 'Have there been any suspicious detection patterns or repeat visitors I should know about?',
+    query:
+      'Have there been any suspicious detection patterns or repeat visitors I should know about?',
     category: 'patterns',
   },
   {
     id: 'weekly',
     label: 'WEEKLY',
-    query: 'Give me a weekly security report. Alert counts, types, trends, and when activity is highest.',
+    query:
+      'Give me a weekly security report. Alert counts, types, trends, and when activity is highest.',
     category: 'general',
   },
 ];
@@ -156,7 +157,8 @@ export const getContextualSuggestions = (context: {
     suggestions.push({
       id: 'review-alerts',
       label: `${context.unreviewedAlerts} UNREVIEWED`,
-      query: 'Show me the unreviewed alerts and help me prioritize what to check first.',
+      query:
+        'Show me the unreviewed alerts and help me prioritize what to check first.',
       category: 'alerts',
     });
   }

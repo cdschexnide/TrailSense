@@ -67,7 +67,9 @@ export const ProximityZoneVisual: React.FC<ProximityZoneVisualProps> = ({
                 },
               ]}
             >
-              <View style={[styles.legendDot, { backgroundColor: meta.color }]} />
+              <View
+                style={[styles.legendDot, { backgroundColor: meta.color }]}
+              />
               <Text variant="subheadline" weight="semibold">
                 {meta.label}
               </Text>

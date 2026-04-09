@@ -15,6 +15,7 @@
 ### Task 1.1: Add Brand Accent Color
 
 **Files:**
+
 - Modify: `src/constants/colors.ts:11-619`
 
 **Step 1: Add brand accent colors to light mode**
@@ -84,6 +85,7 @@ Replaces cyan accent for brand consistency."
 ### Task 1.2: Update Primary Color Reference
 
 **Files:**
+
 - Modify: `src/constants/colors.ts`
 
 **Step 1: Update primary alias to use brand accent**
@@ -136,6 +138,7 @@ systemBlue remains for iOS-native interactive patterns."
 ### Task 2.1: Create FilterChip Component
 
 **Files:**
+
 - Create: `src/components/molecules/FilterChip/FilterChip.tsx`
 - Create: `src/components/molecules/FilterChip/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -285,6 +288,7 @@ Replaces chunky colored summary cards."
 ### Task 2.2: Create InlineFilterBar Component
 
 **Files:**
+
 - Create: `src/components/molecules/InlineFilterBar/InlineFilterBar.tsx`
 - Create: `src/components/molecules/InlineFilterBar/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -393,6 +397,7 @@ Supports single selection with toggle behavior."
 ### Task 2.3: Create GroupedListSection Component
 
 **Files:**
+
 - Create: `src/components/molecules/GroupedListSection/GroupedListSection.tsx`
 - Create: `src/components/molecules/GroupedListSection/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -538,6 +543,7 @@ iOS Settings-style grouped list section with:
 ### Task 2.4: Create GroupedListRow Component
 
 **Files:**
+
 - Create: `src/components/molecules/GroupedListRow/GroupedListRow.tsx`
 - Create: `src/components/molecules/GroupedListRow/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -727,6 +733,7 @@ iOS Settings-style list row with:
 ### Task 3.1: Refactor AlertsHeaderHero to Use InlineFilterBar
 
 **Files:**
+
 - Modify: `src/components/organisms/HeaderHero/AlertsHeaderHero.tsx`
 
 **Step 1: Replace gradient cards with InlineFilterBar**
@@ -833,6 +840,7 @@ Cleaner, more iOS-native appearance."
 ### Task 3.2: Simplify AlertCard - Remove Colored Background
 
 **Files:**
+
 - Modify: `src/components/organisms/AlertCard/AlertCard.tsx`
 
 **Step 1: Update AlertCard to use neutral background**
@@ -926,6 +934,7 @@ Cleaner, less cluttered card appearance."
 ### Task 3.3: Refactor AlertDetailScreen with Grouped Lists
 
 **Files:**
+
 - Modify: `src/screens/alerts/AlertDetailScreen.tsx`
 
 **Step 1: Read current AlertDetailScreen**
@@ -977,6 +986,7 @@ git commit -m "refactor(AlertDetail): apply grouped list design
 ### Task 4.1: Refactor DevicesHeaderHero to Use InlineFilterBar
 
 **Files:**
+
 - Modify: `src/components/organisms/HeaderHero/DevicesHeaderHero.tsx`
 
 **Step 1: Read current implementation**
@@ -1073,6 +1083,7 @@ Matches AlertsHeaderHero pattern."
 ### Task 4.2: Simplify DeviceCard - Neutral Background
 
 **Files:**
+
 - Modify: `src/components/organisms/DeviceCard/DeviceCard.tsx`
 
 **Step 1: Remove status-based background coloring**
@@ -1147,6 +1158,7 @@ git commit -m "refactor(DeviceCard): neutral background and simplified metrics
 ### Task 4.3: Refactor DeviceDetailScreen with Grouped Lists
 
 **Files:**
+
 - Modify: `src/screens/devices/DeviceDetailScreen.tsx`
 
 **Step 1: Read current DeviceDetailScreen**
@@ -1187,6 +1199,7 @@ git commit -m "refactor(DeviceDetail): apply grouped list design
 ### Task 5.1: Simplify ProximityHeatmapScreen Header
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 **Step 1: Update header to use device name as title**
@@ -1242,11 +1255,13 @@ git commit -m "refactor(ProximityHeatmap): device name as title, simplified head
 ### Task 5.2: Enhance PositionListItem with More Details
 
 **Files:**
+
 - Modify: `src/components/molecules/PositionListItem/PositionListItem.tsx`
 
 **Step 1: Add two-line format with accuracy**
 
 Update the component to show:
+
 - Line 1: Signal type label + fingerprint
 - Line 2: Confidence + accuracy
 
@@ -1286,6 +1301,7 @@ git commit -m "refactor(PositionListItem): two-line format with accuracy
 ### Task 6.1: Refactor DashboardScreen with Grouped Lists
 
 **Files:**
+
 - Modify: `src/screens/analytics/DashboardScreen.tsx`
 
 **Step 1: Replace stat cards with grouped list sections**
@@ -1316,11 +1332,13 @@ git commit -m "refactor(Dashboard): apply grouped list design
 ### Task 7.1: Refine SettingsScreen Styling
 
 **Files:**
+
 - Modify: `src/screens/settings/SettingsScreen.tsx`
 
 **Step 1: Ensure consistent use of GroupedListSection/Row**
 
 Settings is already close to iOS style. Verify it uses:
+
 - Grouped sections with proper headers
 - Consistent icon sizing
 - Right-aligned values in muted color
@@ -1350,6 +1368,7 @@ git commit -m "refactor(Settings): minor polish and version footer
 ### Task 8.1: Update Tab Bar Selected Color
 
 **Files:**
+
 - Modify: Navigation configuration file (likely `app/_layout.tsx` or similar)
 
 **Step 1: Update tab bar tint color to brand accent**
@@ -1380,6 +1399,7 @@ git commit -m "refactor(navigation): brand accent tab bar, rename AI tab
 ### Task 9.1: Update EmptyState Component
 
 **Files:**
+
 - Modify: `src/components/templates/EmptyState/EmptyState.tsx`
 
 **Step 1: Ensure outline-style icons**
@@ -1406,6 +1426,7 @@ git commit -m "refactor(EmptyState): polish with outline icons
 **Step 1: Run full app test**
 
 Navigate through all screens verifying:
+
 - Consistent card backgrounds (neutral)
 - Brand accent used for primary actions
 - Filter chips instead of colored boxes
@@ -1426,17 +1447,17 @@ Remove unused imports and dead code from refactor."
 
 ## Summary
 
-| Phase | Tasks | Priority |
-|-------|-------|----------|
-| Phase 1 | Design tokens (brand accent) | P0 |
-| Phase 2 | Core components (FilterChip, GroupedList) | P2 |
-| Phase 3 | Alert screens | P1 |
-| Phase 4 | Device screens | P1 |
-| Phase 5 | Map screen | P3 |
-| Phase 6 | Analytics screen | P3 |
-| Phase 7 | Settings screen | P4 |
-| Phase 8 | Tab bar | P4 |
-| Phase 9 | Final polish | P4 |
+| Phase   | Tasks                                     | Priority |
+| ------- | ----------------------------------------- | -------- |
+| Phase 1 | Design tokens (brand accent)              | P0       |
+| Phase 2 | Core components (FilterChip, GroupedList) | P2       |
+| Phase 3 | Alert screens                             | P1       |
+| Phase 4 | Device screens                            | P1       |
+| Phase 5 | Map screen                                | P3       |
+| Phase 6 | Analytics screen                          | P3       |
+| Phase 7 | Settings screen                           | P4       |
+| Phase 8 | Tab bar                                   | P4       |
+| Phase 9 | Final polish                              | P4       |
 
 **Total Tasks:** 15 main tasks with ~45 individual steps
 

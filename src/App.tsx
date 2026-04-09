@@ -71,7 +71,10 @@ export default function App() {
         try {
           await seedMockData({ queryClient, store });
         } catch (error) {
-          console.error('[App] Failed to seed mock data on demo restore:', error);
+          console.error(
+            '[App] Failed to seed mock data on demo restore:',
+            error
+          );
         }
         if (mounted) {
           setIsMockDataReady(true);
@@ -86,7 +89,9 @@ export default function App() {
           if (!mounted) {
             return;
           }
-          llmLogger.info('Mock data seeded; WebSocket connects via AuthLifecycle');
+          llmLogger.info(
+            'Mock data seeded; WebSocket connects via AuthLifecycle'
+          );
         } catch (error) {
           console.error('[App] Failed to seed mock data:', error);
         } finally {

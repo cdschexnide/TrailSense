@@ -57,7 +57,8 @@ function urlToQueryKeys(url: string): (string | undefined)[][] {
   }
   if (url.includes('/positions')) {
     // Positions use query param ?deviceId= rather than path-based ID
-    const id = extractId(url, 'positions') || extractQueryParam(url, 'deviceId');
+    const id =
+      extractId(url, 'positions') || extractQueryParam(url, 'deviceId');
     if (id) return [['positions', id], ['positions']];
     return [['positions']];
   }

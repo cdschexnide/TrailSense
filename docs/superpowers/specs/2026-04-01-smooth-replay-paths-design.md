@@ -79,9 +79,9 @@ The `InterpolatedDevice` interface used in `useReplayPath` must use `DetectionTy
 
 ## Files to Modify or Create
 
-| File | Action | Responsibility |
-|------|--------|----------------|
-| `src/utils/catmullRom.ts` | Create | Catmull-Rom spline interpolation utility |
-| `src/hooks/useAutoPlay.ts` | Modify | Add `progress` (0.0-1.0) with overflow-safe RAF loop |
-| `src/hooks/useReplayPath.ts` | Create | Per-device path builder (with lookahead + dedup) + smooth marker position + trail line generation |
-| `src/screens/radar/ProximityHeatmapScreen.tsx` | Modify | Use interpolated positions for markers, add trail line rendering with lineGradient + lineMetrics |
+| File                                           | Action | Responsibility                                                                                    |
+| ---------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| `src/utils/catmullRom.ts`                      | Create | Catmull-Rom spline interpolation utility                                                          |
+| `src/hooks/useAutoPlay.ts`                     | Modify | Add `progress` (0.0-1.0) with overflow-safe RAF loop                                              |
+| `src/hooks/useReplayPath.ts`                   | Create | Per-device path builder (with lookahead + dedup) + smooth marker position + trail line generation |
+| `src/screens/radar/ProximityHeatmapScreen.tsx` | Modify | Use interpolated positions for markers, add trail line rendering with lineGradient + lineMetrics  |

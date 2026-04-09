@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Text as RNText } from 'react-native';
 import type { Device } from '@/types/device';
-import { tacticalColors as c, tacticalTypography as t } from '@/constants/tacticalTheme';
+import {
+  tacticalColors as c,
+  tacticalTypography as t,
+} from '@/constants/tacticalTheme';
 
 interface MiniMapProps {
   devices: Device[];
@@ -70,10 +73,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
   };
 
   return (
-    <View
-      style={styles.container}
-      onLayout={() => {}}
-    >
+    <View style={styles.container} onLayout={() => {}}>
       <View style={styles.grid} />
       {devicesWithCoords.map(device => {
         const isHighlighted = device.id === highlightDeviceId;
@@ -90,9 +90,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
                   backgroundColor: isHighlighted
                     ? c.accentDanger
                     : c.accentPrimary,
-                  shadowColor: isHighlighted
-                    ? c.accentDanger
-                    : c.accentPrimary,
+                  shadowColor: isHighlighted ? c.accentDanger : c.accentPrimary,
                 },
               ]}
             />
@@ -124,10 +122,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
               </>
             )}
             <RNText
-              style={[
-                styles.label,
-                { left: pos.x + 7, top: pos.y - 5 },
-              ]}
+              style={[styles.label, { left: pos.x + 7, top: pos.y - 5 }]}
               numberOfLines={1}
             >
               {device.name.split(' ')[0].toUpperCase()}

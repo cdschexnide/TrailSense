@@ -57,9 +57,7 @@ export const useWebSocket = (token: string | null) => {
       // Patch the device list cache directly
       queryClient.setQueryData<Device[]>([DEVICES_QUERY_KEY], oldData => {
         if (!oldData) return oldData;
-        return oldData.map(d =>
-          d.id === status.id ? { ...d, ...status } : d
-        );
+        return oldData.map(d => (d.id === status.id ? { ...d, ...status } : d));
       });
 
       if (!skipInvalidation) {
@@ -82,10 +80,9 @@ export const useWebSocket = (token: string | null) => {
 
       if (skipInvalidation) {
         // Directly update the positions cache
-        queryClient.setQueryData(
-          [POSITIONS_QUERY_KEY, data.deviceId],
-          { positions: data.positions }
-        );
+        queryClient.setQueryData([POSITIONS_QUERY_KEY, data.deviceId], {
+          positions: data.positions,
+        });
       } else {
         queryClient.invalidateQueries({
           queryKey: [POSITIONS_QUERY_KEY, data.deviceId],

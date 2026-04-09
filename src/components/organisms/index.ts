@@ -6,5 +6,6 @@ export * from './HeaderHero';
 export * from './MiniPropertyMap';
 export * from './RadarDisplay';
 export * from './ReplayRadarDisplay';
+export * from './reports';
 export * from './TacticalHeader';
 export * from './TimelineScrubber';

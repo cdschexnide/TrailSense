@@ -73,14 +73,17 @@ Important: `RadarStack` route name `LiveRadar` currently points to `ProximityHea
 The app uses **three state layers** in parallel.
 
 1. Redux Toolkit (`src/store`)
+
 - Global auth, user, settings, and UI slices.
 - Persisted with `redux-persist`.
 
 2. React Query (`@tanstack/react-query`)
+
 - Server/cache data for alerts, devices, whitelist, analytics, positions.
 - Polling used heavily (alerts/devices 30s, positions 10s).
 
 3. Zustand stores (`src/store/zustand`)
+
 - UI/radar/filter-local state.
 
 ### Current Ownership Pattern
@@ -219,22 +222,27 @@ Important backend implementation detail:
 This section is the highest-value part for future agents.
 
 1. Duplicate hook families with drift
+
 - Newer active hooks are in `src/hooks/api/*`.
 - Legacy duplicates exist in `src/hooks/useAlerts.ts`, `src/hooks/useDevices.ts`, `src/hooks/useWhitelist.ts` with stale API signatures (`DeviceFilters`, `markMultipleReviewed`, etc.) that do not match endpoint modules.
 - `WhitelistScreen` currently imports the legacy hook path (`@hooks/useWhitelist`).
 
 2. Legacy screens using outdated atom APIs
+
 - `AddDeviceScreen`, `AddWhitelistScreen`, `SensitivityScreen` use old `Button`/`Text` prop contracts (`title`, `variant`, legacy text variants) inconsistent with current atoms.
 - These files represent partial migration leftovers and are high regression risk.
 
 3. Settings state shape inconsistency
+
 - Redux slice shape: `state.settings.settings`.
 - Several settings screens/selectors read flattened keys (`state.settings?.sensitivity`, `quietHoursEnabled`, etc.) and may not reflect persisted settings correctly.
 
 4. Mock seed action mismatch
+
 - `seedMockData` dispatches nonexistent `auth/setCredentials` action.
 
 5. Endpoint gaps vs backend
+
 - App modules reference backend routes that are not implemented in current backend:
   - `/whitelist*`
   - `/settings/*`
@@ -244,15 +252,19 @@ This section is the highest-value part for future agents.
 - See backend audit doc for route-by-route matrix.
 
 6. Real WebSocket lifecycle gap
+
 - Real API mode logs intent to connect post-auth, but no default global connection path is guaranteed.
 
 7. Navigation target mismatches in some handlers
+
 - Example: `DeviceDetailScreen` navigates to route names not present in current typed stacks (`Map`, `DeviceSettings`).
 
 8. Mixed service maturity
+
 - Many screens contain UI TODO/log stubs instead of wired mutations (e.g., mark reviewed, delete, add device, add whitelist).
 
 9. Config/documentation version drift
+
 - README claims React Native/Expo versions that do not match `package.json` values.
 
 ## End-to-End Data Flow (Device -> App)
@@ -340,4 +352,3 @@ This reference is based on static code analysis of frontend + referenced backend
 Not executed in this pass:
 
 - Type check/test/build commands (dependencies were not installed in this workspace snapshot).
-

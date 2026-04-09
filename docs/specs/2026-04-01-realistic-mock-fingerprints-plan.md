@@ -13,6 +13,7 @@
 ### Task 1: Add persona alert generator to mockAlerts.ts
 
 **Files:**
+
 - Modify: `src/mocks/data/mockAlerts.ts`
 
 - [ ] **Step 1: Add the persona definitions and generator function**
@@ -271,6 +272,7 @@ git commit -m "feat(mock): add 6 persona alert histories for realistic fingerpri
 ### Task 2: Update seedMockData to use persona MAC addresses
 
 **Files:**
+
 - Modify: `src/utils/seedMockData.ts`
 
 - [ ] **Step 1: Import PERSONA_MACS**
@@ -408,6 +410,7 @@ Run: `npx expo start --clear`
 - [ ] **Step 2: Verify persona alerts are seeded**
 
 In the Metro console, confirm the log shows:
+
 ```
 [MockData] Seeded:
   - 55+ alerts  (should be higher now, ~80-90)
@@ -422,6 +425,7 @@ Expected: FingerprintPeek bottom sheet shows a persona MAC address.
 - [ ] **Step 4: Tap "View Full Profile"**
 
 Expected: Device Fingerprint screen shows:
+
 - Non-zero "Total visits" (e.g., 12 for mail carrier)
 - Non-zero "This week"
 - Populated "Most active days" (e.g., "Mon, Wed, Fri")

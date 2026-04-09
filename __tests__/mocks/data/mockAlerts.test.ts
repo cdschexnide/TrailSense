@@ -22,9 +22,9 @@ describe('getMockAlerts', () => {
 
   it('fingerprint prefix matches detectionType', () => {
     alerts.forEach(alert => {
-      expect(alert.fingerprintHash.startsWith(PREFIX_MAP[alert.detectionType])).toBe(
-        true
-      );
+      expect(
+        alert.fingerprintHash.startsWith(PREFIX_MAP[alert.detectionType])
+      ).toBe(true);
     });
   });
 

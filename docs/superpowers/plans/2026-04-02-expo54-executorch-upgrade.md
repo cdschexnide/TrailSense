@@ -14,25 +14,26 @@
 
 ## File Structure
 
-| File | Action | Responsibility |
-|------|--------|----------------|
-| `package.json` | Modify | Bump expo to ~54, executorch to 0.8.1, remove worklets-core, bump jest-expo |
-| `package-lock.json` | Regenerate | Via `npm install` |
-| `app.json` | Verify (no changes expected) | newArchEnabled, iOS deployment target |
-| `src/services/llm/modelManager.ts` | Modify | Migrate to `LLMModule.fromModelName()` static factory, remove dead imports |
-| `src/services/llm/AIProvider.tsx` | Modify | Fix download progress bar (0..1 → 0-100% conversion) |
-| `src/services/llm/modelDownloader.ts` | Delete | Dead code — never imported outside barrel export; 0.8.x handles downloads internally |
-| `src/services/llm/index.ts` | Modify | Remove modelDownloader barrel export |
-| `src/config/llmConfig.ts` | Modify | Remove dead `MODEL_DOWNLOAD_URL`/`TOKENIZER_DOWNLOAD_URL` fields |
-| `__tests__/services/llm/mockModeFlow.test.tsx` | Verify | Ensure mock mode test still passes after changes |
-| `__tests__/services/llm/modelManagerLoad.test.tsx` | Create | Test that non-mock loadModel calls LLMModule.fromModelName correctly |
-| `ios/` | Regenerate | Via `npx expo prebuild --clean` (manual step) |
+| File                                               | Action                       | Responsibility                                                                       |
+| -------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------ |
+| `package.json`                                     | Modify                       | Bump expo to ~54, executorch to 0.8.1, remove worklets-core, bump jest-expo          |
+| `package-lock.json`                                | Regenerate                   | Via `npm install`                                                                    |
+| `app.json`                                         | Verify (no changes expected) | newArchEnabled, iOS deployment target                                                |
+| `src/services/llm/modelManager.ts`                 | Modify                       | Migrate to `LLMModule.fromModelName()` static factory, remove dead imports           |
+| `src/services/llm/AIProvider.tsx`                  | Modify                       | Fix download progress bar (0..1 → 0-100% conversion)                                 |
+| `src/services/llm/modelDownloader.ts`              | Delete                       | Dead code — never imported outside barrel export; 0.8.x handles downloads internally |
+| `src/services/llm/index.ts`                        | Modify                       | Remove modelDownloader barrel export                                                 |
+| `src/config/llmConfig.ts`                          | Modify                       | Remove dead `MODEL_DOWNLOAD_URL`/`TOKENIZER_DOWNLOAD_URL` fields                     |
+| `__tests__/services/llm/mockModeFlow.test.tsx`     | Verify                       | Ensure mock mode test still passes after changes                                     |
+| `__tests__/services/llm/modelManagerLoad.test.tsx` | Create                       | Test that non-mock loadModel calls LLMModule.fromModelName correctly                 |
+| `ios/`                                             | Regenerate                   | Via `npx expo prebuild --clean` (manual step)                                        |
 
 ---
 
 ### Task 1: Upgrade Expo SDK and Dependencies
 
 **Files:**
+
 - Modify: `package.json`
 - Regenerate: `package-lock.json`
 
@@ -41,6 +42,7 @@ This task upgrades the core Expo SDK and lets Expo's dependency resolver handle 
 - [ ] **Step 1: Upgrade Expo SDK to 54**
 
 Run:
+
 ```bash
 npx expo install expo@^54
 ```
@@ -52,6 +54,7 @@ Expected: `package.json` shows `expo` at `~54.x.x`.
 - [ ] **Step 2: Fix all Expo-managed dependency versions**
 
 Run:
+
 ```bash
 npx expo install --fix
 ```
@@ -63,6 +66,7 @@ Expected: No version warnings from `npx expo install --fix`.
 - [ ] **Step 3: Upgrade react-native-executorch to 0.8.1**
 
 Run:
+
 ```bash
 npm install react-native-executorch@0.8.1
 ```
@@ -74,6 +78,7 @@ Expected: `package.json` shows `"react-native-executorch": "0.8.1"`.
 This package is not imported anywhere in `src/` and was only a transitive dependency of executorch 0.5.x.
 
 Run:
+
 ```bash
 npm uninstall react-native-worklets-core
 ```
@@ -83,6 +88,7 @@ Expected: `react-native-worklets-core` no longer appears in `package.json`.
 - [ ] **Step 5: Upgrade jest-expo to SDK 54**
 
 Run:
+
 ```bash
 npx expo install jest-expo
 ```
@@ -92,6 +98,7 @@ Expected: `package.json` devDependencies shows `jest-expo` at `~54.x.x`.
 - [ ] **Step 6: Verify no dual Expo tree**
 
 Run:
+
 ```bash
 npm ls expo 2>&1 | grep -E "expo@|UNMET|invalid" || true
 ```
@@ -103,6 +110,7 @@ Expected: Only one `expo@54.x.x` appears in the tree. No nested `expo@53.x.x` in
 `npx expo install --fix` only covers packages in Expo's known-version mappings. These third-party native packages must be validated explicitly:
 
 Run:
+
 ```bash
 echo "=== Checking third-party native package compatibility with Expo 54 ==="
 npm view @rnmapbox/maps peerDependencies --json 2>/dev/null || echo "@rnmapbox/maps: no peer deps"
@@ -111,6 +119,7 @@ npm view react-native-maps peerDependencies --json 2>/dev/null || echo "react-na
 ```
 
 For each package, check that its `react-native` peer dependency range includes the version Expo 54 pins. If a package is incompatible:
+
 - Check if a newer version supports the required RN version: `npm view <package> versions --json | tail -5`
 - Update to the compatible version: `npm install <package>@<compatible-version>`
 
@@ -119,6 +128,7 @@ Expected: All third-party native packages are compatible or have been updated to
 - [ ] **Step 8: Run Expo doctor**
 
 Run:
+
 ```bash
 npx expo-doctor
 ```
@@ -137,6 +147,7 @@ git commit -m "feat: upgrade Expo 52→54, executorch 0.5.3→0.8.1, remove work
 ### Task 2: Migrate modelManager.ts to ExecuTorch 0.8.x API
 
 **Files:**
+
 - Modify: `src/services/llm/modelManager.ts`
 
 The core API change: `LLMModule` constructor is now private. Use `LLMModule.fromModelName()` static factory which loads the model and returns a ready instance. Also remove the dead `HAMMER2_1_1_5B_QUANTIZED` import and the `responseCallback` (removed in 0.8.x).
@@ -285,6 +296,7 @@ Replace the existing `loadModel()` method (lines 120–237) with:
 ```
 
 Key changes from the old version:
+
 - Removed `new LLMModule({...})` + `this.llmModule.load(...)` two-step pattern
 - Now uses `LLMModule.fromModelName(model, progressCb, tokenCb, historyCb)` single call
 - Removed `responseCallback` (not available in 0.8.x) — response accumulation already happens in `tokenCallback` via `this._response += newToken`
@@ -325,6 +337,7 @@ Replace the try block in `sendMessage()` (lines 349–358) with:
 - [ ] **Step 4: Verify no new TypeScript errors in modelManager**
 
 Run:
+
 ```bash
 npx tsc --noEmit 2>&1 | grep "modelManager" || echo "No errors in modelManager.ts (expected)"
 ```
@@ -343,6 +356,7 @@ git commit -m "refactor: migrate modelManager to ExecuTorch 0.8.x fromModelName(
 ### Task 3: Fix AIProvider Download Progress Bar
 
 **Files:**
+
 - Modify: `src/services/llm/AIProvider.tsx`
 
 The AIProvider has a download progress modal that renders `width: ${downloadProgress}%`. But `modelManager.getDownloadProgress()` returns a value between 0 and 1 (not 0-100). This means the progress bar shows 0.3% instead of 30% during the real model download. The `AIAssistantScreen.tsx` already handles this correctly with `downloadProgress * 100`, but the AIProvider modal does not.
@@ -378,13 +392,13 @@ Replace with:
 In the `enableAI` callback (around line 169), the polling interval checks:
 
 ```typescript
-          setIsDownloading(progress > 0 && progress < 100);
+setIsDownloading(progress > 0 && progress < 100);
 ```
 
 Since `modelManager.getDownloadProgress()` returns 0..1, this should be:
 
 ```typescript
-          setIsDownloading(progress > 0 && progress < 1);
+setIsDownloading(progress > 0 && progress < 1);
 ```
 
 - [ ] **Step 3: Commit**
@@ -399,6 +413,7 @@ git commit -m "fix: correct download progress bar percentage in AIProvider modal
 ### Task 4: Remove Dead modelDownloader and Clean Up llmConfig
 
 **Files:**
+
 - Delete: `src/services/llm/modelDownloader.ts`
 - Modify: `src/services/llm/index.ts`
 - Modify: `src/config/llmConfig.ts`
@@ -424,6 +439,7 @@ export { modelDownloader } from './modelDownloader';
 - [ ] **Step 3: Verify no code imports modelDownloader**
 
 Run:
+
 ```bash
 grep -r "modelDownloader" src/ --include="*.ts" --include="*.tsx" || echo "No references found (expected)"
 ```
@@ -442,14 +458,15 @@ In `src/config/llmConfig.ts`, remove these lines:
 And remove this stale comment block:
 
 ```typescript
-  // Model URLs (provided by react-native-executorch package)
-  // Import these from: 'react-native-executorch'
-  // LLAMA3_2_1B, LLAMA3_2_TOKENIZER, LLAMA3_2_TOKENIZER_CONFIG
+// Model URLs (provided by react-native-executorch package)
+// Import these from: 'react-native-executorch'
+// LLAMA3_2_1B, LLAMA3_2_TOKENIZER, LLAMA3_2_TOKENIZER_CONFIG
 ```
 
 - [ ] **Step 5: Verify no code references the removed fields**
 
 Run:
+
 ```bash
 grep -r "MODEL_DOWNLOAD_URL\|TOKENIZER_DOWNLOAD_URL" src/ --include="*.ts" --include="*.tsx" || echo "No references found (expected)"
 ```
@@ -468,6 +485,7 @@ git commit -m "chore: remove dead modelDownloader and unused download URL config
 ### Task 5: Add Non-Mock loadModel Test and Run All LLM Tests
 
 **Files:**
+
 - Create: `__tests__/services/llm/modelManagerLoad.test.tsx`
 - Verify: `__tests__/services/llm/mockModeFlow.test.tsx`
 
@@ -574,6 +592,7 @@ describe('ModelManager.loadModel (non-mock path)', () => {
 - [ ] **Step 2: Run the new test to verify it passes**
 
 Run:
+
 ```bash
 npx jest __tests__/services/llm/modelManagerLoad.test.tsx --verbose --no-coverage
 ```
@@ -583,11 +602,13 @@ Expected: All 4 tests pass.
 - [ ] **Step 3: Run the existing mock mode test**
 
 Run:
+
 ```bash
 npx jest __tests__/services/llm/mockModeFlow.test.tsx --verbose --no-coverage
 ```
 
 Expected: Both existing tests still pass:
+
 ```
 ✓ enables AI in mock mode without loading the native model
 ✓ uses mock inference for chat without loading the native model
@@ -596,6 +617,7 @@ Expected: Both existing tests still pass:
 - [ ] **Step 4: Run the full test suite and check exit code**
 
 Run:
+
 ```bash
 npx jest --coverage 2>&1; echo "Exit code: $?"
 ```
@@ -610,6 +632,7 @@ git commit -m "test: add non-mock loadModel test verifying fromModelName() wirin
 ```
 
 If existing test fixes were also needed:
+
 ```bash
 git add __tests__/
 git commit -m "test: fix LLM tests after executorch 0.8.x migration"
@@ -620,6 +643,7 @@ git commit -m "test: fix LLM tests after executorch 0.8.x migration"
 ### Task 6: Verify app.json and Prebuild Readiness
 
 **Files:**
+
 - Verify: `app.json`
 
 Confirm that `app.json` is correctly configured for the Expo 54 + ExecuTorch build.
@@ -627,6 +651,7 @@ Confirm that `app.json` is correctly configured for the Expo 54 + ExecuTorch bui
 - [ ] **Step 1: Check app.json configuration**
 
 Read `app.json` and verify:
+
 1. `"newArchEnabled": true` — required for ExecuTorch's Turbo Modules
 2. iOS deployment target is set to 17.0 (in `Podfile.properties.json`)
 3. The `plugins` array does not need a manual ExecuTorch plugin entry (autolinking handles it)
@@ -664,6 +689,7 @@ npx expo run:ios --device
 - [ ] **Step 3: Verify no dual Expo in final state**
 
 After `npm install`, run:
+
 ```bash
 npm ls expo 2>&1 | head -5
 ```

@@ -25,9 +25,11 @@
 Apple's iOS Human Interface Guidelines emphasize three foundational principles that guide all design decisions:
 
 ### 1. Clarity
+
 **Definition:** Every element in the app must be easy to understand, focusing on minimalist design and straightforward navigation.
 
 **Implementation:**
+
 - Legible text at all sizes
 - Precise, easy-to-hit controls
 - Sharp, crisp graphics and icons
@@ -39,9 +41,11 @@ Apple's iOS Human Interface Guidelines emphasize three foundational principles t
 **Key Quote:** "Clarity ensures every element in the app is easy to understand, focusing on minimalist design and straightforward navigation."
 
 ### 2. Deference
+
 **Definition:** The UI should help users understand and interact with content, but never compete with it.
 
 **Implementation:**
+
 - Content is king - design serves the content
 - Minimize visual competition and distractions
 - Use subtle, appropriate visual effects
@@ -55,9 +59,11 @@ Apple's iOS Human Interface Guidelines emphasize three foundational principles t
 **Important:** The design is in service of the content, not the other way around.
 
 ### 3. Depth
+
 **Definition:** Visual layers and realistic motion convey hierarchy and facilitate understanding.
 
 **Implementation:**
+
 - Layering creates distinct visual planes
 - Shadows and blurs suggest depth
 - Translucency provides context
@@ -77,6 +83,7 @@ Apple's iOS Human Interface Guidelines emphasize three foundational principles t
 Apple's system font is **San Francisco (SF)**, designed specifically for optimal legibility on all Apple platforms.
 
 **Font Variants:**
+
 - **SF Text:** Used for sizes below 20pt (body text, captions, smaller UI elements)
 - **SF Display:** Used for sizes 20pt and above (headlines, large titles)
 - **SF Mono:** Monospaced variant for code and technical content
@@ -85,12 +92,12 @@ Apple's system font is **San Francisco (SF)**, designed specifically for optimal
 
 Apple recommends the following font weights for hierarchy:
 
-| Weight | Use Case |
-|--------|----------|
-| **Bold** | Primary headings, emphasis |
+| Weight       | Use Case                             |
+| ------------ | ------------------------------------ |
+| **Bold**     | Primary headings, emphasis           |
 | **Semibold** | Secondary headings, important labels |
-| **Medium** | Subheadings, section titles |
-| **Regular** | Body text, standard UI labels |
+| **Medium**   | Subheadings, section titles          |
+| **Regular**  | Body text, standard UI labels        |
 
 **⚠️ Avoid:** Ultralight, Thin, and Light weights - they are not user-friendly, especially for critical information.
 
@@ -98,19 +105,19 @@ Apple recommends the following font weights for hierarchy:
 
 iOS uses semantic text styles that automatically adapt to user preferences:
 
-| Style | Size (pt) | Weight | Usage |
-|-------|-----------|--------|-------|
-| **Large Title** | 34 | Regular/Bold | Main screen titles |
-| **Title 1** | 28 | Regular | Section headers |
-| **Title 2** | 22 | Regular | Subsection headers |
-| **Title 3** | 20 | Regular | Group headers |
-| **Headline** | 17 | Semibold | Important content |
-| **Body** | 17 | Regular | Main text content |
-| **Callout** | 16 | Regular | Secondary info |
-| **Subheadline** | 15 | Regular | Supporting text |
-| **Footnote** | 13 | Regular | Tertiary info |
-| **Caption 1** | 12 | Regular | Labels, timestamps |
-| **Caption 2** | 11 | Regular | Smallest readable text |
+| Style           | Size (pt) | Weight       | Usage                  |
+| --------------- | --------- | ------------ | ---------------------- |
+| **Large Title** | 34        | Regular/Bold | Main screen titles     |
+| **Title 1**     | 28        | Regular      | Section headers        |
+| **Title 2**     | 22        | Regular      | Subsection headers     |
+| **Title 3**     | 20        | Regular      | Group headers          |
+| **Headline**    | 17        | Semibold     | Important content      |
+| **Body**        | 17        | Regular      | Main text content      |
+| **Callout**     | 16        | Regular      | Secondary info         |
+| **Subheadline** | 15        | Regular      | Supporting text        |
+| **Footnote**    | 13        | Regular      | Tertiary info          |
+| **Caption 1**   | 12        | Regular      | Labels, timestamps     |
+| **Caption 2**   | 11        | Regular      | Smallest readable text |
 
 ### Typography Best Practices
 
@@ -131,24 +138,25 @@ iOS uses **semantic colors** that automatically adapt between light and dark mod
 
 #### System Colors - Primary
 
-| Color | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| **Label** | Black | White | Primary text |
-| **Secondary Label** | Gray (70% opacity) | Gray (60% opacity) | Secondary text |
-| **Tertiary Label** | Gray (40% opacity) | Gray (30% opacity) | Tertiary text |
+| Color                | Light Mode         | Dark Mode          | Usage                |
+| -------------------- | ------------------ | ------------------ | -------------------- |
+| **Label**            | Black              | White              | Primary text         |
+| **Secondary Label**  | Gray (70% opacity) | Gray (60% opacity) | Secondary text       |
+| **Tertiary Label**   | Gray (40% opacity) | Gray (30% opacity) | Tertiary text        |
 | **Quaternary Label** | Gray (20% opacity) | Gray (15% opacity) | Watermarks, disabled |
 
 #### System Colors - Background
 
-| Color | Light Mode | Dark Mode | Usage |
-|-------|------------|-----------|-------|
-| **System Background** | Pure White (#FFFFFF) | Pure Black (#000000) | Primary background |
-| **Secondary Background** | Light Gray (#F2F2F7) | Dark Gray (#1C1C1E) | Grouped content |
-| **Tertiary Background** | White | Elevated Dark Gray | Grouped content hierarchy |
+| Color                    | Light Mode           | Dark Mode            | Usage                     |
+| ------------------------ | -------------------- | -------------------- | ------------------------- |
+| **System Background**    | Pure White (#FFFFFF) | Pure Black (#000000) | Primary background        |
+| **Secondary Background** | Light Gray (#F2F2F7) | Dark Gray (#1C1C1E)  | Grouped content           |
+| **Tertiary Background**  | White                | Elevated Dark Gray   | Grouped content hierarchy |
 
 #### System Colors - Grouped Background
 
 For grouped table views and similar layouts:
+
 - **Primary Grouped Background**
 - **Secondary Grouped Background**
 - **Tertiary Grouped Background**
@@ -157,21 +165,22 @@ For grouped table views and similar layouts:
 
 iOS provides system-wide tint colors that indicate interactivity:
 
-| Color | Hex (Light) | Usage |
-|-------|-------------|-------|
-| **Blue** | #007AFF | Default tint, interactive elements, links |
-| **Green** | #34C759 | Success, positive actions |
-| **Orange** | #FF9500 | Warnings, medium priority |
-| **Red** | #FF3B30 | Errors, destructive actions |
-| **Yellow** | #FFCC00 | Caution |
-| **Purple** | #AF52DE | Special features |
-| **Pink** | #FF2D55 | Accent |
-| **Indigo** | #5856D6 | Accent |
-| **Teal** | #5AC8FA | Accent |
+| Color      | Hex (Light) | Usage                                     |
+| ---------- | ----------- | ----------------------------------------- |
+| **Blue**   | #007AFF     | Default tint, interactive elements, links |
+| **Green**  | #34C759     | Success, positive actions                 |
+| **Orange** | #FF9500     | Warnings, medium priority                 |
+| **Red**    | #FF3B30     | Errors, destructive actions               |
+| **Yellow** | #FFCC00     | Caution                                   |
+| **Purple** | #AF52DE     | Special features                          |
+| **Pink**   | #FF2D55     | Accent                                    |
+| **Indigo** | #5856D6     | Accent                                    |
+| **Teal**   | #5AC8FA     | Accent                                    |
 
 ### Color Usage Guidelines
 
 **Best Practices:**
+
 - Use color sparingly - only 10-15% of UI should be colored
 - Rest should be neutral (white, gray, black)
 - Blue = interactive/tappable elements (standard convention)
@@ -180,6 +189,7 @@ iOS provides system-wide tint colors that indicate interactivity:
 - System colors automatically support dark mode
 
 **Avoid:**
+
 - Hard-coded RGB values for UI elements
 - Relying solely on color to convey information (accessibility)
 - Using too many different colors (visual chaos)
@@ -209,25 +219,27 @@ Apple (and Google) recommend the **8-point grid system** for all spacing, sizing
 
 ### Common Spacing Applications
 
-| Element | Spacing |
-|---------|---------|
-| **Screen Margins** | 16px (some apps use 20-24px) |
-| **Card Padding** | 16px internal |
-| **List Item Padding** | 16px horizontal, 12-16px vertical |
-| **Button Padding** | 12-16px vertical, 16-24px horizontal |
-| **Section Spacing** | 24-32px between major sections |
-| **Icon-to-Text Gap** | 8-12px |
-| **Between Related Items** | 8-12px |
-| **Between Unrelated Items** | 24-32px |
+| Element                     | Spacing                              |
+| --------------------------- | ------------------------------------ |
+| **Screen Margins**          | 16px (some apps use 20-24px)         |
+| **Card Padding**            | 16px internal                        |
+| **List Item Padding**       | 16px horizontal, 12-16px vertical    |
+| **Button Padding**          | 12-16px vertical, 16-24px horizontal |
+| **Section Spacing**         | 24-32px between major sections       |
+| **Icon-to-Text Gap**        | 8-12px                               |
+| **Between Related Items**   | 8-12px                               |
+| **Between Unrelated Items** | 24-32px                              |
 
 ### Layout Principles
 
 **Internal ≤ External Rule:**
+
 - Internal spacing (padding) should be less than or equal to external spacing (margins)
 - This creates clear visual grouping
 - Example: If card has 16px internal padding, gaps between cards should be 16px or more
 
 **Why 8pt Grid?**
+
 - Aligns with Apple's Human Interface Guidelines
 - Provides good balance between density and openness
 - Enhances readability and usability
@@ -252,6 +264,7 @@ iOS apps typically use one of these core navigation patterns:
 #### 1. Tab Bar Navigation (Most Common)
 
 **Characteristics:**
+
 - Fixed at bottom of screen
 - Always visible (except when modal is open)
 - 2-5 tabs maximum
@@ -259,6 +272,7 @@ iOS apps typically use one of these core navigation patterns:
 - Current tab highlighted with tint color
 
 **Best For:**
+
 - Apps with 2-5 main sections
 - Peer-level sections of equal importance
 - Quick switching between sections
@@ -268,6 +282,7 @@ iOS apps typically use one of these core navigation patterns:
 #### 2. Hierarchical/Drill-Down Navigation
 
 **Characteristics:**
+
 - Navigation bar at top with back button
 - Traverses information tree structure
 - Right transition = deeper into hierarchy
@@ -275,6 +290,7 @@ iOS apps typically use one of these core navigation patterns:
 - Page title in center of nav bar
 
 **Best For:**
+
 - Content with clear parent-child relationships
 - Exploring detailed information
 - Master-detail patterns
@@ -284,12 +300,14 @@ iOS apps typically use one of these core navigation patterns:
 #### 3. Modal Presentation
 
 **Characteristics:**
+
 - Slides up from bottom (or full screen)
 - Has clear dismiss mechanism (Done/Cancel/X)
 - Focused task with clear completion
 - Temporary context
 
 **Best For:**
+
 - Creating new content
 - Making choices that affect main view
 - Self-contained tasks
@@ -298,6 +316,7 @@ iOS apps typically use one of these core navigation patterns:
 ### Navigation Bar Elements
 
 **Standard Components:**
+
 - **Back Button:** Top-left, shows previous screen title or "< Back"
 - **Title:** Center-aligned, describes current screen
 - **Action Buttons:** Top-right, 1-3 actions maximum
@@ -306,6 +325,7 @@ iOS apps typically use one of these core navigation patterns:
 ### Back Navigation (4 Methods)
 
 iOS supports multiple ways to go back:
+
 1. Tap back button (top-left)
 2. Swipe right from left edge
 3. Swipe down on modal sheets
@@ -347,11 +367,11 @@ iOS has 4 primary button styles (post-iOS 11):
 
 #### Button Roles
 
-| Role | Color | Usage | Example |
-|------|-------|-------|---------|
-| **Default** | Blue | Most likely action | "Continue", "Done" |
-| **Cancel** | Gray | Cancel current action | "Cancel", "Not Now" |
-| **Destructive** | Red | Data destruction | "Delete", "Remove" |
+| Role            | Color | Usage                 | Example             |
+| --------------- | ----- | --------------------- | ------------------- |
+| **Default**     | Blue  | Most likely action    | "Continue", "Done"  |
+| **Cancel**      | Gray  | Cancel current action | "Cancel", "Not Now" |
+| **Destructive** | Red   | Data destruction      | "Delete", "Remove"  |
 
 **⚠️ Critical Rule:** Never assign primary style to destructive buttons. People often tap primary buttons without reading. Prevent data loss by keeping destructive actions visually secondary even if they're the likely choice.
 
@@ -365,6 +385,7 @@ iOS has 4 primary button styles (post-iOS 11):
 #### Button Best Practices
 
 ✅ **Do:**
+
 - Use verb phrases ("Delete Alert", "Add Device")
 - Keep labels short (1-2 words ideal)
 - Primary action on right
@@ -372,6 +393,7 @@ iOS has 4 primary button styles (post-iOS 11):
 - Use system colors for standard actions
 
 ❌ **Don't:**
+
 - Use "Yes/No" (be specific)
 - Create buttons smaller than 44 x 44pt
 - Put destructive actions in primary style
@@ -382,17 +404,20 @@ iOS has 4 primary button styles (post-iOS 11):
 #### List Styles
 
 **1. Inset Grouped List** (Modern iOS)
+
 - Rounded corners
 - Cards with margins from screen edges
 - Clear visual separation
 - Preferred for most modern iOS apps
 
 **2. Grouped List**
+
 - Section headers
 - Grouped rows
 - Background color distinction
 
 **3. Plain List**
+
 - Edge-to-edge rows
 - Simple dividers
 - High density
@@ -405,6 +430,7 @@ iOS has 4 primary button styles (post-iOS 11):
 ```
 
 **Components:**
+
 - Leading icon/image (optional, 29-40pt square)
 - Primary label (headline or body weight)
 - Secondary label (subheadline or caption)
@@ -412,6 +438,7 @@ iOS has 4 primary button styles (post-iOS 11):
 - Divider/separator (hairline)
 
 **Sizing:**
+
 - Minimum row height: 44pt
 - Standard: 44-60pt
 - With subtitle: 60-80pt
@@ -422,6 +449,7 @@ iOS has 4 primary button styles (post-iOS 11):
 #### When to Use Cards
 
 ✅ **Use cards when:**
+
 - Displaying heterogeneous content
 - Content is self-contained
 - User is browsing/discovering
@@ -429,6 +457,7 @@ iOS has 4 primary button styles (post-iOS 11):
 - Content has multiple data points
 
 ❌ **Use lists when:**
+
 - Content is homogeneous
 - User is searching/scanning
 - Dense information display needed
@@ -450,6 +479,7 @@ iOS has 4 primary button styles (post-iOS 11):
 ```
 
 **Characteristics:**
+
 - 12-16pt corner radius
 - Subtle shadow (low elevation)
 - 16pt internal padding
@@ -469,12 +499,14 @@ iOS has 4 primary button styles (post-iOS 11):
 #### Alerts (Center Dialog)
 
 **When to Use:**
+
 - Critical information requiring acknowledgment
 - Confirming destructive actions
 - Errors that block workflow
 - Binary choices (OK/Cancel)
 
 **Anatomy:**
+
 ```
      [Title]
 
@@ -485,6 +517,7 @@ iOS has 4 primary button styles (post-iOS 11):
 ```
 
 **Best Practices:**
+
 - Use sparingly (they interrupt flow)
 - Title: Short, ask a question or state issue
 - Message: Provide helpful context
@@ -496,12 +529,14 @@ iOS has 4 primary button styles (post-iOS 11):
 #### Action Sheets (Bottom Slide-Up)
 
 **When to Use:**
+
 - More than 2 choices
 - List of actions related to current content
 - Destructive actions (visually separate at bottom)
 - Share sheet patterns
 
 **Characteristics:**
+
 - Slides from bottom
 - Easy thumb reach on iPhone
 - Can fit more options than alerts
@@ -509,6 +544,7 @@ iOS has 4 primary button styles (post-iOS 11):
 - Cancel button separate at very bottom
 
 **Best Practices:**
+
 - Use for 3+ options
 - Keep list short (scrolling action sheets feel wrong)
 - Destructive action in red at bottom of list
@@ -524,6 +560,7 @@ iOS has 4 primary button styles (post-iOS 11):
 **SF Symbols** is Apple's comprehensive icon system with 6,900+ symbols designed to integrate seamlessly with San Francisco font.
 
 **Key Features:**
+
 - 9 weights (ultralight to black) matching SF font
 - 3 scales (small, medium, large)
 - Automatic alignment with text
@@ -534,17 +571,17 @@ iOS has 4 primary button styles (post-iOS 11):
 
 ### Symbol Weights
 
-| Weight | When to Use |
-|--------|-------------|
-| **Ultralight** | Avoid (too thin) |
-| **Thin** | Decorative only |
-| **Light** | Large sizes |
-| **Regular** | Most common, pairs with regular text |
-| **Medium** | Emphasis |
-| **Semibold** | Important UI elements |
-| **Bold** | High emphasis |
-| **Heavy** | Very high emphasis |
-| **Black** | Maximum emphasis |
+| Weight         | When to Use                          |
+| -------------- | ------------------------------------ |
+| **Ultralight** | Avoid (too thin)                     |
+| **Thin**       | Decorative only                      |
+| **Light**      | Large sizes                          |
+| **Regular**    | Most common, pairs with regular text |
+| **Medium**     | Emphasis                             |
+| **Semibold**   | Important UI elements                |
+| **Bold**       | High emphasis                        |
+| **Heavy**      | Very high emphasis                   |
+| **Black**      | Maximum emphasis                     |
 
 ### Symbol Scales
 
@@ -555,6 +592,7 @@ iOS has 4 primary button styles (post-iOS 11):
 ### Using SF Symbols in UI
 
 **Where Symbols Appear:**
+
 - Tab bars
 - Navigation bars
 - Toolbars
@@ -564,6 +602,7 @@ iOS has 4 primary button styles (post-iOS 11):
 - Context menus
 
 **Best Practices:**
+
 1. Match symbol weight to text weight
 2. Use consistent scale throughout a view
 3. Prefer outline style for most UI
@@ -574,12 +613,14 @@ iOS has 4 primary button styles (post-iOS 11):
 ### Custom Icons vs SF Symbols
 
 **Use SF Symbols when:**
+
 - Standard UI needs (navigation, common actions)
 - Want automatic dark mode support
 - Need multiple weights/sizes
 - System integration is important
 
 **Use custom icons when:**
+
 - Brand-specific imagery needed
 - Symbol doesn't exist in SF library
 - Unique visual style required
@@ -587,13 +628,13 @@ iOS has 4 primary button styles (post-iOS 11):
 
 ### Icon Sizing
 
-| Context | Size |
-|---------|------|
-| **Tab Bar** | 25-30pt |
-| **Navigation Bar** | 22-24pt |
-| **List Leading** | 20-24pt |
-| **Button Icon** | 16-20pt |
-| **Inline Text** | Match text size |
+| Context            | Size            |
+| ------------------ | --------------- |
+| **Tab Bar**        | 25-30pt         |
+| **Navigation Bar** | 22-24pt         |
+| **List Leading**   | 20-24pt         |
+| **Button Icon**    | 16-20pt         |
+| **Inline Text**    | Match text size |
 
 ---
 
@@ -604,6 +645,7 @@ iOS has 4 primary button styles (post-iOS 11):
 iOS provides **Swift Charts** for building complex, interactive data visualizations that feel native.
 
 **Chart Types Available:**
+
 - Line charts
 - Bar charts (vertical/horizontal)
 - Point/scatter plots
@@ -688,6 +730,7 @@ iOS provides **Swift Charts** for building complex, interactive data visualizati
 ### Health & Security App References
 
 Look at these iOS apps for inspiration:
+
 - **Apple Health:** Excellent data visualization
 - **Sleep tracking apps:** Timeline visualizations
 - **Apple Home:** Security event timelines
@@ -701,17 +744,20 @@ Look at these iOS apps for inspiration:
 
 **Semantic Colors (Automatic):**
 All system colors adapt automatically:
+
 - Use `UIColor.label` not `UIColor.black`
 - Use `UIColor.systemBackground` not `UIColor.white`
 - Define custom colors in Asset Catalog with dark variants
 
 **Testing Both Modes:**
+
 - Design for both simultaneously
 - Don't just invert colors
 - Maintain sufficient contrast in both
 - Use Color Contrast Analyzer
 
 **Dark Mode Specific Considerations:**
+
 - Reduce pure white (use off-white)
 - Reduce large bright areas
 - Use elevated backgrounds for hierarchy
@@ -722,12 +768,14 @@ All system colors adapt automatically:
 #### 1. Dynamic Type Support
 
 **Must support iOS Dynamic Type:**
+
 - Use text styles, not fixed sizes
 - Test at all accessibility sizes
 - Ensure layouts don't break at largest sizes
 - Consider bold text setting
 
 **Testing Sizes:**
+
 - Extra Small (xSmall)
 - Small
 - Medium
@@ -739,17 +787,20 @@ All system colors adapt automatically:
 #### 2. Color Contrast
 
 **WCAG AA Standards (Minimum):**
+
 - Normal text: 4.5:1 contrast ratio
 - Large text (18pt+): 3:1 contrast ratio
 - UI components: 3:1 contrast ratio
 
 **WCAG AAA Standards (Ideal):**
+
 - Normal text: 7:1
 - Large text: 4.5:1
 
 #### 3. VoiceOver Support
 
 **All interactive elements must:**
+
 - Have accessibility labels
 - Announce their role
 - Announce their state
@@ -759,6 +810,7 @@ All system colors adapt automatically:
 #### 4. Reduce Motion
 
 **Support "Reduce Motion" setting:**
+
 - Disable parallax effects
 - Replace animations with crossfades
 - Reduce or eliminate auto-playing content
@@ -778,6 +830,7 @@ All system colors adapt automatically:
 ### Current Issues Identified from Screenshots
 
 #### 1. **Alerts Screen** ❌ Problems:
+
 - Card design doesn't feel iOS-native
 - Buttons (Dismiss, Whitelist, View) don't follow iOS button hierarchy
 - Color scheme feels Android/Material Design
@@ -786,6 +839,7 @@ All system colors adapt automatically:
 - Detection type badges too prominent
 
 #### 2. **Live Radar Screen** ❌ Problems:
+
 - Radar design is functional but not polished
 - "6 active detections" text could be more prominent
 - Legend at bottom feels tacked on
@@ -793,6 +847,7 @@ All system colors adapt automatically:
 - Distance indicator (800ft) not clear enough
 
 #### 3. **Devices Screen** ❌ Problems:
+
 - Card style doesn't match iOS patterns
 - Battery/Signal/Detections layout not optimal
 - Status badges (ONLINE/OFFLINE) too prominent
@@ -800,6 +855,7 @@ All system colors adapt automatically:
 - Lacks hierarchy within cards
 
 #### 4. **Analytics Screen** ❌ Problems:
+
 - "Chart temporarily disabled" is fine for dev, but:
 - Summary cards are good concept but styling is off
 - Need better visual hierarchy
@@ -807,6 +863,7 @@ All system colors adapt automatically:
 - Text formatting could be more iOS-like
 
 #### 5. **Settings Screen** ❌ Problems:
+
 - Using grouped list style but could be more modern
 - Section headers need better styling
 - Lacks iOS inset grouped list pattern
@@ -818,11 +875,13 @@ All system colors adapt automatically:
 #### Priority 1: Navigation & Structure ✅
 
 **Keep:**
+
 - Bottom tab bar navigation (correct for iOS)
 - Tab icons and labels
 - Overall structure
 
 **Improve:**
+
 - Use SF Symbols for tab icons
 - Ensure selected state is clear
 - Match iOS tab bar styling exactly
@@ -830,6 +889,7 @@ All system colors adapt automatically:
 #### Priority 2: Alert Cards (Alerts Screen) 🎯
 
 **Redesign as:**
+
 ```
 ┌──────────────────────────────────────────┐
 │ [SF Symbol]  CRITICAL              [Time]│
@@ -844,6 +904,7 @@ All system colors adapt automatically:
 ```
 
 **Changes:**
+
 - Use iOS inset grouped cards
 - Threat level as small badge (top-left)
 - Detection type as SF Symbol icon
@@ -857,6 +918,7 @@ All system colors adapt automatically:
 #### Priority 3: Devices Screen 🎯
 
 **Redesign as:**
+
 ```
 ┌──────────────────────────────────────────┐
 │ 🟢 South Boundary                 ONLINE │
@@ -871,6 +933,7 @@ All system colors adapt automatically:
 ```
 
 **Changes:**
+
 - Status indicator as colored dot (🟢/🔴)
 - Device name as headline
 - Stats in 3-column grid
@@ -884,6 +947,7 @@ All system colors adapt automatically:
 **Redesign with:**
 
 1. **Summary Cards** (top):
+
 ```
 ┌───────────────────┐ ┌────────────────────┐
 │ TOTAL DETECTIONS  │ │ UNKNOWN DEVICES    │
@@ -893,6 +957,7 @@ All system colors adapt automatically:
 ```
 
 2. **Charts** (below):
+
 - Implement actual Swift Charts
 - Clean, minimal styling
 - Clear labels
@@ -904,6 +969,7 @@ All system colors adapt automatically:
 **Redesign:**
 
 1. Add summary card at top:
+
 ```
 ┌──────────────────────────────────────────┐
 │         6 Active Detections              │
@@ -912,12 +978,14 @@ All system colors adapt automatically:
 ```
 
 2. Polish radar visualization:
+
 - Smoother animations
 - Better distance indicators
 - Clearer center point
 - iOS-style color scheme
 
 3. Redesign legend:
+
 - Use SF Symbols for legend items
 - Better color contrast
 - Possibly move to top
@@ -925,6 +993,7 @@ All system colors adapt automatically:
 #### Priority 6: Settings Screen 🎯
 
 **Redesign as:**
+
 ```
 DETECTION
 ┌──────────────────────────────────────────┐
@@ -946,6 +1015,7 @@ NOTIFICATIONS
 ```
 
 **Changes:**
+
 - Add SF Symbols to each row
 - Use iOS inset grouped list style
 - Better typography hierarchy
@@ -955,6 +1025,7 @@ NOTIFICATIONS
 ### Color Palette for TrailSense
 
 **Threat Levels:**
+
 ```
 Critical: systemRed     (#FF3B30)
 High:     systemOrange  (#FF9500)
@@ -963,6 +1034,7 @@ Low:      systemGreen   (#34C759)
 ```
 
 **Detection Types:**
+
 ```
 Cellular:  systemPurple (#AF52DE)
 WiFi:      systemBlue   (#007AFF)
@@ -970,6 +1042,7 @@ Bluetooth: systemTeal   (#5AC8FA)
 ```
 
 **UI Elements:**
+
 ```
 Primary:    systemBlue  (#007AFF)
 Success:    systemGreen (#34C759)
@@ -978,6 +1051,7 @@ Danger:     systemRed   (#FF3B30)
 ```
 
 **Backgrounds:**
+
 ```
 Primary:    systemBackground
 Secondary:  secondarySystemBackground
@@ -1016,6 +1090,7 @@ Tab bar icons:       28pt
 ## Implementation Checklist
 
 ### Phase 1: Foundation
+
 - [ ] Set up semantic color system (light + dark mode)
 - [ ] Implement 8pt spacing system
 - [ ] Configure SF Symbols
@@ -1023,12 +1098,14 @@ Tab bar icons:       28pt
 - [ ] Create reusable component library
 
 ### Phase 2: Navigation
+
 - [ ] Refine tab bar with SF Symbols
 - [ ] Ensure navigation bars follow HIG
 - [ ] Implement proper back navigation
 - [ ] Add swipe gestures where appropriate
 
 ### Phase 3: Core Screens
+
 - [ ] Redesign Alerts screen with new card style
 - [ ] Redesign Devices screen
 - [ ] Redesign Analytics with real charts
@@ -1036,12 +1113,14 @@ Tab bar icons:       28pt
 - [ ] Redesign Settings screen
 
 ### Phase 4: Components
+
 - [ ] Create iOS-native button components
 - [ ] Create iOS-native card components
 - [ ] Create iOS-native list components
 - [ ] Implement proper alerts/action sheets
 
 ### Phase 5: Polish
+
 - [ ] Add smooth transitions
 - [ ] Implement haptic feedback
 - [ ] Add loading states
@@ -1049,6 +1128,7 @@ Tab bar icons:       28pt
 - [ ] Add error states
 
 ### Phase 6: Accessibility
+
 - [ ] Test with Dynamic Type
 - [ ] Test with VoiceOver
 - [ ] Verify color contrast
@@ -1060,18 +1140,21 @@ Tab bar icons:       28pt
 ## Resources
 
 ### Official Apple Resources
+
 - [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
 - [SF Symbols App](https://developer.apple.com/sf-symbols/)
 - [Apple Design Resources](https://developer.apple.com/design/resources/)
 - [Swift Charts](https://developer.apple.com/documentation/charts)
 
 ### Design Tools
+
 - **Figma:** iOS 17 Design Kit
 - **Sketch:** iOS UI Kit
 - **SF Symbols App:** Browse all symbols
 - **Color Contrast Analyzer:** Check WCAG compliance
 
 ### Example Apps to Study
+
 - Apple Health (data visualization)
 - Apple Home (security features)
 - Apple Weather (charts, cards)

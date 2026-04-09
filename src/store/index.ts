@@ -6,6 +6,7 @@ import userReducer from './slices/userSlice';
 import settingsReducer from './slices/settingsSlice';
 import uiReducer from './slices/uiSlice';
 import blockedDevicesReducer from './slices/blockedDevicesSlice';
+import savedReportsReducer from './slices/savedReportsSlice';
 
 const authPersistConfig = {
   key: 'auth',
@@ -30,6 +31,14 @@ const persistedBlockedDevicesReducer = persistReducer(
   blockedDevicesPersistConfig,
   blockedDevicesReducer
 );
+const savedReportsPersistConfig = {
+  key: 'savedReports',
+  storage: AsyncStorage,
+};
+const persistedSavedReportsReducer = persistReducer(
+  savedReportsPersistConfig,
+  savedReportsReducer
+);
 
 export const store = configureStore({
   reducer: {
@@ -38,6 +47,7 @@ export const store = configureStore({
     settings: persistedSettingsReducer,
     ui: uiReducer,
     blockedDevices: persistedBlockedDevicesReducer,
+    savedReports: persistedSavedReportsReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

@@ -34,6 +34,7 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 ## Scope — Full Blast Radius
 
 ### Types (5 files)
+
 - `src/types/alert.ts` — Alert, AlertMetadata, DeviceFingerprint, AnalyticsData
 - `src/types/knownDevice.ts` — KnownDevice, CreateKnownDeviceDTO
 - `src/types/replay.ts` — FingerprintPeekProps (macAddress → fingerprintHash in callbacks)
@@ -41,6 +42,7 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 - `src/navigation/types.ts` — DeviceFingerprint and AddKnownDevice route params
 
 ### Alert UI (6 files)
+
 - `src/components/organisms/AlertCard/AlertCard.tsx`
 - `src/screens/alerts/AlertDetailScreen.tsx`
 - `src/screens/alerts/AlertListScreen.tsx`
@@ -49,34 +51,41 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 - `src/hooks/usePropertyStatus.ts` — unique visitor count via `fingerprintHash`
 
 ### AI Cards (2 files)
+
 - `src/components/ai/cards/AlertBriefingCard.tsx` — rssi/macAddress display
 - `src/components/ai/cards/SitrepCard.tsx` — rssi/macAddress display
 
 ### LLM Services (4 files)
+
 - `src/services/llm/FocusedContextBuilder.ts` — rssiToZone, formatMac, alert grouping by macAddress
 - `src/services/llm/ResponseProcessor.ts` — alert.rssi in formatted strings
 - `src/services/llm/templates/AlertSummaryTemplate.ts` — RSSI zone mapping, MAC display
 - `src/services/llm/templates/PatternAnalysisTemplate.ts` — mac_address reference
 
 ### Alert Services (3 files)
+
 - `src/services/threatClassifier.ts` — uses rssi, wifiDetected, bluetoothDetected, multiband, isStationary, seenCount, duration (full rewrite needed)
 - `src/services/deviceFingerprinting.ts` — macAddress params, rssi in tracking
 - `src/services/patternDetection.ts` — macAddress filter param
 
 ### State Management (2 files)
+
 - `src/store/slices/blockedDevicesSlice.ts` — keyed by macAddress
 - `src/hooks/useBlockedDevices.ts` — macAddress params
 
 ### Navigation & Deep Links (2 files)
+
 - `src/navigation/types.ts` — route params
 - `src/navigation/linking.ts` — `:macAddress` in 5 deep link paths
 
 ### Analytics (3 files)
+
 - `src/api/analytics.ts` — getDeviceHistory(macAddress), getTopDevices return type
 - `src/hooks/useAnalytics.ts` — useDeviceHistory(macAddress)
 - `src/services/fingerprintStore.ts` — repository keyed by macAddress
 
 ### Replay/Radar (6 files)
+
 - `src/types/replay.ts` — FingerprintPeekProps callbacks
 - `src/hooks/useTimeBucketing.ts` — alert-position joining via macAddress
 - `src/hooks/useReplayPath.ts` — device path grouping by macAddress
@@ -85,16 +94,19 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 - `src/components/molecules/FingerprintPeek/FingerprintPeek.tsx` — macAddress display
 
 ### Known Devices (3 files)
+
 - `src/screens/settings/AddKnownDeviceScreen.tsx` — MAC input → fingerprint input
 - `src/screens/settings/KnownDevicesScreen.tsx` — macAddress display
 - `src/components/molecules/KnownDeviceItem/KnownDeviceItem.tsx` — props
 
 ### Utilities (3 files)
+
 - `src/utils/visualEffects.ts` — interpretRSSI → interpretAccuracy
 - `src/utils/rssiUtils.ts` — estimateDistance, calculateAngleFromMAC, getSignalStrength (remove or replace)
 - `src/hooks/useSecurityContext.ts` — rssi/macAddress in LLM context string
 
 ### Mock Data (6 files)
+
 - `src/mocks/data/mockAlerts.ts`
 - `src/mocks/data/mockAnalytics.ts`
 - `src/mocks/data/mockKnownDevices.ts`
@@ -103,9 +115,11 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 - `src/utils/seedMockData.ts`
 
 ### Tests
+
 - `__tests__/hooks/useAlerts.test.tsx`
 
 ### Backend (separate repository — coordination only)
+
 - `trailsense-backend/src/controllers/alertsController.ts` — add `toAlertDTO` response mapper
 
 **Total: ~46 files in this workspace + 1 in backend repo**
@@ -115,6 +129,7 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 ### `Alert` interface (`src/types/alert.ts`)
 
 **Remove:**
+
 - `rssi: number` (required)
 - `macAddress: string` (required)
 - `cellularStrength?: number`
@@ -126,11 +141,13 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 - `duration?: number`
 
 **Add:**
+
 - `fingerprintHash: string` (required) — canonical visitor identifier (e.g. `w_3a7fb2e1`)
 - `confidence: number` (required) — 0-100 fingerprint confidence score
 - `accuracyMeters: number` (required) — position accuracy in meters
 
 **Unchanged:**
+
 - `id`, `deviceId`, `timestamp`, `threatLevel`, `detectionType`, `isReviewed`, `isFalsePositive`
 - `location?: { latitude: number; longitude: number }`
 - `metadata?: AlertMetadata`
@@ -138,30 +155,38 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 ### `AlertMetadata` interface
 
 **Remove:**
+
 - `channel`, `deviceName`, `ssid`, `vendor`, `band`, `provider`
 - `cellularPeak`, `cellularAvg`, `cellularDelta`, `burstCount`, `clusterIndex`
 
 **Keep:**
+
 - `zone?`, `distance?`, `source?`, `signalCount?`, `windowDuration?`, `triangulatedPosition?`
 
 **Add:**
+
 - `measurementCount?: number`
 
 **Update:**
+
 - `source` type becomes `'legacy' | 'summary' | 'positions'`
 
 ### `DeviceFingerprint` type
+
 - `macAddress: string` → `fingerprintHash: string`
 - `detections[].rssi: number` → `detections[].confidence: number`
 
 ### `AnalyticsData` type
+
 - `topDetectedDevices` changes from `Array<{ macAddress: string; count: number }>` to `Array<{ fingerprintHash: string; count: number }>`
 
 ### `KnownDevice` type
+
 - `macAddress: string` → `fingerprintHash: string`
 - `CreateKnownDeviceDTO.macAddress` → `CreateKnownDeviceDTO.fingerprintHash`
 
 ### `replay.ts` types
+
 - `FingerprintPeekProps.macAddress` → `FingerprintPeekProps.fingerprintHash`
 - `FingerprintPeekProps.onViewProfile(macAddress)` → `onViewProfile(fingerprintHash)`
 - `BucketEntry.macAddress` removed (already has `fingerprintHash`)
@@ -169,45 +194,55 @@ These must never be collapsed into a single concept. The AlertCard proximity pil
 ## Section 2: UI Component Changes
 
 ### AlertCard
-| Current | New |
-|---------|-----|
-| RSSI value in dBm | Confidence as percentage |
-| Proximity label from RSSI ranges | Proximity label from `accuracyMeters` (<10m = "Close", 10-25m = "Nearby", >25m = "Far") |
-| Last 5 chars of `macAddress` | Full `fingerprintHash` |
-| `onAddToKnown` passes `macAddress` | `onAddToKnown` passes `fingerprintHash` |
+
+| Current                            | New                                                                                     |
+| ---------------------------------- | --------------------------------------------------------------------------------------- |
+| RSSI value in dBm                  | Confidence as percentage                                                                |
+| Proximity label from RSSI ranges   | Proximity label from `accuracyMeters` (<10m = "Close", 10-25m = "Nearby", >25m = "Far") |
+| Last 5 chars of `macAddress`       | Full `fingerprintHash`                                                                  |
+| `onAddToKnown` passes `macAddress` | `onAddToKnown` passes `fingerprintHash`                                                 |
 
 ### AlertDetailScreen
+
 **Signal Tab:**
+
 - RSSI row → "Confidence" row (percentage)
 - New "Estimated Accuracy" row (`~Xm` format) — separate from confidence
 - "MAC Address" → "Fingerprint ID" showing `fingerprintHash`
 - Navigation to DeviceFingerprintScreen passes `fingerprintHash`
 
 **Header/Hero metrics array (3 items):**
+
 1. `confidence` as percentage (e.g. "85%")
 2. Proximity label derived from `accuracyMeters` via `interpretAccuracy()` (e.g. "Close") — NOT from confidence
 3. Device name or device ID fallback
 
 ### AlertListScreen
+
 - Search matches `fingerprintHash` instead of `macAddress`
 - Blocked device filter uses `fingerprintHash`
 
 ### AI Cards (AlertBriefingCard, SitrepCard)
+
 - Replace `alert.rssi` dBm display with `alert.confidence%`
 - Replace `formatMac(alert.macAddress)` with `alert.fingerprintHash`
 - Replace `rssiToZone(alert.rssi)` with accuracy-based label
 
 ### PropertyCommandCenter
+
 - `recentAlerts[0]?.macAddress` → `recentAlerts[0]?.fingerprintHash`
 - Navigation to DeviceFingerprint passes `fingerprintHash`
 
 ### Deep Links (linking.ts)
+
 - All 5 `:macAddress` routes → `:fingerprintHash`
 
 ## Section 3: Service Changes
 
 ### ThreatClassifier (full rewrite)
+
 Currently uses `rssi`, `wifiDetected`, `bluetoothDetected`, `multiband`, `isStationary`, `seenCount`, `duration` — all removed fields. Rewrite to score based on:
+
 - `confidence` (higher = more certain threat)
 - `accuracyMeters` (closer = higher threat)
 - `detectionType` (cellular-only still suspicious)
@@ -215,19 +250,23 @@ Currently uses `rssi`, `wifiDetected`, `bluetoothDetected`, `multiband`, `isStat
 - Backend `threatLevel` is authoritative; classifier is for mock/demo mode and local re-scoring
 
 ### LLM Services
+
 - `FocusedContextBuilder`: replace `rssiToZone()` with accuracy-based zone, replace `formatMac()` with fingerprint display, group alerts by `fingerprintHash` instead of `macAddress`
 - `ResponseProcessor`: replace `alert.rssi` dBm string with `alert.confidence%`
 - `AlertSummaryTemplate`: replace RSSI zone mapping with accuracy-based zone, replace MAC display with fingerprint
 - `PatternAnalysisTemplate`: replace `mac_address` reference with `fingerprintHash`
 
 ### deviceFingerprinting
+
 - `trackDevice(macAddress)` → `trackDevice(fingerprintHash)`
 - `rssi: alert.rssi` in detection tracking → `confidence: alert.confidence`
 
 ### useSecurityContext
+
 - Context string: replace `rssi` dBm display with confidence%, replace MAC with fingerprintHash
 
 ### Analytics API
+
 - `getDeviceHistory(macAddress)` → `getDeviceHistory(fingerprintHash)`
 - `useDeviceHistory(macAddress)` → `useDeviceHistory(fingerprintHash)`
 - Query key shifts from macAddress to fingerprintHash
@@ -247,18 +286,27 @@ Replay types already have `fingerprintHash` on `BucketEntry` and `TriangulatedPo
 ## Section 5: Utility Changes
 
 ### visualEffects.ts
+
 Replace `interpretRSSI` with `interpretAccuracy`:
+
 ```typescript
-export const interpretAccuracy = (accuracyMeters: number): { label: string; color: string; percentage: number } => {
-  if (accuracyMeters < 5)  return { label: 'Very Close', color: '#FF453A', percentage: 95 };
-  if (accuracyMeters < 10) return { label: 'Close', color: '#FF9F0A', percentage: 75 };
-  if (accuracyMeters < 25) return { label: 'Nearby', color: '#FFCC00', percentage: 55 };
-  if (accuracyMeters < 50) return { label: 'Moderate', color: '#30D158', percentage: 35 };
+export const interpretAccuracy = (
+  accuracyMeters: number
+): { label: string; color: string; percentage: number } => {
+  if (accuracyMeters < 5)
+    return { label: 'Very Close', color: '#FF453A', percentage: 95 };
+  if (accuracyMeters < 10)
+    return { label: 'Close', color: '#FF9F0A', percentage: 75 };
+  if (accuracyMeters < 25)
+    return { label: 'Nearby', color: '#FFCC00', percentage: 55 };
+  if (accuracyMeters < 50)
+    return { label: 'Moderate', color: '#30D158', percentage: 35 };
   return { label: 'Distant', color: '#8E8E93', percentage: 15 };
 };
 ```
 
 ### rssiUtils.ts
+
 - `estimateDistance(rssi)` — remove (backend provides `accuracyMeters` directly)
 - `calculateAngleFromMAC(macAddress)` — replace with `calculateAngleFromHash(fingerprintHash)` using same hash algorithm
 - `getSignalStrength(rssi)` — remove (replaced by accuracy-based labels)
@@ -281,7 +329,7 @@ interface AlertDTO {
   threatLevel: string;
   detectionType: string;
   fingerprintHash: string;
-  confidence: number;        // 0-100 integer
+  confidence: number; // 0-100 integer
   accuracyMeters: number;
   isReviewed: boolean;
   isFalsePositive: boolean;

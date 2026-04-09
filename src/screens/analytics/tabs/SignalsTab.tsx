@@ -1,7 +1,11 @@
 import React from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
-import { ChartCard, ModalityCard, ProximityZoneVisual } from '@components/molecules';
+import {
+  ChartCard,
+  ModalityCard,
+  ProximityZoneVisual,
+} from '@components/molecules';
 import { MultiLineChart } from '@components/organisms/charts';
 import { Text } from '@components/atoms/Text';
 import { useTheme } from '@hooks/useTheme';
@@ -104,8 +108,14 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
           color={colors.detection.wifi}
           count={analytics.modalityBreakdown.wifi.count}
           metrics={[
-            { label: 'Channels active', value: `${analytics.modalityBreakdown.wifi.channelsActive}` },
-            { label: 'Probe request share', value: `${analytics.modalityBreakdown.wifi.probeRequestPercent}%` },
+            {
+              label: 'Channels active',
+              value: `${analytics.modalityBreakdown.wifi.channelsActive}`,
+            },
+            {
+              label: 'Probe request share',
+              value: `${analytics.modalityBreakdown.wifi.probeRequestPercent}%`,
+            },
           ]}
         />
         <ModalityCard
@@ -114,9 +124,18 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
           color={colors.detection.bluetooth}
           count={analytics.modalityBreakdown.ble.count}
           metrics={[
-            { label: 'Phone-likely', value: `${analytics.modalityBreakdown.ble.phonePercent}%` },
-            { label: 'Apple markers', value: `${analytics.modalityBreakdown.ble.applePercent}%` },
-            { label: 'Beacon-like', value: `${analytics.modalityBreakdown.ble.beaconPercent}%` },
+            {
+              label: 'Phone-likely',
+              value: `${analytics.modalityBreakdown.ble.phonePercent}%`,
+            },
+            {
+              label: 'Apple markers',
+              value: `${analytics.modalityBreakdown.ble.applePercent}%`,
+            },
+            {
+              label: 'Beacon-like',
+              value: `${analytics.modalityBreakdown.ble.beaconPercent}%`,
+            },
           ]}
         />
         <ModalityCard
@@ -125,9 +144,18 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
           color={colors.detection.cellular}
           count={analytics.modalityBreakdown.cellular.count}
           metrics={[
-            { label: 'Avg peak power', value: `${analytics.modalityBreakdown.cellular.avgPeakDbm} dBm` },
-            { label: 'Burst duration', value: `${analytics.modalityBreakdown.cellular.avgBurstDurationMs} ms` },
-            { label: 'Noise floor', value: `${analytics.modalityBreakdown.cellular.avgNoiseFloorDbm} dBm` },
+            {
+              label: 'Avg peak power',
+              value: `${analytics.modalityBreakdown.cellular.avgPeakDbm} dBm`,
+            },
+            {
+              label: 'Burst duration',
+              value: `${analytics.modalityBreakdown.cellular.avgBurstDurationMs} ms`,
+            },
+            {
+              label: 'Noise floor',
+              value: `${analytics.modalityBreakdown.cellular.avgNoiseFloorDbm} dBm`,
+            },
           ]}
         />
       </View>
@@ -147,7 +175,11 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
           >
             <Text
               variant="caption2"
-              style={[styles.vennLabel, styles.vennLabelLeft, { color: colors.detection.wifi }]}
+              style={[
+                styles.vennLabel,
+                styles.vennLabelLeft,
+                { color: colors.detection.wifi },
+              ]}
             >
               WiFi
             </Text>
@@ -161,7 +193,11 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
           >
             <Text
               variant="caption2"
-              style={[styles.vennLabel, styles.vennLabelRight, { color: colors.detection.bluetooth }]}
+              style={[
+                styles.vennLabel,
+                styles.vennLabelRight,
+                { color: colors.detection.bluetooth },
+              ]}
             >
               BLE
             </Text>
@@ -173,7 +209,12 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
           </View>
         </View>
         <View style={styles.crossModalGrid}>
-          <View style={[styles.crossModalCard, { backgroundColor: colors.tertiarySystemBackground }]}>
+          <View
+            style={[
+              styles.crossModalCard,
+              { backgroundColor: colors.tertiarySystemBackground },
+            ]}
+          >
             <Text variant="title3" weight="bold">
               {analytics.crossModalStats.wifiBleLinks}
             </Text>
@@ -184,7 +225,12 @@ export const SignalsTab: React.FC<SignalsTabProps> = ({ analytics }) => {
               Avg confidence {analytics.crossModalStats.avgLinkConfidence}%
             </Text>
           </View>
-          <View style={[styles.crossModalCard, { backgroundColor: colors.tertiarySystemBackground }]}>
+          <View
+            style={[
+              styles.crossModalCard,
+              { backgroundColor: colors.tertiarySystemBackground },
+            ]}
+          >
             <Text variant="title3" weight="bold">
               {analytics.crossModalStats.phantomMerges}
             </Text>

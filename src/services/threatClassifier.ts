@@ -76,7 +76,8 @@ export class ThreatClassifier {
     }
 
     const sortedAlerts = [...alerts].sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
     let totalDuration = 0;
     for (let index = 1; index < sortedAlerts.length; index += 1) {

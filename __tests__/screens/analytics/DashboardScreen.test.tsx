@@ -83,10 +83,7 @@ const renderScreen = () => {
     <NavigationContainer>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <DashboardScreen
-            navigation={mockNavigation}
-            route={mockRoute}
-          />
+          <DashboardScreen navigation={mockNavigation} route={mockRoute} />
         </ThemeProvider>
       </QueryClientProvider>
     </NavigationContainer>

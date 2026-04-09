@@ -36,7 +36,9 @@ export const TacticalHeader: React.FC<TacticalHeaderProps> = ({
       <View style={styles.rightSection}>
         {statusLabel ? (
           <View style={styles.statusContainer}>
-            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+            <View
+              style={[styles.statusDot, { backgroundColor: statusColor }]}
+            />
             <Text style={[styles.statusText, { color: statusColor }]}>
               {statusLabel}
             </Text>

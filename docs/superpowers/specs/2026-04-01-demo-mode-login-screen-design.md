@@ -45,6 +45,7 @@ When "Explore Demo" is tapped:
 - **`queryClient`**: Snapshot the full current `defaultOptions` object before overwriting (only if not already snapshotted — the helper must be idempotent), then set mock-mode defaults (`staleTime: Infinity`, `retry: false`, `refetchOnReconnect: false`, preserving other keys like `gcTime` and `refetchOnWindowFocus`). `setDefaultOptions` replaces the object — it does not merge — so the snapshot is needed for accurate restoration on exit.
 
 This reconfiguration must be applied in two places:
+
 1. `LoginScreen.handleExploreDemo` — when entering demo from the login screen
 2. `App.tsx` init guard — when cold-starting with persisted demo mode
 
@@ -96,6 +97,7 @@ In `App.tsx` `initializeApp`:
 ## Verification Baseline
 
 The current repo has pre-existing issues that affect verification:
+
 - `npx tsc --noEmit` fails with ~20+ unrelated type errors (icon types, missing exports, etc.)
 - `__tests__/screens/LoginScreen.test.tsx` fails before running due to a `react-redux` ESM transform issue in Jest
 
@@ -103,13 +105,13 @@ Verification steps in the plan should be scoped to: "no new errors introduced by
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `src/screens/auth/LoginScreen.tsx` | Add divider + "Explore Demo" button, `handleExploreDemo` handler |
-| `src/screens/settings/SettingsScreen.tsx` | Remove demo mode toggle, wire up logout to dispatch thunk with full cleanup |
-| `src/store/slices/authSlice.ts` | Add `setCredentials` reducer, clear demo mode in `logout` thunk |
-| `src/config/mockConfig.ts` | Set `FORCE_MOCK_MODE = false` |
-| `src/config/demoModeRuntime.ts` | **Create** — shared helper for applying/reverting mock adapter + query defaults (idempotent snapshot/restore) |
-| `src/api/websocket.ts` | Store forwarder refs, remove on disconnect to prevent duplicate listeners |
-| `src/App.tsx` | Guard re-seeding on `isDemoMode()` flag (not auth state) + apply runtime mock reconfiguration on persisted demo cold-start |
-| `src/config/demoMode.ts` | No changes needed |
+| File                                      | Change                                                                                                                     |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `src/screens/auth/LoginScreen.tsx`        | Add divider + "Explore Demo" button, `handleExploreDemo` handler                                                           |
+| `src/screens/settings/SettingsScreen.tsx` | Remove demo mode toggle, wire up logout to dispatch thunk with full cleanup                                                |
+| `src/store/slices/authSlice.ts`           | Add `setCredentials` reducer, clear demo mode in `logout` thunk                                                            |
+| `src/config/mockConfig.ts`                | Set `FORCE_MOCK_MODE = false`                                                                                              |
+| `src/config/demoModeRuntime.ts`           | **Create** — shared helper for applying/reverting mock adapter + query defaults (idempotent snapshot/restore)              |
+| `src/api/websocket.ts`                    | Store forwarder refs, remove on disconnect to prevent duplicate listeners                                                  |
+| `src/App.tsx`                             | Guard re-seeding on `isDemoMode()` flag (not auth state) + apply runtime mock reconfiguration on persisted demo cold-start |
+| `src/config/demoMode.ts`                  | No changes needed                                                                                                          |

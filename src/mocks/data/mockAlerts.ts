@@ -279,10 +279,7 @@ export function getMockAlerts(): MockAlert[] {
       timestamp: hoursAgo(6 + i * 3),
       threatLevel,
       detectionType,
-      fingerprintHash: fingerprintForType(
-        detectionType,
-        buildHexHash(index)
-      ),
+      fingerprintHash: fingerprintForType(detectionType, buildHexHash(index)),
       confidence,
       accuracyMeters,
       isReviewed: index % 5 !== 0,

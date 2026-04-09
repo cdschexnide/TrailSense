@@ -15,9 +15,11 @@
 ## File Map
 
 **Files to read (firmware — `TrailSenseDevice/`):**
+
 - `main/main.c` — `maybe_send_*_diagnostic` functions, `s_diagnostic_logging_enabled` flag, active data path
 
 **Files to read (mobile — `TrailSense/`):**
+
 - `src/types/alert.ts` — Alert, AlertMetadata, DeviceFingerprint, AnalyticsData types
 - `src/types/replay.ts` — BucketEntry, FingerprintPeekProps
 - `src/types/knownDevice.ts` — KnownDevice, CreateKnownDeviceDTO
@@ -49,6 +51,7 @@
 - `__tests__/hooks/useReplayPositions.test.tsx` — stale macAddress/confidence fixture
 
 **Files to read (backend — `trailsense-backend/`):**
+
 - `src/controllers/alertsController.ts` — response shape, DTO mapper presence
 - `src/controllers/analyticsController.ts` — topDetectedDevices, getDeviceFingerprint
 - `src/controllers/goliothWebhookController.ts` — detectionCount increment logic
@@ -58,6 +61,7 @@
 - `prisma/schema.prisma` — Device.detectionCount, Alert model, PositionSample model
 
 **File to write:**
+
 - `TRAILSENSE_VERIFICATION_REPORT_2026-04-04.md` (project root)
 
 ---
@@ -99,12 +103,14 @@ Note: `src/mocks/` is a subdirectory of `src/`, so the `TrailSense/src/` target 
 Record: hit count per pattern per directory. Any non-zero count is a finding.
 
 **Exceptions:**
+
 - `TriangulatedPosition.macAddress` in `src/types/triangulation.ts` is intentionally kept as an optional field. This single occurrence in `src/` is expected and should be noted but is NOT a failure.
 - Any `macAddress` hits in `__tests__/` ARE failures — the remaining work doc claims all test fixtures were updated.
 
 - [ ] **Step 2: Verify Finding 2 — Alert contract migration (positive confirmation)**
 
 Read `src/types/alert.ts` and confirm:
+
 - `Alert` interface has `fingerprintHash: string`, `confidence: number`, `accuracyMeters: number`
 - `Alert` interface does NOT have `rssi`, `macAddress`, `cellularStrength`, `wifiDetected`, `bluetoothDetected`, `multiband`, `isStationary`, `seenCount`, `duration`
 - `AlertMetadata` has `measurementCount` and `source` includes `'positions'`
@@ -306,6 +312,7 @@ Any additional hits indicate further missed files.
 Read `src/mocks/data/mockAlerts.ts`. Pick 3 mock alert objects and compare them field-by-field against the `Alert` interface from `src/types/alert.ts`:
 
 For each mock alert, check:
+
 - Has `fingerprintHash` (string, matches `[wbc]_[hex]` format)?
 - Has `confidence` (number, 0-100 range, not 0-1)?
 - Has `accuracyMeters` (number)?
@@ -328,6 +335,7 @@ Record: any file where confidence is fractional (0-1) instead of percentage (0-1
 - [ ] **Step 4: Verify TriangulatedPosition retains optional macAddress**
 
 Read `src/types/triangulation.ts`. Confirm:
+
 - `macAddress` exists as an optional field (`macAddress?: string`)
 - This is intentional (the remaining work doc says it was kept on purpose)
 
@@ -352,6 +360,7 @@ cd /Users/codyschexnider/Documents/Project/TrailSense && npx jest --no-coverage 
 Use the `--verbose` flag to get per-test pass/fail lines. Capture the full output — do not pipe through `tail` or truncate, as failure details at the top would be lost.
 
 The remaining work doc claims 6 pre-existing test failures:
+
 1. `__tests__/screens/LoginScreen.test.tsx`
 2. `__tests__/services/llm/modelManagerLoad.test.ts`
 3. `__tests__/hooks/useKnownDevices.test.tsx`
@@ -368,6 +377,7 @@ Read EVERY file in `TrailSense/src/api/` and `TrailSense/src/api/endpoints/` to 
 2. Cross-reference against `trailsense-backend/src/routes/index.ts` to determine if the backend serves this route
 
 **Known API files to check:**
+
 - `src/api/endpoints/alerts.ts` — alert CRUD
 - `src/api/endpoints/devices.ts` — device CRUD
 - `src/api/endpoints/positions.ts` — positions + history
@@ -406,9 +416,9 @@ Impact: [what breaks or degrades]
 
 For each "DONE" claim (Findings 1, 2 mobile, 3, 5 mobile, 9), write:
 
-| Finding | Claimed | Verified | Evidence |
-|---------|---------|----------|----------|
-| Finding N | DONE | Confirmed/Partially/Not Done | file:line summary |
+| Finding   | Claimed | Verified                     | Evidence          |
+| --------- | ------- | ---------------------------- | ----------------- |
+| Finding N | DONE    | Confirmed/Partially/Not Done | file:line summary |
 
 Use the data from Task 1.
 
@@ -417,13 +427,14 @@ Use the data from Task 1.
 For each "TODO" item (Findings 2 backend, 4, 5 backend, 6, 7, 8), write:
 
 | Item | What the doc claims | What the backend actually does | Code reference |
-|------|--------------------|---------------------------------|----------------|
+| ---- | ------------------- | ------------------------------ | -------------- |
 
 Use the data from Task 2. Include exact response shapes.
 
 - [ ] **Step 3: Write Section 3 — Issues Found**
 
 List all new issues from Task 3 that weren't in the remaining work doc. Include:
+
 - TypeScript errors (if any)
 - New test failures (beyond the 6 pre-existing)
 - Mock data inconsistencies
@@ -439,6 +450,7 @@ Create a prioritized list of all actual remaining work items. For each:
 
 **Repo:** mobile / backend / both
 **Files:**
+
 - `exact/path/to/file.ts:line-range` — [what needs to change]
 
 **Risk if not addressed:** Crash / Empty Data / Silent failure
@@ -454,9 +466,10 @@ Order by: Crash risks first, then Empty Data, then Silent failures. Within each 
 Build this table using data from Task 3 Step 7:
 
 | Mobile API Call | Method | URL | Request Body/Params | Expected Response Shape | Backend Satisfies? | Gap Description |
-|-----------------|--------|-----|---------------------|------------------------|--------------------|-----------------|
+| --------------- | ------ | --- | ------------------- | ----------------------- | ------------------ | --------------- |
 
 Cover EVERY API endpoint discovered in Task 3 Step 7. At minimum:
+
 - `GET /api/alerts` and `GET /api/alerts/:id`, `PATCH /api/alerts/:id/reviewed`, `DELETE /api/alerts/:id`
 - `GET /api/devices` and device CRUD (`POST`, `PATCH`, `DELETE`)
 - `GET /api/positions` and `GET /api/positions/history`, `DELETE /api/positions`
@@ -478,6 +491,7 @@ Cover EVERY API endpoint discovered in Task 3 Step 7. At minimum:
 - [ ] **Step 6: Final review of the report**
 
 Read the completed report. Check:
+
 - Every "Confirmed" has a file:line citation
 - Every "Missing" states where you looked
 - No TBDs or placeholders
@@ -487,6 +501,7 @@ Read the completed report. Check:
 - [ ] **Step 7: Save the report**
 
 Write the completed report to:
+
 ```
 /Users/codyschexnider/Documents/Project/TRAILSENSE_VERIFICATION_REPORT_2026-04-04.md
 ```

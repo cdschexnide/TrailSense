@@ -121,7 +121,12 @@ describe('FocusedContextBuilder', () => {
   });
 
   it('builds time context with hourly breakdown', () => {
-    const result = FocusedContextBuilder.build('time_query', {}, alerts, devices);
+    const result = FocusedContextBuilder.build(
+      'time_query',
+      {},
+      alerts,
+      devices
+    );
 
     expect(result).toContain('HOURLY BREAKDOWN');
     expect(result).toContain('BUSIEST');

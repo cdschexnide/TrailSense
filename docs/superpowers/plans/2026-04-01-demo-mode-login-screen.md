@@ -14,22 +14,23 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|----------------|
-| `src/store/slices/authSlice.ts` | Modify | Add `setCredentials` reducer; clear demo mode + disconnect WebSocket in `logout` thunk |
-| `src/config/mockConfig.ts` | Modify | Set `FORCE_MOCK_MODE = false` |
-| `src/api/websocket.ts` | Modify | Store forwarder handler refs; remove them on disconnect to prevent duplicate listeners |
-| `src/config/demoModeRuntime.ts` | Create | Shared helper for applying/reverting mock adapter + query defaults (snapshot/restore) |
-| `src/screens/auth/LoginScreen.tsx` | Modify | Add divider, "Explore Demo" button, `handleExploreDemo` using shared helper |
+| File                                      | Action | Responsibility                                                                          |
+| ----------------------------------------- | ------ | --------------------------------------------------------------------------------------- |
+| `src/store/slices/authSlice.ts`           | Modify | Add `setCredentials` reducer; clear demo mode + disconnect WebSocket in `logout` thunk  |
+| `src/config/mockConfig.ts`                | Modify | Set `FORCE_MOCK_MODE = false`                                                           |
+| `src/api/websocket.ts`                    | Modify | Store forwarder handler refs; remove them on disconnect to prevent duplicate listeners  |
+| `src/config/demoModeRuntime.ts`           | Create | Shared helper for applying/reverting mock adapter + query defaults (snapshot/restore)   |
+| `src/screens/auth/LoginScreen.tsx`        | Modify | Add divider, "Explore Demo" button, `handleExploreDemo` using shared helper             |
 | `src/screens/settings/SettingsScreen.tsx` | Modify | Remove demo toggle; wire logout to dispatch thunk with full cleanup using shared helper |
-| `src/App.tsx` | Modify | Guard re-seeding + apply runtime mock reconfiguration on persisted demo cold-start |
-| `__tests__/screens/LoginScreen.test.tsx` | Modify | Fix stale test expectations; add demo button test |
+| `src/App.tsx`                             | Modify | Guard re-seeding + apply runtime mock reconfiguration on persisted demo cold-start      |
+| `__tests__/screens/LoginScreen.test.tsx`  | Modify | Fix stale test expectations; add demo button test                                       |
 
 ---
 
 ### Task 1: Add `setCredentials` Reducer to authSlice
 
 **Files:**
+
 - Modify: `src/store/slices/authSlice.ts`
 
 - [ ] **Step 1: Add `setCredentials` reducer**
@@ -49,7 +50,8 @@ setCredentials(state, action) {
 Update the exports line:
 
 ```typescript
-export const { setBiometricEnabled, clearAuth, setCredentials } = authSlice.actions;
+export const { setBiometricEnabled, clearAuth, setCredentials } =
+  authSlice.actions;
 ```
 
 - [ ] **Step 3: Import demo/websocket dependencies and update logout thunk**
@@ -90,6 +92,7 @@ Logout now clears demo mode flag and disconnects WebSocket."
 ### Task 2: Set FORCE_MOCK_MODE to false
 
 **Files:**
+
 - Modify: `src/config/mockConfig.ts`
 
 - [ ] **Step 1: Change FORCE_MOCK_MODE to false**
@@ -121,6 +124,7 @@ at boot. Dev mock mode can still be enabled via USE_MOCK_API env var."
 ### Task 3: Fix WebSocket Forwarder Lifecycle
 
 **Files:**
+
 - Modify: `src/api/websocket.ts`
 
 The current implementation registers anonymous callbacks on `mockWebSocketService` as forwarders. These can never be removed via `.off()` since no reference is kept. A boolean guard alone is insufficient — if `disconnect()` resets the guard without removing the callbacks, the next `connect()` adds a second set, duplicating events.
@@ -240,6 +244,7 @@ by storing handler references and calling off() during disconnect."
 ### Task 4: Create Shared Demo Runtime Configuration Helper
 
 **Files:**
+
 - Create: `src/config/demoModeRuntime.ts`
 
 `client.ts` and `queryClient.ts` capture `isMockMode` as a static snapshot at module load time. When demo mode is entered after boot (login screen tap) or on cold-start of a persisted demo session, these snapshots are already initialized with `isMockMode = false`. Both the login screen and the App.tsx init guard need to apply the same reconfiguration.
@@ -254,7 +259,8 @@ Create `src/config/demoModeRuntime.ts`:
 import { QueryClient } from '@tanstack/react-query';
 import { apiClient } from '@api/client';
 
-let savedQueryDefaults: ReturnType<QueryClient['getDefaultOptions']> | null = null;
+let savedQueryDefaults: ReturnType<QueryClient['getDefaultOptions']> | null =
+  null;
 
 /**
  * Apply runtime mock configuration to apiClient and queryClient.
@@ -331,6 +337,7 @@ snapshot/restore for use by both login screen and cold-start init."
 ### Task 5: Add "Explore Demo" Button and Handler to LoginScreen
 
 **Files:**
+
 - Modify: `src/screens/auth/LoginScreen.tsx`
 
 - [ ] **Step 1: Add imports for demo mode dependencies**
@@ -393,16 +400,24 @@ Note: `isDemoLoading` is not reset on success. `seedMockData` dispatches `setCre
 In the return JSX, between the closing `</View>` of the `formCard` and the `{/* Sign Up Link */}` comment, add:
 
 ```tsx
-{/* Demo Mode Divider */}
+{
+  /* Demo Mode Divider */
+}
 <View style={styles.dividerSection}>
-  <View style={[styles.dividerLine, { backgroundColor: isDark ? '#333' : '#ddd' }]} />
+  <View
+    style={[styles.dividerLine, { backgroundColor: isDark ? '#333' : '#ddd' }]}
+  />
   <Text variant="caption1" color="tertiaryLabel" style={styles.dividerText}>
     or
   </Text>
-  <View style={[styles.dividerLine, { backgroundColor: isDark ? '#333' : '#ddd' }]} />
-</View>
+  <View
+    style={[styles.dividerLine, { backgroundColor: isDark ? '#333' : '#ddd' }]}
+  />
+</View>;
 
-{/* Explore Demo Button */}
+{
+  /* Explore Demo Button */
+}
 <Pressable
   onPress={handleExploreDemo}
   disabled={isDemoLoading || isLoading}
@@ -419,7 +434,7 @@ In the return JSX, between the closing `</View>` of the `formCard` and the `{/* 
       Explore Demo
     </Text>
   )}
-</Pressable>
+</Pressable>;
 ```
 
 - [ ] **Step 5: Add styles for divider and demo button**
@@ -470,6 +485,7 @@ setCredentials, and transitions to the main app."
 ### Task 6: Remove Demo Toggle and Wire Up Logout in Settings Screen
 
 **Files:**
+
 - Modify: `src/screens/settings/SettingsScreen.tsx`
 
 - [ ] **Step 1: Update imports**
@@ -553,7 +569,9 @@ const handleLogout = () => {
 Remove the `GroupedListRow` for Demo Mode from the Appearance section:
 
 ```tsx
-{/* Remove this entire block: */}
+{
+  /* Remove this entire block: */
+}
 <GroupedListRow
   icon="flask-outline"
   iconColor={colors.systemOrange}
@@ -563,7 +581,7 @@ Remove the `GroupedListRow` for Demo Mode from the Appearance section:
   onPress={() => {
     void handleToggleDemo();
   }}
-/>
+/>;
 ```
 
 The Appearance section should now only contain the Theme row.
@@ -599,6 +617,7 @@ and disconnects WebSocket."
 ### Task 7: Add App Initialization Guard with Runtime Mock Reconfiguration
 
 **Files:**
+
 - Modify: `src/App.tsx`
 
 On cold-start with a persisted demo session, `initDemoMode()` loads `demoModeEnabled = true`, but the static `isMockMode` snapshot in `client.ts` and `queryClient.ts` was captured at module load before `initDemoMode` ran. The init guard must apply the same runtime mock reconfiguration that the login screen does, in addition to skipping re-seeding.
@@ -661,6 +680,7 @@ and query defaults, reconnects the WebSocket, and skips re-seeding."
 ### Task 8: Fix Stale Tests and Add Demo Button Test
 
 **Files:**
+
 - Modify: `__tests__/screens/LoginScreen.test.tsx`
 
 The existing test file has two problems: (1) stale expectations that don't match the actual component, and (2) a `react-redux` ESM transform error that prevents the suite from running at all. The ESM issue is a pre-existing repo problem (not introduced by this feature). This task fixes the stale expectations and adds the demo button test. The ESM transform issue is out of scope but noted so the implementer isn't surprised when Jest fails.

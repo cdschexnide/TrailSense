@@ -35,7 +35,8 @@ RULES:
       .reverse()
       .find(message => message.role === 'user')?.content;
 
-    const question = latestUserMessage || 'Summarize the current security data.';
+    const question =
+      latestUserMessage || 'Summarize the current security data.';
     const trimmedContext =
       intent === 'help' ? HELP_CONTEXT : this.truncateText(focusedContext, 800);
     const userPrompt = this.buildIntentPrompt(intent, question, trimmedContext);

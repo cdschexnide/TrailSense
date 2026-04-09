@@ -23,7 +23,10 @@ const TARGET_ICONS = {
   patterns: 'analytics-outline',
 } as const;
 
-export const InsightCard: React.FC<InsightCardProps> = ({ insight, onPress }) => {
+export const InsightCard: React.FC<InsightCardProps> = ({
+  insight,
+  onPress,
+}) => {
   const { theme } = useTheme();
   const colors = theme.colors;
   const borderColor = SEVERITY_COLORS[insight.severity];
@@ -61,7 +64,11 @@ export const InsightCard: React.FC<InsightCardProps> = ({ insight, onPress }) =>
           />
         ) : null}
       </View>
-      <Text variant="subheadline" color="secondaryLabel" style={styles.subtitle}>
+      <Text
+        variant="subheadline"
+        color="secondaryLabel"
+        style={styles.subtitle}
+      >
         {insight.subtitle}
       </Text>
     </Pressable>

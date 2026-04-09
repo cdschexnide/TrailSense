@@ -14,18 +14,19 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|------|--------|----------------|
-| `src/utils/catmullRom.ts` | Create | Pure Catmull-Rom spline interpolation function |
-| `src/hooks/useAutoPlay.ts` | Modify | Add `progress` (0.0-1.0) with overflow-safe RAF loop |
-| `src/hooks/useReplayPath.ts` | Create | Per-device waypoint extraction (with lookahead + dedup) + interpolated position + trail lines |
-| `src/screens/radar/ProximityHeatmapScreen.tsx` | Modify | Use interpolated positions for replay markers, add trail line rendering with lineGradient |
+| File                                           | Action | Responsibility                                                                                |
+| ---------------------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| `src/utils/catmullRom.ts`                      | Create | Pure Catmull-Rom spline interpolation function                                                |
+| `src/hooks/useAutoPlay.ts`                     | Modify | Add `progress` (0.0-1.0) with overflow-safe RAF loop                                          |
+| `src/hooks/useReplayPath.ts`                   | Create | Per-device waypoint extraction (with lookahead + dedup) + interpolated position + trail lines |
+| `src/screens/radar/ProximityHeatmapScreen.tsx` | Modify | Use interpolated positions for replay markers, add trail line rendering with lineGradient     |
 
 ---
 
 ### Task 1: Create Catmull-Rom Interpolation Utility
 
 **Files:**
+
 - Create: `src/utils/catmullRom.ts`
 - Create: `__tests__/utils/catmullRom.test.ts`
 
@@ -216,6 +217,7 @@ Used by replay path rendering for demo mode."
 ### Task 2: Add Fractional Progress with Overflow-Safe RAF to useAutoPlay
 
 **Files:**
+
 - Modify: `src/hooks/useAutoPlay.ts`
 
 The RAF loop must consume the full time delta each frame. At 360x speed, a 16ms frame produces ~5.76 minutes of progress. The original plan reset progress to 0 after advancing one minute, discarding the overflow. This version uses a while loop to advance as many minutes as needed per frame.
@@ -468,9 +470,11 @@ the original discrete minute-jump behavior."
 ### Task 3: Create useReplayPath Hook
 
 **Files:**
+
 - Create: `src/hooks/useReplayPath.ts`
 
 Key design decisions addressed:
+
 - **Lookahead:** Path extraction includes `currentMinute + 1` so the interpolator has a target during progress 0→1 within the current minute.
 - **Deduplication:** Multiple entries per device per minute (the mock data generates 2-4) are collapsed to one canonical sample (the last entry). This prevents zero-duration segments.
 - **Type safety:** Uses `DetectionType` and `ThreatLevel` from existing types, matching `DetectedDeviceMarker`'s prop contract.
@@ -565,8 +569,7 @@ function buildDevicePaths(
 
   const paths: DevicePath[] = [];
   for (const [mac, minuteMap] of deviceMinutes) {
-    const sorted = Array.from(minuteMap.entries())
-      .sort(([a], [b]) => a - b);
+    const sorted = Array.from(minuteMap.entries()).sort(([a], [b]) => a - b);
     const waypoints = sorted.map(([, v]) => v.waypoint);
     const lastEntry = sorted[sorted.length - 1][1].entry;
 
@@ -732,6 +735,7 @@ clipped to current head position."
 ### Task 4: Integrate Smooth Replay into ProximityHeatmapScreen
 
 **Files:**
+
 - Modify: `src/screens/radar/ProximityHeatmapScreen.tsx`
 
 - [ ] **Step 1: Add imports**
@@ -749,10 +753,7 @@ After the `currentReplayEntries` useMemo block (around line 358), add:
 
 ```typescript
 const smoothMode = isDemoOrMockMode();
-const {
-  interpolatedDevices,
-  trailLines,
-} = useReplayPath(
+const { interpolatedDevices, trailLines } = useReplayPath(
   bucketed.buckets,
   autoPlay.minuteIndex,
   autoPlay.progress
@@ -764,8 +765,8 @@ const {
 In the replay MapView JSX (around lines 620-632), replace the `currentReplayEntries.map` block with:
 
 ```tsx
-{(smoothMode ? interpolatedDevices : currentReplayEntries).map(
-  (entry, i) => (
+{
+  (smoothMode ? interpolatedDevices : currentReplayEntries).map((entry, i) => (
     <DetectedDeviceMarker
       key={`${entry.macAddress}-${i}`}
       id={`replay-${entry.macAddress}-${i}`}
@@ -777,8 +778,8 @@ In the replay MapView JSX (around lines 620-632), replace the `currentReplayEntr
         setPeekMac(entry.macAddress);
       }}
     />
-  )
-)}
+  ));
+}
 ```
 
 - [ ] **Step 4: Add trail line rendering with lineGradient**
@@ -786,42 +787,45 @@ In the replay MapView JSX (around lines 620-632), replace the `currentReplayEntr
 Inside the replay `<MapView>`, after the `<TrailSenseDeviceMarker>` and before the marker map, add the trail lines:
 
 ```tsx
-{smoothMode &&
-  trailLines.map(trail => (
-    <Mapbox.ShapeSource
-      key={`trail-${trail.macAddress}`}
-      id={`trail-${trail.macAddress}`}
-      lineMetrics={true}
-      shape={{
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: trail.coordinates,
-        },
-      }}
-    >
-      <Mapbox.LineLayer
-        id={`trail-line-${trail.macAddress}`}
-        style={{
-          lineColor:
-            THREAT_COLORS[trail.threatLevel] ||
-            THREAT_COLORS.medium,
-          lineWidth: 2.5,
-          lineGradient: [
-            'interpolate',
-            ['linear'],
-            ['line-progress'],
-            0, 'rgba(0, 0, 0, 0)',
-            0.4, THREAT_COLORS[trail.threatLevel] || THREAT_COLORS.medium,
-            1, THREAT_COLORS[trail.threatLevel] || THREAT_COLORS.medium,
-          ],
-          lineCap: 'round' as const,
-          lineJoin: 'round' as const,
+{
+  smoothMode &&
+    trailLines.map(trail => (
+      <Mapbox.ShapeSource
+        key={`trail-${trail.macAddress}`}
+        id={`trail-${trail.macAddress}`}
+        lineMetrics={true}
+        shape={{
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: trail.coordinates,
+          },
         }}
-      />
-    </Mapbox.ShapeSource>
-  ))}
+      >
+        <Mapbox.LineLayer
+          id={`trail-line-${trail.macAddress}`}
+          style={{
+            lineColor: THREAT_COLORS[trail.threatLevel] || THREAT_COLORS.medium,
+            lineWidth: 2.5,
+            lineGradient: [
+              'interpolate',
+              ['linear'],
+              ['line-progress'],
+              0,
+              'rgba(0, 0, 0, 0)',
+              0.4,
+              THREAT_COLORS[trail.threatLevel] || THREAT_COLORS.medium,
+              1,
+              THREAT_COLORS[trail.threatLevel] || THREAT_COLORS.medium,
+            ],
+            lineCap: 'round' as const,
+            lineJoin: 'round' as const,
+          }}
+        />
+      </Mapbox.ShapeSource>
+    ));
+}
 ```
 
 Note: `lineMetrics={true}` on `ShapeSource` is required for `lineGradient` to work. The gradient fades from transparent at the tail (line-progress 0) to full color at 40% through the line, giving a natural fade-out effect.

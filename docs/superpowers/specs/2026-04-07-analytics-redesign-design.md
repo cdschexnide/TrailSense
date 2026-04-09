@@ -43,12 +43,12 @@ The glanceable tab. Key metrics with period-over-period comparison, a threat tre
 
 Four metric cards, each showing the current value and % change vs the previous equivalent period:
 
-| Card | Metric | Source | Change Color |
-|------|--------|--------|-------------|
-| Detections | Total alert count in period | `analyticsApi.getComparison()` | Green = decrease, Red = increase (neutral — not inherently good/bad) |
-| Unique Devices | Distinct `fingerprintHash` values | New: `comparison.uniqueDevices` | Red = more unknown devices |
-| Avg Confidence | Mean `confidence` across alerts | New: `comparison.avgConfidence` | Green = higher confidence |
-| Closest Approach | Minimum `accuracyMeters` in period | New: `comparison.closestApproach` | Amber = closer than last period |
+| Card             | Metric                             | Source                            | Change Color                                                         |
+| ---------------- | ---------------------------------- | --------------------------------- | -------------------------------------------------------------------- |
+| Detections       | Total alert count in period        | `analyticsApi.getComparison()`    | Green = decrease, Red = increase (neutral — not inherently good/bad) |
+| Unique Devices   | Distinct `fingerprintHash` values  | New: `comparison.uniqueDevices`   | Red = more unknown devices                                           |
+| Avg Confidence   | Mean `confidence` across alerts    | New: `comparison.avgConfidence`   | Green = higher confidence                                            |
+| Closest Approach | Minimum `accuracyMeters` in period | New: `comparison.closestApproach` | Amber = closer than last period                                      |
 
 **API changes required:** Extend the `getComparison()` response to include `uniqueDevices`, `avgConfidence`, and `closestApproach` in both `current` and `comparison` objects, plus corresponding `percentageChange` fields.
 
@@ -74,19 +74,20 @@ Replaces the current pie chart. A single horizontal stacked bar showing WiFi / B
 
 Auto-generated, tappable insight cards. Each navigates to the relevant tab/section for more detail. Insight types:
 
-| Insight | Trigger | Detail Link |
-|---------|---------|-------------|
-| New devices detected | `comparison.uniqueDevices` increased vs previous period | Patterns → Anomalies |
-| Activity spike | Any day >2× the period average | Patterns → Hourly Distribution |
-| Nighttime activity summary | Night detections > 20% of total | Patterns → Nighttime Activity |
-| Sensor offline | Any device `online === false` | Overview → Sensor Health |
-| Confidence drop | Avg confidence dropped >10% vs last period | Signals → Detection Confidence |
+| Insight                    | Trigger                                                 | Detail Link                    |
+| -------------------------- | ------------------------------------------------------- | ------------------------------ |
+| New devices detected       | `comparison.uniqueDevices` increased vs previous period | Patterns → Anomalies           |
+| Activity spike             | Any day >2× the period average                          | Patterns → Hourly Distribution |
+| Nighttime activity summary | Night detections > 20% of total                         | Patterns → Nighttime Activity  |
+| Sensor offline             | Any device `online === false`                           | Overview → Sensor Health       |
+| Confidence drop            | Avg confidence dropped >10% vs last period              | Signals → Detection Confidence |
 
 **Computation:** Insights are derived client-side from the analytics data already fetched for other sections. No dedicated API endpoint needed.
 
 ### Section 5: Sensor Health Summary
 
 Per-TrailSense-device status list showing:
+
 - Online/offline indicator (green/red dot)
 - Device name
 - Battery percentage
@@ -110,10 +111,10 @@ RSSI distribution across all detections in the period, bucketed in 10 dBm increm
 
 ```typescript
 rssiDistribution: Array<{
-  bucketMin: number;  // e.g., -90
-  bucketMax: number;  // e.g., -80
+  bucketMin: number; // e.g., -90
+  bucketMax: number; // e.g., -80
   count: number;
-}>
+}>;
 medianRssi: number;
 peakRssi: number;
 ```
@@ -122,12 +123,12 @@ peakRssi: number;
 
 Concentric ellipse visualization showing detection counts per proximity zone, with count and distance range below each zone.
 
-| Zone | Distance | Color |
-|------|----------|-------|
-| Immediate | <5m | `#ef4444` |
-| Near | 5–15m | `#f59e0b` |
-| Far | 15–50m | `#fbbf24` |
-| Extreme | >50m | `#4ade80` |
+| Zone      | Distance | Color     |
+| --------- | -------- | --------- |
+| Immediate | <5m      | `#ef4444` |
+| Near      | 5–15m    | `#f59e0b` |
+| Far       | 15–50m   | `#fbbf24` |
+| Extreme   | >50m     | `#4ade80` |
 
 Custom component (SVG-based, not a chart library widget).
 
@@ -137,12 +138,13 @@ Custom component (SVG-based, not a chart library widget).
 proximityZoneDistribution: Array<{
   zone: 'immediate' | 'near' | 'far' | 'extreme';
   count: number;
-}>
+}>;
 ```
 
 ### Section 3: Detection Confidence Distribution
 
 Three-tier horizontal progress bars showing the distribution of device confidence scores:
+
 - High (75–100%): green `#4ade80`
 - Medium (50–74%): amber `#fbbf24`
 - Low (0–49%): red `#ef4444`
@@ -153,7 +155,7 @@ Three-tier horizontal progress bars showing the distribution of device confidenc
 confidenceDistribution: Array<{
   tier: 'high' | 'medium' | 'low';
   count: number;
-}>
+}>;
 ```
 
 ### Section 4: Signal Modality Breakdown (3 Cards)
@@ -161,14 +163,16 @@ confidenceDistribution: Array<{
 Per-detection-type card, each showing three metrics specific to that modality:
 
 **WiFi card:**
+
 - Channels active: count of distinct WiFi channels seen (from `channel_bitmap`)
 - Probe request %: percentage of WiFi detections that were probe requests vs beacons
-**BLE card:**
+  **BLE card:**
 - Phone %: percentage of BLE detections classified as phones (from `is_phone_likely`)
 - Apple %: percentage with Apple manufacturer data (from `has_apple_mfr`)
 - Beacon %: percentage classified as beacons (from `is_beacon`)
 
 **Cellular card:**
+
 - Avg power: mean `peak_dbm` across cellular bursts
 - Avg burst duration: mean `burst_duration_ms`
 - Noise floor: mean `noise_floor_dbm`
@@ -181,25 +185,26 @@ modalityBreakdown: {
     count: number;
     channelsActive: number;
     probeRequestPercent: number;
-  };
+  }
   ble: {
     count: number;
     phonePercent: number;
     applePercent: number;
     beaconPercent: number;
-  };
+  }
   cellular: {
     count: number;
     avgPeakDbm: number;
     avgBurstDurationMs: number;
     avgNoiseFloorDbm: number;
-  };
+  }
 }
 ```
 
 ### Section 5: Cross-Modal Correlations
 
 Two stat cards side by side:
+
 - **WiFi↔BLE Links**: count of cross-modal device correlations with average link confidence
 - **Phantom Merges**: count of MAC rotation detections (devices that changed MAC but were identified as the same device via IE fingerprint)
 
@@ -231,7 +236,7 @@ rssiTrend: Array<{
   wifiAvgRssi: number | null;
   bleAvgRssi: number | null;
   cellularAvgRssi: number | null;
-}>
+}>;
 ```
 
 ## Tab 3: Patterns
@@ -251,11 +256,11 @@ GitHub-contributions-style grid: 7 rows (Mon–Sun) × 12 columns (2-hour blocks
 
 ```typescript
 hourlyDayOfWeekDistribution: Array<{
-  dayOfWeek: number;  // 0=Mon, 6=Sun
-  hour: number;       // 0-23
+  dayOfWeek: number; // 0=Mon, 6=Sun
+  hour: number; // 0-23
   count: number;
-  date: string;       // ISO date, for client-side aggregation by month in 1y view
-}>
+  date: string; // ISO date, for client-side aggregation by month in 1y view
+}>;
 ```
 
 ### Section 2: Hourly Distribution (24-Bar Chart)
@@ -272,14 +277,15 @@ Seven vertical bars (Mon–Sun), busiest day highlighted with accent color. Coun
 
 ```typescript
 dayOfWeekDistribution: Array<{
-  day: number;  // 0=Mon, 6=Sun
+  day: number; // 0=Mon, 6=Sun
   count: number;
-}>
+}>;
 ```
 
 ### Section 4: Nighttime Activity (Isolated View)
 
 Detections occurring between 10 PM–6 AM, shown as:
+
 - Total nighttime detection count
 - Percentage of all detections that occurred at night
 - Area chart showing nightly detection count across the period
@@ -301,6 +307,7 @@ nighttimeActivity: {
 Statistically unusual patterns detected by comparing current-period data against the historical baseline. Each anomaly shows a severity dot, title, and magnitude description.
 
 Anomaly detection types:
+
 - **Spike**: Any 2-hour block with >2× the historical average for that time slot
 - **Quiet gap**: Any normally-active period with zero detections
 - **Timing shift**: Peak activity hour shifted >2 hours from historical norm
@@ -323,7 +330,7 @@ perSensorTrend: Array<{
     deviceName: string;
     count: number;
   }>;
-}>
+}>;
 ```
 
 ## API Changes Summary
@@ -357,6 +364,7 @@ closestApproach: number;
 ```
 
 ### Existing endpoints used as-is:
+
 - `analyticsApi.getThreatTimeline()` — for stacked area chart
 - `analyticsApi.getComparison()` — for period comparison cards (extended with new fields)
 - `analyticsApi.getAnalytics()` — for detection type distribution, daily trend

@@ -265,11 +265,13 @@ See `TESTING_AND_DEPLOYMENT_GUIDE.md` for complete testing instructions.
 ## Summary
 
 **The Fix:**
+
 - Use Python 3.11 instead of 3.13
 - Create new venv: `python3.11 -m venv ~/llm-env`
 - Install ExecuTorch: `cd ~/executorch && ./install_requirements.sh`
 
 **Time Required:**
+
 - Environment setup: 5 minutes
 - ExecuTorch installation: 10-15 minutes
 - (Optional) Full build: 30-60 minutes

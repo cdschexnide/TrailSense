@@ -202,7 +202,10 @@ export const seedMockData = async ({
       totalAlerts: Math.round(freshAnalytics.totalAlerts * 0.85),
       totalDetections: Math.round((freshAnalytics.totalDetections ?? 0) * 0.85),
       unknownDevices: Math.round((freshAnalytics.unknownDevices ?? 0) * 0.8),
-      uniqueDevices: Math.max(1, Math.round(freshAnalytics.uniqueDevices * 0.75)),
+      uniqueDevices: Math.max(
+        1,
+        Math.round(freshAnalytics.uniqueDevices * 0.75)
+      ),
       avgConfidence: Math.round(freshAnalytics.avgConfidence * 1.15),
       closestApproachMeters: Math.round(
         freshAnalytics.closestApproachMeters * 1.3

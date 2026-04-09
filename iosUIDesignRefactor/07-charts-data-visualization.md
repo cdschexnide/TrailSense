@@ -22,11 +22,13 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
 **Terminal:**
 
 - [x] **Install React Native Chart Kit:**
+
   ```bash
   npm install react-native-chart-kit
   ```
 
 - [x] **Install react-native-svg** (if not already installed):
+
   ```bash
   npm install react-native-svg
   ```
@@ -43,6 +45,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
 **File:** `src/components/organisms/charts/ChartWrapper.tsx` (NEW)
 
 - [x] **Create reusable chart wrapper with iOS styling:**
+
   ```typescript
   import React from 'react';
   import { View, StyleSheet, Dimensions } from 'react-native';
@@ -105,6 +108,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
 **File:** `src/components/organisms/charts/IOSLineChart.tsx` (NEW)
 
 - [x] **Create iOS-styled line chart:**
+
   ```typescript
   import React from 'react';
   import { Dimensions } from 'react-native';
@@ -186,6 +190,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
 **File:** `src/components/organisms/charts/IOSBarChart.tsx` (NEW)
 
 - [x] **Create iOS-styled bar chart:**
+
   ```typescript
   import React from 'react';
   import { Dimensions } from 'react-native';
@@ -257,6 +262,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
 **File:** `src/components/organisms/charts/IOSPieChart.tsx` (NEW)
 
 - [x] **Create iOS-styled pie chart:**
+
   ```typescript
   import React from 'react';
   import { Dimensions } from 'react-native';
@@ -336,6 +342,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
 **File:** `src/utils/chartDataUtils.ts` (NEW)
 
 - [x] **Create data transformation utilities:**
+
   ```typescript
   import { Alert, AnalyticsData } from '@types';
   import { format, parseISO } from 'date-fns';
@@ -343,9 +350,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
   /**
    * Transform analytics data for line chart (detections over time)
    */
-  export const prepareDetectionsOverTimeData = (
-    analytics: AnalyticsData
-  ) => {
+  export const prepareDetectionsOverTimeData = (analytics: AnalyticsData) => {
     return {
       labels: analytics.dailyDetections.map(d =>
         format(parseISO(d.date), 'MM/dd')
@@ -387,9 +392,7 @@ This phase implements iOS-styled charts using React Native Chart Kit for the Ana
   /**
    * Transform hourly distribution for bar chart
    */
-  export const prepareHourlyDistributionData = (
-    analytics: AnalyticsData
-  ) => {
+  export const prepareHourlyDistributionData = (analytics: AnalyticsData) => {
     // Show only peak hours for better readability
     const peakHours = analytics.hourlyDistribution.slice(6, 22); // 6am to 10pm
 
@@ -446,6 +449,7 @@ This will be completed in Phase 6, but document the integration pattern:
 **File:** `src/screens/analytics/DashboardScreen.tsx`
 
 - [ ] **Example integration:**
+
   ```typescript
   import {
     IOSLineChart,

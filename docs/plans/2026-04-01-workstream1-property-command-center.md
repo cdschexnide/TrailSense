@@ -10,24 +10,25 @@
 
 ## Autoplan Decisions Incorporated
 
-| Decision | Source | Task |
-|----------|--------|------|
-| Stats Row above Mini Map | Design D1 | Task 4 |
-| Mapbox Static Images API for mini map | Design D14, Eng E11 | Task 5 |
-| Each section degrades independently on error | Design D4 | Task 4 |
-| First-run onboarding for zero detections | Design D5 | Task 4 |
-| Client-side status via usePropertyStatus() | Design D13 | Task 3 |
-| Status precedence: threat > offline > stale > clear | Design D19 | Task 3 |
-| AI insight slot on home screen | Design D9 | Task 7 |
-| Deep links updated atomically with nav restructure | Eng E3 | Task 2 |
-| 24h timeline tappable to deep-link into Replay Radar | Design D18 | Task 6 (nav stub only; full time-based params added in WS2) |
-| Analytics buried under More loses discoverability | CEO acknowledged | Task 2 |
+| Decision                                             | Source              | Task                                                        |
+| ---------------------------------------------------- | ------------------- | ----------------------------------------------------------- |
+| Stats Row above Mini Map                             | Design D1           | Task 4                                                      |
+| Mapbox Static Images API for mini map                | Design D14, Eng E11 | Task 5                                                      |
+| Each section degrades independently on error         | Design D4           | Task 4                                                      |
+| First-run onboarding for zero detections             | Design D5           | Task 4                                                      |
+| Client-side status via usePropertyStatus()           | Design D13          | Task 3                                                      |
+| Status precedence: threat > offline > stale > clear  | Design D19          | Task 3                                                      |
+| AI insight slot on home screen                       | Design D9           | Task 7                                                      |
+| Deep links updated atomically with nav restructure   | Eng E3              | Task 2                                                      |
+| 24h timeline tappable to deep-link into Replay Radar | Design D18          | Task 6 (nav stub only; full time-based params added in WS2) |
+| Analytics buried under More loses discoverability    | CEO acknowledged    | Task 2                                                      |
 
 ---
 
 ### Task 1: Navigation Restructure — Types and Stacks
 
 **Files:**
+
 - Create: `src/navigation/stacks/HomeStack.tsx`
 - Create: `src/navigation/stacks/MoreStack.tsx`
 - Modify: `src/navigation/types.ts`
@@ -234,6 +235,7 @@ git commit -m "feat(nav): add HomeStack, MoreStack, MoreMenuScreen, update navig
 ### Task 2: Navigation Restructure — MainNavigator + Deep Links
 
 **Files:**
+
 - Modify: `src/navigation/MainNavigator.tsx`
 - Modify: `src/navigation/linking.ts`
 
@@ -414,6 +416,7 @@ git commit -m "feat(nav): restructure to 5 tabs (Home, Alerts, Radar, Devices, M
 ### Task 3: usePropertyStatus Hook
 
 **Files:**
+
 - Create: `src/hooks/usePropertyStatus.ts`
 
 **Step 1: Create the hook**
@@ -583,7 +586,16 @@ export function usePropertyStatus(): PropertyStatus {
       refetchAlerts,
       refetchDevices,
     };
-  }, [alerts, devices, alertsLoading, devicesLoading, alertsError, devicesError, refetchAlerts, refetchDevices]);
+  }, [
+    alerts,
+    devices,
+    alertsLoading,
+    devicesLoading,
+    alertsError,
+    devicesError,
+    refetchAlerts,
+    refetchDevices,
+  ]);
 }
 
 function _relativeTime(timestamp: string): string {
@@ -614,6 +626,7 @@ git commit -m "feat(hooks): add usePropertyStatus for home screen data derivatio
 ### Task 4: PropertyCommandCenter Screen — Layout and Status Banner
 
 **Files:**
+
 - Create: `src/screens/home/PropertyCommandCenter.tsx`
 - Create: `src/screens/home/index.ts`
 - Modify: `src/navigation/stacks/HomeStack.tsx`
@@ -623,6 +636,7 @@ git commit -m "feat(hooks): add usePropertyStatus for home screen data derivatio
 This is the main home screen. It uses `usePropertyStatus` for all data. Each section renders independently (autoplan D4: partial failure strategy).
 
 The layout order (autoplan D1: Stats Row above map):
+
 1. PropertyStatusBanner
 2. Stats Row
 3. Mini Property Map (Task 5)
@@ -1061,6 +1075,7 @@ git commit -m "feat(home): add PropertyCommandCenter screen with status banner, 
 ### Task 5: MiniPropertyMap Component
 
 **Files:**
+
 - Create: `src/components/organisms/MiniPropertyMap/MiniPropertyMap.tsx`
 - Create: `src/components/organisms/MiniPropertyMap/index.ts`
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
@@ -1206,11 +1221,13 @@ In `src/screens/home/PropertyCommandCenter.tsx`, replace the map placeholder wit
 import { MiniPropertyMap } from '@components/organisms/MiniPropertyMap';
 
 // Inside the component, after Stats Row (uses status.allDevices from usePropertyStatus):
-{/* 3. Mini Property Map */}
+{
+  /* 3. Mini Property Map */
+}
 <MiniPropertyMap
   devices={status.allDevices}
   onPress={() => navigation.navigate('RadarTab')}
-/>
+/>;
 ```
 
 Remove the `mapPlaceholder` View and its style. The `status.allDevices` array from `usePropertyStatus()` provides the device data.
@@ -1227,6 +1244,7 @@ git commit -m "feat(home): add MiniPropertyMap using Mapbox Static Images API"
 ### Task 6: ActivitySparkline Component
 
 **Files:**
+
 - Create: `src/components/molecules/ActivitySparkline/ActivitySparkline.tsx`
 - Create: `src/components/molecules/ActivitySparkline/index.ts`
 - Modify: `src/components/molecules/index.ts`
@@ -1407,6 +1425,7 @@ export { ActivitySparkline } from './ActivitySparkline';
 ```
 
 Add to `src/components/molecules/index.ts`:
+
 ```typescript
 export { ActivitySparkline } from './ActivitySparkline';
 ```
@@ -1421,7 +1440,7 @@ import { ActivitySparkline } from '@components/molecules';
 // After Recent Alerts section:
 <ActivitySparkline
   alerts={status.allAlerts}
-  onHourPress={(hour) => {
+  onHourPress={hour => {
     // Autoplan D18: tappable to deep-link into Replay Radar at that hour.
     // NOTE: Full time-based replay navigation requires WS2 (Replay Radar)
     // which adds a `replayHour` param to RadarStackParamList.
@@ -1429,7 +1448,7 @@ import { ActivitySparkline } from '@components/molecules';
     // navigation.navigate('RadarTab', { screen: 'ReplayRadar', params: { startHour: hour } })
     navigation.navigate('RadarTab', { screen: 'LiveRadar' });
   }}
-/>
+/>;
 ```
 
 **Step 4: Commit**
@@ -1444,6 +1463,7 @@ git commit -m "feat(home): add ActivitySparkline with hourly threat-colored bars
 ### Task 7: AI Insight Slot on Home Screen
 
 **Files:**
+
 - Modify: `src/screens/home/PropertyCommandCenter.tsx`
 
 > **Autoplan decision (Design D9):** Surface AI proactively through the home screen. Shows a weekly insight to keep AI visible without a dedicated tab.
@@ -1454,29 +1474,31 @@ Add a simple insight card between Recent Alerts and Activity Timeline. For now, 
 
 ```tsx
 // Inside PropertyCommandCenter, after Recent Alerts section:
-{/* AI Insight slot (autoplan D9) */}
-{status.activeAlertCount > 0 || status.visitorsToday > 0 ? (
-  <Pressable
-    style={[
-      styles.insightCard,
-      { borderColor: colors.brandAccentBorder || 'rgba(201,184,150,0.25)' },
-    ]}
-    onPress={() =>
-      navigation.navigate('MoreTab', { screen: 'TrailSenseAI' })
-    }
-  >
-    <View style={styles.insightHeader}>
-      <Text variant="caption1" weight="semibold" color="secondaryLabel">
-        ✦ AI INSIGHT
+{
+  /* AI Insight slot (autoplan D9) */
+}
+{
+  status.activeAlertCount > 0 || status.visitorsToday > 0 ? (
+    <Pressable
+      style={[
+        styles.insightCard,
+        { borderColor: colors.brandAccentBorder || 'rgba(201,184,150,0.25)' },
+      ]}
+      onPress={() => navigation.navigate('MoreTab', { screen: 'TrailSenseAI' })}
+    >
+      <View style={styles.insightHeader}>
+        <Text variant="caption1" weight="semibold" color="secondaryLabel">
+          ✦ AI INSIGHT
+        </Text>
+      </View>
+      <Text variant="subheadline" color="label">
+        {status.visitorsToday > 0
+          ? `${status.visitorsToday} device${status.visitorsToday > 1 ? 's' : ''} detected today. Tap for pattern analysis.`
+          : `${status.activeAlertCount} unreviewed alert${status.activeAlertCount > 1 ? 's' : ''} need attention.`}
       </Text>
-    </View>
-    <Text variant="subheadline" color="label">
-      {status.visitorsToday > 0
-        ? `${status.visitorsToday} device${status.visitorsToday > 1 ? 's' : ''} detected today. Tap for pattern analysis.`
-        : `${status.activeAlertCount} unreviewed alert${status.activeAlertCount > 1 ? 's' : ''} need attention.`}
-    </Text>
-  </Pressable>
-) : null}
+    </Pressable>
+  ) : null;
+}
 ```
 
 Add styles:
@@ -1546,25 +1568,26 @@ git commit -m "fix: resolve lint and type errors from property command center"
 
 ## Summary of Deliverables
 
-| Component | Type | Path |
-|-----------|------|------|
-| HomeStack | Nav stack | `src/navigation/stacks/HomeStack.tsx` |
-| MoreStack | Nav stack | `src/navigation/stacks/MoreStack.tsx` |
-| MoreMenuScreen | Screen | `src/screens/more/MoreMenuScreen.tsx` |
-| MainNavigator (5 tabs) | Nav mod | `src/navigation/MainNavigator.tsx` |
-| Navigation types | Type mod | `src/navigation/types.ts` |
-| Deep links (backward compat) | Config mod | `src/navigation/linking.ts` |
-| usePropertyStatus | Hook | `src/hooks/usePropertyStatus.ts` |
-| PropertyCommandCenter | Screen | `src/screens/home/PropertyCommandCenter.tsx` |
-| MiniPropertyMap | Organism | `src/components/organisms/MiniPropertyMap/` |
-| ActivitySparkline | Molecule | `src/components/molecules/ActivitySparkline/` |
-| AI Insight slot | Screen mod | (inline in PropertyCommandCenter) |
+| Component                    | Type       | Path                                          |
+| ---------------------------- | ---------- | --------------------------------------------- |
+| HomeStack                    | Nav stack  | `src/navigation/stacks/HomeStack.tsx`         |
+| MoreStack                    | Nav stack  | `src/navigation/stacks/MoreStack.tsx`         |
+| MoreMenuScreen               | Screen     | `src/screens/more/MoreMenuScreen.tsx`         |
+| MainNavigator (5 tabs)       | Nav mod    | `src/navigation/MainNavigator.tsx`            |
+| Navigation types             | Type mod   | `src/navigation/types.ts`                     |
+| Deep links (backward compat) | Config mod | `src/navigation/linking.ts`                   |
+| usePropertyStatus            | Hook       | `src/hooks/usePropertyStatus.ts`              |
+| PropertyCommandCenter        | Screen     | `src/screens/home/PropertyCommandCenter.tsx`  |
+| MiniPropertyMap              | Organism   | `src/components/organisms/MiniPropertyMap/`   |
+| ActivitySparkline            | Molecule   | `src/components/molecules/ActivitySparkline/` |
+| AI Insight slot              | Screen mod | (inline in PropertyCommandCenter)             |
 
 **8 tasks, ~8 commits, estimated ~2-3 sessions with Claude Code.**
 
 ## Placeholders for Future Workstreams
 
 These are explicitly left as placeholders in the PropertyCommandCenter screen:
+
 - **Recent Visitors** (horizontal VisitorChip scroll) — Workstream 3
 - **Today's Activity timeline → Replay Radar** — ActivitySparkline navigates to RadarTab (generic). Hour-specific deep-link with `replayHour` param is a Workstream 2 deliverable, not WS1. WS2 will update the sparkline's `onHourPress` and add the route param to `RadarStackParamList`.
 - **Known visitors count** — `knownVisitorsToday` hardcoded to 0 until Workstream 3 Known Devices

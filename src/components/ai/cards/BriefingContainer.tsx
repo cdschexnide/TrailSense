@@ -53,9 +53,7 @@ export const BriefingContainer: React.FC<BriefingContainerProps> = ({
 
       {(assessment || assessmentUnavailable) && (
         <View style={styles.assessment}>
-          <Text
-            style={[styles.sectionLabel, { color: c.accentPrimary }]}
-          >
+          <Text style={[styles.sectionLabel, { color: c.accentPrimary }]}>
             {'▌ ' + assessmentLabel}
           </Text>
           <Text
@@ -64,19 +62,13 @@ export const BriefingContainer: React.FC<BriefingContainerProps> = ({
               assessmentUnavailable && styles.assessmentMuted,
             ]}
           >
-            {assessmentUnavailable
-              ? 'Analysis unavailable'
-              : assessment}
+            {assessmentUnavailable ? 'Analysis unavailable' : assessment}
           </Text>
         </View>
       )}
 
       <View style={styles.feedbackRow}>
-        <Pressable
-          style={styles.feedbackBtn}
-          onPress={handleCopy}
-          hitSlop={8}
-        >
+        <Pressable style={styles.feedbackBtn} onPress={handleCopy} hitSlop={8}>
           <Icon name="copy-outline" size={12} color={c.textTertiary} />
           <Text style={styles.feedbackText}>Copy</Text>
         </Pressable>
@@ -85,22 +77,14 @@ export const BriefingContainer: React.FC<BriefingContainerProps> = ({
           onPress={() => handleFeedback(true)}
           hitSlop={8}
         >
-          <Icon
-            name="thumbs-up-outline"
-            size={12}
-            color={c.textTertiary}
-          />
+          <Icon name="thumbs-up-outline" size={12} color={c.textTertiary} />
         </Pressable>
         <Pressable
           style={styles.feedbackBtn}
           onPress={() => handleFeedback(false)}
           hitSlop={8}
         >
-          <Icon
-            name="thumbs-down-outline"
-            size={12}
-            color={c.textTertiary}
-          />
+          <Icon name="thumbs-down-outline" size={12} color={c.textTertiary} />
         </Pressable>
       </View>
     </View>

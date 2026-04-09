@@ -30,6 +30,7 @@ TrailSense uses on-device AI (Llama 3.2 1B) to enhance home security monitoring 
 All inference runs **100% on-device** with no cloud dependency, ensuring privacy and offline functionality.
 
 **Key Metrics:**
+
 - Model Size: ~1.5GB (downloads on first use)
 - Inference Time: 2-5 seconds per request
 - Platform: Android 10+ only (iOS deferred)
@@ -48,6 +49,7 @@ Transforms raw security detection data into clear, actionable explanations that 
 **Trigger:** User clicks "Explain with AI" button on an alert detail screen.
 
 **Input Data:**
+
 - Detection type (WiFi, Bluetooth, Cellular)
 - Signal strength (RSSI in dBm)
 - Proximity zone (IMMEDIATE, NEAR, FAR, EXTREME)
@@ -57,6 +59,7 @@ Transforms raw security detection data into clear, actionable explanations that 
 - Historical context (previous detections, first seen date)
 
 **Output:**
+
 - **Summary**: 2-3 sentence explanation of what happened
 - **Threat Explanation**: Why this threat level was assigned
 - **Recommended Actions**: Specific steps the homeowner should take
@@ -65,6 +68,7 @@ Transforms raw security detection data into clear, actionable explanations that 
 ### Example
 
 **Input Alert:**
+
 ```json
 {
   "detection_type": "wifi",
@@ -78,6 +82,7 @@ Transforms raw security detection data into clear, actionable explanations that 
 ```
 
 **Output Summary:**
+
 ```
 A WiFi device was detected at -55 dBm, indicating close proximity
 (within 10-20 feet). The signal is getting stronger, suggesting the
@@ -89,6 +94,7 @@ Recommended Action: Check your security cameras to see if anyone is nearby.
 ### Implementation Files
 
 #### Service Layer
+
 **File:** `src/services/llm/LLMService.ts:76-109`
 
 ```typescript
@@ -113,6 +119,7 @@ async generateAlertSummary(context: AlertContext): Promise<AlertSummary> {
 ```
 
 #### Prompt Template
+
 **File:** `src/services/llm/templates/AlertSummaryTemplate.ts:32-69`
 
 This template builds the chat messages sent to the AI:
@@ -154,9 +161,11 @@ buildPrompt(context: AlertContext): Message[] {
 ```
 
 #### UI Component
+
 **File:** `src/components/alerts/AlertSummaryCard.tsx`
 
 Displays the AI-generated summary with:
+
 - Summary text
 - Threat explanation
 - Recommended actions (bulleted list)
@@ -164,6 +173,7 @@ Displays the AI-generated summary with:
 - Feedback buttons (helpful/not helpful)
 
 #### React Hook
+
 **File:** `src/hooks/useAlertSummary.ts`
 
 Manages the UI state for alert summaries:
@@ -195,6 +205,7 @@ export function useAlertSummary(alertId: string) {
 ```
 
 #### Screen Integration
+
 **File:** `src/screens/AlertDetailScreen.tsx`
 
 Shows the "Explain with AI" button and AlertSummaryCard component.
@@ -218,6 +229,7 @@ ALERT_SUMMARIES: {
 **File:** `src/services/llm/cache/ResponseCache.ts`
 
 Summaries are cached by:
+
 - Alert ID
 - Threat level
 - Prompt content hash
@@ -237,10 +249,12 @@ Analyzes detection patterns over time to identify routine visitors (delivery dri
 ### User Experience
 
 **Trigger:**
+
 - User views device detail screen
 - System auto-analyzes after 3+ detections
 
 **Input Data:**
+
 - Device MAC address and metadata
 - Detection history (timestamps, zones, signal strengths)
 - Time of day patterns
@@ -248,6 +262,7 @@ Analyzes detection patterns over time to identify routine visitors (delivery dri
 - Similar devices in the system
 
 **Output:**
+
 - **Pattern Type**: delivery, neighbor, routine, suspicious, or unknown
 - **Description**: Detailed analysis of the pattern
 - **Confidence Score**: How certain the AI is (0.0-1.0)
@@ -256,6 +271,7 @@ Analyzes detection patterns over time to identify routine visitors (delivery dri
 ### Example
 
 **Input History:**
+
 ```json
 {
   "device": {
@@ -273,6 +289,7 @@ Analyzes detection patterns over time to identify routine visitors (delivery dri
 ```
 
 **Output Analysis:**
+
 ```json
 {
   "patternType": "delivery",
@@ -291,6 +308,7 @@ Analyzes detection patterns over time to identify routine visitors (delivery dri
 ### Implementation Files
 
 #### Service Layer
+
 **File:** `src/services/llm/LLMService.ts:114-148`
 
 ```typescript
@@ -320,6 +338,7 @@ async analyzeDevicePattern(context: DeviceContext): Promise<PatternAnalysis> {
 ```
 
 #### Prompt Template
+
 **File:** `src/services/llm/templates/PatternAnalysisTemplate.ts:39-80`
 
 ```typescript
@@ -398,6 +417,7 @@ Provides interactive, conversational access to security data. Users can ask ques
 **Trigger:** User types a question in the chat interface.
 
 **Input Data:**
+
 - User's message
 - Conversation history (last 5 messages)
 - Recent alerts (contextual information)
@@ -405,6 +425,7 @@ Provides interactive, conversational access to security data. Users can ask ques
 - System configuration
 
 **Output:**
+
 - Natural language response
 - Relevant follow-up suggestions
 - Actionable recommendations
@@ -412,6 +433,7 @@ Provides interactive, conversational access to security data. Users can ask ques
 ### Example Conversations
 
 **Example 1: Alert Inquiry**
+
 ```
 User: "What happened at 2pm today?"
 
@@ -421,6 +443,7 @@ was flagged as MEDIUM threat. Would you like to see the device details?"
 ```
 
 **Example 2: Status Check**
+
 ```
 User: "Is everything normal?"
 
@@ -430,6 +453,7 @@ No alerts required attention."
 ```
 
 **Example 3: Device Question**
+
 ```
 User: "Who's been detected most this week?"
 
@@ -441,6 +465,7 @@ pattern. The device is whitelisted as 'Neighbor - John'."
 ### Implementation Files
 
 #### Service Layer
+
 **File:** `src/services/llm/LLMService.ts:153-180`
 
 ```typescript
@@ -467,6 +492,7 @@ async chat(context: ConversationContext): Promise<ChatResponse> {
 ```
 
 #### Prompt Template
+
 **File:** `src/services/llm/templates/ConversationalTemplate.ts:51-90`
 
 ```typescript
@@ -555,6 +581,7 @@ Response flows back up the stack
 ### Component Responsibilities
 
 #### 1. **LLM Service** (`LLMService.ts`)
+
 - **Role**: Main entry point for all LLM features
 - **Responsibilities**:
   - Route requests to appropriate templates
@@ -564,6 +591,7 @@ Response flows back up the stack
   - Track performance metrics
 
 #### 2. **Templates** (`templates/*.ts`)
+
 - **Role**: Build prompts for different use cases
 - **Responsibilities**:
   - Format input data for the AI
@@ -572,6 +600,7 @@ Response flows back up the stack
   - Follow best practices for prompt engineering
 
 #### 3. **Inference Engine** (`inferenceEngine.ts`)
+
 - **Role**: Execute model inference
 - **Responsibilities**:
   - Validate input messages
@@ -582,6 +611,7 @@ Response flows back up the stack
   - Provide mock mode for testing
 
 #### 4. **Model Manager** (`modelManager.ts`)
+
 - **Role**: Manage model lifecycle
 - **Responsibilities**:
   - Load Llama 3.2 1B model
@@ -591,6 +621,7 @@ Response flows back up the stack
   - Retry failed loads
 
 #### 5. **LLM Controller** (from `react-native-executorch`)
+
 - **Role**: Native bridge to ExecuTorch
 - **Responsibilities**:
   - Download model files
@@ -605,43 +636,43 @@ Response flows back up the stack
 
 ### Core Services
 
-| File | Purpose | Key Functions |
-|------|---------|---------------|
-| `src/services/llm/LLMService.ts` | Main LLM service | `generateAlertSummary()`, `analyzeDevicePattern()`, `chat()` |
-| `src/services/llm/inferenceEngine.ts` | Run inference | `generate(messages, options)` |
-| `src/services/llm/modelManager.ts` | Manage model lifecycle | `loadModel()`, `unloadModel()`, `getModel()` |
-| `src/services/llm/cache/ResponseCache.ts` | Cache responses | `get()`, `set()`, `clear()` |
+| File                                      | Purpose                | Key Functions                                                |
+| ----------------------------------------- | ---------------------- | ------------------------------------------------------------ |
+| `src/services/llm/LLMService.ts`          | Main LLM service       | `generateAlertSummary()`, `analyzeDevicePattern()`, `chat()` |
+| `src/services/llm/inferenceEngine.ts`     | Run inference          | `generate(messages, options)`                                |
+| `src/services/llm/modelManager.ts`        | Manage model lifecycle | `loadModel()`, `unloadModel()`, `getModel()`                 |
+| `src/services/llm/cache/ResponseCache.ts` | Cache responses        | `get()`, `set()`, `clear()`                                  |
 
 ### Templates
 
-| File | Purpose | Use Case |
-|------|---------|----------|
-| `src/services/llm/templates/PromptTemplate.ts` | Base template class | N/A (abstract) |
-| `src/services/llm/templates/AlertSummaryTemplate.ts` | Alert summaries | Use Case 1 |
-| `src/services/llm/templates/PatternAnalysisTemplate.ts` | Pattern analysis | Use Case 2 |
-| `src/services/llm/templates/ConversationalTemplate.ts` | Chat assistant | Use Case 3 |
+| File                                                    | Purpose             | Use Case       |
+| ------------------------------------------------------- | ------------------- | -------------- |
+| `src/services/llm/templates/PromptTemplate.ts`          | Base template class | N/A (abstract) |
+| `src/services/llm/templates/AlertSummaryTemplate.ts`    | Alert summaries     | Use Case 1     |
+| `src/services/llm/templates/PatternAnalysisTemplate.ts` | Pattern analysis    | Use Case 2     |
+| `src/services/llm/templates/ConversationalTemplate.ts`  | Chat assistant      | Use Case 3     |
 
 ### UI Components
 
-| File | Purpose | Use Case |
-|------|---------|----------|
+| File                                         | Purpose               | Use Case   |
+| -------------------------------------------- | --------------------- | ---------- |
 | `src/components/alerts/AlertSummaryCard.tsx` | Display alert summary | Use Case 1 |
-| `src/hooks/useAlertSummary.ts` | Alert summary hook | Use Case 1 |
-| `src/screens/AlertDetailScreen.tsx` | Alert detail screen | Use Case 1 |
+| `src/hooks/useAlertSummary.ts`               | Alert summary hook    | Use Case 1 |
+| `src/screens/AlertDetailScreen.tsx`          | Alert detail screen   | Use Case 1 |
 
 ### Configuration
 
-| File | Purpose | Contains |
-|------|---------|----------|
-| `src/config/llmConfig.ts` | LLM configuration | Model settings, timeouts, token limits |
-| `src/config/featureFlags.ts` | Feature flags | Enable/disable LLM features, mock mode |
-| `src/types/llm.ts` | Type definitions | Interfaces for requests, responses, contexts |
+| File                         | Purpose           | Contains                                     |
+| ---------------------------- | ----------------- | -------------------------------------------- |
+| `src/config/llmConfig.ts`    | LLM configuration | Model settings, timeouts, token limits       |
+| `src/config/featureFlags.ts` | Feature flags     | Enable/disable LLM features, mock mode       |
+| `src/types/llm.ts`           | Type definitions  | Interfaces for requests, responses, contexts |
 
 ### Utilities
 
-| File | Purpose | Functions |
-|------|---------|-----------|
-| `src/utils/llmLogger.ts` | Logging | `info()`, `error()`, `debug()` |
+| File                          | Purpose              | Functions                           |
+| ----------------------------- | -------------------- | ----------------------------------- |
+| `src/utils/llmLogger.ts`      | Logging              | `info()`, `error()`, `debug()`      |
 | `src/utils/llmPerformance.ts` | Performance tracking | `startTimer()`, `recordInference()` |
 
 ---
@@ -654,7 +685,7 @@ Response flows back up the stack
 import { llmService } from '@/services/llm';
 
 // In a component or hook
-const generateSummary = async (alert) => {
+const generateSummary = async alert => {
   try {
     const summary = await llmService.generateAlertSummary({
       alert: alert,
@@ -688,7 +719,9 @@ const analyzeDevice = async (device, detections) => {
     console.log(`Confidence: ${analysis.confidence}`);
 
     if (analysis.whitelistSuggestion) {
-      console.log(`Suggest whitelisting as: ${analysis.whitelistSuggestion.name}`);
+      console.log(
+        `Suggest whitelisting as: ${analysis.whitelistSuggestion.name}`
+      );
     }
   } catch (error) {
     console.error('Failed to analyze pattern:', error);
@@ -707,12 +740,12 @@ const sendMessage = async (userMessage, conversationHistory) => {
     const response = await llmService.chat({
       messages: [
         ...conversationHistory,
-        { role: 'user', content: userMessage, timestamp: Date.now() }
+        { role: 'user', content: userMessage, timestamp: Date.now() },
       ],
       securityContext: {
         recentAlerts: [], // Include recent alerts
         deviceStatus: [], // Include device statuses
-      }
+      },
     });
 
     console.log(`AI: ${response.message}`);
@@ -728,28 +761,28 @@ const sendMessage = async (userMessage, conversationHistory) => {
 
 ### Initialization (First Time)
 
-| Phase | Duration | Notes |
-|-------|----------|-------|
-| Model Download | 2-5 minutes | ~1.5GB download (one-time) |
-| Model Load | 10-30 seconds | First load after download |
-| First Inference | 5-10 seconds | Includes warm-up |
+| Phase           | Duration      | Notes                      |
+| --------------- | ------------- | -------------------------- |
+| Model Download  | 2-5 minutes   | ~1.5GB download (one-time) |
+| Model Load      | 10-30 seconds | First load after download  |
+| First Inference | 5-10 seconds  | Includes warm-up           |
 
 ### Subsequent Usage
 
-| Operation | Duration | Notes |
-|-----------|----------|-------|
-| Model Load | 5-10 seconds | From cache |
-| Alert Summary | 2-5 seconds | Typical inference time |
-| Pattern Analysis | 3-6 seconds | Slightly longer prompts |
-| Chat Response | 2-4 seconds | Depends on context |
+| Operation        | Duration     | Notes                   |
+| ---------------- | ------------ | ----------------------- |
+| Model Load       | 5-10 seconds | From cache              |
+| Alert Summary    | 2-5 seconds  | Typical inference time  |
+| Pattern Analysis | 3-6 seconds  | Slightly longer prompts |
+| Chat Response    | 2-4 seconds  | Depends on context      |
 
 ### Memory Usage
 
-| State | RAM Usage | Notes |
-|-------|-----------|-------|
-| Model Unloaded | ~100MB | Base app |
-| Model Loaded | ~2-3GB | Model in memory |
-| During Inference | ~3-4GB | Peak usage |
+| State            | RAM Usage | Notes           |
+| ---------------- | --------- | --------------- |
+| Model Unloaded   | ~100MB    | Base app        |
+| Model Loaded     | ~2-3GB    | Model in memory |
+| During Inference | ~3-4GB    | Peak usage      |
 
 ### Optimization Strategies
 
@@ -777,13 +810,13 @@ const sendMessage = async (userMessage, conversationHistory) => {
 
 ### Common Errors
 
-| Error Code | Meaning | User Action |
-|------------|---------|-------------|
-| `MODEL_NOT_DOWNLOADED` | Model needs download | Initiate download from Settings |
-| `MODEL_LOAD_FAILED` | Failed to load model | Restart app, check storage |
-| `INFERENCE_TIMEOUT` | Inference took too long | Try again, simplify prompt |
-| `OUT_OF_MEMORY` | Insufficient RAM | Close other apps |
-| `PLATFORM_NOT_SUPPORTED` | iOS not supported | Use Android device |
+| Error Code               | Meaning                 | User Action                     |
+| ------------------------ | ----------------------- | ------------------------------- |
+| `MODEL_NOT_DOWNLOADED`   | Model needs download    | Initiate download from Settings |
+| `MODEL_LOAD_FAILED`      | Failed to load model    | Restart app, check storage      |
+| `INFERENCE_TIMEOUT`      | Inference took too long | Try again, simplify prompt      |
+| `OUT_OF_MEMORY`          | Insufficient RAM        | Close other apps                |
+| `PLATFORM_NOT_SUPPORTED` | iOS not supported       | Use Android device              |
 
 ### Retry Logic
 
@@ -826,7 +859,7 @@ if (this.loadAttempts < this.MAX_LOAD_ATTEMPTS) {
 Set `LLM_MOCK_MODE: true` to test UI without real model:
 
 ```typescript
-FEATURE_FLAGS.LLM_MOCK_MODE = true;  // Use mock responses
+FEATURE_FLAGS.LLM_MOCK_MODE = true; // Use mock responses
 FEATURE_FLAGS.LLM_MOCK_MODE = false; // Use real Llama 3.2 1B
 ```
 
@@ -861,6 +894,7 @@ All features run **100% on-device** using Llama 3.2 1B, ensuring privacy, offlin
 ---
 
 **For Questions or Issues:**
+
 - Check logs: `adb logcat | grep -E 'LLM|executorch'`
 - Review error codes in `src/types/llm.ts`
 - Test with mock mode first

@@ -11,11 +11,13 @@ This guide will walk you through setting up and running the TrailSense app with 
 ### Required Software
 
 1. **Node.js** (v18 or higher)
+
    ```bash
    node --version  # Should show v18.x or higher
    ```
 
 2. **npm** (comes with Node.js)
+
    ```bash
    npm --version
    ```
@@ -44,6 +46,7 @@ npm install
 ```
 
 **Expected output:**
+
 ```
 added 1234 packages in 45s
 ```
@@ -61,6 +64,7 @@ cat .env
 ```
 
 **You should see:**
+
 ```env
 USE_MOCK_API=true
 ```
@@ -75,6 +79,7 @@ echo "USE_MOCK_API=true" >> .env
 ```
 
 Or manually create `.env` file with this content:
+
 ```env
 # API Configuration
 API_BASE_URL=https://api.trailsense.com
@@ -110,6 +115,7 @@ npm start
 ```
 
 **Expected output:**
+
 ```
 Starting Metro Bundler...
 
@@ -154,6 +160,7 @@ You'll see a QR code and options. Choose your platform:
 Press `i` in the terminal
 
 **Or run:**
+
 ```bash
 npm run ios
 ```
@@ -165,6 +172,7 @@ npm run ios
 Press `a` in the terminal
 
 **Or run:**
+
 ```bash
 npm run android
 ```
@@ -203,6 +211,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 ### 1. **Alerts Tab (Bottom Navigation)** 📢
 
 **What you'll see:**
+
 - **55 pre-loaded alerts** from the last 30 days
 - Mix of threat levels (Critical, High, Medium, Low)
 - Search and filter functionality
@@ -210,6 +219,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 - Alert details when you tap an alert
 
 **Try this:**
+
 - Scroll through the alert list
 - Tap on an alert to see details
 - Use the filter button (top right)
@@ -221,6 +231,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 ### 2. **Live Radar Tab (Bottom Navigation)** 📡
 
 **What you'll see:**
+
 - **Real-time radar display**
 - New detections appearing **every 5 seconds**
 - Color-coded threat levels:
@@ -232,12 +243,14 @@ When the app loads, you'll see in the **Metro Bundler console**:
 - Detections fade after 30 seconds
 
 **Try this:**
+
 - Watch for 30 seconds - you should see 6 new detections appear
 - Observe the radar animation
 - Note the different colors and positions
 - Check the detection counter at the top
 
 **Console will show:**
+
 ```
 [MockWebSocket] 📡 Alert: HIGH wifi @ -68dBm from North Gate Sensor
 [MockWebSocket] 📡 Alert: CRITICAL cellular @ -55dBm from South Boundary
@@ -249,6 +262,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 ### 3. **Devices Tab (Bottom Navigation)** 🎯
 
 **What you'll see:**
+
 - **5 detection devices**
   - 3 online (green status)
   - 2 offline (gray status)
@@ -258,11 +272,13 @@ When the app loads, you'll see in the **Metro Bundler console**:
 - Last seen timestamps
 
 **Try this:**
+
 - Tap on a device to see details
 - Check the device locations on map (if implemented)
 - Watch battery levels update every 15 seconds (via WebSocket)
 
 **Console will show:**
+
 ```
 [MockWebSocket] 🔋 Device Status: North Gate Sensor battery: 87%
 [MockWebSocket] 🔋 Device Status: South Boundary battery: 92%
@@ -273,6 +289,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 ### 4. **Analytics Tab (Bottom Navigation)** 📊
 
 **What you'll see:**
+
 - Total detections count
 - Detection type breakdown (Cellular, WiFi, Bluetooth)
 - Threat level distribution
@@ -280,6 +297,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 - Hourly distribution charts
 
 **Try this:**
+
 - Scroll through the dashboard
 - Check the charts and graphs
 - View detection statistics
@@ -290,6 +308,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 ### 5. **Settings Tab (Bottom Navigation)** ⚙️
 
 **What you'll see:**
+
 - Profile settings (logged in as admin@trailsense.com)
 - Whitelist management (10 entries)
 - Notification settings
@@ -297,6 +316,7 @@ When the app loads, you'll see in the **Metro Bundler console**:
 - Theme settings
 
 **Try this:**
+
 - Navigate to Whitelist screen
 - View whitelist entries
 - Check different categories (Family, Guests, Service, Other)
@@ -347,16 +367,16 @@ When the app loads, you'll see in the **Metro Bundler console**:
 
 Here's what's pre-loaded:
 
-| Data Type | Count | Details |
-|-----------|-------|---------|
-| **Users** | 2 | Admin & regular user |
-| **Auth** | ✅ | Auto-logged in as admin@trailsense.com |
-| **Devices** | 5 | 3 online, 2 offline |
-| **Alerts** | 55 | Past 30 days, mixed threat levels |
-| **Whitelist** | 10 | Family, guests, service, other |
-| **Analytics** | ✅ | Full dashboard data |
-| **Heatmap** | 55 points | Location-based detection data |
-| **WebSocket** | ✅ | Live events every 5 seconds |
+| Data Type     | Count     | Details                                |
+| ------------- | --------- | -------------------------------------- |
+| **Users**     | 2         | Admin & regular user                   |
+| **Auth**      | ✅        | Auto-logged in as admin@trailsense.com |
+| **Devices**   | 5         | 3 online, 2 offline                    |
+| **Alerts**    | 55        | Past 30 days, mixed threat levels      |
+| **Whitelist** | 10        | Family, guests, service, other         |
+| **Analytics** | ✅        | Full dashboard data                    |
+| **Heatmap**   | 55 points | Location-based detection data          |
+| **WebSocket** | ✅        | Live events every 5 seconds            |
 
 ---
 
@@ -365,6 +385,7 @@ Here's what's pre-loaded:
 ### App is Working When You See:
 
 ✅ **Console shows mock mode banner**
+
 ```
 ═══════════════════════════════════════════
           🎭 MOCK MODE ENABLED 🎭
@@ -372,6 +393,7 @@ Here's what's pre-loaded:
 ```
 
 ✅ **Mock data seeding logs**
+
 ```
 [MockData] ✓ Mock data seeding complete!
 [MockData] Seeded:
@@ -381,17 +403,20 @@ Here's what's pre-loaded:
 ```
 
 ✅ **WebSocket connection**
+
 ```
 [MockWebSocket] 🎭 Connecting to mock WebSocket...
 [MockWebSocket] ✓ Connected
 ```
 
 ✅ **Regular alert events**
+
 ```
 [MockWebSocket] 📡 Alert: HIGH wifi @ -68dBm from North Gate Sensor
 ```
 
 ✅ **Device status updates**
+
 ```
 [MockWebSocket] 🔋 Device Status: North Gate Sensor battery: 87%
 ```
@@ -403,6 +428,7 @@ Here's what's pre-loaded:
 ### Problem: App shows login screen instead of auto-logging in
 
 **Solution:**
+
 1. Check `.env` has `USE_MOCK_API=true`
 2. Restart the dev server
 3. Clear app cache: `npm start --reset-cache`
@@ -410,6 +436,7 @@ Here's what's pre-loaded:
 ### Problem: No WebSocket events appearing
 
 **Check these:**
+
 1. Console shows `[MockWebSocket] ✓ Connected`?
 2. Are you on the Live Radar tab?
 3. Check console for alert events every 5 seconds
@@ -418,6 +445,7 @@ Here's what's pre-loaded:
 ### Problem: Empty screens / No data
 
 **Solution:**
+
 1. Check console for `[MockData] ✓ Mock data seeding complete!`
 2. Verify `.env` has `USE_MOCK_API=true`
 3. Restart the dev server: `Ctrl+C`, then `npm start`
@@ -426,6 +454,7 @@ Here's what's pre-loaded:
 ### Problem: Metro bundler errors
 
 **Solution:**
+
 ```bash
 # Clear all caches
 npm start --reset-cache
@@ -439,6 +468,7 @@ npm start
 ### Problem: "Can't find module" errors
 
 **Solution:**
+
 ```bash
 # Reinstall dependencies
 npm install
@@ -450,6 +480,7 @@ npm run type-check
 ### Problem: iOS Simulator won't open
 
 **Solution:**
+
 1. Open Xcode
 2. Go to Xcode → Preferences → Locations
 3. Set Command Line Tools to latest version
@@ -458,6 +489,7 @@ npm run type-check
 ### Problem: Android Emulator won't start
 
 **Solution:**
+
 1. Open Android Studio
 2. Tools → AVD Manager
 3. Start an emulator manually
@@ -498,12 +530,14 @@ npm run
 ## 🔄 Stopping and Restarting
 
 ### To Stop the App:
+
 ```bash
 # In the terminal where Metro is running:
 Ctrl + C
 ```
 
 ### To Restart:
+
 ```bash
 npm start
 ```
@@ -517,28 +551,33 @@ npm start
 Want to demonstrate the app? Follow this flow:
 
 ### 1. **Start on Live Radar** (30 seconds)
+
 - Show the real-time radar
 - Point out new detections appearing
 - Explain the color coding
 - Show detection counter
 
 ### 2. **Switch to Alerts** (30 seconds)
+
 - Pull to refresh
 - Show new alerts at top (from radar)
 - Tap on an alert for details
 - Show threat level and detection type
 
 ### 3. **Go to Devices** (20 seconds)
+
 - Show online/offline status
 - Point out battery levels
 - Show detection counts
 
 ### 4. **Show Analytics** (20 seconds)
+
 - Display total detections
 - Show charts and trends
 - Explain the data visualization
 
 ### 5. **Back to Live Radar** (20 seconds)
+
 - Watch a few more detections appear
 - Emphasize real-time nature
 - End with radar active
@@ -627,6 +666,7 @@ const threatWeights = [20, 20, 30, 30]; // [low, medium, high, critical]
 ### Add More Mock Data
 
 Edit the files in `src/mocks/data/`:
+
 - `mockAlerts.ts` - Add more alerts
 - `mockDevices.ts` - Add more devices
 - `mockWhitelist.ts` - Add more whitelist entries
@@ -638,11 +678,13 @@ Then restart the app.
 ## 📞 Need Help?
 
 ### Resources:
+
 - **Documentation:** `/docs/` folder
 - **Mock WebSocket Guide:** `/docs/implementation/MOCK-WEBSOCKET.md`
 - **Project Overview:** `/docs/plans/00-PROJECT-OVERVIEW.md`
 
 ### Common Issues:
+
 - Most issues fixed by restarting dev server
 - Clear cache if seeing old data
 - Check console for error messages
@@ -653,6 +695,7 @@ Then restart the app.
 ## 🎉 You're All Set!
 
 You now have a **fully functional TrailSense app** with:
+
 - ✅ 55 pre-loaded alerts
 - ✅ 5 detection devices
 - ✅ Real-time WebSocket events

@@ -28,14 +28,10 @@ describe('ProximityHeatmapScreen online status contract', () => {
     const { isDeviceOnline: realIsDeviceOnline } =
       jest.requireActual('@utils/dateUtils');
 
-    const tenMinutesAgo = new Date(
-      Date.now() - 10 * 60 * 1000
-    ).toISOString();
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
     expect(realIsDeviceOnline(tenMinutesAgo)).toBe(false);
 
-    const oneMinuteAgo = new Date(
-      Date.now() - 1 * 60 * 1000
-    ).toISOString();
+    const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000).toISOString();
     expect(realIsDeviceOnline(oneMinuteAgo)).toBe(true);
 
     expect(realIsDeviceOnline(undefined)).toBe(false);

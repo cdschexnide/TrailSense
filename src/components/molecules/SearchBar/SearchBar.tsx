@@ -117,8 +117,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             styles.input,
             {
               color: colors.label,
-              fontFamily:
-                Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+              fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
               fontSize: 14,
             },
           ]}

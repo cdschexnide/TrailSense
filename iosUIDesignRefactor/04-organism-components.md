@@ -34,6 +34,7 @@ This phase involves major redesigns of organism components including AlertCard, 
   - Use swipe actions instead (iOS pattern)
 
 - [x] **Implement swipe actions:**
+
   ```typescript
   <SwipeableRow
     rightActions={[
@@ -51,6 +52,7 @@ This phase involves major redesigns of organism components including AlertCard, 
   ```
 
 - [x] **Redesign card layout:**
+
   ```
   ┌────────────────────────────────────────┐
   │ [Badge] CRITICAL          Nov 16, 8:15 │
@@ -101,6 +103,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 #### Update Props Interface
 
 - [x] **Update AlertCardProps:**
+
   ```typescript
   interface AlertCardProps {
     alert: Alert;
@@ -143,6 +146,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 #### Complete Redesign for iOS
 
 - [x] **Status indicator as colored dot:**
+
   ```typescript
   // Not a badge, just a colored circle
   <View style={{
@@ -154,6 +158,7 @@ This phase involves major redesigns of organism components including AlertCard, 
   ```
 
 - [x] **Redesign card layout:**
+
   ```
   ┌────────────────────────────────────────┐
   │ 🟢 South Boundary            ONLINE    │
@@ -179,6 +184,7 @@ This phase involves major redesigns of organism components including AlertCard, 
   - Spacing between columns: 8pt
 
 - [x] **Stat column:**
+
   ```typescript
   // Each column:
   <View style={{ flex: 1, alignItems: 'center' }}>
@@ -249,6 +255,7 @@ This phase involves major redesigns of organism components including AlertCard, 
   - `#888888`, `#333`, `#666`, `#000` (grays)
 
 - [x] **Use theme semantic colors:**
+
   ```typescript
   const { colors } = useTheme();
 
@@ -300,6 +307,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 #### Redesign Legend
 
 - [x] **Create legend component:**
+
   ```typescript
   <View style={styles.legend}>
     <LegendItem color={colors.systemRed} label="Critical" />
@@ -332,8 +340,8 @@ This phase involves major redesigns of organism components including AlertCard, 
   ```typescript
   interface RadarDisplayProps {
     detections: Detection[];
-    maxRange?: number;  // Default 800ft
-    showSweep?: boolean;  // Default true
+    maxRange?: number; // Default 800ft
+    showSweep?: boolean; // Default true
     style?: ViewStyle;
   }
   ```
@@ -384,6 +392,7 @@ This phase involves major redesigns of organism components including AlertCard, 
   largeTitle?: boolean;
   largeTitleText?: string;
   ```
+
   - When true, show large title below nav bar
   - Text variant: largeTitle (34pt)
   - Scrollable content collapses it
@@ -391,6 +400,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 #### Update Props Interface
 
 - [x] **Update HeaderProps:**
+
   ```typescript
   interface HeaderProps {
     // Navigation
@@ -432,6 +442,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 - [x] Add swipe action handlers
 
 **Key files:**
+
 - [x] `src/screens/alerts/AlertListScreen.tsx`
 
 ### DeviceCard Usage
@@ -441,6 +452,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 - [x] Update onPress handlers
 
 **Key files:**
+
 - [x] `src/screens/devices/DeviceListScreen.tsx`
 
 ### RadarDisplay Usage
@@ -450,6 +462,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 - [x] Update any custom styling (removed duplicate legend)
 
 **Key files:**
+
 - [x] `src/screens/radar/LiveRadarScreen.tsx`
 
 ### Header Usage
@@ -459,6 +472,7 @@ This phase involves major redesigns of organism components including AlertCard, 
 - [x] Most headers are in ScreenLayout template
 
 **Additional files:**
+
 - [x] `src/components/templates/ScreenLayout/ScreenLayout.tsx` - Updated rightAction to rightActions
 
 ---
@@ -558,6 +572,7 @@ git commit -m "refactor: update all organism component usage sites"
 **Status:** ✅ Complete
 
 **Completion Notes:**
+
 - All organism components redesigned with iOS patterns
 - All hardcoded colors removed and replaced with semantic theme colors
 - SwipeableRow component integrated for AlertCard
