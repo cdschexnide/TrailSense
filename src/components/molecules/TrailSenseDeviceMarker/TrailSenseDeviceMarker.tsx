@@ -12,12 +12,14 @@ interface TrailSenseDeviceMarkerProps {
   id: string;
   coordinate: [number, number]; // [longitude, latitude]
   isOnline?: boolean;
+  onPress?: () => void;
 }
 
 export const TrailSenseDeviceMarker: React.FC<TrailSenseDeviceMarkerProps> = ({
   id,
   coordinate,
   isOnline = true,
+  onPress,
 }) => {
   const [pulseAnim] = useState(() => new Animated.Value(1));
 
@@ -55,7 +57,11 @@ export const TrailSenseDeviceMarker: React.FC<TrailSenseDeviceMarkerProps> = ({
   );
 
   return (
-    <PointAnnotation id={`trailsense-device-${id}`} coordinate={coordinate}>
+    <PointAnnotation
+      id={`trailsense-device-${id}`}
+      coordinate={coordinate}
+      onSelected={onPress}
+    >
       <View collapsable={false} style={styles.container}>
         {/* Pulse ring (only when online) */}
         {isOnline && (

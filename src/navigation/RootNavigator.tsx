@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@store/index';
 import { RootStackParamList } from './types';
 import AuthNavigator from './AuthNavigator';
-import MainNavigator from './MainNavigator';
+import MapScreen from '@screens/map/MapScreen';
 import { linking } from './linking';
 import {
   clearNavigationState,
@@ -50,7 +50,7 @@ export const RootNavigator = () => {
           await clearNavigationState();
         }
 
-        setInitialState(sanitizedState);
+        setInitialState(sanitizedState as NavigationState | undefined);
         console.warn('[Navigation] Navigation state restore complete', {
           isAuthenticated: authStateAtRestore,
           restored: Boolean(savedState),
@@ -96,7 +96,7 @@ export const RootNavigator = () => {
         {!isAuthenticated && !SKIP_AUTH_FOR_TESTING ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : (
-          <Stack.Screen name="Main" component={MainNavigator} />
+          <Stack.Screen name="Main" component={MapScreen} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

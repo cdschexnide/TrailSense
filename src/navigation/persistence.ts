@@ -23,45 +23,6 @@ function getActiveRootRouteName(
   return state.routes[routeIndex]?.name;
 }
 
-/**
- * Strip nested stack states from tab routes so the app only restores
- * which tab was active, not deep screen states like DeviceDetail.
- * This prevents stale deep links from trapping users on detail screens
- * after app restart.
- */
-function stripNestedStackStates(
-  state: PersistedNavigationState
-): PersistedNavigationState {
-  return {
-    ...state,
-    routes: state.routes.map(route => {
-      if (!route.state) return route;
-
-      // For the Main tab navigator, preserve which tab is selected
-      // but reset each tab's internal stack to its root screen
-      const nested = route.state as PersistedNavigationState;
-      return {
-        ...route,
-        state: {
-          ...nested,
-          routes: nested.routes.map(tabRoute => {
-            // Strip both the tab's internal stack state AND params so it
-            // starts fresh. Cross-tab navigations (e.g. navigate('DevicesTab',
-            // { screen: 'DeviceDetail' })) store the target screen in params,
-            // which would otherwise survive and re-navigate on restore.
-            const {
-              state: _tabStack,
-              params: _tabParams,
-              ...tabRouteWithoutStackOrParams
-            } = tabRoute;
-            return tabRouteWithoutStackOrParams;
-          }),
-        },
-      };
-    }),
-  };
-}
-
 export function sanitizeNavigationState(
   state: PersistedNavigationState | undefined,
   isAuthenticated: boolean
@@ -81,7 +42,15 @@ export function sanitizeNavigationState(
     return undefined;
   }
 
-  return stripNestedStackStates(state);
+  const mainRoute = state.routes.find(route => route.name === 'Main');
+  if (mainRoute?.state) {
+    console.warn(
+      '[Navigation] Discarding stale nested tab state from old layout'
+    );
+    return undefined;
+  }
+
+  return state;
 }
 
 export async function restoreNavigationState(): Promise<

@@ -9,13 +9,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from '@theme/index';
 import { store, persistor } from '@store/index';
 import { queryClient } from '@api/queryClient';
-import { StyleSheet, ActivityIndicator, View, Platform } from 'react-native';
+import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import RootNavigator from '@navigation/RootNavigator';
 import { getIsMockMode, logMockStatus } from '@/config/mockConfig';
 import { seedMockData } from '@/utils/seedMockData';
 import { websocketService } from '@api/websocket';
 import { featureFlagsManager } from '@/config/featureFlags';
-import { AIProvider } from '@/services/llm';
 import { OfflineBanner } from '@components/molecules';
 import { ToastProvider } from '@components/templates';
 import { initDemoMode, isDemoMode } from '@/config/demoMode';
@@ -23,25 +22,6 @@ import { applyDemoModeConfig } from '@/config/demoModeRuntime';
 import { setMockAdapterQueryClient } from '@api/client';
 import { llmLogger } from '@/utils/llmLogger';
 import { AuthLifecycle } from '@components/AuthLifecycle';
-
-// Initialize react-native-executorch with Expo resource fetcher adapter
-if (Platform.OS === 'android' || Platform.OS === 'ios') {
-  try {
-    const { initExecutorch } = require('react-native-executorch');
-    const {
-      ExpoResourceFetcher,
-    } = require('react-native-executorch-expo-resource-fetcher');
-    initExecutorch({ resourceFetcher: ExpoResourceFetcher });
-    llmLogger.info(
-      'react-native-executorch initialized with Expo resource fetcher',
-      {
-        platform: Platform.OS,
-      }
-    );
-  } catch (error) {
-    llmLogger.warn('Failed to initialize react-native-executorch', error);
-  }
-}
 
 export default function App() {
   const [isMockDataReady, setIsMockDataReady] = useState(false);
@@ -153,13 +133,11 @@ export default function App() {
             >
               <QueryClientProvider client={queryClient}>
                 <AuthLifecycle />
-                <AIProvider>
-                  <StatusBar style="auto" />
-                  <OfflineBanner />
-                  <ToastProvider>
-                    <RootNavigator />
-                  </ToastProvider>
-                </AIProvider>
+                <StatusBar style="auto" />
+                <OfflineBanner />
+                <ToastProvider>
+                  <RootNavigator />
+                </ToastProvider>
               </QueryClientProvider>
             </PersistGate>
           </ReduxProvider>

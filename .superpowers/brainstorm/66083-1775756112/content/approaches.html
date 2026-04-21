@@ -1,0 +1,96 @@
+<h2>Map-Centric Redesign: Architecture Approaches</h2>
+<p class="subtitle">How to structure the single-screen map app — choose the approach that feels right</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Clean Slate — Rewrite from Scratch</h3>
+      <p>Delete everything. New <code>App.tsx</code> that renders a single <code>MapScreen</code>. Rebuild only what's needed: MapBox view, markers, bottom sheet, WebSocket hook, position hook. Estimated ~8-10 new files total.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Zero legacy baggage — no dead imports, no unused types</li>
+            <li>Smallest possible bundle size</li>
+            <li>Easiest to reason about and maintain</li>
+            <li>Clean dependency tree from day one</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Loses reusable code (markers, hooks, WebSocket, API layer)</li>
+            <li>Must rewrite auth flow, axios interceptors, mock mode</li>
+            <li>More upfront work even though result is simpler</li>
+          </ul>
+        </div>
+      </div>
+      <p><strong>Best for:</strong> When you want a truly fresh start and are OK rewriting the plumbing</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Surgical Reduction — Keep Core, Delete the Rest</h3>
+      <p>Keep the working infrastructure (auth, API layer, WebSocket, React Query hooks, MapBox markers, mock data) and delete everything else. Collapse navigation to a single screen. Remove ~80% of screens/components, keep ~20% of proven code.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Proven code stays — markers, hooks, WebSocket already work</li>
+            <li>Auth, token refresh, mock mode all preserved</li>
+            <li>Faster to ship — deletion is faster than rewriting</li>
+            <li>API contract with backend unchanged</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>May leave some dead types/code that needs cleanup</li>
+            <li>Existing code has patterns designed for multi-screen app</li>
+            <li>Redux/Zustand/React Query triple-layer may be overkill for single screen</li>
+          </ul>
+        </div>
+      </div>
+      <p><strong>Best for:</strong> Getting to a working simplified app fastest while keeping battle-tested code</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Hybrid — New Screen, Existing Infrastructure</h3>
+      <p>Write one new <code>MapScreen.tsx</code> that composes existing hooks and marker components. Replace the entire navigation tree with this single screen. Delete all other screens but keep the hooks/services/API layer intact as a clean foundation.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Fresh UI code, proven data layer</li>
+            <li>New screen is purpose-built for map-only UX</li>
+            <li>Hooks and API layer are already clean and well-tested</li>
+            <li>Natural separation: new presentation, existing plumbing</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Some existing components (markers) may need minor adaptation</li>
+            <li>Still need to clean up unused store slices and types</li>
+          </ul>
+        </div>
+      </div>
+      <p><strong>Best for:</strong> Clean UI without reinventing the data layer. <em>Recommended approach.</em></p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid #333; border-radius: 8px; background: #1a1a2e;">
+  <h3>💡 Recommendation: Option C (Hybrid)</h3>
+  <p>Your data layer is solid — <code>usePositions</code>, <code>useDevices</code>, WebSocket integration, the marker components, auth/token management. These are the parts that talk to your backend and ESP32 units. No reason to rewrite them.</p>
+  <p>What needs to change is the <em>presentation</em> — collapsing 6 tabs and 43 screens into one map view with bottom sheets. That's a new screen composed from existing building blocks.</p>
+  <p style="margin-top: 1rem;"><strong>What gets kept:</strong> API layer, React Query hooks, WebSocket service, auth flow, MapBox markers, mock data/mode, theme system</p>
+  <p><strong>What gets deleted:</strong> All navigation stacks, all screens except new MapScreen, AI service, LLM pipeline, analytics, reports, replay/timeline, most store slices</p>
+  <p><strong>What gets written new:</strong> MapScreen.tsx, DeviceBottomSheet, DetectionBottomSheet, StatusChip, SettingsOverlay</p>
+</div>
